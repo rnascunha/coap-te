@@ -5,7 +5,8 @@
 #include "coap.te.hpp"
 
 #define BUFFER_LEN		1000
-//#define USE_INTERNAL_BUFFER
+#define USE_INTERNAL_BUFFER
+#define USE_INTERNAL_MESSAGE_ID
 
 using namespace CoAP::Message;
 
@@ -26,21 +27,24 @@ int main()
 
 	std::cout << "Testing factory...\n";
 
-#ifndef USE_INTERNAL_BUFFER
-	std::cout << "No internal buffer\n";
-	Factory<0> fac;
+#ifdef USE_INTERNAL_BUFFER
+#	ifdef USE_INTERNAL_MESSAGE_ID
+		std::cout << "Internal buffer / Internal message id\n";
+		Factory<BUFFER_LEN, message_id> fac(mid);
+#	else /* USE_INTERNAL_MESSAGE_ID */
+		std::cout << "Internal buffer / NO internal message id\n";
+		Factory<BUFFER_LEN> fac;
+#	endif /* USE_INTERNAL_MESSAGE_ID */
 #else /* USE_INTERNAL_BUFFER */
-	std::cout << "Using internal buffer\n";
-	Factory<BUFFER_LEN> fac;
+#	ifdef USE_INTERNAL_MESSAGE_ID
+		std::cout << "NO internal buffer / Internal message id\n";
+		Factory<0, message_id> fac(mid);
+#	else /* USE_INTERNAL_MESSAGE_ID */
+		std::cout << "NO internal buffer / NO internal message id\n";
+		Factory<0> fac;
+#	endif /* USE_INTERNAL_MESSAGE_ID */
 #endif /* USE_INTERNAL_BUFFER */
 	std::cout << "Size factory: " << sizeof(fac) << "\n";
-	std::cout << "Sizeof: " << sizeof(type) +
-								sizeof(code) +
-								sizeof(void const*) +
-								sizeof(std::size_t) +
-								sizeof(Option_List) +
-								sizeof(void const*) +
-								sizeof(std::size_t) << "\n";
 
 	fac.header(type::confirmable, code::get);
 	fac.token(token, sizeof(token));
@@ -55,11 +59,19 @@ int main()
 
 	fac.payload(payload);
 
-#ifndef USE_INTERNAL_BUFFER
-	std::size_t size = fac.serialize(buffer, BUFFER_LEN, mid(), ec);
-#else
-	std::size_t size = fac.serialize(mid(), ec);
-#endif
+#ifdef USE_INTERNAL_BUFFER
+#	ifdef USE_INTERNAL_MESSAGE_ID
+		std::size_t size = fac.serialize(ec);
+#	else /* USE_INTERNAL_MESSAGE_ID */
+		std::size_t size = fac.serialize(mid(), ec);
+#	endif /* USE_INTERNAL_MESSAGE_ID */
+#else /* USE_INTERNAL_BUFFER */
+#	ifdef USE_INTERNAL_MESSAGE_ID
+		std::size_t size = fac.serialize(buffer, BUFFER_LEN, ec);
+#	else /* USE_INTERNAL_MESSAGE_ID */
+		std::size_t size = fac.serialize(buffer, BUFFER_LEN, mid(), ec);
+#	endif /* USE_INTERNAL_MESSAGE_ID */
+#endif /* USE_INTERNAL_BUFFER */
 
 	/**
 	 * After serialize, you can use the factory again, but first you need to call reset
