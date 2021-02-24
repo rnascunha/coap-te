@@ -5,14 +5,20 @@ namespace CoAP{
 
 enum class errc : int{
 	//General
-	insufficient_buffer = 10,
-	invalid_token_length = 11,
+	insufficient_buffer		= 10,
+	invalid_token_length,
+	message_too_small,
+	version_invalid,
+	type_invalid,
 	//Code
-	code_invalid = 20,
+	code_invalid 			= 20,
 	//Options
-	option_invalid = 30,
+	option_invalid 			= 30,
 	option_out_of_order,
 	option_repeated,
+	option_parse_error,
+	//payload
+	payload_no_marker		= 40
 };
 
 struct Error {

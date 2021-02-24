@@ -26,5 +26,16 @@ void make_short_unsigned(unsigned& value, unsigned& size) noexcept
 	std::memcpy(reinterpret_cast<uint8_t*>(&value), d, size);
 }
 
+bool array_to_unsigned(std::uint8_t const* arr, std::size_t length, unsigned& value)
+{
+	value = 0;
+	if(length > sizeof(unsigned)) return false;
+
+	for(std::size_t i = 0; i < length; i++)
+		value |= arr[i] << ((length - i - 1) * 8);
+
+	return true;
+}
+
 }//Helper
 }//CoAP

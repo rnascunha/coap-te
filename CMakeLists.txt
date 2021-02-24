@@ -48,13 +48,22 @@ endif()
 message(STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " " ${CMAKE_CXX_COMPILER_VERSION})
 
 set(SRC_DIR ./)
+set(SRC_DIR_MESSAGE ${SRC_DIR}/message)
+set(SRC_DIR_DEBUG ${SRC_DIR}/debug)
+set(SRC_DIR_OTHER ${SRC_DIR}/other)
 
 set(MAIN_SRC ${SRC_DIR}/main.cpp 
-				${SRC_DIR}/error.cpp
-				${SRC_DIR}/helper.cpp
-				${SRC_DIR}/options.cpp
-				${SRC_DIR}/debug/print_options.cpp
-				${SRC_DIR}/debug/output_string.cpp)
+				${SRC_DIR_OTHER}/error.cpp
+				${SRC_DIR_OTHER}/helper.cpp
+				${SRC_DIR_MESSAGE}/options.cpp
+				${SRC_DIR_MESSAGE}/message_id.cpp
+				${SRC_DIR_MESSAGE}/types.cpp
+				${SRC_DIR_MESSAGE}/codes.cpp
+				${SRC_DIR_MESSAGE}/parser.cpp
+				${SRC_DIR_DEBUG}/helper.cpp
+				${SRC_DIR_DEBUG}/print_options.cpp
+				${SRC_DIR_DEBUG}/output_string.cpp
+				${SRC_DIR_DEBUG}/print_message.cpp)
 
 add_executable(${PROJECT_NAME} ${MAIN_SRC})
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -62,6 +71,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS ON
 )
+
+include_directories(.)
 
 #if(WIN32)
 #	target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)

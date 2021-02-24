@@ -40,6 +40,7 @@ inline void interger_to_big_endian_array(std::uint8_t* dest,
 }
 
 void make_short_unsigned(unsigned& value, unsigned& size) noexcept;
+bool array_to_unsigned(std::uint8_t const*, std::size_t, unsigned&);
 
 }//Helper
 }//CoAP

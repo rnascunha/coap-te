@@ -56,6 +56,8 @@ enum class code : std::uint8_t
 	proxying_not_supported 	= make_code(code_class::server_error, 5),	//5.05 Proxying Not Supported
 };
 
+bool check_code(code);
+
 }//Message
 }//CoAP
 

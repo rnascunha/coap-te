@@ -1,21 +1,21 @@
 #ifndef COAP_TE_MESSAGE_IMPL_HPP__
 #define COAP_TE_MESSAGE_IMPL_HPP__
 
-#include "../message.hpp"
+#include "../serialize.hpp"
 #include <cstring>
-#include "../helper.hpp"
+#include "other/helper.hpp"
 
-#include <iostream>
-
-#include "../debug/output_string.hpp"
-#include "../debug/print_options.hpp"
+//#include <iostream>
+//
+//#include "../debug/output_string.hpp"
+//#include "../debug/print_options.hpp"
 
 namespace CoAP{
 namespace Message{
 
 static unsigned make_header(std::uint8_t* buffer, std::size_t buffer_len,
 		type mtype, code mcode, std::uint16_t message_id,
-		std::uint8_t const* token, std::size_t token_len,
+		void const* const token, std::size_t token_len,
 		CoAP::Error& ec) noexcept;
 
 template<bool SortOptions = true,
@@ -49,7 +49,7 @@ template<bool SortOptions /* = true */,
 		bool CheckOpRepeat /* = true */>
 std::size_t serialize(std::uint8_t* buffer, std::size_t buffer_len,
 		type mtype, code mcode, std::uint16_t message_id,
-		std::uint8_t const* const token, std::size_t token_len,
+		void const* const token, std::size_t token_len,
 		option* options, std::size_t option_num,
 		void const * const payload, std::size_t payload_len,
 		CoAP::Error& ec) noexcept
@@ -76,7 +76,7 @@ template<bool SortOptions /* = true */,
 		bool CheckOpRepeat /* = true */>
 std::size_t serialize(std::uint8_t* buffer, std::size_t buffer_len,
 		type mtype, code mcode, std::uint16_t message_id,
-		std::uint8_t const* const token, std::size_t token_len,
+		void const* const token, std::size_t token_len,
 		option_node* options,
 		void const* const payload, std::size_t payload_len,
 		CoAP::Error& ec) noexcept
@@ -103,7 +103,7 @@ template<bool SortOptions /* = true */,
 		bool CheckOpRepeat /* = true */>
 std::size_t serialize(std::uint8_t* buffer, std::size_t buffer_len,
 		type mtype, code mcode, std::uint16_t message_id,
-		std::uint8_t const* const token, std::size_t token_len,
+		void const* const token, std::size_t token_len,
 		Option_List& options,
 		void const* const payload, std::size_t payload_len,
 		CoAP::Error& ec) noexcept
@@ -130,7 +130,7 @@ std::size_t serialize(std::uint8_t* buffer, std::size_t buffer_len,
  */
 static unsigned make_header(std::uint8_t* buffer, std::size_t buffer_len,
 		type mtype, code mcode, std::uint16_t message_id,
-		std::uint8_t const* token, std::size_t token_len,
+		void const* const token, std::size_t token_len,
 		CoAP::Error& ec) noexcept
 {
 	unsigned offset = 0;
@@ -168,11 +168,8 @@ static unsigned make_options(std::uint8_t* buffer, std::size_t buffer_len,
 		option* options, std::size_t option_num,
 		CoAP::Error& ec) noexcept
 {
-	CoAP::Debug::print_options(options, option_num);
 	if constexpr(SortOptions)
 		sort_options(options, option_num);
-	std::cout << "Sorted\n";
-	CoAP::Debug::print_options(options, option_num);
 
 	unsigned delta = 0, offset = 0;
 	option_code last_option = option_code::invalid;
@@ -191,11 +188,8 @@ static unsigned make_options(std::uint8_t* buffer,
 		option_node* list,
 		CoAP::Error& ec) noexcept
 {
-	CoAP::Debug::print_options(list);
 	if constexpr(SortOptions)
 		sort_options(list);
-	std::cout << "Sorted\n";
-	CoAP::Debug::print_options(list);
 
 	unsigned delta = 0, offset = 0;
 	option_code last_option = option_code::invalid;

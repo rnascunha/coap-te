@@ -18,10 +18,12 @@ class list{
 			node*	next = nullptr;
 		};
 
-		node* head(){ return head_; }
+		node* head() const noexcept{ return head_; }
+
+		void clear() noexcept{ head_ = nullptr; }
 
 		template<bool AddSorted = true>
-		void add(list::node& node)
+		void add(list::node& node) noexcept
 		{
 			if(head_ == nullptr)
 			{

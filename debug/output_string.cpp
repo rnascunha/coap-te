@@ -3,33 +3,22 @@
 namespace CoAP{
 namespace Debug{
 
-const char* option_string(CoAP::Message::option_code op)
+const char* type_string(CoAP::Message::type type)
 {
-	switch(op)
+	switch(type)
 	{
 		using namespace CoAP::Message;
-		case option_code::content_format:	return "Content-Format";
-		case option_code::etag: 			return "ETag";
-		case option_code::location_path: 	return "Location-Path";
-		case option_code::location_query: 	return "Location-Query";
-		case option_code::max_age: 			return "Max-Age";
-		case option_code::proxy_uri: 		return "Proxy-Uri";
-		case option_code::proxy_scheme: 	return "Proxy-Scheme";
-		case option_code::uri_host: 		return "Uri-Host";
-		case option_code::uri_path: 		return "Uri-Path";
-		case option_code::uri_port: 		return "Uri-Port";
-		case option_code::uri_query: 		return "Uri-Query";
-		case option_code::accept: 			return "Accept";
-		case option_code::if_match: 		return "If-Match";
-		case option_code::if_none_match: 	return "If-None-Match";
-		case option_code::size1: 			return "Size1";
+		case type::confirmable: 		return "Confirmable";
+		case type::nonconfirmable:		return "Non-Confirmable";
+		case type::acknowledgement:		return "Ack";
+		case type::reset:				return "Reset";
 		default:
 			break;
 	}
 	return "undefined";
 }
 
-const char* response_string(CoAP::Message::code code)
+const char* code_string(CoAP::Message::code code)
 {
 	switch(code)
 	{
@@ -69,6 +58,48 @@ const char* response_string(CoAP::Message::code code)
 			break;
 	}
 	return "undefiend";
+}
+
+const char* option_string(CoAP::Message::option_code op)
+{
+	switch(op)
+	{
+		using namespace CoAP::Message;
+		case option_code::content_format:	return "Content-Format";
+		case option_code::etag: 			return "ETag";
+		case option_code::location_path: 	return "Location-Path";
+		case option_code::location_query: 	return "Location-Query";
+		case option_code::max_age: 			return "Max-Age";
+		case option_code::proxy_uri: 		return "Proxy-Uri";
+		case option_code::proxy_scheme: 	return "Proxy-Scheme";
+		case option_code::uri_host: 		return "Uri-Host";
+		case option_code::uri_path: 		return "Uri-Path";
+		case option_code::uri_port: 		return "Uri-Port";
+		case option_code::uri_query: 		return "Uri-Query";
+		case option_code::accept: 			return "Accept";
+		case option_code::if_match: 		return "If-Match";
+		case option_code::if_none_match: 	return "If-None-Match";
+		case option_code::size1: 			return "Size1";
+		default:
+			break;
+	}
+	return "undefined";
+}
+
+const char* content_format_string(CoAP::Message::content_format format)
+{
+	switch(format)
+	{
+		using namespace CoAP::Message;
+		case content_format::text_plain: 				return "text/plain;charset=utf-8";
+		case content_format::application_link_format:	return "application/link-format";
+		case content_format::application_xml: 			return "application/xml";
+		case content_format::application_octet_stream: 	return "application/octet-stream";
+		case content_format::application_exi: 			return "application/exi";
+		case content_format::application_json: 			return "application/json";
+		default: break;
+	}
+	return "undefined";
 }
 
 }//Debug

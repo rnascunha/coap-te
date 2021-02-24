@@ -2,7 +2,7 @@
 #define COAP_TE_OPTIONS_HPP__
 
 #include <cstdint>
-#include "list.hpp"
+#include "other/list.hpp"
 
 namespace CoAP{
 namespace Message{
@@ -68,7 +68,7 @@ enum class option_delta_special
 {
 	one_byte_extend 		= 13,
 	two_byte_extend 		= 14,
-	payload_marker 			= 15
+	error		 			= 15
 };
 
 enum class option_length_special
@@ -92,10 +92,12 @@ enum class option_safe : std::uint8_t
 
 struct option
 {
-	option(){}
-
-	option(option_code code_, unsigned len, const void* val) :
-		code(code_), length(len), value(val){}
+	option();
+	option(option_code code_, unsigned len, const void* val);
+	option(option_code code);
+	option(option_code code, const char* value);
+	option(option_code code, unsigned& value);
+	option(option_code code, const void* value, unsigned length);
 
 	option_code code = option_code::invalid;
 	unsigned	length = 0;

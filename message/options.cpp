@@ -4,6 +4,30 @@
 namespace CoAP{
 namespace Message{
 
+option::option(){}
+option::option(option_code code_, unsigned len, const void* val) :
+	code(code_), length(len), value(val){}
+
+option::option(option_code code)
+{
+	create_option<false>(*this, code);
+}
+
+option::option(option_code code, const char* value)
+{
+	create_option<false>(*this, code, value);
+}
+
+option::option(option_code code, unsigned& value)
+{
+	create_option<false>(*this, code, value);
+}
+
+option::option(option_code code, const void* value, unsigned length)
+{
+	create_option<false>(*this, code, value, length);
+}
+
 option_config const * get_option_config(option_code code) noexcept
 {
 	for(unsigned i = 0; i < (sizeof(options) / sizeof(option_config)); i++)
