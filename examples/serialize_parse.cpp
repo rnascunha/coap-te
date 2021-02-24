@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <ctime>
 
-#include "coap.te.hpp"
+#include "../coap-te.hpp"
 
 #define BUFFER_LEN		1000
 

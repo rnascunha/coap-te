@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 3.10)
-project (coap.te)
+project (coap-te)
 
 message(STATUS "Building OS: " ${CMAKE_SYSTEM_NAME})
 
@@ -16,7 +16,7 @@ if(MSVC)
 	add_compile_definitions(BOOST_DATE_TIME_NO_LIB BOOST_REGEX_NO_LIB)
 else()
 	message(STATUS "NO MSVC build")
-	set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter")	#-fmax-errors=5 
+	set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter") 
 	set(CMAKE_CXX_FLAGS_DEBUG "-g")
 	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()

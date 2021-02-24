@@ -2,9 +2,10 @@
 #include <cstdint>
 #include <ctime>
 
-#include "coap.te.hpp"
+#include "coap-te.hpp"
 
 #define BUFFER_LEN		1000
+
 #define USE_INTERNAL_BUFFER
 #define USE_INTERNAL_MESSAGE_ID
 
