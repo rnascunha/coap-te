@@ -4,7 +4,6 @@
 namespace CoAP{
 namespace Message{
 
-message_id::message_id() : id_(static_cast<uint16_t>(std::rand())){}
 message_id::message_id(unsigned seed)
 {
 	std::srand(seed);

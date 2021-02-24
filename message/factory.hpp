@@ -17,19 +17,19 @@ class Factory{
 		using message_id_type = typename std::conditional<std::is_same<MessageID, void*>::value, empty, MessageID>::type;
 	public:
 		Factory();
-		Factory(message_id_type);
+		Factory(message_id_type&&);
 
-		void header(type, code, void const* const token = nullptr, std::size_t token_len = 0) noexcept;
+		Factory& header(type, code, void const* const token = nullptr, std::size_t token_len = 0) noexcept;
 
-		void token(void const* token, std::size_t token_len) noexcept;
-		void token(const char*) noexcept;
+		Factory& token(void const* token, std::size_t token_len) noexcept;
+		Factory& token(const char*) noexcept;
 
-		void add_option(option_node&) noexcept;
+		Factory& add_option(option_node&) noexcept;
 
-		void payload(void const*, std::size_t) noexcept;
-		void payload(const char*) noexcept;
+		Factory& payload(void const*, std::size_t) noexcept;
+		Factory& payload(const char*) noexcept;
 
-		void reset() noexcept;
+		Factory& reset() noexcept;
 
 		template<bool SortOptions = true,
 				bool CheckOpOrder = !SortOptions,

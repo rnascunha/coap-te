@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include "other/list.hpp"
+#include "types.hpp"
 
 namespace CoAP{
 namespace Message{
@@ -93,11 +94,14 @@ enum class option_safe : std::uint8_t
 struct option
 {
 	option();
-	option(option_code code_, unsigned len, const void* val);
-	option(option_code code);
-	option(option_code code, const char* value);
-	option(option_code code, unsigned& value);
-	option(option_code code, const void* value, unsigned length);
+	//Copy
+	option(option_code, unsigned, const void*);
+	option(option_code);
+	option(option_code, const char*);
+	option(option_code, unsigned&);
+	option(content_format const&);
+	//Opaque
+	option(option_code, const void*, unsigned);
 
 	option_code code = option_code::invalid;
 	unsigned	length = 0;
@@ -144,13 +148,14 @@ void sort_options(option* options, std::size_t num) noexcept;
 void sort_options(option_node*) noexcept;
 
 template<bool CheckType = true>
-bool create_option(option& option, option_code code) noexcept;
+bool create_option(option&, option_code) noexcept;
 template<bool CheckType = true>
-bool create_option(option& option, option_code code, const char* value) noexcept;
+bool create_option(option&, option_code, const char*) noexcept;
 template<bool CheckType = true>
-bool create_option(option& option, option_code code, unsigned& value) noexcept;
+bool create_option(option&, option_code, unsigned&) noexcept;
+void create_option(option&, content_format const&) noexcept;
 template<bool CheckType = true>
-bool create_option(option& option, option_code code, const void* value, unsigned length) noexcept;
+bool create_option(option&, option_code code, const void*, unsigned) noexcept;
 
 }//Message
 }//CoAP

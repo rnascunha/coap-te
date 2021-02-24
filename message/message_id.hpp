@@ -9,7 +9,6 @@ namespace Message{
 class message_id
 {
 	public:
-		message_id();
 		message_id(unsigned seed);
 
 		uint16_t operator()() noexcept;

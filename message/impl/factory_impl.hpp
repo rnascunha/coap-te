@@ -16,13 +16,13 @@ Factory()
 
 template<std::size_t BufferSize, typename MessageID>
 Factory<BufferSize, MessageID>::
-Factory(message_id_type mid) : mid_(mid)
+Factory(message_id_type&& mid) : mid_(std::move(mid))
 {
 	static_assert(!std::is_same<MessageID, void*>::value);
 }
 
 template<std::size_t BufferSize, typename MessageID>
-void
+Factory<BufferSize, MessageID>&
 Factory<BufferSize, MessageID>::
 header(type _type, code _code,
 		void const* const token /* = nullptr */, std::size_t token_len /* = 0 */) noexcept
@@ -31,49 +31,67 @@ header(type _type, code _code,
 	code_ = _code;
 	token_ = token;
 	token_len_ =  token_len;
+
+	return *this;
 }
 
 template<std::size_t BufferSize, typename MessageID>
-void Factory<BufferSize, MessageID>::
+Factory<BufferSize, MessageID>&
+Factory<BufferSize, MessageID>::
 token(void const* token, std::size_t token_len) noexcept
 {
 	token_ = token;
 	token_len_ =  token_len;
+
+	return *this;
 }
 
 template<std::size_t BufferSize, typename MessageID>
-void Factory<BufferSize, MessageID>::
+Factory<BufferSize, MessageID>&
+Factory<BufferSize, MessageID>::
 token(const char* token) noexcept
 {
 	token_ = token;
 	token_len_ = std::strlen(token);
+
+	return *this;
 }
 
 template<std::size_t BufferSize, typename MessageID>
-void Factory<BufferSize, MessageID>::
+Factory<BufferSize, MessageID>&
+Factory<BufferSize, MessageID>::
 add_option(option_node& node) noexcept
 {
 	opt_list_.add(node);
+
+	return *this;
 }
 
 template<std::size_t BufferSize, typename MessageID>
-void Factory<BufferSize, MessageID>::
+Factory<BufferSize, MessageID>&
+Factory<BufferSize, MessageID>::
 payload(void const* pd, std::size_t payload_len) noexcept
 {
 	payload_ = pd;
 	payload_len_ = payload_len;
+
+	return *this;
 }
 
 template<std::size_t BufferSize, typename MessageID>
-void Factory<BufferSize, MessageID>::
+Factory<BufferSize, MessageID>&
+Factory<BufferSize, MessageID>::
 payload(const char* pd) noexcept
 {
 	payload_ = pd;
 	payload_len_ = std::strlen(pd);
+
+	return *this;
 }
 
 template<std::size_t BufferSize, typename MessageID>
-void Factory<BufferSize, MessageID>::
+Factory<BufferSize, MessageID>&
+Factory<BufferSize, MessageID>::
 reset() noexcept
 {
 	type_ = type::confirmable;
@@ -83,6 +101,8 @@ reset() noexcept
 	opt_list_.clear();
 	payload_ = nullptr;
 	payload_len_ = 0;
+
+	return *this;
 }
 
 template<std::size_t BufferSize, typename MessageID>

@@ -1,8 +1,16 @@
 #include "options.hpp"
 #include <cstring>
+#include "other/helper.hpp"
 
 namespace CoAP{
 namespace Message{
+
+void create_option(option& option, content_format const& value) noexcept
+{
+	option.code = option_code::content_format;
+	option.length = 1;
+	option.value = &value;
+}
 
 option::option(){}
 option::option(option_code code_, unsigned len, const void* val) :
@@ -21,6 +29,11 @@ option::option(option_code code, const char* value)
 option::option(option_code code, unsigned& value)
 {
 	create_option<false>(*this, code, value);
+}
+
+option::option(content_format const& value)
+{
+	create_option(*this, value);
 }
 
 option::option(option_code code, const void* value, unsigned length)

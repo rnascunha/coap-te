@@ -15,64 +15,68 @@ int main()
 #ifndef USE_INTERNAL_BUFFER
 	std::uint8_t buffer[BUFFER_LEN];
 #endif /* USE_INTERNAL_BUFFER */
+#ifndef USE_INTERNAL_MESSAGE_ID
+	message_id mid(std::time(NULL));
+#endif /* USE_INTERNAL_MESSAGE_ID */
 	CoAP::Error ec;
 
+	/**
+	 * All objects lifetime is of user responsability. Util "serialize" method
+	 * been called, nothing is copied.
+	 */
 	std::uint8_t token[] = {0x03, 0x04, 0x05, 0x06, 0x07};
-	message_id mid(time(NULL));
 
-	unsigned content_format = static_cast<unsigned>(content_format::application_json);
+	content_format format{content_format::application_json};
 	const char* path = "mypath";
-	const char* path2 = "1234";
+	const char* path2 = "path2";
+
 	const char* payload = "TESTE";
+
+	option_node content_op{format};
+	option_node path_op1{option_code::uri_path, path};
+	option_node path_op2{option_code::uri_path, path2};
 
 	std::cout << "Testing factory...\n";
 
-#ifdef USE_INTERNAL_BUFFER
-#	ifdef USE_INTERNAL_MESSAGE_ID
+#if defined(USE_INTERNAL_BUFFER) && defined(USE_INTERNAL_MESSAGE_ID)
 	std::cout << "Internal buffer / Internal message id\n";
-	Factory<BUFFER_LEN, message_id> fac(mid);
-#	else /* USE_INTERNAL_MESSAGE_ID */
+	Factory<BUFFER_LEN, message_id> fac(message_id(std::time(NULL)));
+#elif defined(USE_INTERNAL_BUFFER) && !defined(USE_INTERNAL_MESSAGE_ID)
 	std::cout << "Internal buffer / NO internal message id\n";
 	Factory<BUFFER_LEN> fac;
-#	endif /* USE_INTERNAL_MESSAGE_ID */
-#else /* USE_INTERNAL_BUFFER */
-#	ifdef USE_INTERNAL_MESSAGE_ID
+#elif !defined(USE_INTERNAL_BUFFER) && defined(USE_INTERNAL_MESSAGE_ID)
 	std::cout << "NO internal buffer / Internal message id\n";
-	Factory<0, message_id> fac(mid);
-#	else /* USE_INTERNAL_MESSAGE_ID */
+	Factory<0, message_id> fac(message_id(std::time(NULL)));
+#else
 	std::cout << "NO internal buffer / NO internal message id\n";
 	Factory<0> fac;
-#	endif /* USE_INTERNAL_MESSAGE_ID */
-#endif /* USE_INTERNAL_BUFFER */
+#endif
 	std::cout << "Size factory: " << sizeof(fac) << "\n";
 
-	fac.header(type::confirmable, code::get);
-	fac.token(token, sizeof(token));
+	fac.header(type::confirmable, code::get)
+		.token(token, sizeof(token))
+		.add_option(content_op)
+		.add_option(path_op1)
+		.add_option(path_op2)
+		.payload(payload);
 
-	option_node first{option_code::content_format, content_format};
-	option_node second{option_code::uri_path, path};
-	option_node last{option_code::uri_path, path2};
-
-	fac.add_option(first);
-	fac.add_option(second);
-	fac.add_option(last);
-
-	fac.payload(payload);
-
-#ifdef USE_INTERNAL_BUFFER
-#	ifdef USE_INTERNAL_MESSAGE_ID
+#if defined(USE_INTERNAL_BUFFER) && defined(USE_INTERNAL_MESSAGE_ID)
 	std::size_t size = fac.serialize(ec);
-#	else /* USE_INTERNAL_MESSAGE_ID */
+#elif defined(USE_INTERNAL_BUFFER) && !defined(USE_INTERNAL_MESSAGE_ID)
 	std::size_t size = fac.serialize(mid(), ec);
-#	endif /* USE_INTERNAL_MESSAGE_ID */
-#else /* USE_INTERNAL_BUFFER */
-#	ifdef USE_INTERNAL_MESSAGE_ID
+#elif !defined(USE_INTERNAL_BUFFER) && defined(USE_INTERNAL_MESSAGE_ID)
 	std::size_t size = fac.serialize(buffer, BUFFER_LEN, ec);
-#	else /* USE_INTERNAL_MESSAGE_ID */
+#else
 	std::size_t size = fac.serialize(buffer, BUFFER_LEN, mid(), ec);
-#	endif /* USE_INTERNAL_MESSAGE_ID */
-#endif /* USE_INTERNAL_BUFFER */
-
+#endif
+	/**
+	 * Checking serialize
+	 */
+	if(ec)
+	{
+		std::cerr << "ERROR! [" << ec.value() << "] " << ec.message() << "\n";
+		return EXIT_FAILURE;
+	}
 	/**
 	 * After serialize, you can use the factory again, but first you need to call reset
 	 *
@@ -83,14 +87,6 @@ int main()
 	 */
 
 	std::cout << "------------\n";
-	/**
-	 * Checking serialize
-	 */
-	if(ec)
-	{
-		std::cerr << "ERROR! [" << ec.value() << "] " << ec.message() << "\n";
-		return EXIT_FAILURE;
-	}
 
 	/**
 	 * Serialized success
