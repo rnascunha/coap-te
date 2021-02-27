@@ -47,14 +47,15 @@ endif()
 
 message(STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " " ${CMAKE_CXX_COMPILER_VERSION})
 
-set(SRC_DIR ./)
+set(SRC_DIR ./src)
 set(SRC_DIR_MESSAGE ${SRC_DIR}/message)
 set(SRC_DIR_DEBUG ${SRC_DIR}/debug)
-set(SRC_DIR_OTHER ${SRC_DIR}/other)
+set(SRC_DIR_INTERNAL ${SRC_DIR}/internal)
 
 set(MAIN_SRC ${SRC_DIR}/main.cpp 
-				${SRC_DIR_OTHER}/error.cpp
-				${SRC_DIR_OTHER}/helper.cpp
+				${SRC_DIR}/error.cpp
+				${SRC_DIR}/uri/compose.cpp
+				${SRC_DIR_INTERNAL}/helper.cpp
 				${SRC_DIR_MESSAGE}/options.cpp
 				${SRC_DIR_MESSAGE}/message_id.cpp
 				${SRC_DIR_MESSAGE}/types.cpp
@@ -63,7 +64,14 @@ set(MAIN_SRC ${SRC_DIR}/main.cpp
 				${SRC_DIR_DEBUG}/helper.cpp
 				${SRC_DIR_DEBUG}/print_options.cpp
 				${SRC_DIR_DEBUG}/output_string.cpp
-				${SRC_DIR_DEBUG}/print_message.cpp)
+				)
+
+if(NOT WIN32)
+	message(STATUS "Adding linux dependecies...")
+	list(APPEND MAIN_SRC ${SRC_DIR}/port/linux/socket.cpp)
+else()
+	message(FATAL_ERROR "No system support")
+endif()
 
 add_executable(${PROJECT_NAME} ${MAIN_SRC})
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -72,7 +80,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_EXTENSIONS ON
 )
 
-include_directories(.)
+include_directories(./src)
 
 #if(WIN32)
 #	target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
