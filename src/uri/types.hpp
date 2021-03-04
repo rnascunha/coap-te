@@ -12,11 +12,10 @@ enum class scheme{
 	coaps
 };
 
-template<typename Address>
+template<typename Endpoint>
 struct uri{
 	scheme 			sch;
-	Address		 	ep;
-	uint16_t		port;
+	Endpoint		ep;
 	CoAP::Message::Option::List	path_list;
 	CoAP::Message::Option::List	query_list;
 };

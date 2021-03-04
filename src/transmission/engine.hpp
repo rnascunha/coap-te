@@ -22,15 +22,15 @@ template<typename Connection,
 class engine
 {
 	public:
-		using transaction_t = transaction2<Config.max_packet_size, Callback_Functor>;
+		using transaction_t = transaction<Config.max_packet_size, Callback_Functor>;
 		engine(Connection&& conn, MessageID&& mid)
 		: conn_(std::move(conn)), mid_(std::move(mid)){}
 
-		template<bool iUseInternalBufferNon,
-				bool iSortOptions2,
-				bool iCheckOpOrder2,
-				bool iCheckOpRepeat2>
-		std::size_t send2(Request2<Callback_Functor> const& req2, CoAP::Error& ec) noexcept;
+		template<bool UseInternalBufferNon,
+				bool SortOptions,
+				bool CheckOpOrder,
+				bool CheckOpRepeat>
+		std::size_t send(Request<Callback_Functor> const&, CoAP::Error&) noexcept;
 
 		void process(std::uint8_t const* buffer, std::size_t buffer_len) noexcept
 		{

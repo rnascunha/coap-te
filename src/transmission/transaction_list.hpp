@@ -11,7 +11,7 @@ template<unsigned Size,
 		typename Callback_Functor>
 class transaction_list{
 	public:
-		using transaction_t = transaction2<MaxPacketSize, Callback_Functor>;
+		using transaction_t = transaction<MaxPacketSize, Callback_Functor>;
 		struct node{
 			transaction_t 	transaction;
 			bool			valid = false;

@@ -6,11 +6,15 @@
 #include "port/port.hpp"
 #include "message/message_id.hpp"
 
+#include <chrono>
+#include <thread>
+
 using namespace CoAP;
 using namespace CoAP::Log;
 using namespace CoAP::Transmission;
 
 #define COAP_PORT		5683
+#define COAP_SLEEP_MS	100
 
 static constexpr module main_mod = {
 		.name = "MAIN",
@@ -54,9 +58,20 @@ int main()
 	debug(main_mod, "Socket binded to %s:%u", ep.host(print_buffer), ep.port());
 
 	debug(main_mod, "Starting CoAP engine...");
-	engine<connection, tconfigure, Message::message_id>(
+	engine<connection, tconfigure, Message::message_id>
+		coap_run(
 			connection{std::move(socket)},
 			Message::message_id{static_cast<unsigned>(CoAP::time())});
+
+	while(true)
+	{
+		if(!coap_run(ec))
+		{
+			error(main_mod, ec, "reading socket");
+			exit(EXIT_FAILURE);
+		}
+		std::this_thread::sleep_for(std::chrono::milliseconds(COAP_SLEEP_MS));
+	}
 }
 
 //#include <cstdint>

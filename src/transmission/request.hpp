@@ -8,9 +8,9 @@ namespace CoAP{
 namespace Transmission{
 
 template<typename Callback_Functor>
-class Request2{
+class Request{
 	public:
-		Request2();
+		Request(CoAP::endpoint const ep) : ep_(ep){}
 
 		CoAP::Message::Factory<>& factory(){ return fac_; }
 
@@ -40,17 +40,13 @@ class Request2{
 			return data_;
 		}
 
-		template<bool SortOptions2,
-				bool CheckOpOrder2,
-				bool CheckOpRepeat2>//,
-//				typename ...Args>
-		std::size_t serialize2(std::uint8_t* buffer,
-				std::size_t buffer_len,
-				std::uint16_t mid,
-				CoAP::Error& ec) const noexcept
+		template<bool SortOptions,
+						bool CheckOpOrder,
+						bool CheckOpRepeat,
+						typename ...Args>
+		std::size_t serialize(Args&&... args) const noexcept
 		{
-			return fac_.serialize<SortOptions2, CheckOpOrder2, CheckOpRepeat2>(buffer, buffer_len, mid, ec);
-//			return fac_.serialize<SortOptions, CheckOpOrder, CheckOpRepeat>(std::forward<Args>(args)...);
+			return fac_.serialize<SortOptions, CheckOpOrder, CheckOpRepeat>(std::forward<Args>(args)...);
 		}
 
 		void reset() noexcept

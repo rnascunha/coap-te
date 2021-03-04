@@ -1,6 +1,8 @@
 #ifndef COAP_TE_LOG_HPP__
 #define COAP_TE_LOG_HPP__
 
+#include "error.hpp"
+
 #include "tt/types.hpp"
 #include "tt/log.hpp"
 #include "tt/color.hpp"
@@ -19,9 +21,7 @@ enum class type{
 	debug,
 };
 
-using module = Tree_Trunks::module<type>;
-
-static constexpr const Tree_Trunks::type_config<type> type_config[] = {
+static constexpr Tree_Trunks::type_config<type> const type_config[] = {
 	{type::error, 		"ERROR", 		"ERRO",	FG_RED},
 	{type::warning, 	"WARNING", 		"WARN",	FG_YELLOW},
 	{type::deprecated, 	"DEPRECATED", 	"DEPR",	FG_BRIG_YELLOW},
@@ -29,7 +29,7 @@ static constexpr const Tree_Trunks::type_config<type> type_config[] = {
 	{type::debug, 		"DEBUG", 		"DEBG",	FG_BLUE}
 };
 
-static constexpr Tree_Trunks::config<type, 5> config = {
+static constexpr const Tree_Trunks::config<type> config = {
 	.use_color 				= true,
 	.time 					= true,
 	.module 				= true,
@@ -41,50 +41,87 @@ static constexpr Tree_Trunks::config<type, 5> config = {
 	.tp_config 				= type_config
 };
 
-template<type MinType, typename ...Args>
+using module = Tree_Trunks::module<type>;
+using eolt = Tree_Trunks::eol_type;
+
+template<type MinType, eolt EOL = eolt::nl_rs, typename ...Args>
 constexpr std::size_t log(Args&& ... args) noexcept
 {
-	return Tree_Trunks::log<type, MinType, 5, config>(std::forward<Args>(args)...);
+	return Tree_Trunks::log<type, MinType, config, EOL>(std::forward<Args>(args)...);
+}
+
+template<eolt EOL = eolt::nl_rs>
+constexpr void eol()
+{
+	Tree_Trunks::eol<type, config, EOL>();
 }
 
 /**
  * Convenience functions
  */
 
-template<typename ...Args>
+template<eolt EOL = eolt::nl_rs, typename ...Args>
 constexpr std::size_t debug(Args&& ... args) noexcept
 {
-	return log<type::debug>(std::forward<Args>(args)...);
+	return log<type::debug, EOL>(std::forward<Args>(args)...);
 }
 
-template<typename ...Args>
+template<eolt EOL = eolt::nl_rs, typename ...Args>
 constexpr std::size_t status(Args&& ... args) noexcept
 {
-	return log<type::status>(std::forward<Args>(args)...);
+	return log<type::status, EOL>(std::forward<Args>(args)...);
 }
 
-template<typename ...Args>
+template<eolt EOL = eolt::nl_rs, typename ...Args>
 constexpr std::size_t deprecated(Args&& ... args) noexcept
 {
-	return log<type::deprecated>(std::forward<Args>(args)...);
+	return log<type::deprecated, EOL>(std::forward<Args>(args)...);
 }
 
-template<typename ...Args>
+template<eolt EOL = eolt::nl_rs, typename ...Args>
 constexpr std::size_t warning(Args&& ... args) noexcept
 {
-	return log<type::warning>(std::forward<Args>(args)...);
+	return log<type::warning, EOL>(std::forward<Args>(args)...);
 }
 
-template<typename ...Args>
+template<eolt EOL = eolt::nl_rs, typename ...Args>
 constexpr std::size_t error(Args&& ... args) noexcept
 {
-	return log<type::error>(std::forward<Args>(args)...);
+	return log<type::error, EOL>(std::forward<Args>(args)...);
+}
+
+template<eolt EOL = eolt::nl_rs, typename ...Args>
+constexpr std::size_t none(Args&& ... args) noexcept
+{
+	return log<type::none, EOL>(std::forward<Args>(args)...);
 }
 
 template<typename ...Args>
-constexpr std::size_t none(Args&& ... args) noexcept
+constexpr void nl_rs(Args&&... args)
 {
-	return log<type::none>(std::forward<Args>(args)...);
+	eol<eolt::nl_rs>(std::forward<Args>(args)...);
+}
+
+template<typename ...Args>
+constexpr void nl(Args&&... args)
+{
+	eol<eolt::nl>(std::forward<Args>(args)...);
+}
+
+template<typename ...Args>
+constexpr void rs(Args&&... args)
+{
+	eol<eolt::rs>(std::forward<Args>(args)...);
+}
+
+std::size_t error(CoAP::Error& ec, const char* what = nullptr) noexcept
+{
+	return log<type::error>("[%d] %s (%s)", ec.value(), ec.message(), what ? what : "");
+}
+
+std::size_t error(module const& mod, CoAP::Error& ec, const char* what = nullptr) noexcept
+{
+	return log<type::error>(mod, "[%d] %s (%s)", ec.value(), ec.message(), what ? what : "");
 }
 
 }//Log
