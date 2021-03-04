@@ -21,7 +21,9 @@ enum class errc : int{
 	payload_no_marker		= 40,
 	//socket
 	socket_error			= 50,
-	endpoint_error
+	endpoint_error,
+	//transmission
+	no_free_slots			= 60
 };
 
 struct Error {

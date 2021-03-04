@@ -1,0 +1,3 @@
+[submodule "third/tree_trunks"]
+	path = third/tree_trunks
+	url = https://github.com/rnascunha/tree_trunks

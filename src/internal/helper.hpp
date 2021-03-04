@@ -1,5 +1,5 @@
-#ifndef COAP_TE_HELPER_HPP__
-#define COAP_TE_HELPER_HPP__
+#ifndef COAP_TE_INTERNAL_HELPER_HPP__
+#define COAP_TE_INTERNAL_HELPER_HPP__
 
 #include <cstdint>
 #include <type_traits>
@@ -10,11 +10,10 @@ namespace Helper{
 template<typename Base, typename Power>
 auto pow(Base base, Power power) noexcept -> decltype(base * power)
 {
-	static_assert(power >= 0, "Power must be a positive interger");
 	if(power == 0) return 1;
 
 	decltype(base * power) result = base;
-	while(--power) result * base;
+	while(--power) result *= base;
 
 	return result;
 }
@@ -45,4 +44,4 @@ bool array_to_unsigned(std::uint8_t const*, std::size_t, unsigned&);
 }//Helper
 }//CoAP
 
-#endif /* COAP_TE_HELPER_HPP__ */
+#endif /* COAP_TE_INTERNAL_HELPER_HPP__ */

@@ -1,5 +1,5 @@
-#ifndef COAP_TE_OPTIONS_HPP__
-#define COAP_TE_OPTIONS_HPP__
+#ifndef COAP_TE_MESSAGE_OPTIONS_HPP__
+#define COAP_TE_MESSAGE_OPTIONS_HPP__
 
 #include <cstdint>
 #include "internal/list.hpp"
@@ -135,4 +135,4 @@ bool create(option&, code code, const void*, unsigned) noexcept;
 
 #include "impl/options_impl.hpp"
 
-#endif /* COAP_TE_OPTIONS_HPP__ */
+#endif /* COAP_TE_MESSAGE_OPTIONS_HPP__ */

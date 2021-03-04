@@ -64,11 +64,12 @@ set(MAIN_SRC ${SRC_DIR}/main.cpp
 				${SRC_DIR_DEBUG}/helper.cpp
 				${SRC_DIR_DEBUG}/print_options.cpp
 				${SRC_DIR_DEBUG}/output_string.cpp
+				${SRC_DIR_DEBUG}/print_message.cpp
 				)
 
 if(NOT WIN32)
 	message(STATUS "Adding linux dependecies...")
-	list(APPEND MAIN_SRC ${SRC_DIR}/port/linux/socket.cpp)
+#	list(APPEND MAIN_SRC ${SRC_DIR}/port/linux/socket.cpp)
 else()
 	message(FATAL_ERROR "No system support")
 endif()
@@ -80,7 +81,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_EXTENSIONS ON
 )
 
-include_directories(./src)
+include_directories(./src ./third/tree_trunks/src/include)
 
 #if(WIN32)
 #	target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)

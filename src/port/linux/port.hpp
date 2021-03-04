@@ -17,7 +17,9 @@ auto random_generator = [](){ return std::rand(); };
 
 
 using endpoint = Port::Linux::endpoint;
-using connection = connection_base<Port::Linux::socket, endpoint>;
+
+using socket = Port::Linux::socket<MSG_DONTWAIT, 0>;
+using connection = connection_base<socket, endpoint>;
 
 }//CoAP
 

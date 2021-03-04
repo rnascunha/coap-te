@@ -1,5 +1,5 @@
-#ifndef COAP_TE_HELPER_ENCODE_HPP__
-#define COAP_TE_HELPER_ENCODE_HPP__
+#ifndef COAP_TE_INTERNAL_ENCODE_HPP__
+#define COAP_TE_INTERNAL_ENCODE_HPP__
 
 #include <cstddef>
 
@@ -25,4 +25,4 @@ int percent_encode(char* buffer, std::size_t buffer_used, std::size_t buffer_len
 
 #include "impl/encoder_impl.hpp"
 
-#endif /* COAP_TE_HELPER_ENCODE_HPP__ */
+#endif /* COAP_TE_INTERNAL_ENCODE_HPP__ */

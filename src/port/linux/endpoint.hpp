@@ -61,10 +61,12 @@ class endpoint{
 		{
 			return inet_ntop(family, &addr_.sin_addr, addr_str, sizeof(native_type));
 		}
+		const char* host(char* host_addr) noexcept { return address(host_addr); }
+
 		in_addr_t address() noexcept{ return addr_.sin_addr.s_addr; }
 		std::uint16_t port() const noexcept{ return ntohs(addr_.sin_port); }
 
-		endpoint& operator=(endpoint& ep)
+		endpoint& operator=(endpoint& ep) noexcept
 		{
 			std::memcpy(&addr_, ep.native(), sizeof(native_type));
 			return *this;

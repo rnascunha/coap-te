@@ -24,7 +24,7 @@ Factory(message_id_type&& mid) : mid_(std::move(mid))
 template<std::size_t BufferSize, typename MessageID>
 Factory<BufferSize, MessageID>&
 Factory<BufferSize, MessageID>::
-header(type _type, code _code,
+header(CoAP::Message::type _type, CoAP::Message::code _code,
 		void const* const token /* = nullptr */, std::size_t token_len /* = 0 */) noexcept
 {
 	type_ = _type;
@@ -175,8 +175,8 @@ serialize(
 
 template<std::size_t BufferSize, typename MessageID>
 template<bool SortOptions /* = true */,
-				bool CheckOpOrder /* = !SortOptions */,
-				bool CheckOpRepeat /* = true */>
+		bool CheckOpOrder /* = !SortOptions */,
+		bool CheckOpRepeat /* = true */>
 std::size_t
 Factory<BufferSize, MessageID>::
 serialize(CoAP::Error& ec) noexcept
@@ -189,6 +189,22 @@ serialize(CoAP::Error& ec) noexcept
 				opt_list_.head(),
 				payload_, payload_len_,
 				ec);
+}
+
+template<std::size_t BufferSize, typename MessageID>
+CoAP::Message::type
+Factory<BufferSize, MessageID>::
+type() const noexcept
+{
+	return type_;
+}
+
+template<std::size_t BufferSize, typename MessageID>
+CoAP::Message::code
+Factory<BufferSize, MessageID>::
+code() const noexcept
+{
+	return code_;
 }
 
 }//Message

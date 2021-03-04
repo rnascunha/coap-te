@@ -1,5 +1,5 @@
-#ifndef COAP_TE_LIST_HPP__
-#define COAP_TE_LIST_HPP__
+#ifndef COAP_TE_INTERNAL_LIST_HPP__
+#define COAP_TE_INTERNAL_LIST_HPP__
 
 #include <utility>
 
@@ -67,4 +67,4 @@ class list{
 
 }//CoAP
 
-#endif /* COAP_TE_LIST_HPP__ */
+#endif /* COAP_TE_INTERNAL_LIST_HPP__ */

@@ -1,103 +1,81 @@
-#include <cstdlib>
-#include <cstdio>
-#include <cstdint>
+#include <ctime>
 
-#include "error.hpp"
+#include "log.hpp"
+#include "transmission/engine.hpp"
+#include "port/linux/port.hpp"
 #include "port/port.hpp"
+#include "message/message_id.hpp"
 
 using namespace CoAP;
+using namespace CoAP::Log;
+using namespace CoAP::Transmission;
 
-static void exit_error(Error& ec, const char* what = "")
-{
-	printf("ERROR! [%d] %s [%s]", ec.value(), ec.message(), what);
-	exit(EXIT_FAILURE);
-}
+#define COAP_PORT		5683
 
-#define BUFFER_LEN		1000
+static constexpr module main_mod = {
+		.name = "MAIN",
+		.max_level = CoAP::Log::type::debug
+};
 
-#define SOCKET_SERVER
+static constexpr const configure tconfigure = {
+	.ack_timeout_seconds 			= 2,	//ACK_TIMEOUT
+	.ack_ramdom_factor 				= 1.5,	//ACK_RANDOM_FACTOR
+	.max_restransmission 			= 4,	//MAX_RETRANSMIT
+	.max_interaction 				= 1,	//NSTART
+	.default_leisure_seconds 		= 5,	//DEFAULT_LEISURE
+	.probing_rate_byte_per_seconds 	= 1,	//PROBING_RATE
+	//Implementation
+	.max_packet_size = 1024
+};
 
-#ifdef SOCKET_SERVER
 int main()
 {
+	debug(main_mod, "Init engine code...");
+	char print_buffer[20];
+
 	Error ec;
-	std::uint8_t buffer[BUFFER_LEN];
+	CoAP::socket socket;
 
-	endpoint ep{INADDR_ANY, 8080};
-
-	connection conn{Port::Linux::socket{}};
-
-	conn.native_handler().open(ec);
-	if(ec) exit_error(ec, "open");
-
-	conn.native_handler().bind(ep, ec);
-	if(ec) exit_error(ec, "bind");
-
-	char addr_str[20];
-	std::printf("Listening: %s:%u\n", ep.address(addr_str), ep.port());
-	while(true)
+	socket.open(ec);
+	if(ec)
 	{
-		endpoint recv_addr;
-		std::size_t size = conn.receive(buffer, BUFFER_LEN, recv_addr, ec);
-		if(ec) if(ec) exit_error(ec, "read");
-		buffer[size] = '\0';
-
-		char addr_str[20];
-		std::printf("Received %s:%u [%lu]: %s\n", recv_addr.address(addr_str), recv_addr.port(), size, buffer);
-		std::printf("Echoing...\n");
-		conn.send(buffer, size, recv_addr, ec);
-		if(ec) if(ec) exit_error(ec, "write");
+		error(main_mod, "Error trying to open socket...");
+		exit(EXIT_FAILURE);
 	}
+	debug(main_mod, "Socket opened...");
 
-	return EXIT_SUCCESS;
-}
-#else /* SOCKET_SERVER */
+	endpoint ep{INADDR_ANY, COAP_PORT};
+	socket.bind(ep, ec);
+	if(ec)
+	{
+		error(main_mod, "Error trying to bind socket");
+		exit(EXIT_FAILURE);
+	}
+	debug(main_mod, "Socket binded to %s:%u", ep.host(print_buffer), ep.port());
 
-int main()
-{
-	Error ec;
-	std::uint8_t buffer[BUFFER_LEN];
-
-	const char* payload = "Teste";
-	std::size_t payload_len = std::strlen(payload);
-
-	std::memcpy(buffer, payload, payload_len + 1);
-
-	endpoint to{"127.0.0.1", 8080, ec};
-	connection conn{Port::Linux::socket{}};
-
-	conn.native_handler().open(ec);
-	if(ec) exit_error(ec, "open");
-
-	conn.send(buffer, payload_len, to, ec);
-	if(ec) exit_error(ec, "send");
-	printf("Send succeced!\n");
-
-	endpoint from;
-	std::size_t size = conn.receive(buffer, BUFFER_LEN, from, ec);
-	if(ec) exit_error(ec, "read");
-
-	char addr_str[20];
-	std::printf("Received %s:%u [%lu]: %s\n", from.address(addr_str), from.port(), size, buffer);
-
-	return EXIT_SUCCESS;
+	debug(main_mod, "Starting CoAP engine...");
+	engine<connection, tconfigure, Message::message_id>(
+			connection{std::move(socket)},
+			Message::message_id{static_cast<unsigned>(CoAP::time())});
 }
 
-#endif /* SOCKET_SERVER */
-
-//#include <iostream>
 //#include <cstdint>
 //#include <cstring>
 //#include <ctime>
 //
 //#include "coap-te.hpp"
 //
-//#include "internal/helper.hpp"
-//#include "internal/ascii.hpp"
+//#include "log.hpp"
 //
 //#define BUFFER_LEN		1000
 //
 //using namespace CoAP::Message;
+//using namespace CoAP::Log;
+//
+//static constexpr module main_mod = {
+//		.name = "MAIN",
+//		.max_level = CoAP::Log::type::status
+//};
 //
 //int main()
 //{
@@ -123,10 +101,10 @@ int main()
 //	Option::node path_op1{Option::code::uri_path, "myp ath"};
 //	Option::node path_op2{Option::code::uri_path, "12?34"};
 //
-//	std::cout << "Testing URI...\n";
+//	status("Testing URI...");
 //	Factory<BUFFER_LEN, message_id> fac(message_id(std::time(NULL)));
 //
-//	fac.header(type::confirmable, code::get)
+//	fac.header(CoAP::Message::type::confirmable, code::get)
 //		.token(token, sizeof(token))
 //		.add_option(content_op)
 //		.add_option(path_op1)
@@ -144,7 +122,7 @@ int main()
 //	 */
 //	if(ec)
 //	{
-//		std::cerr << "ERROR! [" << ec.value() << "] " << ec.message() << "\n";
+//		error(main_mod, "ERROR! [%d] %s", ec.value(), ec.message());
 //		return EXIT_FAILURE;
 //	}
 //	/**
@@ -156,16 +134,18 @@ int main()
 //	 * .
 //	 */
 //
-//	std::cout << "------------\n";
+//	status("------------\n");
 //
 //	/**
 //	 * Serialized success
 //	 */
-//	std::cout << "Serialize succeded! [" << size << "]...";
-//	std::cout << "\n-----------\nPrinting message bytes...\n";
+//	status(main_mod, "Serialize succeded! [%lu]...", size);
+//	status(main_mod, "Printing message bytes...");
+//	status("-----------");
 //	CoAP::Debug::print_byte_message(fac.buffer(), size);
 //
-//	std::cout << "-------------\nParsing message...\n";
+//	status("-------------");
+//	status(main_mod, "Parsing message...");
 //	message msg;
 //	auto size_parse = parse(msg, fac.buffer(), size, ec);
 //	/**
@@ -173,26 +153,27 @@ int main()
 //	 */
 //	if(ec)
 //	{
-//		std::cerr << "ERROR! [" << ec.value() << "] " << ec.message() << "\n";
+//		error(main_mod, "ERROR! [%d] %s", ec.value(), ec.message());
 //		return EXIT_FAILURE;
 //	}
 //	/**
 //	 * Parsed succeded!
 //	 */
-//	std::cout << "Parsing succeded! [" << size_parse << "]...\n";
-//	std::cout << "Printing message...\n";
+//	status(main_mod, "Parsing succeded! [%lu]...\n", size_parse);
+//	status(main_mod, "Printing message...");
 //	CoAP::Debug::print_message(msg);
 //
-//	std::cout << "\n-----------\nComposing URI...\n";
+//	status("\n-----------");
+//	status(main_mod, "Composing URI...\n");
 //	char buffer_uri[500];
 //	Option_Parser opt_parser(msg);
 //	auto size_uri = CoAP::URI::compose(buffer_uri, 500, opt_parser, ec);
 //	if(ec)
 //	{
-//		std::cerr << "ERROR! [" << ec.value() << "] " << ec.message() << "\n";
+//		error(main_mod, "ERROR! [%d] %s", ec.value(), ec.message());
 //		return EXIT_FAILURE;
 //	}
-//	std::printf("URI[%lu]: %.*s\n", size_uri, static_cast<int>(size_uri), buffer_uri);
+//	status(main_mod, "URI[%lu]: %.*s\n", size_uri, static_cast<int>(size_uri), buffer_uri);
 //
 //	return EXIT_SUCCESS;
 //}

@@ -15,7 +15,7 @@ static void exit_error(Error& ec, const char* what = "")
 
 #define BUFFER_LEN		1000
 
-#define SOCKET_SERVER
+//#define SOCKET_SERVER
 
 #ifdef SOCKET_SERVER
 int main()
@@ -25,7 +25,7 @@ int main()
 
 	endpoint ep{INADDR_ANY, 8080};
 
-	connection conn{Port::Linux::socket{}};
+	connection conn{CoAP::socket{}};
 
 	conn.native_handler().open(ec);
 	if(ec) exit_error(ec, "open");
@@ -39,14 +39,15 @@ int main()
 	{
 		endpoint recv_addr;
 		std::size_t size = conn.receive(buffer, BUFFER_LEN, recv_addr, ec);
-		if(ec) if(ec) exit_error(ec, "read");
+		if(ec) exit_error(ec, "read");
+		if(size == 0) continue;
 		buffer[size] = '\0';
 
 		char addr_str[20];
 		std::printf("Received %s:%u [%lu]: %s\n", recv_addr.address(addr_str), recv_addr.port(), size, buffer);
 		std::printf("Echoing...\n");
 		conn.send(buffer, size, recv_addr, ec);
-		if(ec) if(ec) exit_error(ec, "write");
+		if(ec) exit_error(ec, "write");
 	}
 
 	return EXIT_SUCCESS;
@@ -64,7 +65,7 @@ int main()
 	std::memcpy(buffer, payload, payload_len + 1);
 
 	endpoint to{"127.0.0.1", 8080, ec};
-	connection conn{Port::Linux::socket{}};
+	connection conn{CoAP::socket{}};
 
 	conn.native_handler().open(ec);
 	if(ec) exit_error(ec, "open");
@@ -74,12 +75,20 @@ int main()
 	printf("Send succeced!\n");
 
 	endpoint from;
-	std::size_t size = conn.receive(buffer, BUFFER_LEN, from, ec);
-	if(ec) exit_error(ec, "read");
+	while(true)
+	{
+		std::size_t size = conn.receive(buffer, BUFFER_LEN, from, ec);
+		if(ec) exit_error(ec, "read");
+		if(size == 0)
+		{
+			std::printf(".");
+			continue;
+		}
 
-	char addr_str[20];
-	std::printf("Received %s:%u [%lu]: %s\n", from.address(addr_str), from.port(), size, buffer);
-
+		char addr_str[20];
+		std::printf("Received %s:%u [%lu]: %s\n", from.address(addr_str), from.port(), size, buffer);
+		break;
+	}
 	return EXIT_SUCCESS;
 }
 

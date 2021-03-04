@@ -31,6 +31,9 @@ class Factory{
 
 		Factory& reset() noexcept;
 
+		CoAP::Message::type type() const noexcept;
+		CoAP::Message::code code() const noexcept;
+
 		template<bool SortOptions = true,
 				bool CheckOpOrder = !SortOptions,
 				bool CheckOpRepeat = true>
@@ -58,7 +61,7 @@ class Factory{
 				CoAP::Error&) noexcept;
 
 		/**
-		 * To be used with internal buffer and internl message id;
+		 * To be used with internal buffer and internal message id;
 		 */
 		template<bool SortOptions = true,
 						bool CheckOpOrder = !SortOptions,
@@ -69,13 +72,13 @@ class Factory{
 		buffer_type		buffer_[BufferSize];
 		message_id_type	mid_;
 
-		type			type_ = type::confirmable;
-		code			code_ = code::get;
-		void const*		token_ = nullptr;
-		std::size_t		token_len_ = 0;
-		Option::List	opt_list_;
-		void const*		payload_ = nullptr;
-		std::size_t		payload_len_ = 0;
+		CoAP::Message::type	type_ = type::confirmable;
+		CoAP::Message::code	code_ = code::get;
+		void const*			token_ = nullptr;
+		std::size_t			token_len_ = 0;
+		Option::List		opt_list_;
+		void const*			payload_ = nullptr;
+		std::size_t			payload_len_ = 0;
 };
 
 }//Message

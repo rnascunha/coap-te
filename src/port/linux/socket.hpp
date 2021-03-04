@@ -9,6 +9,7 @@ namespace CoAP{
 namespace Port{
 namespace Linux{
 
+template<int RecvFlags = 0, int SendFlags = 0>
 class socket{
 	public:
 		socket();
@@ -24,5 +25,7 @@ class socket{
 }//Linux
 }//Port
 }//CoAP
+
+#include "impl/socket_impl.hpp"
 
 #endif /* COAP_TE_PORT_LINUX_SOCKET_HPP__ */

@@ -1,5 +1,5 @@
-#ifndef COAP_TE_HELPER_ASCII_HPP__
-#define COAP_TE_HELPER_ASCII_HPP__
+#ifndef COAP_TE_INTERNAL_HELPER_ASCII_HPP__
+#define COAP_TE_INTERNAL_HELPER_ASCII_HPP__
 
 #include <cstdint>
 
@@ -58,4 +58,4 @@ inline bool is_reserved(char c)
 }//Helper
 }//CoAP
 
-#endif /* COAP_TE_HELPER_ASCII_HPP__ */
+#endif /* COAP_TE_INTERNAL_HELPER_ASCII_HPP__ */

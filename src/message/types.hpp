@@ -1,5 +1,5 @@
-#ifndef COAP_TE_TYPES_HPP__
-#define COAP_TE_TYPES_HPP__
+#ifndef COAP_TE_MESSAGES_TYPES_HPP__
+#define COAP_TE_MESSAGES_TYPES_HPP__
 
 #include <cstdint>
 #include "codes.hpp"
@@ -27,6 +27,8 @@ enum class content_format : unsigned
 	application_json		= 50	//application/json
 };
 
+using accept = content_format;
+
 static constexpr const std::uint8_t payload_marker = 0xff;
 
 struct message{
@@ -47,4 +49,4 @@ bool check_type(type);
 }//Message
 }//CoAP
 
-#endif /* COAP_TE_TYPES_HPP__ */
+#endif /* COAP_TE_MESSAGES_TYPES_HPP__ */
