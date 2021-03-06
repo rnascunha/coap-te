@@ -1,5 +1,5 @@
-#ifndef COAP_TE_PARSER_IMPL_HPP__
-#define COAP_TE_PARSER_IMPL_HPP__
+#ifndef COAP_TE_MESSAGE_PARSER_IMPL_HPP__
+#define COAP_TE_MESSAGE_PARSER_IMPL_HPP__
 
 #include "../parser.hpp"
 
@@ -29,7 +29,7 @@ unsigned parse_option(Option::option& opt,
 					return offset;
 				}
 			}
-			opt.code_ = static_cast<Option::code>(delta + buffer[1]);
+			opt.code_ = static_cast<Option::code>(delta + buffer[1] + code);
 			offset += 1;
 			break;
 		case Option::delta_special::two_byte_extend:
@@ -41,7 +41,7 @@ unsigned parse_option(Option::option& opt,
 					return offset;
 				}
 			}
-			opt.code_ = static_cast<Option::code>(delta + (buffer[1] << 8 | buffer[2]));
+			opt.code_ = static_cast<Option::code>(delta + (buffer[1] << 8 | buffer[2]) + code);
 			offset += 2;
 			break;
 		case Option::delta_special::error:
@@ -113,7 +113,6 @@ unsigned parse_option(Option::option& opt,
 		opt.value_ = &buffer[offset];
 		offset += opt.length_;
 	}
-
 	return offset;
 }
 
@@ -156,5 +155,5 @@ Option::option const* Option_Parser::next(CoAP::Error& ec) noexcept
 }//Message
 }//CoAP
 
-#endif /* COAP_TE_PARSER_IMPL_HPP__ */
+#endif /* COAP_TE_MESSAGE_PARSER_IMPL_HPP__ */
 

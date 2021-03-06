@@ -13,6 +13,12 @@ static void print_payload(CoAP::Message::Option::option const& op)
 {
 	if(op.code_ == CoAP::Message::Option::code::content_format)
 	{
+		if(op.length_ == 0)
+		{
+			std::uint8_t b = 0;
+			std::cout << 0 << " " << content_format_string(static_cast<CoAP::Message::content_format>(b));
+			return;
+		}
 		auto const* buffer_u8 = static_cast<std::uint8_t const*>(op.value_);
 		std::cout << static_cast<unsigned>(buffer_u8[0]) << " "
 				<< content_format_string(static_cast<CoAP::Message::content_format>(buffer_u8[0]));

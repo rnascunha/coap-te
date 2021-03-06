@@ -69,7 +69,8 @@ const char* option_string(CoAP::Message::Option::code op)
 		case code::etag: 			return "ETag";
 		case code::location_path: 	return "Location-Path";
 		case code::location_query: 	return "Location-Query";
-		case code::max_age: 			return "Max-Age";
+		case code::size2:			return "Size2";
+		case code::max_age: 		return "Max-Age";
 		case code::proxy_uri: 		return "Proxy-Uri";
 		case code::proxy_scheme: 	return "Proxy-Scheme";
 		case code::uri_host: 		return "Uri-Host";

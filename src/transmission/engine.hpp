@@ -12,8 +12,17 @@
 
 #include "message/message_id.hpp"
 
+#include "debug/print_message.hpp"
+#include "log.hpp"
+
 namespace CoAP{
 namespace Transmission{
+
+static constexpr CoAP::Log::module engine_mod = {
+		.name = "ENGINE",
+		.max_level = CoAP::Log::type::debug,
+		.enable = true
+};
 
 template<typename Connection,
 	configure const& Config,
@@ -37,11 +46,21 @@ class engine
 			Response response;
 			CoAP::Error ec;
 			parse(response, buffer, buffer_len, ec);
-			if(ec) return;
+			if(ec)
+			{
+				error(engine_mod, ec, "parsing response");
+				return;
+			}
+			CoAP::Debug::print_message(response);
 
 			transaction_t* trans = list_.mid(response.mid);
-			if(!trans) return;
+			if(!trans)
+			{
+				warning(engine_mod, "Transaction %u not found", response.mid);
+				return;
+			}
 
+			debug(engine_mod, "Calling callback mid[%u]", response.mid);
 			trans->call_cb(&response);
 			list_.clear_by_mid(response.mid);
 		}
@@ -56,7 +75,11 @@ class engine
 			CoAP::endpoint ep;
 			std::size_t size = conn_.receive(buffer_, Config.max_packet_size, ep, ec);
 			if(ec) return false;
-			process(buffer_, size);
+			if(size)
+			{
+				CoAP::Log::debug(engine_mod, "Received %d bytes", size);
+				process(buffer_, size);
+			}
 
 			check_transactions();
 

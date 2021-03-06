@@ -29,6 +29,7 @@ const char* Error::message(int error)
 		case errc::payload_no_marker:	return "no payload marker";
 		case errc::socket_error:		return "socket error";
 		case errc::endpoint_error:		return "endpoint error";
+		case errc::transaction_ocupied:	return "transaction ocupied";
 		case errc::no_free_slots:		return "no transacition free slot";
 		default:
 			break;

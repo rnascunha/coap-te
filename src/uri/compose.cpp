@@ -81,7 +81,7 @@ std::size_t compose_path(char* buffer, std::size_t buffer_len,
 }
 
 std::size_t compose_query(char* buffer, std::size_t buffer_len,
-		const char* query, std::size_t query_len, bool is_first, CoAP::Error&ec)
+		const char* query, std::size_t query_len, bool is_first, CoAP::Error& ec)
 {
 	if((query_len + 1) > buffer_len)
 	{

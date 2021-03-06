@@ -1,5 +1,5 @@
-#ifndef COAP_TE_PARSER_HPP__
-#define COAP_TE_PARSER_HPP__
+#ifndef COAP_TE_MESSAGE_PARSER_HPP__
+#define COAP_TE_MESSAGE_PARSER_HPP__
 
 #include "error.hpp"
 #include "types.hpp"
@@ -47,4 +47,4 @@ class Option_Parser
 
 #include "impl/parser_impl.hpp"
 
-#endif /* COAP_TE_PARSER_HPP__ */
+#endif /* COAP_TE_MESSAGE_PARSER_HPP__ */

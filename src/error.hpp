@@ -23,6 +23,7 @@ enum class errc : int{
 	socket_error			= 50,
 	endpoint_error,
 	//transmission
+	transaction_ocupied		= 61,
 	no_free_slots			= 60
 };
 

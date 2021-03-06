@@ -23,6 +23,7 @@ enum class code {
 	uri_query		= 15,	//Uri-Query
 	accept			= 17,	//Accept
 	location_query	= 20,	//Location-Query
+	size2			= 28,	//Size2 - RFC7859 -- https://tools.ietf.org/html/rfc7959#section-4
 	proxy_uri		= 35,	//Proxy-Uri
 	proxy_scheme	= 39,	//Proxy-Scheme
 	size1			= 60,	//Size1
@@ -57,6 +58,7 @@ static constexpr const config options[] = {
 	{code::uri_query, 		true, 	type::string},
 	{code::accept, 			false, 	type::uint},
 	{code::location_query, 	true, 	type::string},
+	{code::size2,			false,	type::uint},
 	{code::proxy_uri, 		false, 	type::string},
 	{code::proxy_scheme, 	false, 	type::string},
 	{code::size1, 			false, 	type::uint},

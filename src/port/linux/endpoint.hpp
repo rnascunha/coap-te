@@ -66,10 +66,23 @@ class endpoint{
 		in_addr_t address() noexcept{ return addr_.sin_addr.s_addr; }
 		std::uint16_t port() const noexcept{ return ntohs(addr_.sin_port); }
 
-		endpoint& operator=(endpoint& ep) noexcept
+		endpoint& operator=(endpoint const& ep) noexcept
 		{
-			std::memcpy(&addr_, ep.native(), sizeof(native_type));
+			addr_.sin_family = ep.addr_.sin_family;
+			addr_.sin_port = ep.addr_.sin_port;
+			addr_.sin_addr.s_addr = ep.addr_.sin_addr.s_addr;
 			return *this;
+		}
+
+		bool operator==(endpoint const& ep) const noexcept
+		{
+			return addr_.sin_port == ep.addr_.sin_port &&
+					addr_.sin_addr.s_addr == ep.addr_.sin_addr.s_addr;
+		}
+
+		bool operator!=(endpoint const& ep) const noexcept
+		{
+			return !(*this == ep);
 		}
 	private:
 		struct sockaddr_in		addr_;

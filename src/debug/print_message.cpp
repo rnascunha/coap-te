@@ -10,7 +10,7 @@
 namespace CoAP{
 namespace Debug{
 
-void print_message(CoAP::Message::message& msg)
+void print_message(CoAP::Message::message const& msg)
 {
 	std::printf("\tType: %s\n\tCode: %s\n\tMessage ID: 0x%04X\n\tToken[%lu]: ",
 			type_string(msg.mtype), code_string(msg.mcode), msg.mid, msg.token_len);
@@ -21,7 +21,7 @@ void print_message(CoAP::Message::message& msg)
 	{
 		CoAP::Message::Option::option opt;
 		CoAP::Error ec;
-		offset += CoAP::Message::parse_option<false>(opt,
+		offset += CoAP::Message::parse_option<true>(opt,
 				msg.option_init + offset, msg.options_len - offset, delta, ec);
 		delta = static_cast<unsigned>(opt.code_);
 		std::printf("\t\t");

@@ -18,7 +18,7 @@ struct configure{
 	unsigned int	max_packet_size 				= 1024;
 };
 
-using transaction_cb = void(*)(CoAP::Message::message const*,
+using transaction_cb = void(*)(void const*,
 							CoAP::Message::message const*,
 							void*);
 

@@ -7,7 +7,7 @@
 namespace CoAP{
 namespace Debug{
 
-void print_message(CoAP::Message::message&);
+void print_message(CoAP::Message::message const&);
 bool print_message(std::uint8_t const* const, std::size_t);
 
 bool print_byte_message(std::uint8_t const* const, std::size_t);
