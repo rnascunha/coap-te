@@ -103,5 +103,20 @@ const char* content_format_string(CoAP::Message::content_format format)
 	return "undefined";
 }
 
+const char* transaction_status_string(CoAP::Transmission::status_t status)
+{
+	switch(status)
+	{
+		using namespace CoAP::Transmission;
+		case status_t::none: return "none";
+		case status_t::sending: return "sending";
+		case status_t::canceled: return "canceled";
+		case status_t::success: return "success";
+		case status_t::timeout: return "timeout";
+		default: break;
+	}
+	return "undefined";
+}
+
 }//Debug
 }//CoAP

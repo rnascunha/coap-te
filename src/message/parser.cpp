@@ -81,6 +81,11 @@ unsigned parse_header(message& msg,
 		return offset;
 	}
 	offset += 1;
+	if(msg.mcode == code::empty && buffer_len != 4)
+	{
+		ec = CoAP::errc::empty_format_error;
+		return offset;
+	}
 
 	msg.mid = buffer[2] << 8 | buffer[3];
 	offset += 2;

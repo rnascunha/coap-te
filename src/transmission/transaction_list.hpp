@@ -1,71 +1,43 @@
 #ifndef COAP_TE_TRANSMISSION_TRANSACTION_LIST_HPP__
 #define COAP_TE_TRANSMISSION_TRANSACTION_LIST_HPP__
 
-#include "transaction.hpp"
-
 namespace CoAP{
 namespace Transmission{
 
 template<unsigned Size,
-		unsigned MaxPacketSize,
-		typename Callback_Functor>
+		typename Transaction>
 class transaction_list{
 	public:
-		using transaction_t = transaction<MaxPacketSize, Callback_Functor>;
+		using transaction_t = Transaction;
+		using endpoint = typename Transaction::endpoint_t;
+
 		struct node{
 			transaction_t 	transaction;
-			bool			valid = false;
 		};
 
-		transaction_list(){}
-		transaction_t* mid(std::uint16_t mid)
-		{
-			for(unsigned i = 0; i < Size; i++)
-				if(nodes_[i].valid && nodes_[i].transaction.mid() == mid)
-					return &nodes_[i].transaction;
+		transaction_list();
 
-			return nullptr;
+		Transaction* find(std::uint16_t mid) noexcept;
+		Transaction* find(endpoint const&, std::uint16_t mid) noexcept;
+		Transaction* find_free_slot() noexcept;
+
+		void check_all(configure const&) noexcept;
+		Transaction* check_all_response(CoAP::Message::message const&) noexcept;
+		Transaction* check_all_response(endpoint const&, CoAP::Message::message const&) noexcept;
+
+		Transaction* operator[](unsigned index) noexcept
+		{
+			return index >= Size ? nullptr : &nodes_[index].transaction;
 		}
 
-		transaction_t* check_free_slot(bool ocupie = true)
-		{
-			for(unsigned i = 0; i < Size; i++)
-				if(!nodes_[i].valid)
-				{
-					nodes_[i].valid = ocupie;
-					return &nodes_[i].transaction;
-				}
-
-			return nullptr;
-		}
-
-		void clear_by_mid(std::uint16_t mid)
-		{
-			for(unsigned i = 0; i < Size; i++)
-				if(nodes_[i].transaction.mid() == mid)
-					nodes_[i].valid = false;
-		}
-
-		void clear_by_slot(unsigned slot)
-		{
-			if(slot >= Size) return;
-			nodes_[slot].valid = false;
-		}
-
-		void checks(CoAP::time_t time)
-		{
-			for(unsigned i = 0; i < Size; i++)
-				if(nodes_[i].valid)
-					if(!nodes_[i].transaction.check(time))
-						nodes_[i].valid = false;
-		}
-
-		constexpr unsigned size(){ return Size; }
+		constexpr unsigned size() const noexcept{ return Size; }
 	private:
 		node	nodes_[Size];
 };
 
 }//Transmission
 }//CoAP
+
+#include "impl/transaction_list_impl.hpp"
 
 #endif /* COAP_TE_TRANSMISSION_TRANSACTION_LIST_HPP__ */

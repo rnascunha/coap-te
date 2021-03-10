@@ -1,48 +1,22 @@
 #ifndef COAP_TE_TRANSMISSION_FUNCTION_HPP__
 #define COAP_TE_TRANSMISSION_FUNCTION_HPP__
 
-#include "internal/helper.hpp"
 #include "types.hpp"
 
 namespace CoAP{
 namespace Transmission{
 
-float
-max_transmit_span(configure const& config)
-{
-	return config.ack_timeout_seconds *
-			CoAP::Helper::pow(2, config.max_restransmission) *
-			config.ack_ramdom_factor;
-}
-
-float
-max_transmist_wait(configure const& config)
-{
-	return config.ack_timeout_seconds *
-				(CoAP::Helper::pow(2, config.max_restransmission + 1) - 1) *
-				config.ack_ramdom_factor;
-}
-
 static constexpr const unsigned int max_latency_seconds = 100;	//MAX_LATENCY
 
-unsigned int
-maximum_round_trip_time(unsigned int max_latency, unsigned int processing_delay)
-{
-	return (2* max_latency) * processing_delay;
-}
-
-float
-exchange_lifetime(configure const& config, unsigned int max_latency, unsigned int processing_delay)
-{
-	return max_transmit_span(config) * (2 * max_latency) * processing_delay;
-}
-
-float
-non_lifetime(configure const& config, unsigned int max_latency)
-{
-	return max_transmit_span(config) * (max_latency);
-}
-
+double expiration_timeout(configure const& config) noexcept;
+double expiration_timeout_retransmit(
+		double timeout,
+		unsigned restransmit_count) noexcept;
+double max_transmit_span(configure const& config) noexcept;
+double max_transmist_wait(configure const& config) noexcept;
+unsigned int maximum_round_trip_time(unsigned int max_latency, unsigned int processing_delay) noexcept;
+double exchange_lifetime(configure const& config, unsigned int max_latency, unsigned int processing_delay) noexcept;
+double non_lifetime(configure const& config, unsigned int max_latency) noexcept;
 
 }//Transmission
 }//CoAP

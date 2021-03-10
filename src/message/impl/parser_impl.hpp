@@ -73,7 +73,7 @@ unsigned parse_option(Option::option& opt,
 					return offset;
 				}
 			}
-			opt.length_ = buffer[offset + 1];
+			opt.length_ = buffer[offset] + 13;
 			offset += 1;
 			break;
 		case Option::length_special::two_byte_extend:
@@ -85,7 +85,7 @@ unsigned parse_option(Option::option& opt,
 					return offset;
 				}
 			}
-			opt.length_ = buffer[offset + 1] << 8 | buffer[offset + 2];
+			opt.length_ = (buffer[offset] << 8 | buffer[offset + 1]) + 269;
 			offset += 2;
 			break;
 		case Option::length_special::error:

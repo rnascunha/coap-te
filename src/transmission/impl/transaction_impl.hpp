@@ -1,10 +1,20 @@
 #ifndef COAP_TE_TRANSMISSION_TRANSACTION_IMPL_HPP__
 #define COAP_TE_TRANSMISSION_TRANSACTION_IMPL_HPP__
 
+#include "log.hpp"
+#include "../functions.hpp"
+#include "port/port.hpp"
+#include "message/parser.hpp"
 #include "../transaction.hpp"
 
 namespace CoAP{
 namespace Transmission{
+
+static constexpr CoAP::Log::module transaction_mod = {
+		.name = "TRANS",
+		.max_level = CoAP::Log::type::debug,
+		.enable = true
+};
 
 template<unsigned MaxPacketSize,
 		typename Callback_Functor,
@@ -15,8 +25,9 @@ clear() noexcept
 {
 	cb_ = nullptr;
 	data_ = nullptr;
-	transmission_init_ = 0;
-	expiration_time_ = 0;
+	max_span_timeout_ = 0;
+	expiration_time_factor_ = 0;
+	next_expiration_time_ = 0;
 	retransmission_count_ = 0;
 	buffer_used_ = 0;
 	status_ = status_t::none;
@@ -28,37 +39,38 @@ clear() noexcept
 template<unsigned MaxPacketSize,
 		typename Callback_Functor,
 		typename Endpoint>
+template<bool CheckMaxSpan>
 bool
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
 check(configure const& config) noexcept
 {
 	if(status_ != status_t::sending)
-	{
-		CoAP::Log::warning(transaction_mod, "Transaction not waiting response...");
 		return false;
+
+	double ftime = static_cast<double>(CoAP::time());
+	if constexpr(CheckMaxSpan)
+	{
+		if(ftime > max_span_timeout_)
+		{
+			status_ = status_t::timeout;
+			call_cb(nullptr);
+			return false;
+		}
 	}
 
-	if(CoAP::time() > expiration_time_)
+	if(ftime > next_expiration_time_)
 	{
-		CoAP::Log::debug(transaction_mod, "[%u] Transaciton expired", request_.mid);
+		CoAP::Log::debug(transaction_mod, "[%04X] Transaciton expired", request_.mid);
 		if(retransmission_count_ >= config.max_restransmission)
 		{
-			CoAP::Log::status(transaction_mod, "[%u] Max retransmission reached [%u]",
+			CoAP::Log::status(transaction_mod, "[%04X] Max retransmission reached [%u]",
 					request_.mid, config.max_restransmission);
 			status_ = status_t::timeout;
 			call_cb(nullptr);
 			return false;
 		}
-		else
-		{
-			retransmission_count_++;
-			CoAP::Log::status(transaction_mod, "[%u] Retransmit transaction = %u",
-								request_.mid, retransmission_count_);
-			expiration_time_ = CoAP::time() + 10;
-			CoAP::Log::debug(transaction_mod, "[%u] New expiration time = %u",
-													request_.mid, expiration_time_);
+		else //message must be retransmitted
 			return true;
-		}
 	}
 	return false;
 }
@@ -66,14 +78,34 @@ check(configure const& config) noexcept
 template<unsigned MaxPacketSize,
 		typename Callback_Functor,
 		typename Endpoint>
+void
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+retransmit() noexcept
+{
+	retransmission_count_++;
+	CoAP::Log::status(transaction_mod, "[%04X] Retransmit transaction = %u",
+						request_.mid, retransmission_count_);
+	next_expiration_time_ = static_cast<double>(CoAP::time()) +
+			expiration_timeout_retransmit(expiration_time_factor_, retransmission_count_);
+	CoAP::Log::debug(transaction_mod, "[%04X] New expiration time = %.2f (diff=%.2f)",
+											request_.mid,
+											next_expiration_time_,
+											next_expiration_time_ - static_cast<double>(CoAP::time()));
+}
+
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
 bool
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
-check(CoAP::Message::message const& response)
+check_response(CoAP::Message::message const& response)
 {
+	if(status_ != status_t::sending) return false;
 	if(request_.mid != response.mid) return false;
-	status_ = status_t::success;
+	status_ = response.mcode == CoAP::Message::code::empty ?
+			status_t::failed : status_t::success;
 
-	CoAP::Log::debug(transaction_mod, "[%d] Response arrived");
+	CoAP::Log::debug(transaction_mod, "[%04X] Response arrived", response.mid);
 	call_cb(&response);
 
 	return true;
@@ -84,13 +116,23 @@ template<unsigned MaxPacketSize,
 		typename Endpoint>
 bool
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
-check(Endpoint const& ep,
+check_response(endpoint_t const& ep,
 		CoAP::Message::message const& response)
 {
 	if(ep != ep_) return false;
-	check(response);
+	check_response(response);
 
 	return true;
+}
+
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
+CoAP::Message::message const&
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+request() const noexcept
+{
+	return request_;
 }
 
 template<unsigned MaxPacketSize,
@@ -116,9 +158,19 @@ buffer() noexcept
 template<unsigned MaxPacketSize,
 		typename Callback_Functor,
 		typename Endpoint>
-Endpoint const&
+std::size_t
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
-endpoint() const noexcept
+buffer_used() const noexcept
+{
+	return buffer_used_;
+}
+
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
+Endpoint&
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+endpoint() noexcept
 {
 	return ep_;
 }
@@ -128,11 +180,26 @@ template<unsigned MaxPacketSize,
 		typename Endpoint>
 bool
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
-init(Endpoint const& ep, std::uint8_t const* buffer, std::size_t size,
-				Callback_Functor func, void* data, CoAP::Error& ec)
+init(configure const& config,
+	endpoint_t const& ep,
+	std::uint8_t* buffer, std::size_t size,
+	Callback_Functor func, void* data, CoAP::Error& ec) noexcept
 {
-	static_assert(is_external_storage, "***");
+	static_assert(is_external_storage, "Must use external storage");
 
+	return init_impl(config, ep, buffer, size, func, data, ec);
+}
+
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
+bool
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+init_impl(configure const& config,
+		endpoint_t const& ep,
+		std::uint8_t* buffer, std::size_t size,
+		Callback_Functor func, void* data, CoAP::Error& ec) noexcept
+{
 	if(status_ != status_t::none)
 	{
 		CoAP::Log::error(transaction_mod, "Transaction been used");
@@ -150,22 +217,138 @@ init(Endpoint const& ep, std::uint8_t const* buffer, std::size_t size,
 
 	status_ = status_t::sending;
 
-	transmission_init_ = CoAP::time();
+	max_span_timeout_ = static_cast<double>(CoAP::time()) + max_transmit_span(config);
 	retransmission_count_ = 0;
-	expiration_time_ = transmission_init_ + 10;
+	expiration_time_factor_ = expiration_timeout(config);
+	next_expiration_time_ = static_cast<double>(CoAP::time()) + expiration_time_factor_;
+	CoAP::Log::debug(transaction_mod, "[%04X] Expiration time = %.2f (diff=%.2f/factor=%.2f)",
+								request_.mid,
+								next_expiration_time_,
+								next_expiration_time_ - static_cast<double>(CoAP::time()),
+								expiration_time_factor_);
 
 	ep_ = ep;
 	cb_ = func;
 	data_ = data;
-	buffer_ = buffer;
+	if constexpr(is_external_storage)
+		buffer_ = buffer;
 	buffer_used_ = size;
 
 	return true;
 }
 
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
+template<std::size_t BufferSize,
+		typename MessageID,
+		bool SortOptions,
+		bool CheckOpOrder,
+		bool CheckOpRepeat>
+std::size_t
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+serialize(CoAP::Message::Factory<BufferSize, MessageID>& factory, CoAP::Error& ec) noexcept
+{
+	static_assert(!is_external_storage, "Must use internal storage");
+
+	std::size_t size = factory.template serialize<SortOptions, CheckOpOrder, CheckOpRepeat>(
+								buffer_, MaxPacketSize, ec);
+	if(!ec) buffer_used_ = size;
+	return size;
+}
+
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
+template<std::size_t BufferSize,
+		typename MessageID,
+		bool SortOptions,
+		bool CheckOpOrder,
+		bool CheckOpRepeat>
+std::size_t
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+serialize(CoAP::Message::Factory<BufferSize, MessageID> const& factory,
+		std::uint16_t mid,
+		CoAP::Error& ec) noexcept
+{
+	static_assert(!is_external_storage, "Must use internal storage");
+
+	std::size_t size = factory.template serialize<SortOptions, CheckOpOrder, CheckOpRepeat>(
+			buffer_, MaxPacketSize, mid, ec);
+	if(!ec) buffer_used_ = size;
+	return size;
+}
+
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
+bool
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+init(configure const& config,
+		endpoint_t const& ep,
+		Callback_Functor func, void* data,
+		CoAP::Error& ec) noexcept
+{
+	static_assert(!is_external_storage, "Must use internal storage");
+	if(!buffer_used_)
+	{
+		ec = CoAP::errc::buffer_empty;
+		return false;
+	}
+	return init_impl(config, ep, buffer_, buffer_used_, func, data, ec);
+}
+
 /**
  *
  */
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
+status_t
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+status() const noexcept
+{
+	return status_;
+}
+
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
+transaction_param
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+transaction_parameters() const noexcept
+{
+	return transaction_param{
+		.max_span = max_span_timeout_,
+		.next_expiration = next_expiration_time_,
+		.expiration_factor = expiration_time_factor_,
+		.retransmission_count = retransmission_count_
+	};
+}
+
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
+bool
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+is_busy() const noexcept
+{
+	return status_ != status_t::none;
+}
+
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
+void
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+cancel() noexcept
+{
+	if(status_ != status_t::sending) return;
+
+	status_ = status_t::canceled;
+	call_cb(nullptr);
+}
+
 template<unsigned MaxPacketSize,
 		typename Callback_Functor,
 		typename Endpoint>

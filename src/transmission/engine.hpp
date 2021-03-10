@@ -6,92 +6,72 @@
 #include "error.hpp"
 
 #include "types.hpp"
-#include "transaction.hpp"
 #include "transaction_list.hpp"
+#include "transaction.hpp"
 #include "request.hpp"
-
-#include "message/message_id.hpp"
-
-#include "debug/print_message.hpp"
-#include "log.hpp"
 
 namespace CoAP{
 namespace Transmission{
 
-static constexpr CoAP::Log::module engine_mod = {
-		.name = "ENGINE",
-		.max_level = CoAP::Log::type::debug,
-		.enable = true
-};
-
 template<typename Connection,
 	configure const& Config,
-	typename MessageID,
+	unsigned MaxTransactionNumber,
+	unsigned MaxPacketSize,
 	typename Callback_Functor = transaction_cb>
 class engine
 {
 	public:
-		using transaction_t = transaction<Config.max_packet_size, Callback_Functor>;
-		engine(Connection&& conn, MessageID&& mid)
-		: conn_(std::move(conn)), mid_(std::move(mid)){}
+		using endpoint = typename Connection::endpoint;
+		using transaction_t = transaction<MaxPacketSize, Callback_Functor, endpoint>;
+		using request = Request<Callback_Functor>;
+
+		engine(Connection&& conn)
+		: conn_(std::move(conn)){}
 
 		template<bool UseInternalBufferNon,
-				bool SortOptions,
-				bool CheckOpOrder,
-				bool CheckOpRepeat>
-		std::size_t send(Request<Callback_Functor> const&, CoAP::Error&) noexcept;
+				std::size_t BufferSize,
+				typename MessageID,
+				bool SortOptions = true,
+				bool CheckOpOrder = !SortOptions,
+				bool CheckOpRepeat = true>
+		std::size_t send(endpoint&,
+				CoAP::Message::Factory<BufferSize, MessageID>&,
+				Callback_Functor func, void* data,
+				CoAP::Error&) noexcept;
 
-		void process(std::uint8_t const* buffer, std::size_t buffer_len) noexcept
-		{
-			Response response;
-			CoAP::Error ec;
-			parse(response, buffer, buffer_len, ec);
-			if(ec)
-			{
-				error(engine_mod, ec, "parsing response");
-				return;
-			}
-			CoAP::Debug::print_message(response);
+		template<bool UseInternalBufferNon,
+				std::size_t BufferSize,
+				typename MessageID,
+				bool SortOptions = true,
+				bool CheckOpOrder = !SortOptions,
+				bool CheckOpRepeat = true>
+		std::size_t send(endpoint&,
+				CoAP::Message::Factory<BufferSize, MessageID> const&,
+				std::uint16_t mid,
+				Callback_Functor func, void* data,
+				CoAP::Error&) noexcept;
 
-			transaction_t* trans = list_.mid(response.mid);
-			if(!trans)
-			{
-				warning(engine_mod, "Transaction %u not found", response.mid);
-				return;
-			}
+		template<bool UseInternalBufferNon,
+						bool SortOptions = true,
+						bool CheckOpOrder = !SortOptions,
+						bool CheckOpRepeat = true>
+		std::size_t send(Request<Callback_Functor>&,
+						std::uint16_t mid,
+						CoAP::Error&) noexcept;
 
-			debug(engine_mod, "Calling callback mid[%u]", response.mid);
-			trans->call_cb(&response);
-			list_.clear_by_mid(response.mid);
-		}
-
-		void check_transactions()
-		{
-			list_.checks(CoAP::time());
-		}
-
-		bool operator()(CoAP::Error& ec)
-		{
-			CoAP::endpoint ep;
-			std::size_t size = conn_.receive(buffer_, Config.max_packet_size, ep, ec);
-			if(ec) return false;
-			if(size)
-			{
-				CoAP::Log::debug(engine_mod, "Received %d bytes", size);
-				process(buffer_, size);
-			}
-
-			check_transactions();
-
-			return true;
-		}
+		void process(std::uint8_t const* buffer, std::size_t buffer_len,
+				CoAP::Error& ec) noexcept;
+		void process(endpoint const& ep,
+				std::uint8_t const* buffer, std::size_t buffer_len,
+				CoAP::Error& ec) noexcept;
+		void check_transactions() noexcept;
+		bool run(CoAP::Error& ec);
+		bool operator()(CoAP::Error& ec) noexcept;
 	private:
-		transaction_list<Config.max_interaction,
-						 Config.max_packet_size,
-						 Callback_Functor> list_;
+		transaction_list<MaxTransactionNumber,
+						transaction_t> list_;
 		Connection		conn_;
-		MessageID		mid_;
-		std::uint8_t	buffer_[Config.max_packet_size];
+		std::uint8_t	buffer_[MaxPacketSize];
 };
 
 }//Transmission

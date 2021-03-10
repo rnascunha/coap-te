@@ -10,6 +10,7 @@ enum class errc : int{
 	message_too_small,
 	version_invalid,
 	type_invalid,
+	empty_format_error,
 	//Code
 	code_invalid 			= 20,
 	//Options
@@ -23,8 +24,9 @@ enum class errc : int{
 	socket_error			= 50,
 	endpoint_error,
 	//transmission
-	transaction_ocupied		= 61,
-	no_free_slots			= 60
+	transaction_ocupied		= 60,
+	no_free_slots,
+	buffer_empty,
 };
 
 struct Error {

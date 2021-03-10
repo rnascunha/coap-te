@@ -49,6 +49,7 @@ message(STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " " ${CMAKE_CXX_COMPILER_VE
 
 set(SRC_DIR ./src)
 set(SRC_DIR_MESSAGE ${SRC_DIR}/message)
+set(SRC_DIR_TRANSMISSION ${SRC_DIR}/transmission)
 set(SRC_DIR_DEBUG ${SRC_DIR}/debug)
 set(SRC_DIR_INTERNAL ${SRC_DIR}/internal)
 
@@ -61,6 +62,7 @@ set(MAIN_SRC ${SRC_DIR}/main.cpp
 				${SRC_DIR_MESSAGE}/types.cpp
 				${SRC_DIR_MESSAGE}/codes.cpp
 				${SRC_DIR_MESSAGE}/parser.cpp
+				${SRC_DIR_TRANSMISSION}/functions.cpp
 				${SRC_DIR_DEBUG}/helper.cpp
 				${SRC_DIR_DEBUG}/print_options.cpp
 				${SRC_DIR_DEBUG}/output_string.cpp

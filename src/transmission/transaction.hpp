@@ -5,97 +5,104 @@
 #include <cstdlib>
 #include <type_traits>
 
-//#include "port/port.hpp"
 #include "transmission/types.hpp"
-#include "request.hpp"
+#include "message/factory.hpp"
 #include "message/types.hpp"
-#include "message/parser.hpp"
-
-#include "log.hpp"
 
 namespace CoAP{
 namespace Transmission{
-
-static constexpr CoAP::Log::module transaction_mod = {
-		.name = "TRANS",
-		.max_level = CoAP::Log::type::debug,
-		.enable = true
-};
 
 template<unsigned MaxPacketSize = 0,
 		typename Callback_Functor = transaction_cb,
 		typename Endpoint = CoAP::endpoint>
 class transaction
 {
-	static bool constexpr const is_external_storage = MaxPacketSize == 0;
-	using buffer_type = typename std::conditional<MaxPacketSize == 0, std::uint8_t const*, std::uint8_t[MaxPacketSize]>::type;
+	using buffer_type = typename std::conditional<MaxPacketSize == 0,
+									std::uint8_t*,
+									std::uint8_t[MaxPacketSize]>::type;
 	public:
+		static bool constexpr const is_external_storage = MaxPacketSize == 0;
+		using endpoint_t = Endpoint;
+
 		transaction(){}
 
-		enum class status_t{
-			none = 0,
-			sending,
-			canceled,
-			success,
-			timeout
-		};
+		/**
+		 * To be used with external buffer
+		 */
+		bool init(configure const& config,
+				endpoint_t const& ep,
+				std::uint8_t* buffer, std::size_t size,
+				Callback_Functor func, void* data, CoAP::Error& ec) noexcept;
 
-		status_t status() const noexcept{ return status_; }
+		/**
+		 * To be used with internal buffer
+		 */
+		template<std::size_t BufferSize,
+				typename MessageID,
+				bool SortOptions = true,
+				bool CheckOpOrder = !SortOptions,
+				bool CheckOpRepeat = true>
+		std::size_t serialize(CoAP::Message::Factory<BufferSize, MessageID>&,
+				CoAP::Error&) noexcept;
 
-		void clear() noexcept;
+		template<std::size_t BufferSize,
+				typename MessageID,
+				bool SortOptions = true,
+				bool CheckOpOrder = !SortOptions,
+				bool CheckOpRepeat = true>
+		std::size_t serialize(CoAP::Message::Factory<BufferSize, MessageID> const&,
+				std::uint16_t mid,
+				CoAP::Error&) noexcept;
 
+		bool init(configure const& config,
+				endpoint_t const&,
+				Callback_Functor, void*,
+				CoAP::Error&) noexcept;
+
+		/**
+		 *
+		 */
+		void retransmit() noexcept;
+
+		status_t status() const noexcept;
+		bool is_busy() const noexcept;
+
+		void cancel() noexcept;
+
+		template<bool CheckMaxSpan = false>
 		bool check(configure const& config) noexcept;
-		bool check(CoAP::Message::message const& response);
-		bool check(Endpoint const& ep,
-				CoAP::Message::message const& response);
 
+		bool check_response(endpoint_t const& ep,
+				CoAP::Message::message const& response);
+		bool check_response(CoAP::Message::message const& response);
+
+		CoAP::Message::message const& request() const noexcept;
 		std::uint16_t mid() const noexcept;
 		std::uint8_t* buffer() noexcept;
-		Endpoint const& endpoint() const noexcept;
+		std::size_t buffer_used() const noexcept;
+		endpoint_t& endpoint() noexcept;
 
-		bool init(Endpoint const& ep, std::uint8_t const* buffer, std::size_t size,
-						Callback_Functor func, void* data, CoAP::Error& ec);
-//		template<bool SortOptions,
-//				bool CheckOpOrder,
-//				bool CheckOpRepeat>
-//		std::size_t request(Request<Callback_Functor> const& req,
-//				uint16_t mid,
-//				CoAP::Error& ec) noexcept
-//		{
-//			std::size_t size = req.template serialize<SortOptions, CheckOpOrder, CheckOpRepeat>(
-//														buffer_, MaxPacketSize, mid, ec);
-//			if(ec)
-//			{
-//				error(transaction_mod, ec, "serialize");
-//				return size;
-//			}
-//
-//			if(req.factory().type() != CoAP::Message::type::confirmable) return size;
-//			transmission_init_ = CoAP::time();
-//			retransmission_count_ = 0;
-//			buffer_used_ = size;
-//			/**
-//			 * Parsing and serialize hold the message in different ways...
-//			 */
-//			CoAP::Message::parse(request_, buffer_, MaxPacketSize, ec);
-//
-//			ep_ = req.endpoint();
-//			cb_ = req.callback();
-//			data_ = req.data();
-//
-//			return size;
-//		}
+		transaction_param transaction_parameters() const noexcept;
 	private:
+		bool init_impl(configure const& config,
+				endpoint_t const& ep,
+				std::uint8_t* buffer, std::size_t size,
+				Callback_Functor func, void* data, CoAP::Error& ec) noexcept;
+
 		void call_cb(CoAP::Message::message const* response) noexcept;
+		void clear() noexcept;
 
 		CoAP::Message::message	request_;
-		Endpoint			ep_;
+		endpoint_t				ep_;
 
 		Callback_Functor		cb_ = nullptr;
 		void*					data_ = nullptr;
-		CoAP::time_t			transmission_init_ = 0;
-		CoAP::time_t			expiration_time_ = 0;
+
+		double					max_span_timeout_ = 0;
+		double					next_expiration_time_ = 0;
+		double					expiration_time_factor_ = 0;
 		unsigned int			retransmission_count_ = 0;
+
 		buffer_type				buffer_;
 		std::size_t				buffer_used_ = 0;
 

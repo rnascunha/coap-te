@@ -1,5 +1,5 @@
-#ifndef COAP_TE_SERIALIZE_HPP__
-#define COAP_TE_SERIALIZE_HPP__
+#ifndef COAP_TE_MESSAGE_SERIALIZE_HPP__
+#define COAP_TE_MESSAGE_SERIALIZE_HPP__
 
 #include <cstdint>
 
@@ -10,6 +10,9 @@
 
 namespace CoAP{
 namespace Message{
+
+std::size_t empty_message(std::uint8_t* buffer, std::size_t buffer_len,
+		std::uint16_t mid, CoAP::Error&) noexcept;
 
 template<bool SortOptions = true,
 		bool CheckOpOrder = !SortOptions,
@@ -46,5 +49,5 @@ std::size_t serialize(std::uint8_t* buffer, std::size_t buffer_len,
 
 #include "impl/serialize_impl.hpp"
 
-#endif /* COAP_TE_SERIALIZE_HPP__ */
+#endif /* COAP_TE_MESSAGE_SERIALIZE_HPP__ */
 

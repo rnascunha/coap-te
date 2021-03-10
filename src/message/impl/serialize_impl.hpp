@@ -1,5 +1,5 @@
-#ifndef COAP_TE_MESSAGE_IMPL_HPP__
-#define COAP_TE_MESSAGE_IMPL_HPP__
+#ifndef COAP_TE_MESSAGE_SERIALIZE_IMPL_HPP__
+#define COAP_TE_MESSAGE_SERIALIZE_IMPL_HPP__
 
 #include "../serialize.hpp"
 #include <cstring>
@@ -38,6 +38,20 @@ static unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 static unsigned make_payload(uint8_t* buffer, std::size_t buffer_len,
 		void const* const payload, std::size_t payload_len,
 		CoAP::Error& ec) noexcept;
+
+/**
+ * https://tools.ietf.org/html/rfc7252#section-4.1
+ *
+ * An Empty message has the Code field set to 0.00.  The Token Length
+ * field MUST be set to 0 and bytes of data MUST NOT be present after
+ * the Message ID field.  If there are any bytes, they MUST be processed
+ * as a message format error.
+ */
+std::size_t empty_message(std::uint8_t* buffer, std::size_t buffer_len,
+		std::uint16_t mid, CoAP::Error& ec) noexcept
+{
+	return make_header(buffer, buffer_len, type::reset, code::empty, mid, nullptr, 0, ec);
+}
 
 template<bool SortOptions /* = true */,
 		bool CheckOpOrder /* = !SortOptions */,
@@ -336,4 +350,4 @@ static unsigned make_payload(uint8_t* buffer, std::size_t buffer_len,
 }//Message
 }//CoAP
 
-#endif /* COAP_TE_MESSAGE_IMPL_HPP__ */
+#endif /* COAP_TE_MESSAGE_SERIALIZE_IMPL_HPP__ */

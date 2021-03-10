@@ -15,7 +15,6 @@ auto time = []{ return std::time(NULL); };
 
 auto random_generator = [](){ return std::rand(); };
 
-
 using endpoint = Port::Linux::endpoint;
 
 using socket = Port::Linux::socket<MSG_DONTWAIT, 0>;

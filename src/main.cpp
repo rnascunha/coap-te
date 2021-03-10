@@ -3,37 +3,34 @@
 #include "log.hpp"
 #include "transmission/types.hpp"
 #include "transmission/transaction.hpp"
+#include "transmission/request.hpp"
+#include "transmission/engine.hpp"
 #include "port/linux/port.hpp"
 #include "port/port.hpp"
 #include "message/message_id.hpp"
 #include "coap-te.hpp"
 
-#include <chrono>
-#include <thread>
-
 using namespace CoAP;
 using namespace CoAP::Log;
 using namespace CoAP::Message;
-using namespace CoAP::Transmission;
 
 #define COAP_PORT		5683
-#define COAP_SLEEP_MS	100
-#define BUFFER_LEN		1024
+#define TRANSACT_NUM	4
+#define BUFFER_LEN		512
+#define HOST_ADDR		"127.0.0.1"
 
 static constexpr module main_mod = {
 		.name = "MAIN",
 		.max_level = CoAP::Log::type::debug
 };
 
-static constexpr const configure tconfigure = {
-	.ack_timeout_seconds 			= 2,	//ACK_TIMEOUT
+static constexpr const CoAP::Transmission::configure tconfigure = {
+	.ack_timeout_seconds 			= 2.0,	//ACK_TIMEOUT
 	.ack_ramdom_factor 				= 1.5,	//ACK_RANDOM_FACTOR
 	.max_restransmission 			= 4,	//MAX_RETRANSMIT
 	.max_interaction 				= 1,	//NSTART
 	.default_leisure_seconds 		= 5,	//DEFAULT_LEISURE
 	.probing_rate_byte_per_seconds 	= 1,	//PROBING_RATE
-	//Implementation
-	.max_packet_size = 1024
 };
 
 static bool response_flag = false;
@@ -41,12 +38,15 @@ static bool response_flag = false;
 void exit_error(CoAP::Error& ec, const char* what = nullptr)
 {
 	error(main_mod, ec, what);
+	exit(EXIT_FAILURE);
 }
+
+using engine = CoAP::Transmission::engine<CoAP::connection, tconfigure, TRANSACT_NUM, BUFFER_LEN>;
 
 void cb(void const* trans, CoAP::Message::message const* r, void*)
 {
-	transaction<> const* t = static_cast<transaction<> const*>(trans);
-	status(main_mod, "Status: %u", static_cast<unsigned>(t->status()));
+	auto const* t = static_cast<engine::transaction_t const*>(trans);
+	status(main_mod, "Status: %s", CoAP::Debug::transaction_status_string(t->status()));
 	if(r)
 	{
 		status(main_mod, "Response received!");
@@ -54,80 +54,55 @@ void cb(void const* trans, CoAP::Message::message const* r, void*)
 	}
 	else
 	{
-		status(main_mod, "Response not received");
+		status(main_mod, "Response NOT received");
 	}
 	response_flag = true;
 }
 
 int main()
 {
-	debug(main_mod, "Init transaction code...");
+	debug(main_mod, "Init engine code...");
 
 	Error ec;
+
+	/**
+	 * Socket
+	 */
 	CoAP::socket socket;
-	std::uint8_t buffer_send[BUFFER_LEN], buffer_recv[BUFFER_LEN];
-	char print_buffer[20];
 
 	socket.open(ec);
 	if(ec) exit_error(ec, "Error trying to open socket...");
 
 	debug(main_mod, "Socket opened...");
 
-	endpoint ep{"127.0.0.1", COAP_PORT, ec};
+	endpoint ep{HOST_ADDR, COAP_PORT, ec};
 	if(ec) exit_error(ec);
 
 	CoAP::connection conn{std::move(socket)};
 
-	/**
-	 * All object lifetime if of user responsability. Util "serialize" method
-	 * been called, nothing is copied.
-	 */
-//	Option::node path_op{Option::code::uri_path, "time"};
-	Option::node path_op1{Option::code::uri_path, ".well-known"};
-	Option::node path_op2{Option::code::uri_path, "core"};
+	CoAP::Message::Option::node path_op1{CoAP::Message::Option::code::uri_path, ".well-known"};
+	CoAP::Message::Option::node path_op2{CoAP::Message::Option::code::uri_path, "core"};
 
-	status("Testing URI...");
-	Factory<0, message_id> fac(message_id(CoAP::time()));
+	CoAP::Message::message_id mid(CoAP::time());
 
-	fac.header(CoAP::Message::type::confirmable, code::get)
-		.add_option(path_op1)
-		.add_option(path_op2);
+	status(main_mod, "Testing Engine...");
 
-	std::size_t size = fac.serialize(buffer_send, BUFFER_LEN, ec);
-	if(ec)
-	{
-		error(main_mod, ec, "serialize");
-		exit(EXIT_FAILURE);
-	}
-	debug("Message to send");
-	CoAP::Debug::print_byte_message(buffer_send, size);
+	engine::request request(ep);
+	request.header(CoAP::Message::type::confirmable, CoAP::Message::code::get)
+			.token("tok")
+			.add_option(path_op1)
+			.add_option(path_op2)
+			.callback(cb);
 
-	transaction<> tr;
+	engine coap_engine(std::move(conn));
 
-	debug("Sending data... [%d]", size);
-	conn.send(buffer_send, size, ep, ec);
+	coap_engine.send<true>(request, mid(), ec);
 	if(ec) exit_error(ec, "send");
-	tr.init(ep, buffer_send, size, cb, nullptr, ec);
 
-	endpoint ep_recv;
-	CoAP::Message::message response;
 	while(!response_flag)
 	{
-		size = conn.receive(buffer_recv, BUFFER_LEN, ep_recv, ec);
-		if(ec) exit_error(ec, "read");
-
-		if(size)
-		{
-			status("From: %s:%u", ep_recv.host(print_buffer), ep_recv.port());
-			CoAP::Message::parse(response, buffer_recv, size, ec);
-			if(ec) exit_error(ec, "parse");
-			if(tr.check(response))
-				status(main_mod, "Response received correctly");
-		}
-		else if(tr.check(tconfigure))
-		{
-			status(main_mod, "Message timeout");
-		}
+		coap_engine(ec);
+		if(ec) exit_error(ec, "run");
 	}
 
 	return EXIT_SUCCESS;

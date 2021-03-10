@@ -11,6 +11,8 @@ template<typename ConnType,
 		typename Endpoint>
 class connection_base{
 	public:
+		using endpoint = Endpoint;
+
 		connection_base(ConnType&& conn) : conn_(std::move(conn)){}
 
 		std::size_t send(const void* buffer, std::size_t buffer_len, Endpoint& ep, CoAP::Error& ec) noexcept
