@@ -8,9 +8,9 @@ namespace Option{
 
 void create(option& option, content_format const& value, bool is_request /* = false */) noexcept
 {
-	option.code_ = is_request ? code::accept : code::content_format;
-	option.length_ = 1;
-	option.value_ = &value;
+	option.ocode = is_request ? code::accept : code::content_format;
+	option.length = 1;
+	option.value = &value;
 }
 
 bool is_critical(code code) noexcept { return static_cast<int>(code) & 1; }
@@ -27,7 +27,7 @@ config const * get_config(code code) noexcept
 
 option::option(){}
 option::option(code code, unsigned len, const void* val) :
-	code_(code), length_(len), value_(val){}
+	ocode(code), length(len), value(val){}
 
 option::option(code code)
 {
@@ -56,7 +56,7 @@ option::option(code code, const void* value, unsigned length)
 
 bool option::operator==(option const& rhs) noexcept
 {
-	return code_ == rhs.code_;
+	return ocode == rhs.ocode;
 }
 
 bool option::operator!=(option const& rhs) noexcept
@@ -66,7 +66,7 @@ bool option::operator!=(option const& rhs) noexcept
 
 bool option::operator<(option const& rhs) noexcept
 {
-	return code_ < rhs.code_;
+	return ocode < rhs.ocode;
 }
 
 bool option::operator>(option const& rhs) noexcept
@@ -84,9 +84,9 @@ bool option::operator>=(option const& rhs) noexcept
 	return !(*this < rhs);
 }
 
-bool option::is_critical() const noexcept{ return CoAP::Message::Option::is_critical(code_); }
-bool option::is_unsafe() const noexcept{ return CoAP::Message::Option::is_unsafe(code_); }
-bool option::is_no_cache_key() const noexcept{ return CoAP::Message::Option::is_no_cache_key(code_); }
+bool option::is_critical() const noexcept{ return CoAP::Message::Option::is_critical(ocode); }
+bool option::is_unsafe() const noexcept{ return CoAP::Message::Option::is_unsafe(ocode); }
+bool option::is_no_cache_key() const noexcept{ return CoAP::Message::Option::is_no_cache_key(ocode); }
 
 void exchange(option* first, option* second) noexcept
 {
@@ -115,8 +115,8 @@ void sort(option* options, std::size_t num) noexcept
 		std::size_t exchange_index = i;
 		std::size_t j = i + 1;
 		for(; j < num; j++)
-			if(option->code_ > options[j].code_)
-				if(options[exchange_index].code_ > options[j].code_)
+			if(option->ocode > options[j].ocode)
+				if(options[exchange_index].ocode > options[j].ocode)
 					exchange_index = j;
 
 		if(i != exchange_index)
@@ -133,8 +133,8 @@ void sort(node* list) noexcept
 		node* exchange_opt = i;
 		node* j = i->next;
 		for(; j != nullptr; j = j->next)
-			if(option->code_ > j->value.code_)
-				if(exchange_opt->value.code_ > j->value.code_)
+			if(option->ocode > j->value.ocode)
+				if(exchange_opt->value.ocode > j->value.ocode)
 					exchange_opt = j;
 
 		if(i != exchange_opt)
@@ -145,7 +145,7 @@ void sort(node* list) noexcept
 unsigned parse_unsigned(option const& opt)
 {
 	unsigned value;
-	CoAP::Helper::array_to_unsigned(static_cast<std::uint8_t const*>(opt.value_), opt.length_, value);
+	CoAP::Helper::array_to_unsigned(static_cast<std::uint8_t const*>(opt.value), opt.length, value);
 
 	return value;
 }

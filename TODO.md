@@ -11,3 +11,5 @@
 * Type traits...
 
 * Define a cache strategy.
+
+* Remove all function pointers that are not necessary at resource;

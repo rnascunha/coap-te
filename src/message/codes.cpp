@@ -3,7 +3,7 @@
 namespace CoAP{
 namespace Message{
 
-bool check_code(code mcode)
+bool check_code(code mcode) noexcept
 {
 	switch(mcode)
 	{
@@ -42,6 +42,16 @@ bool check_code(code mcode)
 		default: break;
 	}
 	return false;
+}
+
+bool is_request(code mcode) noexcept
+{
+	return mcode != code::empty && ((static_cast<std::uint8_t>(mcode) & 0b11100000) == code_class::request);
+}
+
+bool is_response(code mcode) noexcept
+{
+	return !is_request(mcode) && mcode != code::empty;
 }
 
 }//Message

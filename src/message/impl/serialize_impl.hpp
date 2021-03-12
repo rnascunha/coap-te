@@ -217,7 +217,7 @@ static unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 							CoAP::Error& ec) noexcept
 {
 	unsigned offset = 0;
-	Option::config const * const config = Option::get_config(option.code_);
+	Option::config const * const config = Option::get_config(option.ocode);
 	if(config == nullptr)
 	{
 		ec = CoAP::errc::option_invalid;
@@ -226,7 +226,7 @@ static unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 
 	if constexpr(CheckOpOrder)
 	{
-		if(option.code_ < last_option)
+		if(option.ocode < last_option)
 		{
 			ec = CoAP::errc::option_out_of_order;
 			return offset;
@@ -235,16 +235,16 @@ static unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 
 	if constexpr(CheckOpRepeat)
 	{
-		if(!config->repeatable && last_option == option.code_)
+		if(!config->repeatable && last_option == option.ocode)
 		{
 			ec = CoAP::errc::option_repeated;
 			return offset;
 		}
 	}
-	last_option = option.code_;
+	last_option = option.ocode;
 
 	unsigned option_size = 1;
-	unsigned offset_delta = static_cast<std::uint8_t>(option.code_) - delta, delta_opt = 0;
+	unsigned offset_delta = static_cast<std::uint8_t>(option.ocode) - delta, delta_opt = 0;
 	std::uint16_t delta_ext = 0;
 	delta += offset_delta;
 	if(offset_delta > 12)
@@ -267,25 +267,25 @@ static unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 
 	unsigned length_opt = 0;
 	std::uint16_t length_ext = 0;
-	if(option.length_ > 12)
+	if(option.length > 12)
 	{
-		if(option.length_ <= 255)
+		if(option.length <= 255)
 		{
 			length_opt = static_cast<unsigned>(Option::length_special::one_byte_extend);
-			length_ext = option.length_ - 13;
+			length_ext = option.length - 13;
 			option_size += 1;
 		}
 		else
 		{
 			length_opt = static_cast<unsigned>(Option::length_special::two_byte_extend);
-			length_ext = option.length_ - 269;
+			length_ext = option.length - 269;
 			option_size += 2;
 		}
 	}
 	else
-		length_opt = option.length_;
+		length_opt = option.length;
 
-	if((option_size + option.length_ + offset) > buffer_len)
+	if((option_size + option.length + offset) > buffer_len)
 	{
 		ec = CoAP::errc::insufficient_buffer;
 		return offset;
@@ -321,8 +321,8 @@ static unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 	}
 	std::memcpy(buffer + offset, &byte, option_size);
 	offset += option_size;
-	std::memcpy(buffer + offset, option.value_, option.length_);
-	offset += option.length_;
+	std::memcpy(buffer + offset, option.value, option.length);
+	offset += option.length;
 
 	return offset;
 }

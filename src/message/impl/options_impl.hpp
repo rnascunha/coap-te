@@ -26,9 +26,9 @@ bool create(option& option, code code) noexcept
 		if(!check_type(code, type::empty))
 			return false;
 
-	option.code_ = code;
-	option.length_ = 0;
-	option.value_ = nullptr;
+	option.ocode = code;
+	option.length = 0;
+	option.value = nullptr;
 
 	return true;
 }
@@ -40,9 +40,9 @@ bool create(option& option, code code, const char* value) noexcept
 		if(!check_type(code, type::string))
 			return false;
 
-	option.code_ = code;
-	option.length_ = std::strlen(value);
-	option.value_ = value;
+	option.ocode = code;
+	option.length = std::strlen(value);
+	option.value = value;
 
 	return true;
 }
@@ -54,9 +54,9 @@ bool create(option& option, code code, unsigned& value) noexcept
 		if(!check_type(code, type::uint))
 			return false;
 
-	option.code_ = code;
-	CoAP::Helper::make_short_unsigned(value, option.length_);
-	option.value_ = &value;
+	option.ocode = code;
+	CoAP::Helper::make_short_unsigned(value, option.length);
+	option.value = &value;
 
 	return true;
 }
@@ -68,9 +68,9 @@ bool create(option& option, code code, const void* value, unsigned length) noexc
 		if(!check_type(code, type::opaque))
 			return false;
 
-	option.code_ = code;
-	option.length_ = length;
-	option.value_ = value;
+	option.ocode = code;
+	option.length = length;
+	option.value = value;
 
 	return true;
 }

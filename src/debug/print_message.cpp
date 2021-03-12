@@ -23,7 +23,7 @@ void print_message(CoAP::Message::message const& msg)
 		CoAP::Error ec;
 		offset += CoAP::Message::parse_option<true>(opt,
 				msg.option_init + offset, msg.options_len - offset, delta, ec);
-		delta = static_cast<unsigned>(opt.code_);
+		delta = static_cast<unsigned>(opt.ocode);
 		std::printf("\t\t");
 		print_option(opt);
 		std::printf("\n");
@@ -51,7 +51,7 @@ bool print_message(std::uint8_t const* const arr, std::size_t size)
 		CoAP::Error ec;
 		offset += CoAP::Message::parse_option<false>(opt,
 				msg.option_init + offset, msg.options_len - offset, delta, ec);
-		delta = static_cast<unsigned>(opt.code_);
+		delta = static_cast<unsigned>(opt.ocode);
 		std::printf("\t\t");
 		print_option(opt);
 		std::printf("\n");

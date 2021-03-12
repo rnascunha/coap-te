@@ -29,7 +29,7 @@ unsigned parse_option(Option::option& opt,
 					return offset;
 				}
 			}
-			opt.code_ = static_cast<Option::code>(delta + buffer[1] + code);
+			opt.ocode = static_cast<Option::code>(delta + buffer[1] + code);
 			offset += 1;
 			break;
 		case Option::delta_special::two_byte_extend:
@@ -41,18 +41,18 @@ unsigned parse_option(Option::option& opt,
 					return offset;
 				}
 			}
-			opt.code_ = static_cast<Option::code>(delta + (buffer[1] << 8 | buffer[2]) + code);
+			opt.ocode = static_cast<Option::code>(delta + (buffer[1] << 8 | buffer[2]) + code);
 			offset += 2;
 			break;
 		case Option::delta_special::error:
 			ec = CoAP::errc::option_parse_error;
 			return offset;
 		default:
-			opt.code_ = static_cast<Option::code>(delta + code);
+			opt.ocode = static_cast<Option::code>(delta + code);
 			break;
 	}
 
-	Option::config const* config = Option::get_config(opt.code_);
+	Option::config const* config = Option::get_config(opt.ocode);
 	if constexpr(CheckOptions)
 	{
 		if(!config)
@@ -73,7 +73,7 @@ unsigned parse_option(Option::option& opt,
 					return offset;
 				}
 			}
-			opt.length_ = buffer[offset] + 13;
+			opt.length = buffer[offset] + 13;
 			offset += 1;
 			break;
 		case Option::length_special::two_byte_extend:
@@ -85,17 +85,17 @@ unsigned parse_option(Option::option& opt,
 					return offset;
 				}
 			}
-			opt.length_ = (buffer[offset] << 8 | buffer[offset + 1]) + 269;
+			opt.length = (buffer[offset] << 8 | buffer[offset + 1]) + 269;
 			offset += 2;
 			break;
 		case Option::length_special::error:
 			ec = CoAP::errc::option_parse_error;
 			return offset;
 		default:
-			opt.length_ = length;
+			opt.length = length;
 			break;
 	}
-	if(opt.length_)
+	if(opt.length)
 	{
 		if constexpr(CheckOptions)
 		{
@@ -104,14 +104,14 @@ unsigned parse_option(Option::option& opt,
 				ec = CoAP::errc::option_parse_error;
 				return offset;
 			}
-			if((buffer_len - offset) < opt.length_)
+			if((buffer_len - offset) < opt.length)
 			{
 				ec = CoAP::errc::message_too_small;
 				return offset;
 			}
 		}
-		opt.value_ = &buffer[offset];
-		offset += opt.length_;
+		opt.value = &buffer[offset];
+		offset += opt.length;
 	}
 	return offset;
 }
@@ -129,7 +129,7 @@ Option_Parser::next() noexcept
 			reset();
 			return nullptr;
 		}
-		delta_ = static_cast<unsigned>(opt_.code_);
+		delta_ = static_cast<unsigned>(opt_.ocode);
 		current_opt_++;
 	} else return nullptr;
 
@@ -145,7 +145,7 @@ Option::option const* Option_Parser::next(CoAP::Error& ec) noexcept
 		if(ec)
 			return nullptr;
 
-		delta_ = static_cast<unsigned>(opt_.code_);
+		delta_ = static_cast<unsigned>(opt_.ocode);
 		current_opt_++;
 	} else return nullptr;
 

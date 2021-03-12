@@ -50,7 +50,7 @@ std::size_t
 socket<RecvFlags, SendFlags>::
 receive(std::uint8_t* buffer, std::size_t buffer_len, endpoint& ep, CoAP::Error& ec) noexcept
 {
-	unsigned addr_len;
+	unsigned addr_len = sizeof(struct sockaddr);
 	int recv = ::recvfrom(socket_,
 			buffer, buffer_len, RecvFlags,
 			reinterpret_cast<struct sockaddr*>(ep.native()), &addr_len);

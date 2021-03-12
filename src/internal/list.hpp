@@ -61,6 +61,13 @@ class list{
 				node.next = nullptr;
 			}
 		}
+
+		node* operator[](unsigned index) noexcept
+		{
+			node* n = head_;
+			for(;index-- && n; n = n->next);
+			return n;
+		}
 	private:
 		node* head_ = nullptr;
 };

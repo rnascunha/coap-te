@@ -29,8 +29,6 @@ using transaction_cb = void(*)(void const*,
 							CoAP::Message::message const*,
 							void*);
 
-using Response = CoAP::Message::message;
-
 enum class status_t{
 	none = 0,
 	sending,

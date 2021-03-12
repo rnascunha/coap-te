@@ -110,7 +110,7 @@ static unsigned parse_options(message& msg,
 		offset += parse_option<true>(opt, buffer + offset, buffer_len - offset, delta, ec);
 		if(ec)
 			return offset;
-		delta = static_cast<unsigned>(opt.code_);
+		delta = static_cast<unsigned>(opt.ocode);
 		msg.option_num++;
 	}
 	msg.options_len = offset;

@@ -112,11 +112,11 @@ std::size_t compose(char* buffer, std::size_t buffer_len,
 
 	while((opt = list.next()))
 	{
-		switch(opt->code_)
+		switch(opt->ocode)
 		{
 			case Option::code::uri_host:
 				offset += compose_host(buffer + offset, buffer_len - offset,
-						reinterpret_cast<char const*>(opt->value_), opt->length_, ec);
+						reinterpret_cast<char const*>(opt->value), opt->length, ec);
 				if(ec) return offset;
 				break;
 			case Option::code::uri_port:
@@ -128,12 +128,12 @@ std::size_t compose(char* buffer, std::size_t buffer_len,
 				break;
 			case Option::code::uri_path:
 				offset += compose_path(buffer + offset, buffer_len - offset,
-						reinterpret_cast<char const*>(opt->value_), opt->length_, ec);
+						reinterpret_cast<char const*>(opt->value), opt->length, ec);
 				if(ec) return offset;
 				break;
 			case Option::code::uri_query:
 				offset += compose_query(buffer + offset, buffer_len - offset,
-									reinterpret_cast<char const*>(opt->value_), opt->length_,
+									reinterpret_cast<char const*>(opt->value), opt->length,
 									is_first_query, ec);
 				is_first_query = false;
 				if(ec) return offset;

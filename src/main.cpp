@@ -4,11 +4,18 @@
 #include "transmission/types.hpp"
 #include "transmission/transaction.hpp"
 #include "transmission/request.hpp"
+#include "transmission/response.hpp"
 #include "transmission/engine.hpp"
+
+#include "resource/types.hpp"
+#include "resource/resource.hpp"
+
 #include "port/linux/port.hpp"
 #include "port/port.hpp"
 #include "message/message_id.hpp"
 #include "coap-te.hpp"
+
+#include "debug/print_resource.hpp"
 
 using namespace CoAP;
 using namespace CoAP::Log;
@@ -33,31 +40,22 @@ static constexpr const CoAP::Transmission::configure tconfigure = {
 	.probing_rate_byte_per_seconds 	= 1,	//PROBING_RATE
 };
 
-static bool response_flag = false;
+static constexpr const char* my_message =  "recebido";
 
-void exit_error(CoAP::Error& ec, const char* what = nullptr)
+static void get_handler(CoAP::Message::message const& request,
+						CoAP::Transmission::Response& response)
+{
+	debug(main_mod, "Called get handler");
+	response.payload(my_message).serialize();
+}
+
+static void exit_error(CoAP::Error& ec, const char* what = nullptr)
 {
 	error(main_mod, ec, what);
 	exit(EXIT_FAILURE);
 }
 
 using engine = CoAP::Transmission::engine<CoAP::connection, tconfigure, TRANSACT_NUM, BUFFER_LEN>;
-
-void cb(void const* trans, CoAP::Message::message const* r, void*)
-{
-	auto const* t = static_cast<engine::transaction_t const*>(trans);
-	status(main_mod, "Status: %s", CoAP::Debug::transaction_status_string(t->status()));
-	if(r)
-	{
-		status(main_mod, "Response received!");
-		CoAP::Debug::print_message(*r);
-	}
-	else
-	{
-		status(main_mod, "Response NOT received");
-	}
-	response_flag = true;
-}
 
 int main()
 {
@@ -68,15 +66,16 @@ int main()
 	/**
 	 * Socket
 	 */
+	endpoint ep{HOST_ADDR, COAP_PORT, ec};
+	if(ec) exit_error(ec);
 	CoAP::socket socket;
 
 	socket.open(ec);
 	if(ec) exit_error(ec, "Error trying to open socket...");
+	socket.bind(ep, ec);
+	if(ec) exit_error(ec, "Error trying to bind socket...");
 
 	debug(main_mod, "Socket opened...");
-
-	endpoint ep{HOST_ADDR, COAP_PORT, ec};
-	if(ec) exit_error(ec);
 
 	CoAP::connection conn{std::move(socket)};
 
@@ -87,23 +86,21 @@ int main()
 
 	status(main_mod, "Testing Engine...");
 
-	engine::request request(ep);
-	request.header(CoAP::Message::type::confirmable, CoAP::Message::code::get)
-			.token("tok")
-			.add_option(path_op1)
-			.add_option(path_op2)
-			.callback(cb);
-
 	engine coap_engine(std::move(conn));
 
-	coap_engine.send<true>(request, mid(), ec);
-	if(ec) exit_error(ec, "send");
+	/**
+	 * Resource
+	 */
+	engine::resource_node c00{"1"}, c01{"2", get_handler}, c02{"3"},
+							c10{"4"}, c20{"5"}, c21{"6"},
+							c40{"7"}, c41{"8"}, c50{"9"},
+							c90{"10"};
 
-	while(!response_flag)
-	{
-		coap_engine(ec);
-		if(ec) exit_error(ec, "run");
-	}
+	coap_engine.root_node().add_branch(c00, c01, c02, c10, c20, c21, c40, c41, c50, c90);
+
+//	CoAP::Debug::print_resource_branch(coap_engine.root_node());
+
+	while(coap_engine(ec));
 
 	return EXIT_SUCCESS;
 }
