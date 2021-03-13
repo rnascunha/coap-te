@@ -64,26 +64,14 @@ check_all(configure const& config) noexcept
 
 template<unsigned Size,
 		typename Transaction>
-Transaction*
-transaction_list<Size, Transaction>::
-check_all_response(CoAP::Message::message const& msg) noexcept
-{
-	for(unsigned i = 0; i < Size; i++)
-		if(nodes_[i].transaction.check_response(msg))
-			return &nodes_[i].transaction;
-
-	return nullptr;
-}
-
-template<unsigned Size,
-		typename Transaction>
+template<bool CheckEndpoint, bool CheckToken>
 Transaction*
 transaction_list<Size, Transaction>::
 check_all_response(transaction_list<Size, Transaction>::endpoint const& ep,
 		CoAP::Message::message const& msg) noexcept
 {
 	for(unsigned i = 0; i < Size; i++)
-		if(nodes_[i].transaction.check_response(ep, msg))
+		if(nodes_[i].transaction.template check_response<CheckEndpoint, CheckToken>(ep, msg))
 			return &nodes_[i].transaction;
 
 	return nullptr;

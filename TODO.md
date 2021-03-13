@@ -1,6 +1,6 @@
 # TODO
 
-##
+* Simplify;
 
 * Transaction restransmit paremeter as template...
 

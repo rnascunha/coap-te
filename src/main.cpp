@@ -40,13 +40,27 @@ static constexpr const CoAP::Transmission::configure tconfigure = {
 	.probing_rate_byte_per_seconds 	= 1,	//PROBING_RATE
 };
 
-static constexpr const char* my_message =  "recebido";
-
 static void get_handler(CoAP::Message::message const& request,
 						CoAP::Transmission::Response& response)
 {
 	debug(main_mod, "Called get handler");
-	response.payload(my_message).serialize();
+
+	CoAP::Message::content_format format = CoAP::Message::content_format::text_plain;
+	CoAP::Message::Option::node content{format};
+
+	response
+			.code(CoAP::Message::code::content)
+			.add_option(content)
+			.payload("recebido")
+			.serialize();
+}
+
+static void get_root_handler(CoAP::Message::message const& request,
+						CoAP::Transmission::Response& response)
+{
+	debug(main_mod, "Called root get handler");
+
+	response.payload("root").serialize();
 }
 
 static void exit_error(CoAP::Error& ec, const char* what = nullptr)
@@ -55,12 +69,16 @@ static void exit_error(CoAP::Error& ec, const char* what = nullptr)
 	exit(EXIT_FAILURE);
 }
 
-using engine = CoAP::Transmission::engine<CoAP::connection, tconfigure, TRANSACT_NUM, BUFFER_LEN>;
+using engine = CoAP::Transmission::engine<
+		CoAP::Transmission::profile::server,
+		CoAP::connection,
+		message_id,
+		tconfigure,
+		TRANSACT_NUM,
+		BUFFER_LEN>;
 
 int main()
 {
-	debug(main_mod, "Init engine code...");
-
 	Error ec;
 
 	/**
@@ -79,14 +97,12 @@ int main()
 
 	CoAP::connection conn{std::move(socket)};
 
-	CoAP::Message::Option::node path_op1{CoAP::Message::Option::code::uri_path, ".well-known"};
-	CoAP::Message::Option::node path_op2{CoAP::Message::Option::code::uri_path, "core"};
-
-	CoAP::Message::message_id mid(CoAP::time());
+//	CoAP::Message::Option::node path_op1{CoAP::Message::Option::code::uri_path, ".well-known"};
+//	CoAP::Message::Option::node path_op2{CoAP::Message::Option::code::uri_path, "core"};
 
 	status(main_mod, "Testing Engine...");
 
-	engine coap_engine(std::move(conn));
+	engine coap_engine(std::move(conn), CoAP::Message::message_id(CoAP::time()));
 
 	/**
 	 * Resource
@@ -96,9 +112,10 @@ int main()
 							c40{"7"}, c41{"8"}, c50{"9"},
 							c90{"10"};
 
+	coap_engine.root().get(get_root_handler);
 	coap_engine.root_node().add_branch(c00, c01, c02, c10, c20, c21, c40, c41, c50, c90);
 
-//	CoAP::Debug::print_resource_branch(coap_engine.root_node());
+	CoAP::Debug::print_resource_branch(coap_engine.root_node());
 
 	while(coap_engine(ec));
 

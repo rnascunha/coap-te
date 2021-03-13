@@ -8,6 +8,10 @@ namespace Transmission{
 
 static constexpr const unsigned int max_latency_seconds = 100;	//MAX_LATENCY
 
+std::size_t make_response_code_error(CoAP::Message::message const& msg,
+		std::uint8_t* buffer, std::size_t buffer_len,
+		CoAP::Message::code, const char* payload = "") noexcept;
+
 double expiration_timeout(configure const& config) noexcept;
 double expiration_timeout_retransmit(
 		double timeout,

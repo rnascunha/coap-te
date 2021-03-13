@@ -96,31 +96,29 @@ retransmit() noexcept
 template<unsigned MaxPacketSize,
 		typename Callback_Functor,
 		typename Endpoint>
+template<bool CheckEndpoint, bool CheckToken>
 bool
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
-check_response(CoAP::Message::message const& response)
+check_response(endpoint_t const& ep [[maybe_unused]],
+		CoAP::Message::message const& response) noexcept
 {
 	if(status_ != status_t::sending) return false;
 	if(request_.mid != response.mid) return false;
+	if constexpr(CheckEndpoint)
+		if(ep != ep_) return false;
+	if constexpr(CheckToken)
+	{
+		if(request_.token_len != response.token_len)
+			return false;
+		if(std::memcmp(request_.token, response.token, request_.token_len) != 0)
+			return false;
+	}
+
 	status_ = response.mcode == CoAP::Message::code::empty ?
-			status_t::failed : status_t::success;
+			status_t::empty : status_t::success;
 
 	CoAP::Log::debug(transaction_mod, "[%04X] Response arrived", response.mid);
 	call_cb(&response);
-
-	return true;
-}
-
-template<unsigned MaxPacketSize,
-		typename Callback_Functor,
-		typename Endpoint>
-bool
-transaction<MaxPacketSize, Callback_Functor, Endpoint>::
-check_response(endpoint_t const& ep,
-		CoAP::Message::message const& response)
-{
-	if(ep != ep_) return false;
-	check_response(response);
 
 	return true;
 }

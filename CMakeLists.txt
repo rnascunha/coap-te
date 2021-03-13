@@ -62,6 +62,7 @@ set(MAIN_SRC ${SRC_DIR}/main.cpp
 				${SRC_DIR_MESSAGE}/types.cpp
 				${SRC_DIR_MESSAGE}/codes.cpp
 				${SRC_DIR_MESSAGE}/parser.cpp
+				${SRC_DIR_MESSAGE}/serialize.cpp
 				${SRC_DIR_TRANSMISSION}/functions.cpp
 				${SRC_DIR_DEBUG}/helper.cpp
 				${SRC_DIR_DEBUG}/print_options.cpp

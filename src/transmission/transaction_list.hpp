@@ -22,7 +22,7 @@ class transaction_list{
 		Transaction* find_free_slot() noexcept;
 
 		void check_all(configure const&) noexcept;
-		Transaction* check_all_response(CoAP::Message::message const&) noexcept;
+		template<bool CheckEndpoint, bool CheckToken>
 		Transaction* check_all_response(endpoint const&, CoAP::Message::message const&) noexcept;
 
 		Transaction* operator[](unsigned index) noexcept

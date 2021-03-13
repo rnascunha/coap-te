@@ -35,7 +35,12 @@ enum class status_t{
 	canceled,
 	success,
 	timeout,
-	failed		//reset received
+	empty		//reset received
+};
+
+enum class profile{
+	client = 0,
+	server
 };
 
 }//Transmission

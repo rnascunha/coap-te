@@ -31,6 +31,7 @@ const char* code_string(CoAP::Message::code code)
 		case code::cdelete: 			return "0.04 DELETE";
 		//response
 		//success
+		case code::success:				return "2.00 Success";
 		case code::created: 			return "2.01 Created";
 		case code::deleted: 			return "2.02 Deleted";
 		case code::valid: 				return "2.03 Valid";

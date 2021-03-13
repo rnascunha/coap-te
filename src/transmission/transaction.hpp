@@ -72,9 +72,9 @@ class transaction
 		template<bool CheckMaxSpan = false>
 		bool check(configure const& config) noexcept;
 
+		template<bool CheckEndpoint = true, bool CheckToken = true>
 		bool check_response(endpoint_t const& ep,
-				CoAP::Message::message const& response);
-		bool check_response(CoAP::Message::message const& response);
+				CoAP::Message::message const& response) noexcept;
 
 		CoAP::Message::message const& request() const noexcept;
 		std::uint16_t mid() const noexcept;

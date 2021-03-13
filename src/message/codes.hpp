@@ -31,6 +31,7 @@ enum class code : std::uint8_t
 	cdelete					= make_code(code_class::request, 4),	//0.04 DELETE
 	//response - https://tools.ietf.org/html/rfc7252#section-12.1.2
 	//success
+	success					= make_code(code_class::success, 0),	//2.00 Success
 	created 				= make_code(code_class::success, 1),	//2.01 Created
 	deleted 				= make_code(code_class::success, 2),	//2.02 Deleted
 	valid 					= make_code(code_class::success, 3),	//2.03 Valid

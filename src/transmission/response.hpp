@@ -13,26 +13,23 @@ namespace Transmission{
 class Response{
 	public:
 		Response(CoAP::endpoint const& ep,
-			std::uint8_t mid,
+			CoAP::Message::type mtype,
+			std::uint16_t mid,
 			const void* token,
 			std::size_t token_len,
-			std::uint8_t* buffer,
-			std::size_t buffer_len
+			std::uint8_t* buffer = nullptr,
+			std::size_t buffer_len = 0
 			) : ep_(ep), mid_(mid), token_len_(token_len),
 			buffer_(buffer), buffer_len_(buffer_len), buffer_used_(0)
 		{
 			std::memcpy(token_, token, token_len_);
-			fac_.header(CoAP::Message::type::acknowledgement,
+			fac_.header(mtype == CoAP::Message::type::confirmable ?
+								CoAP::Message::type::acknowledgement :
+								CoAP::Message::type::nonconfirmable,
 					CoAP::Message::code::content,
 					token_,
 					token_len_);
 		}
-
-		Response(CoAP::endpoint const& ep,
-				CoAP::Message::message const& request,
-				std::uint8_t* buffer,
-				std::size_t buffer_len)
-			: Response(ep, request.mid, request.token, request.token_len, buffer, buffer_len){}
 
 		CoAP::Message::Factory<>& factory(){ return fac_; }
 
@@ -74,14 +71,25 @@ class Response{
 			return buffer_used_;
 		}
 
+		template<bool SortOptions = true,
+						bool CheckOpOrder = !SortOptions,
+						bool CheckOpRepeat = true>
+		std::size_t serialize(std::uint8_t* buffer, std::size_t buffer_len) noexcept
+		{
+			buffer_ = buffer;
+			buffer_len_ = buffer_len;
+			return serialize<SortOptions, CheckOpOrder, CheckOpRepeat>();
+		}
+
 		std::size_t serialize_empty_message() noexcept
 		{
 			buffer_used_ = CoAP::Message::empty_message(buffer_, buffer_len_, mid_, ec_);
 			return buffer_used_;
 		}
 
+		std::uint8_t* buffer() noexcept{ return buffer_; }
 		std::size_t buffer_used() const noexcept{ return buffer_used_; }
-		CoAP::Error error_code() const noexcept{ return ec_; }
+		CoAP::Error error() const noexcept{ return ec_; }
 
 		void reset() noexcept
 		{

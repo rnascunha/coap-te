@@ -11,9 +11,9 @@ class message_id
 	public:
 		message_id(unsigned seed);
 
-		uint16_t operator()() noexcept;
+		std::uint16_t operator()() noexcept;
 	private:
-		uint16_t id_;
+		std::uint16_t id_;
 };
 
 }//Message

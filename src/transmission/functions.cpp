@@ -1,9 +1,25 @@
 #include "functions.hpp"
 #include "port/port.hpp"
 #include "internal/helper.hpp"
+#include "message/serialize.hpp"
 
 namespace CoAP{
 namespace Transmission{
+
+std::size_t
+make_response_code_error(CoAP::Message::message const& msg,
+				std::uint8_t* buffer, std::size_t buffer_len,
+				CoAP::Message::code err_code, const char* payload /* = "" */) noexcept
+{
+	CoAP::Error ec;
+	std::uint8_t token[8];
+	std::memcpy(token, msg.token, msg.token_len);
+
+	return CoAP::Message::serialize(buffer, buffer_len,
+					CoAP::Message::type::acknowledgement,
+					err_code, msg.mid, token, msg.token_len,
+					nullptr, payload, std::strlen(payload), ec);
+}
 
 double expiration_timeout(configure const& config) noexcept
 {
