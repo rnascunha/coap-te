@@ -7,10 +7,11 @@
 namespace CoAP{
 namespace Transmission{
 
-template<typename Callback_Functor>
+template<typename Endpoint,
+		typename Callback_Functor>
 class Request{
 	public:
-		Request(CoAP::endpoint const ep) : ep_(ep){}
+		Request(Endpoint const ep) : ep_(ep){}
 
 		CoAP::Message::Factory<>& factory(){ return fac_; }
 
@@ -42,7 +43,7 @@ class Request{
 			return *this;
 		}
 
-		Request& endpoint(CoAP::endpoint const& ep) noexcept
+		Request& endpoint(Endpoint const& ep) noexcept
 		{
 			ep_ = ep;
 			return *this;
@@ -56,7 +57,7 @@ class Request{
 			return *this;
 		}
 
-		CoAP::endpoint& endpoint() noexcept
+		Endpoint& endpoint() noexcept
 		{
 			return ep_;
 		}
@@ -89,7 +90,7 @@ class Request{
 
 	private:
 		CoAP::Message::Factory<> fac_;
-		CoAP::endpoint ep_;
+		Endpoint ep_;
 
 		Callback_Functor cb_ = nullptr;
 		void* data_ = nullptr;

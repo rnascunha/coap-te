@@ -8,7 +8,8 @@
 namespace CoAP{
 namespace Resource{
 
-using callback = void(CoAP::Message::message const&, CoAP::Transmission::Response&);
+template<typename Endpoint>
+using callback = void(CoAP::Message::message const&, CoAP::Transmission::Response<Endpoint>&);
 
 }//Resource
 }//CoAP

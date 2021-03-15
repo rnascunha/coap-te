@@ -3,6 +3,7 @@
 #include "log.hpp"
 #include "transmission/types.hpp"
 #include "transmission/transaction.hpp"
+#include "transmission/transaction_list.hpp"
 #include "transmission/request.hpp"
 #include "transmission/response.hpp"
 #include "transmission/engine.hpp"
@@ -31,17 +32,21 @@ static constexpr module main_mod = {
 		.max_level = CoAP::Log::type::debug
 };
 
-static constexpr const CoAP::Transmission::configure tconfigure = {
-	.ack_timeout_seconds 			= 2.0,	//ACK_TIMEOUT
-	.ack_ramdom_factor 				= 1.5,	//ACK_RANDOM_FACTOR
-	.max_restransmission 			= 4,	//MAX_RETRANSMIT
-	.max_interaction 				= 1,	//NSTART
-	.default_leisure_seconds 		= 5,	//DEFAULT_LEISURE
-	.probing_rate_byte_per_seconds 	= 1,	//PROBING_RATE
-};
+using engine = CoAP::Transmission::engine<
+		CoAP::Transmission::profile::server,
+		CoAP::connection,
+		message_id,
+		CoAP::Transmission::transaction_list<
+			CoAP::Transmission::transaction<
+				512,
+				CoAP::Transmission::transaction_cb,
+				CoAP::connection::endpoint>,
+			4>,
+		CoAP::Resource::callback<CoAP::connection::endpoint>
+	>;
 
 static void get_handler(CoAP::Message::message const& request,
-						CoAP::Transmission::Response& response)
+						engine::response& response)
 {
 	debug(main_mod, "Called get handler");
 
@@ -56,7 +61,7 @@ static void get_handler(CoAP::Message::message const& request,
 }
 
 static void get_root_handler(CoAP::Message::message const& request,
-						CoAP::Transmission::Response& response)
+						engine::response& response)
 {
 	debug(main_mod, "Called root get handler");
 
@@ -69,13 +74,29 @@ static void exit_error(CoAP::Error& ec, const char* what = nullptr)
 	exit(EXIT_FAILURE);
 }
 
-using engine = CoAP::Transmission::engine<
-		CoAP::Transmission::profile::server,
-		CoAP::connection,
-		message_id,
-		tconfigure,
-		TRANSACT_NUM,
-		BUFFER_LEN>;
+static constexpr const CoAP::Transmission::configure trans_config = {
+	.ack_timeout_seconds 			= 5.0,	//ACK_TIMEOUT
+	.ack_ramdom_factor 				= 5.0,	//ACK_RANDOM_FACTOR
+	.max_restransmission 			= 1		//MAX_RETRANSMIT
+};
+
+static bool response_flag = false;
+
+void cb(void const* transaction, CoAP::Message::message const* response, void*)
+{
+	auto const* t = static_cast<engine::transaction_t const*>(transaction);
+	status(main_mod, "Status: %s", CoAP::Debug::transaction_status_string(t->status()));
+	if(response)
+	{
+		status(main_mod, "Response received!");
+		CoAP::Debug::print_message(*response);
+	}
+	else
+	{
+		status(main_mod, "Response NOT received");
+	}
+	response_flag = true;
+}
 
 int main()
 {
@@ -90,8 +111,8 @@ int main()
 
 	socket.open(ec);
 	if(ec) exit_error(ec, "Error trying to open socket...");
-	socket.bind(ep, ec);
-	if(ec) exit_error(ec, "Error trying to bind socket...");
+//	socket.bind(ep, ec);
+//	if(ec) exit_error(ec, "Error trying to bind socket...");
 
 	debug(main_mod, "Socket opened...");
 
@@ -99,6 +120,7 @@ int main()
 
 //	CoAP::Message::Option::node path_op1{CoAP::Message::Option::code::uri_path, ".well-known"};
 //	CoAP::Message::Option::node path_op2{CoAP::Message::Option::code::uri_path, "core"};
+	CoAP::Message::Option::node time{CoAP::Message::Option::code::uri_path, "time"};
 
 	status(main_mod, "Testing Engine...");
 
@@ -117,7 +139,21 @@ int main()
 
 	CoAP::Debug::print_resource_branch(coap_engine.root_node());
 
-	while(coap_engine(ec));
+	engine::request request{ep};
+	request.header(CoAP::Message::type::confirmable, CoAP::Message::code::get)
+			.token("teste")
+			.add_option(time)
+			.callback(cb);
+
+	coap_engine.send(request, trans_config, ec);
+	if(ec) exit_error(ec, "send");
+
+	while(!response_flag)
+	{
+		coap_engine(ec);
+		if(ec) exit_error(ec, "run");
+	}
+//	while(coap_engine(ec));
 
 	return EXIT_SUCCESS;
 }

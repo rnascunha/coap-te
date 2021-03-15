@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include "message/options.hpp"
+#include <arpa/inet.h>
 
 namespace CoAP{
 namespace URI{
@@ -12,12 +13,28 @@ enum class scheme{
 	coaps
 };
 
-template<typename Endpoint>
+enum class host_type{
+	ipv4 = 0,
+	ipv6
+};
+
+struct ip_type{
+	host_type		type;
+	union {
+		in_addr		ip4;
+		in6_addr	ip6;
+	} host;
+};
+
+template<typename Host>
 struct uri{
-	scheme 			sch;
-	Endpoint		ep;
-	CoAP::Message::Option::List	path_list;
-	CoAP::Message::Option::List	query_list;
+	scheme			uri_scheme;
+	Host			host;
+	uint16_t		port;
+	const char*		path;
+	std::size_t		path_len;
+	const char* 	query;
+	std::size_t		query_len;
 };
 
 }//URI

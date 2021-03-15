@@ -5,7 +5,6 @@
 #include "../functions.hpp"
 
 #include "log.hpp"
-#include "debug/print_message.hpp"
 
 namespace CoAP{
 namespace Transmission{
@@ -19,125 +18,10 @@ static constexpr CoAP::Log::module engine_mod = {
 template<profile Profile,
 	typename Connection,
 	typename MessageID,
-	configure const& Config,
-	unsigned MaxTransactionNumber,
-	unsigned MaxPacketSize,
-	typename Callback_Functor,
+	typename TransactionList,
 	typename Callback_Resource_Functor>
-template<bool UseInternalBufferNon,
-		bool SortOptions,
-		bool CheckOpOrder,
-		bool CheckOpRepeat,
-		std::size_t BufferSize,
-		typename Message_ID>
-std::size_t
-engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::
-send(endpoint& ep,
-		CoAP::Message::Factory<BufferSize, Message_ID>& fac,
-		Callback_Functor func, void* data,
-		CoAP::Error& ec) noexcept
-{
-	return send(ep, fac, mid_(), data, func, ec);
-}
-
-template<profile Profile,
-	typename Connection,
-	typename MessageID,
-	configure const& Config,
-	unsigned MaxTransactionNumber,
-	unsigned MaxPacketSize,
-	typename Callback_Functor,
-	typename Callback_Resource_Functor>
-template<bool UseInternalBufferNon,
-		bool SortOptions,
-		bool CheckOpOrder,
-		bool CheckOpRepeat,
-		std::size_t BufferSize,
-		typename Message_ID>
-std::size_t
-engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::
-send(endpoint& ep,
-		CoAP::Message::Factory<BufferSize, Message_ID> const& fac,
-		std::uint16_t mid,
-		Callback_Functor func, void* data,
-		CoAP::Error& ec) noexcept
-{
-	std::size_t size = 0;
-	if constexpr(UseInternalBufferNon)
-	{
-		if(fac.type() == CoAP::Message::type::nonconfirmable)
-		{
-			size = fac.template serialize<SortOptions, CheckOpOrder, CheckOpRepeat>(buffer_, MaxPacketSize, mid, ec);
-			if(ec) return size;
-			conn_.send(buffer_, size, ep, ec);
-			return size;
-		}
-	}
-
-	transaction_t* ts = list_.find_free_slot();
-	if(!ts)
-	{
-		ec = CoAP::errc::no_free_slots;
-		return size;
-	}
-
-	size = ts->template serialize<BufferSize, MessageID, SortOptions, CheckOpOrder, CheckOpRepeat>(fac, mid, ec);
-	if(ec) return size;
-
-	conn_.send(ts->buffer(), ts->buffer_used(), ep, ec);
-	if(ec) return size;
-	ts->init(Config, ep, func, data, ec);
-
-	return size;
-}
-
-template<profile Profile,
-	typename Connection,
-	typename MessageID,
-	configure const& Config,
-	unsigned MaxTransactionNumber,
-	unsigned MaxPacketSize,
-	typename Callback_Functor,
-	typename Callback_Resource_Functor>
-template<bool UseInternalBufferNon,
-		bool SortOptions,
-		bool CheckOpOrder,
-		bool CheckOpRepeat>
-std::size_t
-engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::
-send(Request<Callback_Functor>& req,
-	std::uint16_t mid,
-	CoAP::Error& ec) noexcept
-{
-	return send<UseInternalBufferNon, 0, void*, SortOptions, CheckOpOrder, CheckOpRepeat>
-						(req.endpoint(), req.factory(), mid, req.callback(), req.data(), ec);
-}
-
-template<profile Profile,
-	typename Connection,
-	typename MessageID,
-	configure const& Config,
-	unsigned MaxTransactionNumber,
-	unsigned MaxPacketSize,
-	typename Callback_Functor,
-	typename Callback_Resource_Functor>
-std::size_t
-engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::
-send(endpoint& ep, const void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
-{
-	return conn_.send(buffer, buffer_len, ep, ec);
-}
-
-template<profile Profile,
-	typename Connection,
-	typename MessageID,
-	configure const& Config,
-	unsigned MaxTransactionNumber,
-	unsigned MaxPacketSize,
-	typename Callback_Functor,
-	typename Callback_Resource_Functor>
-typename engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::resource&
-engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::
+typename engine<Profile, Connection, MessageID, TransactionList, Callback_Resource_Functor>::resource&
+engine<Profile, Connection, MessageID, TransactionList, Callback_Resource_Functor>::
 root() noexcept
 {
 	static_assert(Profile == profile::server, "Resource just available at 'server' profile");
@@ -147,13 +31,10 @@ root() noexcept
 template<profile Profile,
 	typename Connection,
 	typename MessageID,
-	configure const& Config,
-	unsigned MaxTransactionNumber,
-	unsigned MaxPacketSize,
-	typename Callback_Functor,
+	typename TransactionList,
 	typename Callback_Resource_Functor>
-typename engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::resource_node&
-engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::
+typename engine<Profile, Connection, MessageID, TransactionList, Callback_Resource_Functor>::resource_node&
+engine<Profile, Connection, MessageID, TransactionList, Callback_Resource_Functor>::
 root_node() noexcept
 {
 	static_assert(Profile == profile::server, "Resource just available at 'server' profile");
@@ -163,14 +44,11 @@ root_node() noexcept
 template<profile Profile,
 	typename Connection,
 	typename MessageID,
-	configure const& Config,
-	unsigned MaxTransactionNumber,
-	unsigned MaxPacketSize,
-	typename Callback_Functor,
+	typename TransactionList,
 	typename Callback_Resource_Functor>
 template<bool UseEndpointTransMatch>
 void
-engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::
+engine<Profile, Connection, MessageID, TransactionList, Callback_Resource_Functor>::
 process(endpoint& ep, std::uint8_t const* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 {
 	CoAP::Message::message msg;
@@ -181,7 +59,6 @@ process(endpoint& ep, std::uint8_t const* buffer, std::size_t buffer_len, CoAP::
 		return;
 	}
 	debug(engine_mod, "Packet received");
-	CoAP::Debug::print_message(msg);
 
 	if(CoAP::Message::is_response(msg.mcode)
 		|| msg.mcode == CoAP::Message::code::empty)
@@ -200,13 +77,10 @@ process(endpoint& ep, std::uint8_t const* buffer, std::size_t buffer_len, CoAP::
 template<profile Profile,
 	typename Connection,
 	typename MessageID,
-	configure const& Config,
-	unsigned MaxTransactionNumber,
-	unsigned MaxPacketSize,
-	typename Callback_Functor,
+	typename TransactionList,
 	typename Callback_Resource_Functor>
 std::uint16_t
-engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::
+engine<Profile, Connection, MessageID, TransactionList, Callback_Resource_Functor>::
 mid() noexcept
 {
 	return mid_();
@@ -215,14 +89,11 @@ mid() noexcept
 template<profile Profile,
 	typename Connection,
 	typename MessageID,
-	configure const& Config,
-	unsigned MaxTransactionNumber,
-	unsigned MaxPacketSize,
-	typename Callback_Functor,
+	typename TransactionList,
 	typename Callback_Resource_Functor>
 template<bool CheckEndpoint, bool CheckToken>
 void
-engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::
+engine<Profile, Connection, MessageID, TransactionList, Callback_Resource_Functor>::
 process_response(endpoint& ep [[maybe_unused]], CoAP::Message::message& msg) noexcept
 {
 	transaction_t* trans;
@@ -239,13 +110,10 @@ process_response(endpoint& ep [[maybe_unused]], CoAP::Message::message& msg) noe
 template<profile Profile,
 	typename Connection,
 	typename MessageID,
-	configure const& Config,
-	unsigned MaxTransactionNumber,
-	unsigned MaxPacketSize,
-	typename Callback_Functor,
+	typename TransactionList,
 	typename Callback_Resource_Functor>
 void
-engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::
+engine<Profile, Connection, MessageID, TransactionList, Callback_Resource_Functor>::
 process_request(endpoint& ep,
 		CoAP::Message::message& request,
 		std::uint8_t const* buffer,
@@ -255,7 +123,7 @@ process_request(endpoint& ep,
 	if(!res)
 	{
 		error(engine_mod, "Resource not found!");
-		std::size_t bu = make_response_code_error(request, buffer_, MaxPacketSize, CoAP::Message::code::not_found);
+		std::size_t bu = make_response_code_error(request, buffer_, packet_size, CoAP::Message::code::not_found);
 		conn_.send(buffer_, bu, ep, ec);
 	}
 	else
@@ -266,7 +134,7 @@ process_request(endpoint& ep,
 				request.mtype == CoAP::Message::type::confirmable ?
 						request.mid : mid_(),
 				request.token, request.token_len,
-				buffer_, MaxPacketSize);
+				buffer_, packet_size);
 		if(res->call(request.mcode, request, response))
 		{
 			status(engine_mod, "Method found");
@@ -283,7 +151,7 @@ process_request(endpoint& ep,
 		else
 		{
 			status(engine_mod, "Method not allowed");
-			std::size_t bu = make_response_code_error(request, buffer_, MaxPacketSize, CoAP::Message::code::method_not_allowed);
+			std::size_t bu = make_response_code_error(request, buffer_, packet_size, CoAP::Message::code::method_not_allowed);
 			conn_.send(buffer_, bu, ep, ec);
 		}
 	}
@@ -292,13 +160,10 @@ process_request(endpoint& ep,
 template<profile Profile,
 	typename Connection,
 	typename MessageID,
-	configure const& Config,
-	unsigned MaxTransactionNumber,
-	unsigned MaxPacketSize,
-	typename Callback_Functor,
+	typename TransactionList,
 	typename Callback_Resource_Functor>
 void
-engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::
+engine<Profile, Connection, MessageID, TransactionList, Callback_Resource_Functor>::
 check_transactions() noexcept
 {
 	int i = 0;
@@ -306,7 +171,7 @@ check_transactions() noexcept
 	CoAP::Error ec;
 	while((trans = list_[i++]))
 	{
-		if(trans->check(Config))
+		if(trans->check())
 		{
 			//Must retransmit
 			debug(engine_mod, "[%04X] Retransmitting...", trans->mid());
@@ -321,17 +186,14 @@ check_transactions() noexcept
 template<profile Profile,
 	typename Connection,
 	typename MessageID,
-	configure const& Config,
-	unsigned MaxTransactionNumber,
-	unsigned MaxPacketSize,
-	typename Callback_Functor,
+	typename TransactionList,
 	typename Callback_Resource_Functor>
 bool
-engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::
+engine<Profile, Connection, MessageID, TransactionList, Callback_Resource_Functor>::
 run(CoAP::Error& ec)
 {
 	endpoint ep;
-	std::size_t size = conn_.receive(buffer_, MaxPacketSize, ep, ec);
+	std::size_t size = conn_.receive(buffer_, packet_size, ep, ec);
 	if(ec) return false;
 	if(size)
 	{
@@ -349,13 +211,10 @@ run(CoAP::Error& ec)
 template<profile Profile,
 	typename Connection,
 	typename MessageID,
-	configure const& Config,
-	unsigned MaxTransactionNumber,
-	unsigned MaxPacketSize,
-	typename Callback_Functor,
+	typename TransactionList,
 	typename Callback_Resource_Functor>
 bool
-engine<Profile, Connection, MessageID, Config, MaxTransactionNumber, MaxPacketSize, Callback_Functor, Callback_Resource_Functor>::
+engine<Profile, Connection, MessageID, TransactionList, Callback_Resource_Functor>::
 operator()(CoAP::Error& ec) noexcept
 {
 	return run(ec);

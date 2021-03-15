@@ -56,6 +56,7 @@ set(SRC_DIR_INTERNAL ${SRC_DIR}/internal)
 set(MAIN_SRC ${SRC_DIR}/main.cpp 
 				${SRC_DIR}/error.cpp
 				${SRC_DIR}/uri/compose.cpp
+				${SRC_DIR}/uri/decompose.cpp
 				${SRC_DIR_INTERNAL}/helper.cpp
 				${SRC_DIR_MESSAGE}/options.cpp
 				${SRC_DIR_MESSAGE}/message_id.cpp
@@ -68,6 +69,7 @@ set(MAIN_SRC ${SRC_DIR}/main.cpp
 				${SRC_DIR_DEBUG}/print_options.cpp
 				${SRC_DIR_DEBUG}/output_string.cpp
 				${SRC_DIR_DEBUG}/print_message.cpp
+				${SRC_DIR_DEBUG}/print_uri.cpp
 				)
 
 if(NOT WIN32)

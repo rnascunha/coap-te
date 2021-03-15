@@ -6,14 +6,17 @@
 namespace CoAP{
 namespace Transmission{
 
-template<unsigned Size,
-		typename Transaction>
-transaction_list<Size, Transaction>::transaction_list(){}
+template<typename Transaction,
+		unsigned Size>
+transaction_list<Transaction, Size>::transaction_list()
+{
+	static_assert(Size > 0, "Transaction size (capacity) must be > 0");
+}
 
-template<unsigned Size,
-		typename Transaction>
+template<typename Transaction,
+		unsigned Size>
 Transaction*
-transaction_list<Size, Transaction>::
+transaction_list<Transaction, Size>::
 find(std::uint16_t mid) noexcept
 {
 	for(unsigned i = 0; i < Size; i++)
@@ -23,10 +26,10 @@ find(std::uint16_t mid) noexcept
 	return nullptr;
 }
 
-template<unsigned Size,
-		typename Transaction>
+template<typename Transaction,
+		unsigned Size>
 Transaction*
-transaction_list<Size, Transaction>::
+transaction_list<Transaction, Size>::
 find(endpoint const& ep,
 		std::uint16_t mid) noexcept
 {
@@ -39,10 +42,10 @@ find(endpoint const& ep,
 	return nullptr;
 }
 
-template<unsigned Size,
-		typename Transaction>
+template<typename Transaction,
+		unsigned Size>
 Transaction*
-transaction_list<Size, Transaction>::
+transaction_list<Transaction, Size>::
 find_free_slot() noexcept
 {
 	for(unsigned i = 0; i < Size; i++)
@@ -52,22 +55,23 @@ find_free_slot() noexcept
 	return nullptr;
 }
 
-template<unsigned Size,
-		typename Transaction>
+template<typename Transaction,
+		unsigned Size>
 void
-transaction_list<Size, Transaction>::
-check_all(configure const& config) noexcept
+transaction_list<Transaction, Size>::
+check_all() noexcept
 {
 	for(unsigned i = 0; i < Size; i++)
-		nodes_[i].transaction.check(config);
+		nodes_[i].transaction.check();
 }
 
-template<unsigned Size,
-		typename Transaction>
-template<bool CheckEndpoint, bool CheckToken>
+template<typename Transaction,
+		unsigned Size>
+template<bool CheckEndpoint,
+	bool CheckToken>
 Transaction*
-transaction_list<Size, Transaction>::
-check_all_response(transaction_list<Size, Transaction>::endpoint const& ep,
+transaction_list<Transaction, Size>::
+check_all_response(transaction_list<Transaction, Size>::endpoint const& ep,
 		CoAP::Message::message const& msg) noexcept
 {
 	for(unsigned i = 0; i < Size; i++)

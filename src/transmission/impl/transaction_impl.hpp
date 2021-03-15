@@ -28,7 +28,7 @@ clear() noexcept
 	max_span_timeout_ = 0;
 	expiration_time_factor_ = 0;
 	next_expiration_time_ = 0;
-	retransmission_count_ = 0;
+	retransmission_remaining_ = 0;
 	buffer_used_ = 0;
 	status_ = status_t::none;
 
@@ -42,7 +42,7 @@ template<unsigned MaxPacketSize,
 template<bool CheckMaxSpan>
 bool
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
-check(configure const& config) noexcept
+check() noexcept
 {
 	if(status_ != status_t::sending)
 		return false;
@@ -61,10 +61,10 @@ check(configure const& config) noexcept
 	if(ftime > next_expiration_time_)
 	{
 		CoAP::Log::debug(transaction_mod, "[%04X] Transaciton expired", request_.mid);
-		if(retransmission_count_ >= config.max_restransmission)
+		if(retransmission_remaining_ <= 0)
 		{
 			CoAP::Log::status(transaction_mod, "[%04X] Max retransmission reached [%u]",
-					request_.mid, config.max_restransmission);
+					request_.mid, retransmission_remaining_);
 			status_ = status_t::timeout;
 			call_cb(nullptr);
 			return false;
@@ -82,11 +82,11 @@ void
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
 retransmit() noexcept
 {
-	retransmission_count_++;
-	CoAP::Log::status(transaction_mod, "[%04X] Retransmit transaction = %u",
-						request_.mid, retransmission_count_);
-	next_expiration_time_ = static_cast<double>(CoAP::time()) +
-			expiration_timeout_retransmit(expiration_time_factor_, retransmission_count_);
+	retransmission_remaining_--;
+	CoAP::Log::status(transaction_mod, "[%04X] Retransmit remaining = %u",
+						request_.mid, retransmission_remaining_);
+	expiration_time_factor_ *= 2;
+	next_expiration_time_ = static_cast<double>(CoAP::time()) + expiration_time_factor_;
 	CoAP::Log::debug(transaction_mod, "[%04X] New expiration time = %.2f (diff=%.2f)",
 											request_.mid,
 											next_expiration_time_,
@@ -216,7 +216,7 @@ init_impl(configure const& config,
 	status_ = status_t::sending;
 
 	max_span_timeout_ = static_cast<double>(CoAP::time()) + max_transmit_span(config);
-	retransmission_count_ = 0;
+	retransmission_remaining_ = config.max_restransmission;
 	expiration_time_factor_ = expiration_timeout(config);
 	next_expiration_time_ = static_cast<double>(CoAP::time()) + expiration_time_factor_;
 	CoAP::Log::debug(transaction_mod, "[%04X] Expiration time = %.2f (diff=%.2f/factor=%.2f)",
@@ -238,11 +238,11 @@ init_impl(configure const& config,
 template<unsigned MaxPacketSize,
 		typename Callback_Functor,
 		typename Endpoint>
-template<std::size_t BufferSize,
-		typename MessageID,
-		bool SortOptions,
+template<bool SortOptions,
 		bool CheckOpOrder,
-		bool CheckOpRepeat>
+		bool CheckOpRepeat,
+		std::size_t BufferSize,
+		typename MessageID>
 std::size_t
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
 serialize(CoAP::Message::Factory<BufferSize, MessageID>& factory, CoAP::Error& ec) noexcept
@@ -258,11 +258,11 @@ serialize(CoAP::Message::Factory<BufferSize, MessageID>& factory, CoAP::Error& e
 template<unsigned MaxPacketSize,
 		typename Callback_Functor,
 		typename Endpoint>
-template<std::size_t BufferSize,
-		typename MessageID,
-		bool SortOptions,
+template<bool SortOptions,
 		bool CheckOpOrder,
-		bool CheckOpRepeat>
+		bool CheckOpRepeat,
+		std::size_t BufferSize,
+		typename MessageID>
 std::size_t
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
 serialize(CoAP::Message::Factory<BufferSize, MessageID> const& factory,
@@ -320,7 +320,7 @@ transaction_parameters() const noexcept
 		.max_span = max_span_timeout_,
 		.next_expiration = next_expiration_time_,
 		.expiration_factor = expiration_time_factor_,
-		.retransmission_count = retransmission_count_
+		.retransmission_remaining = retransmission_remaining_
 	};
 }
 

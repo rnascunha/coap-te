@@ -4,12 +4,17 @@
 namespace CoAP{
 namespace Transmission{
 
-template<unsigned Size,
-		typename Transaction>
+template<typename Transaction,
+		unsigned Size>
 class transaction_list{
 	public:
 		using transaction_t = Transaction;
 		using endpoint = typename Transaction::endpoint_t;
+
+		constexpr unsigned capacity() const noexcept
+		{
+			return Size;
+		}
 
 		struct node{
 			transaction_t 	transaction;
@@ -21,7 +26,7 @@ class transaction_list{
 		Transaction* find(endpoint const&, std::uint16_t mid) noexcept;
 		Transaction* find_free_slot() noexcept;
 
-		void check_all(configure const&) noexcept;
+		void check_all() noexcept;
 		template<bool CheckEndpoint, bool CheckToken>
 		Transaction* check_all_response(endpoint const&, CoAP::Message::message const&) noexcept;
 

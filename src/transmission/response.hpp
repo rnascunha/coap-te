@@ -10,9 +10,10 @@
 namespace CoAP{
 namespace Transmission{
 
+template<typename Endpoint>
 class Response{
 	public:
-		Response(CoAP::endpoint const& ep,
+		Response(Endpoint const& ep,
 			CoAP::Message::type mtype,
 			std::uint16_t mid,
 			const void* token,
@@ -56,7 +57,7 @@ class Response{
 			return *this;
 		}
 
-		CoAP::endpoint endpoint() noexcept
+		Endpoint endpoint() noexcept
 		{
 			return ep_;
 		}
@@ -101,7 +102,7 @@ class Response{
 
 	private:
 		CoAP::Message::Factory<> 	fac_;
-		CoAP::endpoint 				ep_;
+		Endpoint 					ep_;
 		std::uint16_t 				mid_;
 		std::uint8_t				token_[8];
 		std::size_t					token_len_;

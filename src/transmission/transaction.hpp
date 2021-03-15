@@ -23,6 +23,12 @@ class transaction
 	public:
 		static bool constexpr const is_external_storage = MaxPacketSize == 0;
 		using endpoint_t = Endpoint;
+		using transaction_cb = Callback_Functor;
+
+		static constexpr unsigned max_packet_size()
+		{
+			return MaxPacketSize;
+		}
 
 		transaction(){}
 
@@ -37,19 +43,19 @@ class transaction
 		/**
 		 * To be used with internal buffer
 		 */
-		template<std::size_t BufferSize,
-				typename MessageID,
-				bool SortOptions = true,
+		template<bool SortOptions = true,
 				bool CheckOpOrder = !SortOptions,
-				bool CheckOpRepeat = true>
+				bool CheckOpRepeat = true,
+				std::size_t BufferSize,
+				typename MessageID>
 		std::size_t serialize(CoAP::Message::Factory<BufferSize, MessageID>&,
 				CoAP::Error&) noexcept;
 
-		template<std::size_t BufferSize,
-				typename MessageID,
-				bool SortOptions = true,
+		template<bool SortOptions = true,
 				bool CheckOpOrder = !SortOptions,
-				bool CheckOpRepeat = true>
+				bool CheckOpRepeat = true,
+				std::size_t BufferSize,
+				typename MessageID>
 		std::size_t serialize(CoAP::Message::Factory<BufferSize, MessageID> const&,
 				std::uint16_t mid,
 				CoAP::Error&) noexcept;
@@ -70,7 +76,7 @@ class transaction
 		void cancel() noexcept;
 
 		template<bool CheckMaxSpan = false>
-		bool check(configure const& config) noexcept;
+		bool check() noexcept;
 
 		template<bool CheckEndpoint = true, bool CheckToken = true>
 		bool check_response(endpoint_t const& ep,
@@ -101,7 +107,7 @@ class transaction
 		double					max_span_timeout_ = 0;
 		double					next_expiration_time_ = 0;
 		double					expiration_time_factor_ = 0;
-		unsigned int			retransmission_count_ = 0;
+		unsigned int			retransmission_remaining_ = 0;
 
 		buffer_type				buffer_;
 		std::size_t				buffer_used_ = 0;

@@ -13,16 +13,16 @@ struct configure{
 	double			ack_timeout_seconds 			= 2.0;	//ACK_TIMEOUT
 	double			ack_ramdom_factor 				= 1.5;	//ACK_RANDOM_FACTOR
 	unsigned int	max_restransmission 			= 4;	//MAX_RETRANSMIT
-	unsigned int	max_interaction 				= 1;	//NSTART
-	unsigned int	default_leisure_seconds 		= 5;	//DEFAULT_LEISURE
-	double			probing_rate_byte_per_seconds 	= 1;	//PROBING_RATE
+//	unsigned int	max_interaction 				= 1;	//NSTART
+//	unsigned int	default_leisure_seconds 		= 5;	//DEFAULT_LEISURE
+//	double			probing_rate_byte_per_seconds 	= 1;	//PROBING_RATE
 };
 
 struct transaction_param{
 	double			max_span;
 	double			next_expiration;
 	double			expiration_factor;
-	unsigned int	retransmission_count;
+	unsigned int	retransmission_remaining;
 };
 
 using transaction_cb = void(*)(void const*,

@@ -6,13 +6,10 @@
 #include "error.hpp"
 
 #include "types.hpp"
-#include "transaction_list.hpp"
-#include "transaction.hpp"
 #include "request.hpp"
 #include "response.hpp"
 #include "resource/types.hpp"
 #include "resource/node.hpp"
-//#include "resource/list.hpp"
 
 namespace CoAP{
 namespace Transmission{
@@ -20,45 +17,40 @@ namespace Transmission{
 template<profile Profile,
 	typename Connection,
 	typename MessageID,
-	configure const& Config,
-	unsigned MaxTransactionNumber,
-	unsigned MaxPacketSize,
-	typename Callback_Functor = transaction_cb,
-	typename Callback_Resource_Functor = CoAP::Resource::callback>
+	typename TransactionList,
+	typename Callback_Resource_Functor>
 class engine
 {
 		using empty = struct{};
 	public:
+		using transaction_list = TransactionList;
+		using transaction_t = typename TransactionList::transaction_t;
+		using transaction_cb = typename transaction_t::transaction_cb;
 		using endpoint = typename Connection::endpoint;
-		using transaction_t = transaction<MaxPacketSize, Callback_Functor, endpoint>;
-		using request = Request<Callback_Functor>;
+		using request = Request<endpoint, transaction_cb>;
+		using response = Response<endpoint>;
 		using resource = CoAP::Resource::resource<Callback_Resource_Functor>;
 		using resource_root = typename std::conditional<Profile == profile::server,
 				typename CoAP::Resource::resource_node<Callback_Resource_Functor>, empty>::type;
 		using resource_node = typename std::conditional<Profile == profile::server,
 				typename CoAP::Resource::resource_node<Callback_Resource_Functor>::node_t, empty>::type;
 
+		static constexpr const unsigned packet_size = transaction_t::max_packet_size();
+
 		engine(Connection&& conn, MessageID&& message_id)
 		: conn_(std::move(conn)), mid_(std::move(message_id)){}
 
-		constexpr profile get_profile() const noexcept
+		engine(Connection&& conn, MessageID&& message_id, configure& config)
+			: conn_(std::move(conn)), mid_(std::move(message_id)), config_(config){}
+
+		static constexpr profile get_profile()
 		{
 			return Profile;
 		}
 
-		constexpr configure const& get_configure() const noexcept
+		static constexpr unsigned max_packet_size()
 		{
-			return Config;
-		}
-
-		constexpr unsigned max_transaction() const noexcept
-		{
-			return MaxTransactionNumber;
-		}
-
-		constexpr unsigned max_packet_size() const noexcept
-		{
-			return MaxPacketSize;
+			return packet_size;
 		}
 
 		constexpr Connection& connection() noexcept
@@ -66,18 +58,18 @@ class engine
 			return conn_;
 		}
 
-		template<bool UseInternalBufferNon,
+		template<bool UseInternalBufferNon = false,
 				bool SortOptions = true,
 				bool CheckOpOrder = !SortOptions,
 				bool CheckOpRepeat = true,
 				std::size_t BufferSize,
 				typename Message_ID>
 		std::size_t send(endpoint&,
-				CoAP::Message::Factory<BufferSize, Message_ID>&,
-				Callback_Functor func, void* data,
+				CoAP::Message::Factory<BufferSize, Message_ID> const&,
+				transaction_cb func, void* data,
 				CoAP::Error&) noexcept;
 
-		template<bool UseInternalBufferNon,
+		template<bool UseInternalBufferNon = false,
 				bool SortOptions = true,
 				bool CheckOpOrder = !SortOptions,
 				bool CheckOpRepeat = true,
@@ -86,16 +78,65 @@ class engine
 		std::size_t send(endpoint&,
 				CoAP::Message::Factory<BufferSize, Message_ID> const&,
 				std::uint16_t mid,
-				Callback_Functor func, void* data,
+				transaction_cb func, void* data,
 				CoAP::Error&) noexcept;
 
-		template<bool UseInternalBufferNon,
+		template<bool UseInternalBufferNon = false,
 				bool SortOptions = true,
 				bool CheckOpOrder = !SortOptions,
 				bool CheckOpRepeat = true>
-		std::size_t send(Request<Callback_Functor>&,
+		std::size_t send(request&,
 						std::uint16_t mid,
 						CoAP::Error&) noexcept;
+
+		template<bool UseInternalBufferNon = false,
+				bool SortOptions = true,
+				bool CheckOpOrder = !SortOptions,
+				bool CheckOpRepeat = true>
+		std::size_t send(request&,
+						CoAP::Error&) noexcept;
+
+		template<bool UseInternalBufferNon = false,
+				bool SortOptions = true,
+				bool CheckOpOrder = !SortOptions,
+				bool CheckOpRepeat = true,
+				std::size_t BufferSize,
+				typename Message_ID>
+		std::size_t send(endpoint&,
+				configure const&,
+				CoAP::Message::Factory<BufferSize, Message_ID> const&,
+				transaction_cb func, void* data,
+				CoAP::Error&) noexcept;
+
+		template<bool UseInternalBufferNon = false,
+				bool SortOptions = true,
+				bool CheckOpOrder = !SortOptions,
+				bool CheckOpRepeat = true,
+				std::size_t BufferSize,
+				typename Message_ID>
+		std::size_t send(endpoint&,
+				configure const&,
+				CoAP::Message::Factory<BufferSize, Message_ID> const&,
+				std::uint16_t mid,
+				transaction_cb func, void* data,
+				CoAP::Error&) noexcept;
+
+		template<bool UseInternalBufferNon = false,
+				bool SortOptions = true,
+				bool CheckOpOrder = !SortOptions,
+				bool CheckOpRepeat = true>
+		std::size_t send(request&,
+					configure const&,
+					std::uint16_t mid,
+					CoAP::Error&) noexcept;
+
+		template<bool UseInternalBufferNon = false,
+				bool SortOptions = true,
+				bool CheckOpOrder = !SortOptions,
+				bool CheckOpRepeat = true>
+		std::size_t send(request&,
+				configure const&,
+				CoAP::Error&) noexcept;
 
 		std::size_t send(endpoint&,
 				const void* buffer, std::size_t buffer_len,
@@ -121,19 +162,21 @@ class engine
 				std::uint8_t const* buffer,
 				CoAP::Error& ec) noexcept;
 
-		transaction_list<MaxTransactionNumber,
-						transaction_t> list_;
+		transaction_list list_;
 
 		resource_root	resource_root_;
 
 		Connection		conn_;
 		MessageID		mid_;
-		std::uint8_t	buffer_[MaxPacketSize];
+		std::uint8_t	buffer_[packet_size];
+
+		configure		config_;
 };
 
 }//Transmission
 }//CoAP
 
+#include "impl/engine_send_impl.hpp"
 #include "impl/engine_impl.hpp"
 
 #endif /* COAP_TE_TRANSMISSION_ENGINE_HPP__ */
