@@ -10,22 +10,22 @@ namespace CoAP{
 namespace Port{
 namespace Linux{
 
-class endpoint{
+class socket_endpoint{
 	public:
 		using native_type = struct sockaddr_in;
 		static constexpr const sa_family_t family = AF_INET;
 
-		endpoint()
+		socket_endpoint()
 		{
 			::bzero(&addr_, sizeof(struct sockaddr_in));
 		}
 
-		endpoint(in_addr_t addr, std::uint16_t port)
+		socket_endpoint(in_addr_t addr, std::uint16_t port)
 		{
 			set(addr, port);
 		}
 
-		endpoint(const char* addr_str, std::uint16_t port, CoAP::Error& ec)
+		socket_endpoint(const char* addr_str, std::uint16_t port, CoAP::Error& ec)
 		{
 			if(!set(addr_str, port))
 				ec = CoAP::errc::endpoint_error;
@@ -66,7 +66,7 @@ class endpoint{
 		in_addr_t address() noexcept{ return addr_.sin_addr.s_addr; }
 		std::uint16_t port() const noexcept{ return ntohs(addr_.sin_port); }
 
-		endpoint& operator=(endpoint const& ep) noexcept
+		socket_endpoint& operator=(socket_endpoint const& ep) noexcept
 		{
 			addr_.sin_family = ep.addr_.sin_family;
 			addr_.sin_port = ep.addr_.sin_port;
@@ -74,13 +74,13 @@ class endpoint{
 			return *this;
 		}
 
-		bool operator==(endpoint const& ep) const noexcept
+		bool operator==(socket_endpoint const& ep) const noexcept
 		{
 			return addr_.sin_port == ep.addr_.sin_port &&
 					addr_.sin_addr.s_addr == ep.addr_.sin_addr.s_addr;
 		}
 
-		bool operator!=(endpoint const& ep) const noexcept
+		bool operator!=(socket_endpoint const& ep) const noexcept
 		{
 			return !(*this == ep);
 		}

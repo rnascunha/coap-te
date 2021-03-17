@@ -57,7 +57,7 @@ class Response{
 			return *this;
 		}
 
-		Endpoint endpoint() noexcept
+		Endpoint const& endpoint() noexcept
 		{
 			return ep_;
 		}
@@ -82,9 +82,12 @@ class Response{
 			return serialize<SortOptions, CheckOpOrder, CheckOpRepeat>();
 		}
 
-		std::size_t serialize_empty_message() noexcept
+		std::size_t serialize_empty_ack() noexcept
 		{
-			buffer_used_ = CoAP::Message::empty_message(buffer_, buffer_len_, mid_, ec_);
+			buffer_used_ = CoAP::Message::empty_message(
+										CoAP::Message::type::acknowledgement,
+										buffer_, buffer_len_,
+										mid_, ec_);
 			return buffer_used_;
 		}
 

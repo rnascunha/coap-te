@@ -1,6 +1,7 @@
 #ifndef COAP_TE_TRANSMISSION_REQUEST_HPP__
 #define COAP_TE_TRANSMISSION_REQUEST_HPP__
 
+#include "types.hpp"
 #include "port/port.hpp"
 #include "message/factory.hpp"
 
@@ -11,7 +12,18 @@ template<typename Endpoint,
 		typename Callback_Functor>
 class Request{
 	public:
-		Request(Endpoint const ep) : ep_(ep){}
+		Request(Endpoint const& ep) : ep_(ep){}
+		Request(async_response<Endpoint>const& data, CoAP::Message::code mcode)
+		: ep_(data.ep)
+		{
+			fac_.header(data.type, mcode, data.token, data.token_len);
+		}
+
+		Request(async_response<Endpoint>const& data, CoAP::Message::type mtype, CoAP::Message::code mcode)
+		: ep_(data.ep)
+		{
+			fac_.header(mtype, mcode, data.token, data.token_len);
+		}
 
 		CoAP::Message::Factory<>& factory(){ return fac_; }
 

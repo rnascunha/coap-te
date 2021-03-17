@@ -2,7 +2,7 @@
 #define COAP_TE_INTERNAL_TREE_HPP__
 
 #include <utility>
-//#include <cstdio>
+#include <cstdio>
 
 namespace CoAP{
 
@@ -139,6 +139,58 @@ class branch{
 			{
 				path.template add_branch<AddSorted>(std::forward<Paths>(paths)...);
 			}
+		}
+
+		template<typename U>
+		branch* remove_child(U const& u) noexcept
+		{
+			if(!children_) return nullptr;
+
+			branch* n = children_;
+			if(children_->value_ == u)
+			{
+				children_ = children_->next_;
+				n->next_ = nullptr;
+				return n;
+			}
+
+			for(; n->next_; n = n->next_)
+			{
+				if(n->next_->value_ == u)
+				{
+					branch* res = n->next_;
+					n->next_ = n->next_->next_;
+					res->next_ = nullptr;
+					return n;
+				}
+			}
+
+			return nullptr;
+		}
+
+		branch* remove_child(branch& u) noexcept
+		{
+			if(!children_) return nullptr;
+
+			if(children_ == &u)
+			{
+				children_ = u.next_;
+				u.next_ = nullptr;
+				return &u;
+			}
+
+			branch* n = children_;
+			for(; n->next_; n = n->next_)
+			{
+				if(n->next_ == &u)
+				{
+					n->next_ = u.next_;
+					u.next_ = nullptr;
+					return &u;
+				}
+			}
+
+			return nullptr;
 		}
 	private:
 		T				value_;

@@ -18,6 +18,8 @@ unsigned parse_option(Option::option& opt,
 		unsigned delta,
 		CoAP::Error& ec);
 
+bool query_by_key(message const& msg, const char* key, const void** value, unsigned& length) noexcept;
+
 class Option_Parser
 {
 	public:

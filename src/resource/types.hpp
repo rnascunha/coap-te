@@ -3,13 +3,16 @@
 
 #include "transmission/response.hpp"
 #include "message/types.hpp"
-#include "internal/list.hpp"
+#include "internal/tree.hpp"
 
 namespace CoAP{
 namespace Resource{
 
 template<typename Endpoint>
-using callback = void(CoAP::Message::message const&, CoAP::Transmission::Response<Endpoint>&);
+using callback = void(
+		CoAP::Message::message const&,
+		CoAP::Transmission::Response<Endpoint>&,
+		void*) noexcept;
 
 }//Resource
 }//CoAP

@@ -12,10 +12,10 @@ namespace Message{
  * the Message ID field.  If there are any bytes, they MUST be processed
  * as a message format error.
  */
-std::size_t empty_message(std::uint8_t* buffer, std::size_t buffer_len,
+std::size_t empty_message(type mtype, std::uint8_t* buffer, std::size_t buffer_len,
 		std::uint16_t mid, CoAP::Error& ec) noexcept
 {
-	return make_header(buffer, buffer_len, type::reset, code::empty, mid, nullptr, 0, ec);
+	return make_header(buffer, buffer_len, mtype, code::empty, mid, nullptr, 0, ec);
 }
 
 

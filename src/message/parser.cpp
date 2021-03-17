@@ -30,6 +30,41 @@ unsigned parse(message& msg,
 	return offset;
 }
 
+bool query_by_key(message const& msg, const char* key, const void** value, unsigned& length) noexcept
+{
+	Option_Parser parser(msg);
+	Option::option const *opt;
+
+	while((opt = parser.next()))
+	{
+		if(opt->ocode == Option::code::uri_query)
+		{
+			const char *nkey = key, *opt_value = static_cast<const char*>(opt->value);
+			unsigned len = opt->length;
+			int i = 0;
+			while(len && nkey[i] && nkey[i] == opt_value[i])
+			{
+				i++; len--;
+			}
+			if(!nkey[i])
+			{
+				if(len > 0 && opt_value[i] == '=')
+				{
+					*value = (opt_value + i) + 1;
+					length = len;
+					return true;
+				}
+				if(len == 0)
+				{
+					length = 0;
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
 /**
  *
  *

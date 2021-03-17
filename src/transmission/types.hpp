@@ -25,6 +25,20 @@ struct transaction_param{
 	unsigned int	retransmission_remaining;
 };
 
+template<typename Endpoint>
+struct async_response{
+	Endpoint		 	ep;
+	Message::type		type;
+	std::size_t			token_len;
+	const void*			token[8];
+
+	async_response(Endpoint const& endp, Message::message const& request)
+	: ep{endp}, type{request.mtype}, token_len{request.token_len}
+	{
+		std::memcpy(token, request.token, token_len);
+	}
+};
+
 using transaction_cb = void(*)(void const*,
 							CoAP::Message::message const*,
 							void*);

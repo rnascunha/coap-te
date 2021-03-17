@@ -31,9 +31,10 @@ class engine
 		using response = Response<endpoint>;
 		using resource = CoAP::Resource::resource<Callback_Resource_Functor>;
 		using resource_root = typename std::conditional<Profile == profile::server,
-				typename CoAP::Resource::resource_node<Callback_Resource_Functor>, empty>::type;
+				typename CoAP::Resource::resource_root<Callback_Resource_Functor>, empty>::type;
 		using resource_node = typename std::conditional<Profile == profile::server,
-				typename CoAP::Resource::resource_node<Callback_Resource_Functor>::node_t, empty>::type;
+				typename CoAP::Resource::resource_root<Callback_Resource_Functor>::node_t, empty>::type;
+		using Async_response = async_response<endpoint>;
 
 		static constexpr const unsigned packet_size = transaction_t::max_packet_size();
 
@@ -143,7 +144,7 @@ class engine
 				CoAP::Error&) noexcept;
 
 		resource& root() noexcept;
-		resource_node& root_node() noexcept;
+		resource_root& root_node() noexcept;
 
 		std::uint16_t mid() noexcept;
 
@@ -156,7 +157,7 @@ class engine
 		bool run(CoAP::Error& ec);
 		bool operator()(CoAP::Error& ec) noexcept;
 	private:
-		template<bool CheckEndpoint = true, bool CheckToken = true>
+		template<bool CheckEndpoint = true, bool CheckToken = false>
 		void process_response(endpoint& ep, CoAP::Message::message&) noexcept;
 		void process_request(endpoint& ep, CoAP::Message::message&,
 				std::uint8_t const* buffer,

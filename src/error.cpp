@@ -34,6 +34,7 @@ const char* Error::message(int error)
 		case errc::transaction_ocupied:	return "transaction ocupied";
 		case errc::no_free_slots:		return "no transacition free slot";
 		case errc::buffer_empty:		return "buffer empty";
+		case errc::request_not_supported: return "request not supported";
 		default:
 			break;
 	}

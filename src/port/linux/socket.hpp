@@ -12,6 +12,7 @@ namespace Linux{
 template<int RecvFlags = 0, int SendFlags = 0>
 class socket{
 	public:
+		using endpoint = socket_endpoint;
 		socket();
 
 		void open(CoAP::Error&) noexcept;

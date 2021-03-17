@@ -27,6 +27,7 @@ enum class errc : int{
 	transaction_ocupied		= 60,
 	no_free_slots,
 	buffer_empty,
+	request_not_supported
 };
 
 struct Error {
@@ -57,6 +58,16 @@ struct Error {
 	{
 		err_ = static_cast<int>(error);
 		return *this;
+	}
+
+	inline bool operator==(errc const& error) noexcept
+	{
+		return err_ == static_cast<int>(error);
+	}
+
+	inline bool operator!=(errc const& error) noexcept
+	{
+		return !(*this == error);
 	}
 };
 

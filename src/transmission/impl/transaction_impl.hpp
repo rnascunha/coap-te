@@ -60,13 +60,14 @@ check() noexcept
 
 	if(ftime > next_expiration_time_)
 	{
-		CoAP::Log::debug(transaction_mod, "[%04X] Transaciton expired", request_.mid);
+		CoAP::Log::debug(transaction_mod, "[%04X] Transaciton expired [%.02f]", request_.mid, next_expiration_time_);
 		if(retransmission_remaining_ <= 0)
 		{
 			CoAP::Log::status(transaction_mod, "[%04X] Max retransmission reached [%u]",
 					request_.mid, retransmission_remaining_);
 			status_ = status_t::timeout;
 			call_cb(nullptr);
+			clear();
 			return false;
 		}
 		else //message must be retransmitted

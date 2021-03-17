@@ -42,7 +42,7 @@ unsigned make_payload(uint8_t* buffer, std::size_t buffer_len,
 		void const* const payload, std::size_t payload_len,
 		CoAP::Error& ec) noexcept;
 
-std::size_t empty_message(std::uint8_t* buffer, std::size_t buffer_len,
+std::size_t empty_message(type mtype, std::uint8_t* buffer, std::size_t buffer_len,
 		std::uint16_t mid, CoAP::Error&) noexcept;
 
 template<bool SortOptions = true,

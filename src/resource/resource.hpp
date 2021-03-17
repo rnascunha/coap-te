@@ -46,22 +46,23 @@ class resource
 		template<typename Endpoint>
 		bool call(CoAP::Message::code code,
 			CoAP::Message::message const& request,
-			CoAP::Transmission::Response<Endpoint>& response) const noexcept
+			CoAP::Transmission::Response<Endpoint>& response,
+			void* engine) const noexcept
 		{
 			switch(code)
 			{
 				using namespace CoAP::Message;
 				case code::get:
-					return get_ ? get_(request, response), true : false;
+					return get_ ? get_(request, response, engine), true : false;
 					break;
 				case code::post:
-					return post_ ? post_(request, response), true : false;
+					return post_ ? post_(request, response, engine), true : false;
 					break;
 				case code::put:
-					return put_ ? put_(request, response), true : false;
+					return put_ ? put_(request, response, engine), true : false;
 					break;
 				case code::cdelete:
-					return del_ ? del_(request, response), true : false;
+					return del_ ? del_(request, response, engine), true : false;
 					break;
 				default:
 					break;

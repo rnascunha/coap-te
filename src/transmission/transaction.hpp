@@ -12,9 +12,9 @@
 namespace CoAP{
 namespace Transmission{
 
-template<unsigned MaxPacketSize = 0,
-		typename Callback_Functor = transaction_cb,
-		typename Endpoint = CoAP::endpoint>
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
 class transaction
 {
 	using buffer_type = typename std::conditional<MaxPacketSize == 0,

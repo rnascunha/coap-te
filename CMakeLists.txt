@@ -88,8 +88,8 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 include_directories(./src ./third/tree_trunks/src/include)
 
-#if(WIN32)
-#	target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
-#else()
-#	target_link_libraries(${PROJECT_NAME} pthread)
-#endif()
+if(WIN32)
+	target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
+else()
+	target_link_libraries(${PROJECT_NAME} pthread)
+endif()
