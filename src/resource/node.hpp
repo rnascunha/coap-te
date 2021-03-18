@@ -57,11 +57,11 @@ class resource_root{
 		{
 			using namespace CoAP::Message;
 			using namespace CoAP::Message::Option;
-			node_t* res = &root_;
+			node_t const* res = &root_;
 
 			Option_Parser op(msg);
 			option const* opt;
-			node_t* n = &root_, *parent = nullptr;
+			node_t const* n = &root_, *parent = nullptr;
 			while((opt = op.next()))
 			{
 				if(opt->ocode == Option::code::uri_path)
@@ -75,9 +75,9 @@ class resource_root{
 			return parent;
 		}
 
-		resource_t const* search(CoAP::Message::message& msg) noexcept
+		resource_t const* search(CoAP::Message::message const& msg) noexcept
 		{
-			node_t* node = search_node(msg);
+			node_t const* node = search_node(msg);
 			return node ? &node->value() : nullptr;
 		}
 

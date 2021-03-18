@@ -9,8 +9,8 @@ namespace Message{
 class message_id
 {
 	public:
-		message_id(unsigned seed);
-
+		message_id();
+		message_id(unsigned);
 		std::uint16_t operator()() noexcept;
 	private:
 		std::uint16_t id_;

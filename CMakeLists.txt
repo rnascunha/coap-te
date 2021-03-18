@@ -52,11 +52,12 @@ set(SRC_DIR_MESSAGE ${SRC_DIR}/message)
 set(SRC_DIR_TRANSMISSION ${SRC_DIR}/transmission)
 set(SRC_DIR_DEBUG ${SRC_DIR}/debug)
 set(SRC_DIR_INTERNAL ${SRC_DIR}/internal)
+set(SRC_DIR_PORT ${SRC_DIR}/port)
+set(SRC_DIR_URI ${SRC_DIR}/uri)
 
-set(MAIN_SRC ${SRC_DIR}/main.cpp 
-				${SRC_DIR}/error.cpp
-				${SRC_DIR}/uri/compose.cpp
-				${SRC_DIR}/uri/decompose.cpp
+set(MAIN_SRC ${SRC_DIR}/error.cpp
+				${SRC_DIR_URI}/compose.cpp
+				${SRC_DIR_URI}/decompose.cpp
 				${SRC_DIR_INTERNAL}/helper.cpp
 				${SRC_DIR_MESSAGE}/options.cpp
 				${SRC_DIR_MESSAGE}/message_id.cpp
@@ -74,12 +75,13 @@ set(MAIN_SRC ${SRC_DIR}/main.cpp
 
 if(NOT WIN32)
 	message(STATUS "Adding linux dependecies...")
-#	list(APPEND MAIN_SRC ${SRC_DIR}/port/linux/socket.cpp)
+	add_definitions(-DCOAP_TE_PORT_C_STANDARD=1)
+	list(APPEND MAIN_SRC ${SRC_DIR_PORT}/c_standard_port.cpp)
 else()
 	message(FATAL_ERROR "No system support")
 endif()
-
-add_executable(${PROJECT_NAME} ${MAIN_SRC})
+				
+add_library(${PROJECT_NAME} ${MAIN_SRC})
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
@@ -88,8 +90,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 include_directories(./src ./third/tree_trunks/src/include)
 
-if(WIN32)
-	target_link_libraries(${PROJECT_NAME} wsock32 ws2_32)
-else()
-	target_link_libraries(${PROJECT_NAME} pthread)
+#Checking if must compile examples
+if(DEFINED WITH_EXAMPLES)
+	if(${WITH_EXAMPLES} EQUAL 1)
+		include (compile_example.cmake)
+	endif()
 endif()

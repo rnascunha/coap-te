@@ -29,9 +29,6 @@ static constexpr const configure tconfigure = {
 	.ack_timeout_seconds 			= 2.0,	//ACK_TIMEOUT
 	.ack_ramdom_factor 				= 1.5,	//ACK_RANDOM_FACTOR
 	.max_restransmission 			= 4,	//MAX_RETRANSMIT
-	.max_interaction 				= 1,	//NSTART
-	.default_leisure_seconds 		= 5,	//DEFAULT_LEISURE
-	.probing_rate_byte_per_seconds 	= 1,	//PROBING_RATE
 };
 
 static bool response_flag = false;

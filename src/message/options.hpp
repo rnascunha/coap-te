@@ -107,9 +107,9 @@ struct option
 	bool operator<=(option const& rhs) noexcept;
 	bool operator>=(option const& rhs) noexcept;
 
-	code 		ocode = code::invalid;
-	unsigned	length = 0;
-	const void*	value = nullptr;
+	code 		ocode = code::invalid;		//Option code
+	unsigned	length = 0;					//Option length
+	const void*	value = nullptr;			//Pointer to option value
 };
 
 using List = CoAP::list<option>;

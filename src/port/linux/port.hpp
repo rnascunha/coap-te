@@ -9,10 +9,6 @@
 
 namespace CoAP{
 
-using time_t = std::time_t;
-auto time = []{ return std::time(NULL); };
-
-auto random_generator = [](){ return std::rand(); };
 using socket = Port::Linux::socket<MSG_DONTWAIT, 0>;
 
 }//CoAP

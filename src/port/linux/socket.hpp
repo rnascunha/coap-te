@@ -18,7 +18,7 @@ class socket{
 		void open(CoAP::Error&) noexcept;
 		void bind(endpoint&, CoAP::Error&) noexcept;
 		std::size_t send(const void*, std::size_t, endpoint&, CoAP::Error&)  noexcept;
-		std::size_t receive(std::uint8_t*, std::size_t, endpoint&, CoAP::Error&) noexcept;
+		std::size_t receive(void*, std::size_t, endpoint&, CoAP::Error&) noexcept;
 	private:
 		int socket_;
 };

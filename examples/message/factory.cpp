@@ -1,65 +1,130 @@
-#include <iostream>
+/**
+ * Factory examples show how to use... a factory... to construct
+ * a message.
+ *
+ * Factorys can be instatiated as follows:
+ * * with/without internal buffer;
+ * * with/without internal message id generator;
+ *
+ * Even if you use internal buffer/message id, you still can pass
+ * the arguments externally.
+ */
+
 #include <cstdint>
-#include <ctime>
 
-#include "coap-te.hpp"
+#include "log.hpp"				//Log header
+#include "coap-te.hpp"			//Convenient header
+#include "coap-te-debug.hpp"	//Convenient debug header
 
-#define BUFFER_LEN		1000
+#define BUFFER_LEN		512		//Size of buffer
+
+/**
+ * Comment/uncomment the following line to use/not use the internal
+ * buffer of the factory.
+ */
 #define USE_INTERNAL_BUFFER
+
+/**
+ * Comment/uncomment the following line to use/not use the internal
+ * message id generator of the factory
+ */
 #define USE_INTERNAL_MESSAGE_ID
 
 using namespace CoAP::Message;
+using namespace CoAP::Log;
+
+/**
+ * Log module
+ */
+static constexpr module example_mod = {
+		.name = "EXAMPLE",
+		.max_level = CoAP::Log::type::debug
+};
+
+/**
+ * Auxiliar function
+ */
+static void exit_error(CoAP::Error& ec, const char* what = nullptr)
+{
+	error(example_mod, ec, what);
+	exit(EXIT_FAILURE);
+}
 
 int main()
 {
 #ifndef USE_INTERNAL_BUFFER
+	/**
+	 * If we are not going to use internal buffer, we need one
+	 */
 	std::uint8_t buffer[BUFFER_LEN];
 #endif /* USE_INTERNAL_BUFFER */
 #ifndef USE_INTERNAL_MESSAGE_ID
-	message_id mid(std::time(NULL));
+	/**
+	 * If we are not going to use a internal message id generator,
+	 * we need to instantiate one
+	 */
+	message_id mid(CoAP::time());
 #endif /* USE_INTERNAL_MESSAGE_ID */
-	CoAP::Error ec;
+	CoAP::Error ec;		//message error
 
 	/**
 	 * All object lifetime if of user responsability. Util "serialize" method
 	 * been called, nothing is copied.
 	 */
+	/**
+	 * Token
+	 */
 	std::uint8_t token[] = {0x03, 0x04, 0x05, 0x06, 0x07};
 
-	content_format format{content_format::application_json};
-	const char* path = "mypath";
-	const char* path2 = "1234";
+	/**
+	 * Options node. Factory uses option list internally, so we
+	 * need to instantiate options node
+	 */
+	CoAP::Message::accept format{accept::application_json};
+	Option::node content_op{format, true};
+	Option::node path_op1{Option::code::uri_path, "path1"};
+	Option::node path_op2{Option::code::uri_query, "value=1"};
 
-	const char* payload = "TESTE";
+	status(example_mod, "Testing factory...");
 
-	option_node content_op{format};
-	option_node path_op1{option_code::uri_path, path};
-	option_node path_op2{option_code::uri_path, path2};
-
-	std::cout << "Testing factory...\n";
-
+	/**
+	 * The following lines show how to instatiate a factory with/without
+	 * internal features.
+	 */
 #if defined(USE_INTERNAL_BUFFER) && defined(USE_INTERNAL_MESSAGE_ID)
-	std::cout << "Internal buffer / Internal message id\n";
-	Factory<BUFFER_LEN, message_id> fac(message_id(std::time(NULL)));
+	status(example_mod, "Internal buffer / Internal message id");
+	Factory<BUFFER_LEN, message_id> fac(message_id(CoAP::time()));
 #elif defined(USE_INTERNAL_BUFFER) && !defined(USE_INTERNAL_MESSAGE_ID)
-	std::cout << "Internal buffer / NO internal message id\n";
+	status(example_mod, "Internal buffer / NO internal message id");
 	Factory<BUFFER_LEN> fac;
 #elif !defined(USE_INTERNAL_BUFFER) && defined(USE_INTERNAL_MESSAGE_ID)
-	std::cout << "NO internal buffer / Internal message id\n";
-	Factory<0, message_id> fac(message_id(std::time(NULL)));
+	/**
+	 * 0 buffer len means NO internal buffer
+	 */
+	status(example_mod, "NO internal buffer / Internal message id");
+	Factory<0, message_id> fac(message_id(CoAP::time()));
 #else
-	std::cout << "NO internal buffer / NO internal message id\n";
+	/**
+	 * 0 buffer len means NO internal buffer
+	 */
+	status(example_mod, "NO internal buffer / NO internal message id\n");
 	Factory<0> fac;
 #endif
-	std::cout << "Size factory: " << sizeof(fac) << "\n";
 
-	fac.header(type::confirmable, code::get)
+	/**
+	 * Adding all header/token/options/payload to the factory
+	 */
+	fac.header(CoAP::Message::type::confirmable, code::get)
 		.token(token, sizeof(token))
 		.add_option(content_op)
 		.add_option(path_op1)
 		.add_option(path_op2)
-		.payload(payload);
+		.payload("payload");
 
+	/**
+	 * When factory doesn't have a buffer/message id internally, you
+	 * must provide externally
+	 */
 #if defined(USE_INTERNAL_BUFFER) && defined(USE_INTERNAL_MESSAGE_ID)
 	std::size_t size = fac.serialize(ec);
 #elif defined(USE_INTERNAL_BUFFER) && !defined(USE_INTERNAL_MESSAGE_ID)
@@ -72,11 +137,7 @@ int main()
 	/**
 	 * Checking serialize
 	 */
-	if(ec)
-	{
-		std::cerr << "ERROR! [" << ec.value() << "] " << ec.message() << "\n";
-		return EXIT_FAILURE;
-	}
+	if(ec) exit_error(ec, "serialize");
 	/**
 	 * After serialize, you can use the factory again, but first you need to call reset
 	 *
@@ -86,20 +147,25 @@ int main()
 	 * .
 	 */
 
-	std::cout << "------------\n";
+	debug(example_mod, "------------");
 
 	/**
-	 * Serialized success
+	 * Serialize succeeded
 	 */
-	std::cout << "Serialize succeded! [" << size << "]...";
-	std::cout << "\n-----------\nPrinting message bytes...\n";
+	status(example_mod, "Serialize succeeded! [%lu]...", size);
+	debug(example_mod, "Printing message bytes...");
 #ifndef USE_INTERNAL_BUFFER
 	CoAP::Debug::print_byte_message(buffer, size);
 #else /* USE_INTERNAL_BUFFER */
 	CoAP::Debug::print_byte_message(fac.buffer(), size);
 #endif
 
-	std::cout << "-------------\nParsing message...\n";
+	debug(example_mod, "-----------");
+	status(example_mod, "Parsing message...");
+
+	/**
+	 * Structure to hold message parsed
+	 */
 	message msg;
 #ifndef USE_INTERNAL_BUFFER
 	auto size_parse = parse(msg, buffer, size, ec);
@@ -109,17 +175,14 @@ int main()
 	/**
 	 * Checking parse
 	 */
-	if(ec)
-	{
-		std::cerr << "ERROR! [" << ec.value() << "] " << ec.message() << "\n";
-		return EXIT_FAILURE;
-	}
+	if(ec) exit_error(ec, "parsing");
 	/**
 	 * Parsed succeded!
 	 */
-	std::cout << "Parsing succeded! [" << size_parse << "]...\n";
-	std::cout << "Printing message...\n";
+	status(example_mod, "Parsing succeded! [%u]...", size_parse);
+	debug(example_mod, "Printing message...");
 	CoAP::Debug::print_message(msg);
 
+	status(example_mod, "Success!");
 	return EXIT_SUCCESS;
 }

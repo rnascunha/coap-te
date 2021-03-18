@@ -3,7 +3,6 @@
 
 #include <cstring>
 #include "port/port.hpp"
-#include "message/types.hpp"
 #include "message/factory.hpp"
 #include "message/serialize.hpp"
 
@@ -57,7 +56,7 @@ class Response{
 			return *this;
 		}
 
-		Endpoint const& endpoint() noexcept
+		Endpoint const& endpoint() const noexcept
 		{
 			return ep_;
 		}

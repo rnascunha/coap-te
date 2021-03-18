@@ -4,6 +4,7 @@
 #include "port/port.hpp"
 #include "internal/helper.hpp"
 #include "message/types.hpp"
+#include "response.hpp"
 
 namespace CoAP{
 namespace Transmission{
@@ -26,18 +27,29 @@ struct transaction_param{
 };
 
 template<typename Endpoint>
-struct async_response{
+struct separate_response{
 	Endpoint		 	ep;
 	Message::type		type;
 	std::size_t			token_len;
 	const void*			token[8];
 
-	async_response(Endpoint const& endp, Message::message const& request)
+	separate_response(Message::message const& request, Endpoint const& endp)
 	: ep{endp}, type{request.mtype}, token_len{request.token_len}
 	{
 		std::memcpy(token, request.token, token_len);
 	}
+
+	separate_response(Message::message const& request, Response<Endpoint> const& response)
+	: ep{response.endpoint()}, type{request.mtype}, token_len{request.token_len}
+	{
+		std::memcpy(token, request.token, token_len);
+	}
 };
+
+template<typename Endpoint>
+using default_cb = void(*)(Endpoint const&,
+							CoAP::Message::message const&,
+							void*);
 
 using transaction_cb = void(*)(void const*,
 							CoAP::Message::message const*,
