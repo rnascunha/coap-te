@@ -149,6 +149,53 @@ bool decompose(uri<Host>& uri, const char* uri_string, HostParser parser) noexce
 	return true;
 }
 
+template<typename Host>
+bool decompose_to_list(std::uint8_t* buffer, std::size_t& buffer_len,
+		uri<Host>& uri,
+		CoAP::Message::Option::List& list) noexcept
+{
+	using namespace CoAP::Message;
+
+	std::size_t used = 0, total = buffer_len;
+//	if(add_port)
+//	{
+//		if(buffer_len < sizeof(Option::node)) return false;
+//		Option::node* node = reinterpret_cast<Option::node*>(buffer);
+//		buffer_len -= sizeof(Option::node);
+//		buffer += sizeof(Option::node);
+//
+//		if(buffer_len < sizeof(std::uint16_t)) return false;
+//		std::memcpy(buffer, &uri.port, sizeof(std::uint16_t));
+//
+//		node->value.ocode = Option::code::uri_port;
+//		node->value.length = 2;
+//		node->value.value = buffer;
+//
+//		buffer_len -= 2;
+//		buffer += 2;
+//
+//		list.add<true>(*node);
+//
+//		used += sizeof(Option::node) + 2;
+//	}
+
+//	buffer_len = total - used;
+	if(!path_to_list(buffer, buffer_len, uri.path, uri.path_len, list))
+		return false;
+
+	buffer += buffer_len;
+	used += buffer_len;
+
+	buffer_len = total - used;
+	if(!query_to_list(buffer, buffer_len, uri.query, uri.query_len, list))
+		return false;
+
+	used += buffer_len;
+	buffer_len = used;
+
+	return true;
+}
+
 }//URI
 }//CoAP
 

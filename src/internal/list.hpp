@@ -62,6 +62,17 @@ class list{
 			}
 		}
 
+		unsigned size() const noexcept
+		{
+			if(!head_) return 0;
+
+			list::node* n = head_;
+			unsigned i = 0;
+			for(; n!= nullptr; n = n->next, i++);
+
+			return i;
+		}
+
 		node* operator[](unsigned index) noexcept
 		{
 			node* n = head_;

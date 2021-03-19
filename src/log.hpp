@@ -41,25 +41,11 @@ static constexpr const Tree_Trunks::config<type> config = {
 	.tp_config 				= type_config
 };
 
-using module = Tree_Trunks::module<type>;
-using eolt = Tree_Trunks::eol_type;
-
-template<type MinType, eolt EOL = eolt::nl_rs, typename ...Args>
-constexpr std::size_t log(Args&& ... args) noexcept
-{
-	return Tree_Trunks::log<type, MinType, config, EOL>(std::forward<Args>(args)...);
-}
-
-template<eolt EOL = eolt::nl_rs>
-constexpr void eol()
-{
-	Tree_Trunks::eol<type, config, EOL>();
-}
+#include "tt/functions_conv.hpp"
 
 /**
  * Convenience functions
  */
-
 template<eolt EOL = eolt::nl_rs, typename ...Args>
 constexpr std::size_t debug(Args&& ... args) noexcept
 {
@@ -94,24 +80,6 @@ template<eolt EOL = eolt::nl_rs, typename ...Args>
 constexpr std::size_t none(Args&& ... args) noexcept
 {
 	return log<type::none, EOL>(std::forward<Args>(args)...);
-}
-
-template<typename ...Args>
-constexpr void nl_rs(Args&&... args)
-{
-	eol<eolt::nl_rs>(std::forward<Args>(args)...);
-}
-
-template<typename ...Args>
-constexpr void nl(Args&&... args)
-{
-	eol<eolt::nl>(std::forward<Args>(args)...);
-}
-
-template<typename ...Args>
-constexpr void rs(Args&&... args)
-{
-	eol<eolt::rs>(std::forward<Args>(args)...);
 }
 
 std::size_t error(CoAP::Error& ec, const char* what = nullptr) noexcept

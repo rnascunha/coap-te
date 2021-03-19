@@ -2,7 +2,7 @@
  * Factory examples show how to use... a factory... to construct
  * a message.
  *
- * Factorys can be instatiated as follows:
+ * Factorys can be instantiated as follows:
  * * with/without internal buffer;
  * * with/without internal message id generator;
  *
@@ -42,7 +42,7 @@ static constexpr module example_mod = {
 };
 
 /**
- * Auxiliar function
+ * Auxiliary function
  */
 static void exit_error(CoAP::Error& ec, const char* what = nullptr)
 {
@@ -88,7 +88,7 @@ int main()
 	status(example_mod, "Testing factory...");
 
 	/**
-	 * The following lines show how to instatiate a factory with/without
+	 * The following lines show how to instantiate a factory with/without
 	 * internal features.
 	 */
 #if defined(USE_INTERNAL_BUFFER) && defined(USE_INTERNAL_MESSAGE_ID)
@@ -177,9 +177,9 @@ int main()
 	 */
 	if(ec) exit_error(ec, "parsing");
 	/**
-	 * Parsed succeded!
+	 * Parse succeeded!
 	 */
-	status(example_mod, "Parsing succeded! [%u]...", size_parse);
+	status(example_mod, "Parsing succeeded! [%u]...", size_parse);
 	debug(example_mod, "Printing message...");
 	CoAP::Debug::print_message(msg);
 

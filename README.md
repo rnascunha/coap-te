@@ -62,18 +62,26 @@ This will generate one excutable file to each example file.
 
 The directory `examples` contains some code samples with detailed exaplanations on how to use **CoAP-te**. A brief overview is show here:
 
-Messages examples:
+*Messages examples*:
 * `serialize_parse`: shows how the serialize message using 3 strategies (factory and manually using option list/array). Then parse this information (as it was received by network) and iterate through options.
 * `factory`: demostrate how to use a factory to construct a message, using internal/external features.
+* `option`: shows how to manipulate options of different types. How to declare, serialize and parse.
 
-Transmission examples:
+*Transmission examples*:
+
+*URI examples*:
+* `decompose`: breaks a CoAP URI into internal structures of **CoAP-te**, ready to be used.
+
+*Internal examples*: this examples are to test internal functions used, not intended to the end user.
+
+*Port examples*: here are show the raw use of connections/plataform dependent functions. Not intended to the end user.
 
 ## Portability
 
 To port **CoAP-te** to your system, you must:
 * Define the following functions:
 
-```
+```c++
 namespace CoAP{
 using time_t = <some_interger_type> 
 
@@ -93,7 +101,7 @@ unsigned random_generator() noexcept;
 
 * Define a connection. A connection must define a endpoint, a receiving function, and a send function, as show:
 
-```
+```c++
 struct my_connection{
 	using endpoint = Endpoint;
 
@@ -101,7 +109,7 @@ struct my_connection{
 	std::size_t receive(void*, std::size_t, endpoint&, CoAP::Error&) noexcept;
 }
 ```
-** The endpoint must be default constructable, copiable and comparable;
-** The class connection must be moveable. The receiving/send functions MUST NOT block.
+  * The endpoint must be default constructable, copiable and comparable;
+  * The class connection must be moveable. The receiving/send functions MUST NOT block.
 > There is already a implmentation to UDP posix-like sockets.
 

@@ -7,6 +7,7 @@ namespace CoAP{
 namespace Helper{
 
 inline bool is_digit(char c){ return c >= '0' && c <= '9'; }
+inline bool is_hexa(char c){ return is_digit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'); }
 inline bool is_lower_alpha(char c){ return c >= 'a' && c <= 'z'; }
 inline bool is_upper_alpha(char c){ return c >= 'A' && c <= 'Z'; }
 inline bool is_alpha(char c){ return is_lower_alpha(c) || is_upper_alpha(c); }
@@ -29,6 +30,17 @@ inline void array_to_upper_case(char* arr, std::size_t len)
 		if(is_lower_alpha(*arr)) *arr = to_upper_case(*arr);
 		arr++;
 	}
+}
+
+inline int hexa_char_to_int(char ch)
+{
+    if (ch >= '0' && ch <= '9')
+        return ch - '0';
+    if (ch >= 'A' && ch <= 'F')
+        return ch - 'A' + 10;
+    if (ch >= 'a' && ch <= 'f')
+        return ch - 'a' + 10;
+    return -1;
 }
 
 //https://tools.ietf.org/html/rfc3986#section-2.3

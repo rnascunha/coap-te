@@ -59,6 +59,7 @@ set(MAIN_SRC ${SRC_DIR}/error.cpp
 				${SRC_DIR_URI}/compose.cpp
 				${SRC_DIR_URI}/decompose.cpp
 				${SRC_DIR_INTERNAL}/helper.cpp
+				${SRC_DIR_INTERNAL}/decoder.cpp
 				${SRC_DIR_MESSAGE}/options.cpp
 				${SRC_DIR_MESSAGE}/message_id.cpp
 				${SRC_DIR_MESSAGE}/types.cpp
@@ -93,6 +94,6 @@ include_directories(./src ./third/tree_trunks/src/include)
 #Checking if must compile examples
 if(DEFINED WITH_EXAMPLES)
 	if(${WITH_EXAMPLES} EQUAL 1)
-		include (compile_example.cmake)
+		include (examples/compile_example.cmake)
 	endif()
 endif()
