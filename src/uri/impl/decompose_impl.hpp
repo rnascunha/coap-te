@@ -10,7 +10,7 @@ namespace CoAP{
 namespace URI{
 
 template<typename Host>
-bool decompose_scheme(uri<Host>& uri, const char* uri_string, const char** new_uri_string) noexcept
+bool decompose_scheme(uri<Host>& uri, char* uri_string, char** new_uri_string) noexcept
 {
 	/**
 	 * Scheme
@@ -32,7 +32,7 @@ bool decompose_scheme(uri<Host>& uri, const char* uri_string, const char** new_u
 }
 
 template<typename Host>
-bool decompose_port(uri<Host>& uri, const char* uri_string, const char** new_uri_string) noexcept
+bool decompose_port(uri<Host>& uri, char* uri_string, char** new_uri_string) noexcept
 {
 	char port[6];
 	int i = 0;
@@ -59,7 +59,7 @@ bool decompose_port(uri<Host>& uri, const char* uri_string, const char** new_uri
 }
 
 template<typename Host>
-bool decompose_path(uri<Host>& uri, const char* uri_string, const char** new_uri_string) noexcept
+bool decompose_path(uri<Host>& uri, char* uri_string, char** new_uri_string) noexcept
 {
 	uri.path = uri_string;
 	while(uri_string[0] != '\0'
@@ -74,7 +74,7 @@ bool decompose_path(uri<Host>& uri, const char* uri_string, const char** new_uri
 }
 
 template<typename Host>
-bool decompose_query(uri<Host>& uri, const char* uri_string, const char** new_uri_string) noexcept
+bool decompose_query(uri<Host>& uri, char* uri_string, char** new_uri_string) noexcept
 {
 	uri.query = uri_string;
 	while(uri_string[0] != '\0'
@@ -89,11 +89,11 @@ bool decompose_query(uri<Host>& uri, const char* uri_string, const char** new_ur
 
 template<typename Host,
 		typename HostParser>
-bool decompose(uri<Host>& uri, const char* uri_string, HostParser parser) noexcept
+bool decompose(uri<Host>& uri, char* uri_string, HostParser parser) noexcept
 {
 	uri.path_len = uri.query_len = 0;
 
-	const char* nuri_string = uri_string;
+	char* nuri_string = uri_string;
 	if(!decompose_scheme(uri, uri_string, &nuri_string)) return false;
 	uri_string = nuri_string;
 

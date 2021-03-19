@@ -1,3 +1,14 @@
+/**
+ * This examples shows the use of UDP posix-like socket, used
+ * at CoAP protocol
+ *
+ * It has a server and client version
+ *
+ * A CoAP-te connection must define a endpoint type, and the following functions:
+ * * std::size_t send(const void*, std::size_t, endpoint&, CoAP::Error&)  noexcept;
+ * * std::size_t receive(void*, std::size_t, endpoint&, CoAP::Error&) noexcept;
+ */
+
 #include <cstdlib>
 #include <cstdio>
 #include <cstdint>
@@ -15,7 +26,10 @@ static void exit_error(Error& ec, const char* what = "")
 
 #define BUFFER_LEN		1000
 
-//#define SOCKET_SERVER
+/**
+ * Uncomment: server / Comment: client
+ */
+#define SOCKET_SERVER
 
 #ifdef SOCKET_SERVER
 int main()
@@ -23,21 +37,21 @@ int main()
 	Error ec;
 	std::uint8_t buffer[BUFFER_LEN];
 
-	endpoint ep{INADDR_ANY, 8080};
+	CoAP::socket::endpoint ep{INADDR_ANY, 8080};
 
-	connection conn{CoAP::socket{}};
+	CoAP::socket conn;
 
-	conn.native_handler().open(ec);
+	conn.open(ec);
 	if(ec) exit_error(ec, "open");
 
-	conn.native_handler().bind(ep, ec);
+	conn.bind(ep, ec);
 	if(ec) exit_error(ec, "bind");
 
 	char addr_str[20];
 	std::printf("Listening: %s:%u\n", ep.address(addr_str), ep.port());
 	while(true)
 	{
-		endpoint recv_addr;
+		CoAP::socket::endpoint recv_addr;
 		std::size_t size = conn.receive(buffer, BUFFER_LEN, recv_addr, ec);
 		if(ec) exit_error(ec, "read");
 		if(size == 0) continue;
@@ -64,24 +78,24 @@ int main()
 
 	std::memcpy(buffer, payload, payload_len + 1);
 
-	endpoint to{"127.0.0.1", 8080, ec};
-	connection conn{CoAP::socket{}};
+	CoAP::socket::endpoint to{"127.0.0.1", 8080, ec};
+	CoAP::socket conn;
 
-	conn.native_handler().open(ec);
+	conn.open(ec);
 	if(ec) exit_error(ec, "open");
 
 	conn.send(buffer, payload_len, to, ec);
 	if(ec) exit_error(ec, "send");
 	printf("Send succeced!\n");
 
-	endpoint from;
+	CoAP::socket::endpoint from;
 	while(true)
 	{
 		std::size_t size = conn.receive(buffer, BUFFER_LEN, from, ec);
 		if(ec) exit_error(ec, "read");
 		if(size == 0)
 		{
-			std::printf(".");
+//			std::printf(".");
 			continue;
 		}
 

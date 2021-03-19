@@ -31,9 +31,9 @@ struct uri{
 	scheme			uri_scheme;
 	Host			host;
 	uint16_t		port;
-	const char*		path;
+	char*		path;
 	std::size_t		path_len;
-	const char* 	query;
+	char* 	query;
 	std::size_t		query_len;
 };
 

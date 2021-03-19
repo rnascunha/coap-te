@@ -8,6 +8,8 @@
 
 #include "internal/decoder.hpp"
 
+//#define USE_SAME_BUFFER
+
 #define BUFFER_LEN		512
 
 int main(int argv, char** argc)
@@ -18,25 +20,41 @@ int main(int argv, char** argc)
 		std::printf("How to use:\n\t%s <text> [<text>...]\n", argc[0]);
 		return EXIT_FAILURE;
 	}
-
-	char buffer[BUFFER_LEN];
-	std::size_t buffer_len = BUFFER_LEN;
+#ifdef USE_SAME_BUFFER
 	int i = 1;
+	std::size_t size;
 	while(argv > 1)
 	{
-		if(CoAP::Helper::percent_decode(buffer, buffer_len, argc[i], std::strlen(argc[i])))
+		if((size = CoAP::Helper::percent_decode(argc[i])))
 		{
-			std::printf("Decoded [%lu]: %s -> %.*s\n", buffer_len, argc[i],
-					static_cast<int>(buffer_len), buffer);
+			std::printf("Decoded [%lu]: %s\n", size, argc[i]);
 		}
 		else
 		{
 			std::printf("Error decoding [%d]: %s\n", i, argc[i]);
 		}
 		i++;
-		buffer_len = BUFFER_LEN;
 		argv--;
 	}
+#else
+	char buffer[BUFFER_LEN];
+	std::size_t size;
+	int i = 1;
+	while(argv > 1)
+	{
+		if((size = CoAP::Helper::percent_decode(buffer, 512, argc[i], std::strlen(argc[i]))))
+		{
+			std::printf("Decoded [%lu]: %s -> %.*s\n", size, argc[i],
+					static_cast<int>(size), buffer);
+		}
+		else
+		{
+			std::printf("Error decoding [%d]: %s\n", i, argc[i]);
+		}
+		i++;
+		argv--;
+	}
+#endif /* USE_SAME_BUFFER */
 
 	return EXIT_SUCCESS;
 }

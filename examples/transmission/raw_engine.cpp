@@ -1,14 +1,21 @@
-#include <ctime>
+/**
+ * This is a example on how to define a CoAP::engine. The engine
+ * is where all the CoAP-te features are aggregate. All the transaction
+ * complexity, resources management and others are hidden from the user.
+ *
+ * Thinking that different environments have different needs, it was develop
+ * a configurable engine. More about how to configure it to your needs below.
+ */
 
 #include "log.hpp"
-#include "transmission/types.hpp"
-#include "transmission/transaction.hpp"
-#include "transmission/request.hpp"
-#include "transmission/engine.hpp"
-#include "port/linux/port.hpp"
-#include "port/port.hpp"
-#include "message/message_id.hpp"
 #include "coap-te.hpp"
+#include "coap-te-debug.hpp"
+
+#define USE_TRANSACTION_LIST_VECTOR
+
+#ifdef USE_TRANSACTION_LIST_VECTOR
+#include "transmission/transaction_list_vector.hpp"
+#endif /* USE_TRANSACTION_LIST_VECTOR */
 
 using namespace CoAP;
 using namespace CoAP::Log;
@@ -19,7 +26,7 @@ using namespace CoAP::Message;
 #define BUFFER_LEN		512
 #define HOST_ADDR		"127.0.0.1"
 
-static constexpr module main_mod = {
+static constexpr module example_mod = {
 		.name = "MAIN",
 		.max_level = CoAP::Log::type::debug
 };
@@ -28,40 +35,59 @@ static constexpr const CoAP::Transmission::configure tconfigure = {
 	.ack_timeout_seconds 			= 2.0,	//ACK_TIMEOUT
 	.ack_ramdom_factor 				= 1.5,	//ACK_RANDOM_FACTOR
 	.max_restransmission 			= 4,	//MAX_RETRANSMIT
-//	.max_interaction 				= 1,	//NSTART
-//	.default_leisure_seconds 		= 5,	//DEFAULT_LEISURE
-//	.probing_rate_byte_per_seconds 	= 1,	//PROBING_RATE
 };
 
 static bool response_flag = false;
 
 void exit_error(CoAP::Error& ec, const char* what = nullptr)
 {
-	error(main_mod, ec, what);
+	error(example_mod, ec, what);
 	exit(EXIT_FAILURE);
 }
 
-using engine = CoAP::Transmission::engine<CoAP::connection, TRANSACT_NUM, BUFFER_LEN>;
+using transaction_t = CoAP::Transmission::transaction<
+		512,
+		CoAP::Transmission::transaction_cb,
+		CoAP::socket::endpoint>;
 
-void cb(void const* trans, CoAP::Message::message const* r, void*)
+#ifdef USE_TRANSACTION_LIST_VECTOR
+using transaction_list_t =
+		CoAP::Transmission::transaction_list_vector<transaction_t>;
+#else /* USE_TRANSACTION_LIST_VECTOR */
+using transaction_list_t =
+		CoAP::Transmission::transaction_list<
+			transaction_t,
+			TRANSACT_NUM>,
+#endif /* USE_TRANSACTION_LIST_VECTOR */
+
+using engine = CoAP::Transmission::engine<
+		CoAP::Transmission::profile::client,
+		CoAP::socket,
+		CoAP::Message::message_id,
+		transaction_list_t,
+		void*,		//default callback disabled
+		CoAP::Resource::callback<CoAP::socket::endpoint>
+	>;
+
+void request_cb(void const* trans, CoAP::Message::message const* response, void*)
 {
 	auto const* t = static_cast<engine::transaction_t const*>(trans);
-	status(main_mod, "Status: %s", CoAP::Debug::transaction_status_string(t->status()));
-	if(r)
+	status(example_mod, "Status: %s", CoAP::Debug::transaction_status_string(t->status()));
+	if(response)
 	{
-		status(main_mod, "Response received!");
-		CoAP::Debug::print_message(*r);
+		status(example_mod, "Response received!");
+		CoAP::Debug::print_message(*response);
 	}
 	else
 	{
-		status(main_mod, "Response NOT received");
+		status(example_mod, "Response NOT received");
 	}
 	response_flag = true;
 }
 
 int main()
 {
-	debug(main_mod, "Init engine code...");
+	debug(example_mod, "Init engine code...");
 
 	Error ec;
 
@@ -73,30 +99,30 @@ int main()
 	socket.open(ec);
 	if(ec) exit_error(ec, "Error trying to open socket...");
 
-	debug(main_mod, "Socket opened...");
+	debug(example_mod, "Socket opened...");
 
-	endpoint ep{HOST_ADDR, COAP_PORT, ec};
+	CoAP::socket::endpoint ep{HOST_ADDR, COAP_PORT, ec};
 	if(ec) exit_error(ec);
 
-	CoAP::connection conn{std::move(socket)};
+	CoAP::socket conn;
 
 	CoAP::Message::Option::node path_op1{CoAP::Message::Option::code::uri_path, ".well-known"};
 	CoAP::Message::Option::node path_op2{CoAP::Message::Option::code::uri_path, "core"};
 
-	CoAP::Message::message_id mid(CoAP::time());
-
-	status(main_mod, "Testing Engine...");
+	status(example_mod, "Testing Engine...");
 
 	engine::request request(ep);
 	request.header(CoAP::Message::type::confirmable, CoAP::Message::code::get)
-			.token("tok")
+			.token("token")
 			.add_option(path_op1)
 			.add_option(path_op2)
-			.callback(cb);
+			.callback(request_cb);
 
-	engine coap_engine(std::move(conn));
+	engine coap_engine(std::move(socket),
+			CoAP::Message::message_id(CoAP::time()),
+			tconfigure);
 
-	coap_engine.send<true>(request, mid(), ec);
+	coap_engine.send(request, ec);
 	if(ec) exit_error(ec, "send");
 
 	while(!response_flag)

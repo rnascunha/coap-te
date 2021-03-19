@@ -56,12 +56,12 @@ using transaction_cb = void(*)(void const*,
 							void*);
 
 enum class status_t{
-	none = 0,
-	sending,
-	canceled,
-	success,
-	timeout,
-	empty		//reset received
+	none = 0,	///<  not been used
+	sending,	///< in used
+	canceled,	///< canceled
+	success,	///< received a response
+	timeout,	///< timeout
+	empty		///< received a empty response
 };
 
 enum class profile{

@@ -2,10 +2,17 @@
 #include <cstdio>
 #include <thread>
 
+#include "log.hpp"
 #include "coap-te.hpp"
 #include "coap-te-debug.hpp"
 
+//#define USE_TRANSACTION_LIST_VECTOR
+
 #define USE_RESOURCE_ADD_CHILD
+
+#ifdef USE_TRANSACTION_LIST_VECTOR
+#include "transmission/transaction_list_vector.hpp"
+#endif /* USE_TRANSACTION_LIST_VECTOR */
 
 /**
  * 	l0:			          	   root
@@ -34,12 +41,21 @@ using engine = CoAP::Transmission::engine<
 		CoAP::Transmission::profile::server,
 		CoAP::socket,
 		CoAP::Message::message_id,
+#ifdef USE_TRANSACTION_LIST_VECTOR
+		CoAP::Transmission::transaction_list_vector<
+			CoAP::Transmission::transaction<
+				512,
+				CoAP::Transmission::transaction_cb,
+				CoAP::socket::endpoint>
+		>,
+#else /* USE_TRANSACTION_LIST_VECTOR */
 		CoAP::Transmission::transaction_list<
 			CoAP::Transmission::transaction<
 				512,
 				CoAP::Transmission::transaction_cb,
 				CoAP::socket::endpoint>,
 			TRANSACT_NUM>,
+#endif /* USE_TRANSACTION_LIST_VECTOR */
 		void*,		//default callback disabled
 		CoAP::Resource::callback<CoAP::socket::endpoint>
 	>;

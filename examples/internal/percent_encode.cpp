@@ -1,18 +1,23 @@
+/**
+ * Percent-encode exemple
+ *
+ * All encode is done locally
+ */
 #include <iostream>
 #include <cstdint>
 #include <cstring>
 
-//#define OPT_2
+#define USE_FUNCTION
 
 #include "internal/encoder.hpp"
-#ifdef OPT_2
+#ifdef USE_FUNCTION
 #include "internal/ascii.hpp"
 #endif
 
 int main()
 {
 
-#ifndef OPT_2
+#ifndef USE_FUNCTION
 	char buffer[1000] = "my/teste_now;tchau";
 	char encoded_list[] = {'/','_', '\\', ';'};
 	std::size_t s = sizeof(encoded_list) / sizeof(char);
@@ -22,11 +27,17 @@ int main()
 
 	std::cout << "Initial: " << buffer << ", size: " << std::strlen(buffer) <<"\n";
 
-#ifndef OPT_2
+#ifndef USE_FUNCTION
+	/**
+	 * This call will percent-encode any character present at the encoded_list
+	 */
 	int size = CoAP::Helper::percent_encode(buffer, std::strlen(buffer), 1000, encoded_list, s);
 #else
+	/**
+	 * This call will percent-encode any character that satisfy the function
+	 */
 	int size = CoAP::Helper::percent_encode(buffer, std::strlen(buffer), 1000, CoAP::Helper::is_lower_alpha);
-#endif
+#endif /* USE_FUNCTION */
 	if(size < 0)
 	{
 		std::cout << "ERROR! " << size << "\n";

@@ -1,3 +1,12 @@
+/**
+ * This example shows how to add elements to the
+ * tree structure created. The tree structure is the
+ * same used to hold all the resource
+ *
+ * When adding a child, the algorithm doesn't look for cyclic
+ * branchs! Be careful!
+ */
+
 #include "internal/tree.hpp"
 #include <cstdlib>
 #include <cstdio>
@@ -29,6 +38,9 @@ int main()
 	std::printf("init...\n");
 	branch na{1}, nb{2}, nc{3}, nd{4}, ne{5}, nf{6};
 
+	/**
+	 * Adding using add_child;
+	 */
 	na.add_child(nb, nd);
 	nb.add_child(nc, ne);
 	ne.add_child(nf);
@@ -62,6 +74,9 @@ int main()
 			cu{21}, cv{22}, cx{23}, cw{24}, cy{25}, cz{26};
 
 	std::printf("Adding branch\n");
+	/**
+	 * Adding using add_branch
+	 */
 	ca.add_branch<false>(cb, cc, cd, ce, cf, cg, ch, ci, cj);
 	cc.add_branch<false>(ck, cl);
 	ca.add_branch<false>(cb, cc, cd, cm);

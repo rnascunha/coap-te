@@ -50,7 +50,7 @@ class engine
 		static constexpr const unsigned packet_size = transaction_t::max_packet_size();
 
 		engine(Connection&& conn, MessageID&& message_id);
-		engine(Connection&& conn, MessageID&& message_id, configure& config);
+		engine(Connection&& conn, MessageID&& message_id, configure const& config);
 
 		static constexpr profile get_profile()
 		{

@@ -37,7 +37,7 @@ template<profile Profile,
 	typename Callback_Default_Functor,
 	typename Callback_Resource_Functor>
 engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
-engine(Connection&& conn, MessageID&& message_id, configure& config)
+engine(Connection&& conn, MessageID&& message_id, configure const& config)
 	: conn_(std::move(conn)), mid_(std::move(message_id)), config_(config)
 {
 	if constexpr(has_default_callback)

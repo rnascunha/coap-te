@@ -6,7 +6,7 @@ The implemtation aims to:
 * Don't use any *dynamic allocation*;
 * Configurable: the CoAP *engine* be configurable to your system/environment requirements;
 * Modularized: As much as possible, all modules work indenpenditly;
-* Portable: ease to port to your system/device.
+* Portable: simple to port to your system/device.
 
 It's NOT implemented (yet):
 * Cache strategie;
@@ -60,7 +60,7 @@ This will generate one excutable file to each example file.
 
 ## Using
 
-The directory `examples` contains some code samples with detailed exaplanations on how to use **CoAP-te**. A brief overview is show here:
+If you build **CoAP-te** with the `-DWITH_EXAMPLES=1` flag, all example executables are at you build directory. The directory `examples` contains the source code of the examples with detailed exaplanations on how to use **CoAP-te**. A brief overview is show here:
 
 *Messages examples*:
 * `serialize_parse`: shows how the serialize message using 3 strategies (factory and manually using option list/array). Then parse this information (as it was received by network) and iterate through options.
@@ -68,13 +68,18 @@ The directory `examples` contains some code samples with detailed exaplanations 
 * `option`: shows how to manipulate options of different types. How to declare, serialize and parse.
 
 *Transmission examples*:
+* `raw_transaction`: explains the use of transactions. Transactions are not meant to be used directly, but through the *CoAP::engine*.
 
 *URI examples*:
-* `decompose`: breaks a CoAP URI into internal structures of **CoAP-te**, ready to be used.
+* `decompose`: breaks a CoAP URI into internal structures of **CoAP-te**, ready to be used. Any percent-encoded characters is converted. 
 
 *Internal examples*: this examples are to test internal functions used, not intended to the end user.
+* `tree`: shows how to work with *trees*, the structure that holds all the resources.
+* `percent_encode`: demonstrate the use of the function `percent_encode` used to compose URI strings;
+* `percent_decode`: demonstrate the use of the function `percent_decode` used to decompose URI strings;
 
 *Port examples*: here are show the raw use of connections/plataform dependent functions. Not intended to the end user.
+* `udp_socket`: the use of the implemented posix-like UDP socket. You can use this as reference to port **CoAP-te** to your plataform.
 
 ## Portability
 
@@ -99,17 +104,17 @@ unsigned random_generator() noexcept;
 ```
 > The default implementation uses `std::time` and `std::rand` as the functions above, respectivily, and uses `time_t` as `std::time_t`. If your system support this functions, just use then.   
 
-* Define a connection. A connection must define a endpoint, a receiving function, and a send function, as show:
+* Define a connection. A connection must define a endpoint, a receiving function, and a send function:
+  * The endpoint must be default constructable, copiable and comparable;
+  * The class connection must be moveable. The receiving/send functions MUST NOT block. Any error calling the functions must be reported at the last parameter (*CoAP::errc::socket_error*).
 
 ```c++
 struct my_connection{
-	using endpoint = Endpoint;
+	using endpoint = <some_endpoint>;
 
 	std::size_t send(const void*, std::size_t, endpoint&, CoAP::Error&)  noexcept;
 	std::size_t receive(void*, std::size_t, endpoint&, CoAP::Error&) noexcept;
 }
 ```
-  * The endpoint must be default constructable, copiable and comparable;
-  * The class connection must be moveable. The receiving/send functions MUST NOT block.
 > There is already a implmentation to UDP posix-like sockets.
 
