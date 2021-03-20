@@ -94,7 +94,7 @@ using transaction_t = transaction<0,							//max packet size == 0 (use external 
 /**
  * Call
  */
-void request_cb(void const* trans, CoAP::Message::message const* response, void* /* engine */)
+void request_cb(void const* trans, CoAP::Message::message const* response, void* /* engine */) noexcept
 {
 	transaction_t const* t = static_cast<transaction_t const*>(trans);
 

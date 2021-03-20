@@ -24,7 +24,7 @@ class Response{
 		{
 			std::memcpy(token_, token, token_len_);
 			fac_.header(mtype == CoAP::Message::type::confirmable ?
-								CoAP::Message::type::acknowledgement :
+								CoAP::Message::type::acknowledgment :
 								CoAP::Message::type::nonconfirmable,
 					CoAP::Message::code::content,
 					token_,
@@ -35,7 +35,7 @@ class Response{
 
 		Response& code(CoAP::Message::code rcode) noexcept
 		{
-			fac_.header(CoAP::Message::type::acknowledgement,
+			fac_.header(CoAP::Message::type::acknowledgment,
 					rcode,
 					token_,
 					token_len_);
@@ -84,7 +84,7 @@ class Response{
 		std::size_t serialize_empty_ack() noexcept
 		{
 			buffer_used_ = CoAP::Message::empty_message(
-										CoAP::Message::type::acknowledgement,
+										CoAP::Message::type::acknowledgment,
 										buffer_, buffer_len_,
 										mid_, ec_);
 			return buffer_used_;

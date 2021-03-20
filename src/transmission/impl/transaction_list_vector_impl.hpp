@@ -47,7 +47,9 @@ find_free_slot() noexcept
 		if(!node.transaction.is_busy())
 			return &node.transaction;
 
-	return nullptr;
+	auto& node = nodes_.emplace_back();
+
+	return &node.transaction;
 }
 
 template<typename Transaction>

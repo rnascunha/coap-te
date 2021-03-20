@@ -11,9 +11,10 @@ The implemtation aims to:
 It's NOT implemented (yet):
 * Cache strategie;
 * Security;
-* Observing (RFC7641);
-* Block-wise transfer (RFC7641);
-* TCP support (RFC8323);
+* Discovery ([RFC6690](https://tools.ietf.org/html/rfc6690))
+* Observing ([RFC7641](https://tools.ietf.org/html/rfc7641));
+* Block-wise transfer ([RFC7959](https://tools.ietf.org/html/rfc7959));
+* TCP support ([RFC8323](https://tools.ietf.org/html/rfc8323));
 * Many more :(...
 
 ## Dependencies
@@ -69,14 +70,16 @@ If you build **CoAP-te** with the `-DWITH_EXAMPLES=1` flag, all example executab
 
 *Transmission examples*:
 * `raw_transaction`: explains the use of transactions. Transactions are not meant to be used directly, but through the *CoAP::engine*.
+* `raw_engine`: demonstrate how to configure and use your own engines, the central feature of **CoAP-te**. Engines
+deal with all CoAP transmission complexity. 
 
 *URI examples*:
 * `decompose`: breaks a CoAP URI into internal structures of **CoAP-te**, ready to be used. Any percent-encoded characters is converted. 
 
 *Internal examples*: this examples are to test internal functions used, not intended to the end user.
 * `tree`: shows how to work with *trees*, the structure that holds all the resources.
-* `percent_encode`: demonstrate the use of the function `percent_encode` used to compose URI strings;
-* `percent_decode`: demonstrate the use of the function `percent_decode` used to decompose URI strings;
+* `percent_encode`: demonstrate the use of function `percent_encode` used to compose URI strings;
+* `percent_decode`: demonstrate the use of function `percent_decode` used to decompose URI strings;
 
 *Port examples*: here are show the raw use of connections/plataform dependent functions. Not intended to the end user.
 * `udp_socket`: the use of the implemented posix-like UDP socket. You can use this as reference to port **CoAP-te** to your plataform.

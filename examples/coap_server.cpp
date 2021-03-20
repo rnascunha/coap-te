@@ -454,7 +454,7 @@ static void delete_dynamic_handler(CoAP::Message::message const& request,
 		.serialize();
 }
 
-void cb(void const* trans, CoAP::Message::message const* r, void*)
+void cb(void const* trans, CoAP::Message::message const* r, void*) noexcept
 {
 	auto const* t = static_cast<engine::transaction_t const*>(trans);
 	status(main_mod, "Status: %s", CoAP::Debug::transaction_status_string(t->status()));

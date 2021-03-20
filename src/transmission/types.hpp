@@ -49,11 +49,11 @@ struct separate_response{
 template<typename Endpoint>
 using default_cb = void(*)(Endpoint const&,
 							CoAP::Message::message const&,
-							void*);
+							void*) noexcept;
 
 using transaction_cb = void(*)(void const*,
 							CoAP::Message::message const*,
-							void*);
+							void*) noexcept;
 
 enum class status_t{
 	none = 0,	///<  not been used

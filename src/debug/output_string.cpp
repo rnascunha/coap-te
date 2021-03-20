@@ -10,7 +10,7 @@ const char* type_string(CoAP::Message::type type)
 		using namespace CoAP::Message;
 		case type::confirmable: 		return "Confirmable";
 		case type::nonconfirmable:		return "Non-Confirmable";
-		case type::acknowledgement:		return "Ack";
+		case type::acknowledgment:		return "Ack";
 		case type::reset:				return "Reset";
 		default:
 			break;

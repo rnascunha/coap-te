@@ -9,7 +9,7 @@ bool check_type(type mtype)
 	{
 		case type::confirmable:
 		case type::nonconfirmable:
-		case type::acknowledgement:
+		case type::acknowledgment:
 		case type::reset:
 			return true;
 		default: break;

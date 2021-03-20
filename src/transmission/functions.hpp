@@ -12,6 +12,13 @@ std::size_t make_response_code_error(CoAP::Message::message const& msg,
 		std::uint8_t* buffer, std::size_t buffer_len,
 		CoAP::Message::code, const char* payload = "") noexcept;
 
+template<bool UseInternalBuffer = false,
+		typename Engine>
+bool send_async_ack(Engine&,
+		typename Engine::endpoint const&,
+		CoAP::Message::message const&,
+		CoAP::Error& ec) noexcept;
+
 double expiration_timeout(configure const& config) noexcept;
 double expiration_timeout_retransmit(
 		double timeout,
@@ -24,5 +31,7 @@ double non_lifetime(configure const& config, unsigned int max_latency) noexcept;
 
 }//Transmission
 }//CoAP
+
+#include "impl/functions_impl.hpp"
 
 #endif /* COAP_TE_TRANSMISSION_FUNCTION_HPP__ */

@@ -16,7 +16,7 @@ make_response_code_error(CoAP::Message::message const& msg,
 	std::memcpy(token, msg.token, msg.token_len);
 
 	return CoAP::Message::serialize(buffer, buffer_len,
-					CoAP::Message::type::acknowledgement,
+					CoAP::Message::type::acknowledgment,
 					err_code, msg.mid, token, msg.token_len,
 					nullptr, payload, std::strlen(payload), ec);
 }

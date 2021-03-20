@@ -13,7 +13,7 @@ enum class type : std::uint8_t
 {
 	confirmable 			= 0,
 	nonconfirmable 			= 1,
-	acknowledgement 		= 2,
+	acknowledgment	 		= 2,
 	reset 					= 3
 };
 
