@@ -3,7 +3,6 @@ message(STATUS "Compile examples...")
 set(EXAMPLES_DIR ./examples)
 
 set(EXAMPLES_LIST	
-					${EXAMPLES_DIR}/coap_server.cpp
 					${EXAMPLES_DIR}/internal/percent_encode.cpp
 					${EXAMPLES_DIR}/internal/tree.cpp
 					${EXAMPLES_DIR}/internal/percent_decode.cpp
@@ -14,6 +13,7 @@ set(EXAMPLES_LIST
 					${EXAMPLES_DIR}/port/udp_socket.cpp
 					${EXAMPLES_DIR}/transmission/raw_engine.cpp
 					${EXAMPLES_DIR}/transmission/raw_transaction.cpp
+					${EXAMPLES_DIR}/transmission/engine_server.cpp
 					)
 
 foreach(example ${EXAMPLES_LIST})
@@ -33,7 +33,7 @@ foreach(example ${EXAMPLES_LIST})
 	if(WIN32)
 		target_link_libraries(${EXAMPLE_OUT} wsock32 ws2_32)
 	else()
-		if(${EXAMPLE_OUT} STREQUAL coap_server)
+		if(${EXAMPLE_OUT} STREQUAL engine_server)
 			target_link_libraries(${EXAMPLE_OUT} pthread)
 		endif()
 	endif()

@@ -38,7 +38,7 @@ struct message{
 	void const*		token;				///< Pointer to token
 	std::size_t		token_len = 0;		///< Token length
 	std::uint8_t const* option_init;	///< Pointer to init of options
-	std::size_t		options_len;		///< Size at buffer of options
+	std::size_t		options_len = 0;		///< Size at buffer of options
 	std::size_t		option_num = 0;		///< Number of options
 	void const*		payload;			///< Pointer to payload init
 	std::size_t		payload_len = 0;	///< Size of payload

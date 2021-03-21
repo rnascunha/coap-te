@@ -5,6 +5,9 @@
  *
  * Thinking that different environments have different needs, it was develop
  * a configurable engine. More about how to configure it to your needs below.
+ *
+ * This examples show the use in client mode, so we are going to make a
+ * simple request, and print the response (if any).
  */
 
 #include "log.hpp"				//Log header

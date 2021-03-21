@@ -71,7 +71,8 @@ If you build **CoAP-te** with the `-DWITH_EXAMPLES=1` flag, all example executab
 *Transmission examples*:
 * `raw_transaction`: explains the use of transactions. Transactions are not meant to be used directly, but through the *CoAP::engine*.
 * `raw_engine`: demonstrate how to configure and use your own engines, the central feature of **CoAP-te**. Engines
-deal with all CoAP transmission complexity. 
+deal with all CoAP transmission complexity. After configuration, makes a simple CoAP request.
+* `engine_server`: shows how to add resource to a engine, and how to make the response to specific methods, using different strategies.
 
 *URI examples*:
 * `decompose`: breaks a CoAP URI into internal structures of **CoAP-te**, ready to be used. Any percent-encoded characters is converted. 
