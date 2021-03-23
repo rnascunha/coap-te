@@ -10,6 +10,9 @@ namespace Debug{
 void print_message(CoAP::Message::message const&);
 bool print_message(std::uint8_t const* const, std::size_t);
 
+void print_message_str(CoAP::Message::message const&) noexcept;
+
+
 bool print_byte_message(std::uint8_t const* const, std::size_t);
 
 }//Debug

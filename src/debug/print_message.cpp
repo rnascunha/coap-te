@@ -15,6 +15,7 @@ void print_message(CoAP::Message::message const& msg)
 	std::printf("\tType: %s\n\tCode: %s\n\tMessage ID: 0x%04X\n\tToken[%lu]: ",
 			type_string(msg.mtype), code_string(msg.mcode), msg.mid, msg.token_len);
 	print_array(msg.token, msg.token_len);
+
 	std::printf("\n\tOptions[%lu]:\n", msg.option_num);
 	unsigned offset = 0, delta = 0;
 	for(std::size_t i = 0; i < msg.option_num; i++)
@@ -23,11 +24,13 @@ void print_message(CoAP::Message::message const& msg)
 		CoAP::Error ec;
 		offset += CoAP::Message::parse_option<true>(opt,
 				msg.option_init + offset, msg.options_len - offset, delta, ec);
+
 		delta = static_cast<unsigned>(opt.ocode);
 		std::printf("\t\t");
 		print_option(opt);
 		std::printf("\n");
 	}
+
 	std::printf("\tPayload[%lu]: ", msg.payload_len);
 	print_array(msg.payload, msg.payload_len);
 	std::printf("\n");
@@ -61,6 +64,35 @@ bool print_message(std::uint8_t const* const arr, std::size_t size)
 	std::printf("\n");
 
 	return true;
+}
+
+void print_message_str(CoAP::Message::message const& msg) noexcept
+{
+	std::printf("\tType: %s\n\tCode: %s\n\tMessage ID: 0x%04X\n\tToken[%lu]: ",
+			type_string(msg.mtype), code_string(msg.mcode), msg.mid, msg.token_len);
+	print_array_as_string(msg.token, msg.token_len);
+	std::printf("\n\tOptions[%lu]:\n", msg.option_num);
+	unsigned offset = 0, delta = 0;
+	for(std::size_t i = 0; i < msg.option_num; i++)
+	{
+		CoAP::Message::Option::option opt;
+		CoAP::Error ec;
+		offset += CoAP::Message::parse_option<true>(opt,
+				msg.option_init + offset, msg.options_len - offset, delta, ec);
+		if(ec)
+		{
+			printf("\n\nERROR PARSING[%d] %s\n\n", ec.value(), ec.message());
+			printf("opt: %d/%u\n", static_cast<int>(opt.ocode), opt.length);
+			exit(1);
+		}
+		delta = static_cast<unsigned>(opt.ocode);
+		std::printf("\t\t");
+		print_option(opt);
+		std::printf("\n");
+	}
+	std::printf("\tPayload[%lu]: ", msg.payload_len);
+	print_array_as_string(msg.payload, msg.payload_len);
+	std::printf("\n");
 }
 
 static void print_make_space(const char* header, std::size_t length, int size_data)

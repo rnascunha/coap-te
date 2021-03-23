@@ -100,12 +100,18 @@ struct option
 	bool is_unsafe() const noexcept;
 	bool is_no_cache_key() const noexcept;
 
-	bool operator==(option const& rhs) noexcept;
-	bool operator!=(option const& rhs) noexcept;
-	bool operator<(option const& rhs) noexcept;
-	bool operator>(option const& rhs) noexcept;
-	bool operator<=(option const& rhs) noexcept;
-	bool operator>=(option const& rhs) noexcept;
+	bool operator==(option const& rhs) const noexcept;
+	bool operator!=(option const& rhs) const noexcept;
+	bool operator<(option const& rhs) const noexcept;
+	bool operator>(option const& rhs) const noexcept;
+	bool operator<=(option const& rhs) const noexcept;
+	bool operator>=(option const& rhs) const noexcept;
+
+	bool operator==(code rhs) const noexcept;
+	bool operator!=(code rhs) const noexcept;
+	explicit operator bool() const noexcept;
+
+	option& operator=(option const&) noexcept = default;
 
 	code 		ocode = code::invalid;		//Option code
 	unsigned	length = 0;					//Option length
@@ -114,6 +120,8 @@ struct option
 
 using List = CoAP::list<option>;
 using node = List::node;
+
+std::size_t serialized_size(option const&, option const& before) noexcept;
 
 void exchange(option* first, option* second) noexcept;
 void sort(option* options, std::size_t num) noexcept;

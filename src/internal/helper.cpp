@@ -20,7 +20,7 @@ void make_short_unsigned(unsigned& value, unsigned& size) noexcept
 	}
 	if(size == 0)
 	{
-		size = 1;
+		size = 0;
 		value = 0;
 		return;
 	}
@@ -36,6 +36,21 @@ bool array_to_unsigned(std::uint8_t const* arr, std::size_t length, unsigned& va
 		value |= arr[i] << ((length - i - 1) * 8);
 
 	return true;
+}
+
+void shift_left(std::uint8_t* buffer, std::size_t size, std::size_t shift) noexcept
+{
+	std::uint8_t *begin = buffer + shift;
+	while(size--)
+		*buffer++ = *begin++;
+}
+
+void shift_right(std::uint8_t* buffer, std::size_t size, std::size_t shift) noexcept
+{
+	std::uint8_t *end = buffer + size - 1,
+				*n_end = buffer + size + shift - 1;
+	while(size--)
+		*n_end-- = *end--;
 }
 
 }//Helper

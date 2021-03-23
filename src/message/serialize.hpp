@@ -75,6 +75,39 @@ std::size_t serialize(std::uint8_t* buffer, std::size_t buffer_len,
 		void const* const payload, std::size_t payload_len,
 		CoAP::Error& ec) noexcept;
 
+class Serialize{
+	public:
+		Serialize(std::uint8_t* buffer, std::size_t buffer_size);
+		Serialize(std::uint8_t* buffer, std::size_t buffer_size, message&);
+
+		std::uint8_t const* buffer() const noexcept;
+		std::size_t	size() const noexcept;
+		std::size_t used() const noexcept;
+
+		message const& get_message() const noexcept;
+
+		bool header(type mtype, code mcode, std::uint16_t message_id) noexcept;
+
+		bool token(const char*) noexcept;
+		bool token(const void*, std::size_t) noexcept;
+
+		template<bool CheckRepeat = true>
+		bool add_option(Option::option&& op) noexcept;
+
+		bool payload(const char*) noexcept;
+		bool payload(const void*, std::size_t) noexcept;
+
+		bool remove_token() noexcept;
+		bool remove_option(Option::code op) noexcept;
+		bool remove_payload() noexcept;
+	private:
+		std::uint8_t* 		buffer_;
+		std::size_t const 	size_;
+
+		message 			msg_;
+};
+
+
 }//Message
 }//CoAP
 

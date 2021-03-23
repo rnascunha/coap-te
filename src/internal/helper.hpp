@@ -41,6 +41,9 @@ inline void interger_to_big_endian_array(std::uint8_t* dest,
 void make_short_unsigned(unsigned& value, unsigned& size) noexcept;
 bool array_to_unsigned(std::uint8_t const*, std::size_t, unsigned&);
 
+void shift_left(std::uint8_t* buffer, std::size_t size, std::size_t shift) noexcept;
+void shift_right(std::uint8_t* buffer, std::size_t size, std::size_t shift) noexcept;
+
 }//Helper
 }//CoAP
 

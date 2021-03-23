@@ -8,6 +8,7 @@ namespace Debug{
 
 int print_array(const void* const buffer, std::size_t len, unsigned separate = 2);
 void print_string(const void* const buffer, std::size_t len);
+void print_array_as_string(const void* const buffer, std::size_t len) noexcept;
 
 }//Message
 }//CoAP

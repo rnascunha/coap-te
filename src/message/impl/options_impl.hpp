@@ -19,7 +19,7 @@ static bool check_type(code code, type type) noexcept
 	return true;
 }
 
-template<bool CheckType = true>
+template<bool CheckType /* = true */>
 bool create(option& option, code code) noexcept
 {
 	if constexpr (CheckType)
@@ -33,7 +33,7 @@ bool create(option& option, code code) noexcept
 	return true;
 }
 
-template<bool CheckType = true>
+template<bool CheckType /* = true */>
 bool create(option& option, code code, const char* value) noexcept
 {
 	if constexpr (CheckType)
@@ -47,7 +47,7 @@ bool create(option& option, code code, const char* value) noexcept
 	return true;
 }
 
-template<bool CheckType = true>
+template<bool CheckType /* = true */>
 bool create(option& option, code code, unsigned& value) noexcept
 {
 	if constexpr (CheckType)
@@ -61,7 +61,7 @@ bool create(option& option, code code, unsigned& value) noexcept
 	return true;
 }
 
-template<bool CheckType = true>
+template<bool CheckType /* = true */>
 bool create(option& option, code code, const void* value, unsigned length) noexcept
 {
 	if constexpr (CheckType)

@@ -31,9 +31,10 @@ class Option_Parser
 		Option::option const* next(CoAP::Error& ec) noexcept;
 
 		void reset() noexcept;
-		Option::option const* current() noexcept;
-		unsigned current_number() noexcept;
-		std::size_t total_number() noexcept;
+		Option::option const* current() const noexcept;
+		unsigned current_number() const noexcept;
+		std::size_t total_number() const noexcept;
+		unsigned offset() const noexcept;
 	private:
 		message const& msg_;
 

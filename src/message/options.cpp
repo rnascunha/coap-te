@@ -54,39 +54,67 @@ option::option(code code, const void* value, unsigned length)
 	create<false>(*this, code, value, length);
 }
 
-bool option::operator==(option const& rhs) noexcept
+bool option::operator==(option const& rhs) const noexcept
 {
 	return ocode == rhs.ocode;
 }
 
-bool option::operator!=(option const& rhs) noexcept
+bool option::operator!=(option const& rhs) const noexcept
 {
 	return !(*this == rhs);
 }
 
-bool option::operator<(option const& rhs) noexcept
+bool option::operator<(option const& rhs) const noexcept
 {
 	return ocode < rhs.ocode;
 }
 
-bool option::operator>(option const& rhs) noexcept
+bool option::operator>(option const& rhs) const noexcept
 {
 	return *this > rhs;
 }
 
-bool option::operator<=(option const& rhs) noexcept
+bool option::operator<=(option const& rhs) const noexcept
 {
 	return !(*this > rhs);
 }
 
-bool option::operator>=(option const& rhs) noexcept
+bool option::operator>=(option const& rhs) const noexcept
 {
 	return !(*this < rhs);
+}
+
+bool option::operator==(code rhs) const noexcept
+{
+	return ocode == rhs;
+}
+
+bool option::operator!=(code rhs) const noexcept
+{
+	return !(*this == rhs);
+}
+
+option::operator bool() const noexcept
+{
+	return ocode != code::invalid;
 }
 
 bool option::is_critical() const noexcept{ return CoAP::Message::Option::is_critical(ocode); }
 bool option::is_unsafe() const noexcept{ return CoAP::Message::Option::is_unsafe(ocode); }
 bool option::is_no_cache_key() const noexcept{ return CoAP::Message::Option::is_no_cache_key(ocode); }
+
+std::size_t serialized_size(option const& op, option const& before) noexcept
+{
+	std::size_t size = 1;
+	unsigned delta = before ?
+								static_cast<unsigned>(op.ocode) - static_cast<unsigned>(before.ocode)
+								: static_cast<unsigned>(op.ocode);
+
+	size += delta > 12 ? (delta < 255 ? 1 : 2) : 0;
+	size += op.length > 12 ? (op.length < 255 ? 1 : 2) : 0;
+
+	return size + op.length;
+}
 
 void exchange(option* first, option* second) noexcept
 {

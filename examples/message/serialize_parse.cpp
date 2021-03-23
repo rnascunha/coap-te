@@ -57,7 +57,7 @@ int main()
 	status(example_mod, "Serialize/Parse Example...");
 
 	std::uint8_t buffer[BUFFER_LEN];	//Buffer where the data will be serialized
-	CoAP::Error ec;					//Use to error repport
+	CoAP::Error ec;						//Use to error report
 
 	//Message token
 	std::uint8_t token[] = {0x03, 0x04, 0x05, 0x06, 0x07};

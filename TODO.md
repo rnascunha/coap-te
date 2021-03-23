@@ -19,3 +19,5 @@
 * Change std::size_t to unsigned?
 
 * engine parameter profile and resource_callback seems to be ambiguos... is it?
+
+* ETSI tests. Do it...

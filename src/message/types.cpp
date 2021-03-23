@@ -17,5 +17,12 @@ bool check_type(type mtype)
 	return false;
 }
 
+std::size_t
+message::size() const noexcept
+{
+		/* header */									/* payload marker */
+	return 4 + token_len + options_len + payload_len + (payload_len ? 1 : 0);
+}
+
 }//Message
 }//CoAP

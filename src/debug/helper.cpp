@@ -1,5 +1,6 @@
 #include "helper.hpp"
 #include <cstdio>
+#include "internal/ascii.hpp"
 
 #include <cstdint>
 
@@ -24,6 +25,16 @@ void print_string(const void* const buffer, std::size_t len)
 	auto const* char_u8 = static_cast<char const*>(buffer);
 	for(std::size_t i = 0; i < len; i++)
 		std::printf("%c", char_u8[i]);
+}
+
+void print_array_as_string(const void* const buffer, std::size_t len) noexcept
+{
+	auto const* char_u8 = static_cast<char const*>(buffer);
+	for(std::size_t i = 0; i < len; i++)
+		if(CoAP::Helper::is_alpha_digit(char_u8[i]))
+			std::printf("%c", char_u8[i]);
+		else
+			std::printf("\\%02X", char_u8[i]);
 }
 
 }//Debug

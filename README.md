@@ -67,6 +67,8 @@ If you build **CoAP-te** with the `-DWITH_EXAMPLES=1` flag, all example executab
 * `serialize_parse`: shows how the serialize message using 3 strategies (factory and manually using option list/array). Then parse this information (as it was received by network) and iterate through options.
 * `factory`: demostrate how to use a factory to construct a message, using internal/external features.
 * `option`: shows how to manipulate options of different types. How to declare, serialize and parse.
+* `serialze_class`: explain the use of the `Serialize` class. This is a class to modified information that were
+already serilized (written to the buffer).
 
 *Transmission examples*:
 * `raw_transaction`: explains the use of transactions. Transactions are not meant to be used directly, but through the *CoAP::engine*.

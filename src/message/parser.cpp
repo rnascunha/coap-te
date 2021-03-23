@@ -182,19 +182,24 @@ void Option_Parser::reset() noexcept
 	offset_ = 0;
 }
 
-Option::option const* Option_Parser::current() noexcept
+Option::option const* Option_Parser::current() const noexcept
 {
 	return &opt_;
 }
 
-unsigned Option_Parser::current_number() noexcept
+unsigned Option_Parser::current_number() const noexcept
 {
 	return current_opt_;
 }
 
-std::size_t Option_Parser::total_number() noexcept
+std::size_t Option_Parser::total_number() const noexcept
 {
 	return msg_.option_num;
+}
+
+unsigned Option_Parser::offset() const noexcept
+{
+	return offset_;
 }
 
 }//Message

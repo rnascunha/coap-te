@@ -4,6 +4,7 @@
 #include "../serialize.hpp"
 #include <cstring>
 #include "internal/helper.hpp"
+#include "../parser.hpp"
 
 namespace CoAP{
 namespace Message{
@@ -244,6 +245,91 @@ static unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 	offset += option.length;
 
 	return offset;
+}
+
+template<bool CheckRepeat>
+bool Serialize::add_option(Option::option&& op) noexcept
+{
+	if constexpr(CheckRepeat)
+	{
+		Option::config const * const config = Option::get_config(op.ocode);
+		if(!config->repeatable)
+		{
+			Option_Parser parser(msg_);
+			Option::option const* opt;
+			while((opt = parser.next()))
+			{
+				if(opt->ocode == op.ocode) return false;
+				if(opt->ocode > op.ocode) break;
+			}
+		}
+	}
+
+	Option_Parser parser(msg_);
+	Option::option const *next;
+	Option::option current;
+
+	unsigned offset = 0;
+	while((next = parser.next()))
+	{
+		if(next->ocode > op.ocode)
+			break;
+		current = *next;
+		offset = parser.offset();
+	}
+
+	std::size_t opt_size = Option::serialized_size(op, current);
+	if((msg_.size() + opt_size) > size_) return false;
+
+	std::uint8_t* n_buf = buffer_ + 4 + msg_.token_len + offset;
+	CoAP::Helper::shift_right(n_buf,
+							msg_.size() - msg_.token_len - offset - 4,
+							opt_size);
+
+	CoAP::Error ec;
+	unsigned delta = current ? static_cast<unsigned>(current.ocode) : 0;
+	Option::code c = current.ocode;
+	make_option<false, false>(n_buf, opt_size,
+								op, delta,
+								c, ec);
+	if(ec) return false;
+
+	msg_.option_num++;
+	msg_.options_len += opt_size;
+	msg_.option_init = buffer_ + 4 + msg_.token_len;
+
+	msg_.payload = static_cast<std::uint8_t const*>(msg_.payload) + opt_size;
+
+	/**
+	 * Changing the next option
+	 */
+	if(next)
+	{
+		unsigned n_delta = current ? static_cast<unsigned>(current.ocode) : 0;
+
+		n_buf += opt_size;
+		CoAP::Error ec;
+		Option::option opt;
+		std::size_t off = parse_option(opt, n_buf, msg_.options_len - offset - opt_size, n_delta, ec);
+		if(ec) return false;
+
+		n_delta = static_cast<unsigned>(op.ocode);
+		Option::code c = op.ocode;
+		unsigned after = make_option<false, false>(n_buf, off,
+										opt, delta,
+										c, ec);
+		if(ec) return false;
+
+		std::size_t diff = off - after;
+		if(diff)
+		{
+			CoAP::Helper::shift_left(n_buf + after, msg_.size() - offset - after, diff);
+			msg_.options_len -= diff;
+			msg_.payload = static_cast<std::uint8_t const*>(msg_.payload) - diff;
+		}
+	}
+
+	return true;
 }
 
 }//Message

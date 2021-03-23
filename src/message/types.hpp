@@ -35,13 +35,15 @@ struct message{
 	type			mtype;				///< Message type (check enum class type)
 	code			mcode;				///< Message code (check enum class code)
 	uint16_t		mid;				///< Message ID
-	void const*		token;				///< Pointer to token
+	void const*		token = nullptr;	///< Pointer to token
 	std::size_t		token_len = 0;		///< Token length
-	std::uint8_t const* option_init;	///< Pointer to init of options
-	std::size_t		options_len = 0;		///< Size at buffer of options
+	std::uint8_t const* option_init = nullptr;	///< Pointer to init of options
+	std::size_t		options_len = 0;	///< Size at buffer of options
 	std::size_t		option_num = 0;		///< Number of options
-	void const*		payload;			///< Pointer to payload init
+	void const*		payload = nullptr;	///< Pointer to payload init
 	std::size_t		payload_len = 0;	///< Size of payload
+
+	std::size_t size() const noexcept;
 };
 
 bool check_type(type);
