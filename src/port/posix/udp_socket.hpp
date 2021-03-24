@@ -1,19 +1,21 @@
-#ifndef COAP_TE_PORT_LINUX_SOCKET_HPP__
-#define COAP_TE_PORT_LINUX_SOCKET_HPP__
+#ifndef COAP_TE_PORT_POSIX_SOCKET_UDP_HPP__
+#define COAP_TE_PORT_POSIX_SOCKET_UDP_HPP__
 
 #include "error.hpp"
-#include "endpoint.hpp"
+#include "endpoint_ipv6.hpp"
 #include <cstdint>
 
 namespace CoAP{
 namespace Port{
-namespace Linux{
+namespace POSIX{
 
-template<int RecvFlags = 0, int SendFlags = 0>
-class socket{
+template<class Endpoint,
+		int RecvFlags = 0,
+		int SendFlags = 0>
+class udp{
 	public:
-		using endpoint = socket_endpoint;
-		socket();
+		using endpoint = Endpoint;
+		udp();
 
 		void open(CoAP::Error&) noexcept;
 		void bind(endpoint&, CoAP::Error&) noexcept;
@@ -27,6 +29,6 @@ class socket{
 }//Port
 }//CoAP
 
-#include "impl/socket_impl.hpp"
+#include "impl/udp_socket_impl.hpp"
 
-#endif /* COAP_TE_PORT_LINUX_SOCKET_HPP__ */
+#endif /* COAP_TE_PORT_POSIX_SOCKET_UDP_HPP__ */

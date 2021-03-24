@@ -1,31 +1,33 @@
-#ifndef COAP_TE_PORT_LINUX_ENDPOINT_HPP__
-#define COAP_TE_PORT_LINUX_ENDPOINT_HPP__
+#ifndef COAP_TE_PORT_POSIX_ENDPOINT_IPV4_HPP__
+#define COAP_TE_PORT_POSIX_ENDPOINT_IPV4_HPP__
 
 #include <cstring>
 #include <cstdint>
+#include "error.hpp"
+
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
 namespace CoAP{
 namespace Port{
-namespace Linux{
+namespace POSIX{
 
-class socket_endpoint{
+class endpoint_ipv4{
 	public:
 		using native_type = struct sockaddr_in;
 		static constexpr const sa_family_t family = AF_INET;
 
-		socket_endpoint()
+		endpoint_ipv4()
 		{
 			::bzero(&addr_, sizeof(struct sockaddr_in));
 		}
 
-		socket_endpoint(in_addr_t addr, std::uint16_t port)
+		endpoint_ipv4(in_addr_t addr, std::uint16_t port)
 		{
 			set(addr, port);
 		}
 
-		socket_endpoint(const char* addr_str, std::uint16_t port, CoAP::Error& ec)
+		endpoint_ipv4(const char* addr_str, std::uint16_t port, CoAP::Error& ec)
 		{
 			if(!set(addr_str, port))
 				ec = CoAP::errc::endpoint_error;
@@ -57,16 +59,16 @@ class socket_endpoint{
 
 		struct sockaddr_in* native() noexcept{ return &addr_; }
 
-		const char* address(char* addr_str) noexcept
+		const char* address(char* addr_str, std::size_t len = INET_ADDRSTRLEN) noexcept
 		{
-			return inet_ntop(family, &addr_.sin_addr, addr_str, sizeof(native_type));
+			return inet_ntop(family, &addr_.sin_addr, addr_str, len);
 		}
 		const char* host(char* host_addr) noexcept { return address(host_addr); }
 
 		in_addr_t address() noexcept{ return addr_.sin_addr.s_addr; }
 		std::uint16_t port() const noexcept{ return ntohs(addr_.sin_port); }
 
-		socket_endpoint& operator=(socket_endpoint const& ep) noexcept
+		endpoint_ipv4& operator=(endpoint_ipv4 const& ep) noexcept
 		{
 			addr_.sin_family = ep.addr_.sin_family;
 			addr_.sin_port = ep.addr_.sin_port;
@@ -74,13 +76,13 @@ class socket_endpoint{
 			return *this;
 		}
 
-		bool operator==(socket_endpoint const& ep) const noexcept
+		bool operator==(endpoint_ipv4 const& ep) const noexcept
 		{
 			return addr_.sin_port == ep.addr_.sin_port &&
 					addr_.sin_addr.s_addr == ep.addr_.sin_addr.s_addr;
 		}
 
-		bool operator!=(socket_endpoint const& ep) const noexcept
+		bool operator!=(endpoint_ipv4 const& ep) const noexcept
 		{
 			return !(*this == ep);
 		}
@@ -88,8 +90,8 @@ class socket_endpoint{
 		struct sockaddr_in		addr_;
 };
 
-}//Linux
+}//POSIX
 }//Port
 }//CoAP
 
-#endif /* COAP_TE_PORT_LINUX_ENDPOINT_HPP__ */
+#endif /* COAP_TE_PORT_POSIX_ENDPOINT_IPV4_HPP__ */

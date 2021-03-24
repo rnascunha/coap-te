@@ -3,19 +3,21 @@ message(STATUS "Compile examples...")
 set(EXAMPLES_DIR ./examples)
 
 set(EXAMPLES_LIST	
-#					${EXAMPLES_DIR}/internal/percent_encode.cpp
-#					${EXAMPLES_DIR}/internal/tree.cpp
-#					${EXAMPLES_DIR}/internal/percent_decode.cpp
-#					${EXAMPLES_DIR}/message/factory.cpp
-#					${EXAMPLES_DIR}/message/serialize_parse.cpp
-#					${EXAMPLES_DIR}/message/option.cpp
-					${EXAMPLES_DIR}/message/serialize_class.cpp
-#					${EXAMPLES_DIR}/uri/decompose.cpp
-#					${EXAMPLES_DIR}/port/udp_socket.cpp
-#					${EXAMPLES_DIR}/transmission/raw_engine.cpp
-#					${EXAMPLES_DIR}/transmission/raw_transaction.cpp
-#					${EXAMPLES_DIR}/transmission/engine_server.cpp
-					)
+				${EXAMPLES_DIR}/internal/percent_encode.cpp
+				${EXAMPLES_DIR}/internal/tree.cpp
+				${EXAMPLES_DIR}/internal/percent_decode.cpp
+				${EXAMPLES_DIR}/message/factory.cpp
+				${EXAMPLES_DIR}/message/serialize_parse.cpp
+				${EXAMPLES_DIR}/message/option.cpp
+				${EXAMPLES_DIR}/message/serialize_class.cpp
+				${EXAMPLES_DIR}/uri/decompose.cpp
+				${EXAMPLES_DIR}/transmission/raw_engine.cpp
+				${EXAMPLES_DIR}/transmission/raw_transaction.cpp
+				${EXAMPLES_DIR}/transmission/engine_server.cpp
+				${EXAMPLES_DIR}/port/endpoint_ipv6.cpp
+				${EXAMPLES_DIR}/port/udp_server.cpp
+				${EXAMPLES_DIR}/port/udp_client.cpp
+			)
 
 foreach(example ${EXAMPLES_LIST})
 	string(REGEX REPLACE "./.*/" "" EXAMPLE_OUT ${example})

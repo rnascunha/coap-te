@@ -1,25 +1,25 @@
-#include "../socket.hpp"
+#include "../udp_ipv4.hpp"
 #include <cerrno>
 
 namespace CoAP{
 namespace Port{
-namespace Linux{
+namespace POSIX{
 
 template<int RecvFlags, int SendFlags>
-socket<RecvFlags, SendFlags>::socket() : socket_(0){}
+udp_ipv4<RecvFlags, SendFlags>::udp_ipv4() : socket_(0){}
 
 template<int RecvFlags, int SendFlags>
 void
-socket<RecvFlags, SendFlags>::
+udp_ipv4<RecvFlags, SendFlags>::
 open(CoAP::Error& ec) noexcept
 {
-	if((socket_ = ::socket(AF_INET, SOCK_DGRAM, 0)) == -1)
+	if((socket_ = ::socket(endpoint::family, SOCK_DGRAM, 0)) == -1)
 		ec = CoAP::errc::socket_error;
 }
 
 template<int RecvFlags, int SendFlags>
 void
-socket<RecvFlags, SendFlags>::
+udp_ipv4<RecvFlags, SendFlags>::
 bind(endpoint& ep, CoAP::Error& ec) noexcept
 {
 	if (::bind(socket_,
@@ -30,7 +30,7 @@ bind(endpoint& ep, CoAP::Error& ec) noexcept
 
 template<int RecvFlags, int SendFlags>
 std::size_t
-socket<RecvFlags, SendFlags>::
+udp_ipv4<RecvFlags, SendFlags>::
 send(const void* buffer, std::size_t buffer_len, endpoint& ep, CoAP::Error& ec) noexcept
 {
 	int sent = ::sendto(socket_, buffer, buffer_len, SendFlags,
@@ -47,7 +47,7 @@ send(const void* buffer, std::size_t buffer_len, endpoint& ep, CoAP::Error& ec) 
 
 template<int RecvFlags, int SendFlags>
 std::size_t
-socket<RecvFlags, SendFlags>::
+udp_ipv4<RecvFlags, SendFlags>::
 receive(void* buffer, std::size_t buffer_len, endpoint& ep, CoAP::Error& ec) noexcept
 {
 	unsigned addr_len = sizeof(struct sockaddr);
@@ -69,6 +69,6 @@ receive(void* buffer, std::size_t buffer_len, endpoint& ep, CoAP::Error& ec) noe
 	return recv;
 }
 
-}//Linux
+}//POSIX
 }//Port
 }//CoAP
