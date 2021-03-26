@@ -60,7 +60,7 @@ class transaction
 				std::uint16_t mid,
 				CoAP::Error&) noexcept;
 
-		bool init(configure const& config,
+		bool init(configure const&,
 				endpoint_t const&,
 				Callback_Functor, void*,
 				CoAP::Error&) noexcept;
@@ -87,6 +87,7 @@ class transaction
 		std::uint8_t* buffer() noexcept;
 		std::size_t buffer_used() const noexcept;
 		endpoint_t& endpoint() noexcept;
+		endpoint_t endpoint() const noexcept;
 
 		transaction_param transaction_parameters() const noexcept;
 	private:

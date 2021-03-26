@@ -20,6 +20,9 @@ bool check_code(code mcode) noexcept
 		case code::valid:						//2.03 Valid
 		case code::changed:						//2.04 Changed
 		case code::content:						//2.05 Content
+#if	COAP_TE_BLOCKWISE_TRANSFER == 1
+		case code::ccontinue:					//2.31 Continue
+#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
 		//Client Error
 		case code::bad_request:					//4.00 Bad Request
 		case code::unauthorized:				//4.01 Unauthorized
@@ -28,6 +31,9 @@ bool check_code(code mcode) noexcept
 		case code::not_found:					//4.04 Not Found
 		case code::method_not_allowed:			//4.05 Method Not Allowed
 		case code::not_accpetable:				//4.06 Not Acceptable
+#if	COAP_TE_BLOCKWISE_TRANSFER == 1
+		case code::request_entity_incomplete:	//4.08 Request Entity Incomplete
+#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
 		case code::precondition_failed:			//4.12 Precondition Failed
 		case code::request_entity_too_large:	//4.13 Request Entity Too Large
 		case code::unsupported_content_format:	//4.15 Unsupported Content-Format
@@ -52,6 +58,26 @@ bool is_request(code mcode) noexcept
 bool is_response(code mcode) noexcept
 {
 	return !is_request(mcode) && mcode != code::empty;
+}
+
+bool is_success(code mcode) noexcept
+{
+	return mcode != code::empty && (static_cast<int>(mcode) >> 5) == code_class::success;
+}
+
+bool is_client_error(code mcode) noexcept
+{
+	return mcode != code::empty && (static_cast<int>(mcode) >> 5) == code_class::client_error;
+}
+
+bool is_server_error(code mcode) noexcept
+{
+	return mcode != code::empty && (static_cast<int>(mcode) >> 5) == code_class::server_error;
+}
+
+bool is_error(code mcode) noexcept
+{
+	return is_server_error(mcode) || is_client_error(mcode);
 }
 
 }//Message

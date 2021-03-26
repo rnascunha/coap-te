@@ -177,6 +177,16 @@ endpoint() noexcept
 template<unsigned MaxPacketSize,
 		typename Callback_Functor,
 		typename Endpoint>
+Endpoint
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+endpoint() const noexcept
+{
+	return ep_;
+}
+
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
 bool
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
 init(configure const& config,

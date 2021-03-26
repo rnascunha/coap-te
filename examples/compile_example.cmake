@@ -14,6 +14,9 @@ set(EXAMPLES_LIST
 				${EXAMPLES_DIR}/transmission/raw_engine.cpp
 				${EXAMPLES_DIR}/transmission/raw_transaction.cpp
 				${EXAMPLES_DIR}/transmission/engine_server.cpp
+				${EXAMPLES_DIR}/transmission/request_get_block_wise.cpp
+				${EXAMPLES_DIR}/transmission/request_put_block_wise.cpp
+				${EXAMPLES_DIR}/transmission/response_block_wise.cpp
 				${EXAMPLES_DIR}/port/endpoint_ipv6.cpp
 				${EXAMPLES_DIR}/port/udp_server.cpp
 				${EXAMPLES_DIR}/port/udp_client.cpp

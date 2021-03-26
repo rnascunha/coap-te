@@ -1,3 +1,4 @@
+#include "defines/defaults.hpp"
 #include "print_options.hpp"
 #include <iostream>
 
@@ -24,6 +25,23 @@ static void print_payload(CoAP::Message::Option::option const& op)
 				<< content_format_string(static_cast<CoAP::Message::content_format>(buffer_u8[0]));
 		return;
 	}
+
+#if	COAP_TE_BLOCKWISE_TRANSFER == 1
+	if(op.ocode == CoAP::Message::Option::code::block1 ||
+		op.ocode == CoAP::Message::Option::code::block2)
+	{
+		unsigned value;
+		CoAP::Helper::array_to_unsigned(static_cast<std::uint8_t const*>(op.value), op.length, value);
+		std::printf("%u %u(%u)/%c/%u",
+				value,
+				CoAP::Message::Option::block_number(value),
+				CoAP::Message::Option::byte_offset(value),
+				CoAP::Message::Option::more(value) ? 'M' : '_',
+				CoAP::Message::Option::block_size(value));
+
+		return;
+	}
+#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
 
 	CoAP::Message::Option::config const* config = CoAP::Message::Option::get_config(op.ocode);
 	switch(config->otype)

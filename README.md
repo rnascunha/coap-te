@@ -8,12 +8,15 @@ The implemtation aims to:
 * Modularized: As much as possible, all modules work indenpenditly;
 * Portable: simple to port to your system/device.
 
+It's implemented:
+* CoAP ([RFC7252](https://tools.ietf.org/html/rfc7252));
+* Block-wise transfer ([RFC7959](https://tools.ietf.org/html/rfc7959));
+
 It's NOT implemented (yet):
 * Cache strategie;
 * Security;
 * Discovery ([RFC6690](https://tools.ietf.org/html/rfc6690))
 * Observing ([RFC7641](https://tools.ietf.org/html/rfc7641));
-* Block-wise transfer ([RFC7959](https://tools.ietf.org/html/rfc7959));
 * TCP support ([RFC8323](https://tools.ietf.org/html/rfc8323));
 * Many more :(...
 
@@ -75,6 +78,9 @@ already serilized (written to the buffer).
 * `raw_engine`: demonstrate how to configure and use your own engines, the central feature of **CoAP-te**. Engines
 deal with all CoAP transmission complexity. After configuration, makes a simple CoAP request.
 * `engine_server`: shows how to add resource to a engine, and how to make the response to specific methods, using different strategies.
+* `request_get_block_wise`: this example makes a *GET* request using *block2* block wise transfer, from a client to a server; 
+* `request_put_block_wise`: this example makes a *PUT* request using *block1* block wise transfer, from a client to a server; 
+* `response_block_wise`: this example is a server that responsts to the `request_get_block_wise` and `request_put_block_wise` examples above;
 
 *URI examples*:
 * `decompose`: breaks a CoAP URI into internal structures of **CoAP-te**, ready to be used. Any percent-encoded characters is converted. 
@@ -85,7 +91,8 @@ deal with all CoAP transmission complexity. After configuration, makes a simple 
 * `percent_decode`: demonstrate the use of function `percent_decode` used to decompose URI strings;
 
 *Port examples*: here are show the raw use of connections/plataform dependent functions. Not intended to the end user.
-* `udp_socket`: the use of the implemented posix-like UDP socket. You can use this as reference to port **CoAP-te** to your plataform.
+* `udp_server`: the use of the implemented posix-like UDP socket. Run a echo UDP server;
+* `udp_client`: the use of the implemented posix-like UDP socket. Run a UDP client making a request and wait for a response;
 
 ## Portability
 

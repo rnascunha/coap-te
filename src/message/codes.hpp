@@ -1,6 +1,7 @@
 #ifndef COAP_TE_CODES_HPP__
 #define COAP_TE_CODES_HPP__
 
+#include "defines/defaults.hpp"
 #include <cstdint>
 
 namespace CoAP{
@@ -37,6 +38,9 @@ enum class code : std::uint8_t
 	valid 					= make_code(code_class::success, 3),	//2.03 Valid
 	changed 				= make_code(code_class::success, 4),	//2.04 Changed
 	content 				= make_code(code_class::success, 5),	//2.05 Content
+#if	COAP_TE_BLOCKWISE_TRANSFER == 1
+	ccontinue				= make_code(code_class::success, 31),	//2.31 Continue
+#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
 	//Client Error
 	bad_request 			= make_code(code_class::client_error, 0),	//4.00 Bad Request
 	unauthorized 			= make_code(code_class::client_error, 1),	//4.01 Unauthorized
@@ -45,6 +49,9 @@ enum class code : std::uint8_t
 	not_found 				= make_code(code_class::client_error, 4),	//4.04 Not Found
 	method_not_allowed 		= make_code(code_class::client_error, 5),	//4.05 Method Not Allowed
 	not_accpetable 			= make_code(code_class::client_error, 6),	//4.06 Not Acceptable
+#if	COAP_TE_BLOCKWISE_TRANSFER == 1
+	request_entity_incomplete = make_code(code_class::client_error, 8),	//4.08 Request Entity Incomplete
+#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
 	precondition_failed 	= make_code(code_class::client_error, 12),	//4.12 Precondition Failed
 	request_entity_too_large = make_code(code_class::client_error, 13), //4.13 Request Entity Too Large
 	unsupported_content_format = make_code(code_class::client_error, 15),	//4.15 Unsupported Content-Format
@@ -60,6 +67,10 @@ enum class code : std::uint8_t
 bool check_code(code) noexcept;
 bool is_request(code) noexcept;
 bool is_response(code) noexcept;
+bool is_success(code) noexcept;
+bool is_client_error(code) noexcept;
+bool is_server_error(code) noexcept;
+bool is_error(code) noexcept;
 
 }//Message
 }//CoAP
