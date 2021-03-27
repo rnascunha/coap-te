@@ -1,9 +1,10 @@
 #ifndef COAP_TE_URI_TYPES_HPP__
 #define COAP_TE_URI_TYPES_HPP__
 
+#include <cstdlib>
 #include <cstdint>
 #include "message/options.hpp"
-#include <arpa/inet.h>
+#include "port/port.hpp"
 
 namespace CoAP{
 namespace URI{
@@ -31,9 +32,9 @@ struct uri{
 	scheme			uri_scheme;
 	Host			host;
 	uint16_t		port;
-	char*		path;
+	char*			path;
 	std::size_t		path_len;
-	char* 	query;
+	char* 			query;
 	std::size_t		query_len;
 };
 

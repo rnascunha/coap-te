@@ -1,6 +1,7 @@
 #ifndef COAP_TE_INTERNAL_DECODE_HPP__
 #define COAP_TE_INTERNAL_DECODE_HPP__
 
+#include <cstdlib>
 #include <cstdint>
 
 namespace CoAP{

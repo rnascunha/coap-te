@@ -1,6 +1,7 @@
 #ifndef COAP_TE_INTERNAL_HELPER_ASCII_HPP__
 #define COAP_TE_INTERNAL_HELPER_ASCII_HPP__
 
+#include <cstdlib>
 #include <cstdint>
 
 namespace CoAP{
