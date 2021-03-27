@@ -3,12 +3,14 @@
 
 #include "posix/port.hpp"
 
+#ifdef COAP_TE_PORT_C_STANDARD
+#include <ctime>
+#endif /* COAP_TE_PORT_C_STANDART */
+
 namespace CoAP{
 
 #ifdef COAP_TE_PORT_C_STANDARD
-
 using time_t = std::time_t;
-
 #endif /* COAP_TE_PORT_C_STANDART */
 
 /**

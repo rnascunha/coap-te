@@ -190,11 +190,11 @@ void request_cb(void const* trans, CoAP::Message::message const* response, void*
 				.add_option(size1_op)
 				.payload(data_send + offset, more ? block_size : left)
 				.callback(request_cb, eng_ptr);
-			CoAP::Error ec;
 
 			/**
 			 * Sending
 			 */
+			CoAP::Error ec;
 			engine* eng = static_cast<engine*>(eng_ptr);
 			eng->send(req, ec);
 			return;

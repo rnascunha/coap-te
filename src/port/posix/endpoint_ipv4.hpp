@@ -5,8 +5,7 @@
 #include <cstdint>
 #include "error.hpp"
 
-#include <netinet/in.h>
-#include <arpa/inet.h>
+#include "port.hpp"
 
 namespace CoAP{
 namespace Port{
@@ -19,7 +18,7 @@ class endpoint_ipv4{
 
 		endpoint_ipv4()
 		{
-			::bzero(&addr_, sizeof(struct sockaddr_in));
+			std::memset(&addr_, 0, sizeof(native_type));
 		}
 
 		endpoint_ipv4(in_addr_t addr, std::uint16_t port)

@@ -74,13 +74,13 @@ set(MAIN_SRC ${SRC_DIR}/error.cpp
 				${SRC_DIR_DEBUG}/print_uri.cpp
 				)
 
-if(NOT WIN32)
-	message(STATUS "Adding linux dependecies...")
+#if(NOT WIN32)
+#	message(STATUS "Adding linux dependecies...")
 	add_definitions(-DCOAP_TE_PORT_C_STANDARD=1)
 	list(APPEND MAIN_SRC ${SRC_DIR_PORT}/c_standard_port.cpp)
-else()
-	message(FATAL_ERROR "No system support")
-endif()
+#else()
+#	message(FATAL_ERROR "No system support")
+#endif()
 				
 add_library(${PROJECT_NAME} ${MAIN_SRC})
 set_target_properties(${PROJECT_NAME} PROPERTIES

@@ -9,15 +9,19 @@ namespace CoAP{
 template<typename T>
 class branch{
 	public:
+		using type = T;
+
 		template<typename ...Args>
 		branch(Args&&... args) : value_(std::forward<Args>(args)...){}
 
 		T& value() noexcept{ return value_; }
 		T const& value() const noexcept{ return value_; }
 		branch* next() noexcept{ return next_; }
+		branch const* next() const noexcept{ return next_; }
+		branch const* children() const noexcept { return children_; }
 
 		template<typename U>
-		branch* find_child(U const& u)
+		branch* find_child(U const& u) noexcept
 		{
 			branch* n = children_;
 			for(; n; n = n->next_)

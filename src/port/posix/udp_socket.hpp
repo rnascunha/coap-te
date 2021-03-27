@@ -1,17 +1,16 @@
 #ifndef COAP_TE_PORT_POSIX_SOCKET_UDP_HPP__
 #define COAP_TE_PORT_POSIX_SOCKET_UDP_HPP__
 
-#include "error.hpp"
-#include "endpoint_ipv6.hpp"
+#include <cstdlib>
 #include <cstdint>
+#include "error.hpp"
 
 namespace CoAP{
 namespace Port{
 namespace POSIX{
 
 template<class Endpoint,
-		int RecvFlags = 0,
-		int SendFlags = 0>
+		int Flags = 0>
 class udp{
 	public:
 		using endpoint = Endpoint;
@@ -25,7 +24,7 @@ class udp{
 		int socket_;
 };
 
-}//Linux
+}//POSIX
 }//Port
 }//CoAP
 

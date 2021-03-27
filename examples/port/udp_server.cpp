@@ -63,7 +63,7 @@ static void exit_error(Error& ec, const char* what = "")
  * not to block (as must be at CoAP-te);
  * The last is the socket send flag (no flag).
  */
-using udp_socket = Port::POSIX::udp<endpoint, MSG_DONTWAIT, 0>;
+using udp_socket = Port::POSIX::udp<endpoint, MSG_DONTWAIT>;
 
 int main()
 {

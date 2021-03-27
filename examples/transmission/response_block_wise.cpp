@@ -65,7 +65,7 @@ static constexpr module example_mod = {
 
 /**
  * Engine definition. Check 'raw_engine' example for a full
- * description os the options.
+ * description of the options.
  *
  * Here we are using server profile, and defining a resource callback
  * function. Server profile allow to add resources. We are also disabling
@@ -300,6 +300,9 @@ static void put_data_handler(CoAP::Message::message const& request,
 		status(example_mod, "Copying to buffer [%lu]", request.payload_len);
 		std::memcpy(recv_buffer + offset, request.payload, request.payload_len);
 
+		/**
+		 * Is there more blocks to be sent?
+		 */
 		if(!more)
 		{
 			/**

@@ -1,8 +1,9 @@
 #ifndef COAP_TE_URI_DECOMPOSE_HPP__
 #define COAP_TE_URI_DECOMPOSE_HPP__
 
+#include <cstdlib>
+
 #include "types.hpp"
-#include <arpa/inet.h>
 #include "message/options.hpp"
 
 namespace CoAP{

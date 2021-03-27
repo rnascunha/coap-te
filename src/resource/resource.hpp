@@ -8,17 +8,46 @@
 namespace CoAP{
 namespace Resource{
 
-template<typename Callback_Functor>
+template<typename Callback_Functor, bool HasDescription = false>
 class resource
 {
+	using empty = struct{};
 	public:
+		static constexpr const bool has_description = HasDescription;
+		using description_type = typename std::conditional<HasDescription, const char*, empty>::type;
 		using callback_t = Callback_Functor;
 		resource(const char* path,
 				callback_t get = nullptr, callback_t post = nullptr,
 				callback_t put = nullptr, callback_t del = nullptr)
-		: path_(path), get_(get), post_(post), put_(put), del_(del){}
+		: path_(path), get_(get), post_(post), put_(put), del_(del)
+		{
+			if constexpr(has_description)
+				desc_ = nullptr;
+		}
+
+		resource(const char* path, const char* description [[maybe_unused]],
+						callback_t get = nullptr, callback_t post = nullptr,
+						callback_t put = nullptr, callback_t del = nullptr)
+				: path_(path), get_(get), post_(post), put_(put), del_(del)
+		{
+			if constexpr(has_description)
+				desc_ = description;
+		}
 
 		const char* path() const noexcept{ return path_; }
+		const char* description() const noexcept
+		{
+			if constexpr(has_description)
+				return desc_;
+			else return nullptr;
+		}
+
+		void description(const char* desc [[maybe_unused]]) noexcept
+		{
+			if constexpr(has_description)
+				desc_ = desc;
+		}
+
 		resource& get(callback_t cb = nullptr) noexcept
 		{
 			get_ = cb;
@@ -96,12 +125,14 @@ class resource
 
 
 	private:
-		const char*	path_;
+		const char*			path_;
 
-		callback_t*	get_;
-		callback_t*	post_;
-		callback_t*	put_;
-		callback_t*	del_;
+		callback_t*			get_;
+		callback_t*			post_;
+		callback_t*			put_;
+		callback_t*			del_;
+
+		description_type	desc_;
 };
 
 }//Resource

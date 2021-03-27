@@ -1,6 +1,7 @@
 #ifndef COAP_TE_MESSAGES_TYPES_HPP__
 #define COAP_TE_MESSAGES_TYPES_HPP__
 
+#include <cstdlib>
 #include <cstdint>
 #include "codes.hpp"
 
@@ -24,7 +25,7 @@ enum class content_format : unsigned
 	application_xml			= 41, 	//application/xml
 	application_octet_stream = 42, 	//application/octet-stream
 	application_exi			= 47, 	//application/exi
-	application_json		= 50	//application/json
+	application_json		= 50,	//application/json
 };
 
 using accept = content_format;

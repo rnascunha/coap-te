@@ -15,19 +15,19 @@ It's implemented:
 It's NOT implemented (yet):
 * Cache strategie;
 * Security;
-* Discovery ([RFC6690](https://tools.ietf.org/html/rfc6690))
+* Resource Discovery ([RFC6690](https://tools.ietf.org/html/rfc6690));
 * Observing ([RFC7641](https://tools.ietf.org/html/rfc7641));
 * TCP support ([RFC8323](https://tools.ietf.org/html/rfc8323));
-* Many more :(...
+* Much more :(...
 
 ## Dependencies
 
-As external library depencie, **CoAP-te** uses just [Tree Trunks](https://github.com/rnascunha/tree_trunks) as log system (same author).
+As external library dependency, **CoAP-te** uses just [Tree Trunks](https://github.com/rnascunha/tree_trunks) as log system (same author).
 
 It also needs the following softwares:
 * Compiler that support C++17 standard;
 * [git](https://git-scm.com/) to download;
-* [CMake](https://cmake.org/) to build;
+* [CMake](https://cmake.org/) to build and compile;
 
 ## Download and Compile
 
@@ -49,28 +49,28 @@ $ cd build
 $ cmake ..
 $ make
 ```
-This will generate a library file (`libcoap-te.a` at linux). Link this file to your project, and include `./src/` directory. There are to convenient headers:
+This will generate a library file (`libcoap-te.a` at linux). Link this file to your project, and include `./src/` directory. There are two convenient headers:
 * `coap-te.hpp`: this has all necessary headers to use **CoAP-te**;
 * `coap-te-debug.hpp`: this includes some print functions to help debug messages.
 
-If will want also want to compile the examples (at `examples` directory), run at the build directory:
+If you also want to compile the examples (at `examples` directory), run at the build directory:
 
 ```
 $ cmake -DWITH_EXAMPLES=1 ..
 $ make
 ```
 
-This will generate one excutable file to each example file.
+This will generate one excutable to each example.
 
 ## Using
 
-If you build **CoAP-te** with the `-DWITH_EXAMPLES=1` flag, all example executables are at you build directory. The directory `examples` contains the source code of the examples with detailed exaplanations on how to use **CoAP-te**. A brief overview is show here:
+If you build **CoAP-te** with the `-DWITH_EXAMPLES=1` flag, all example executables are at your build directory. The directory `examples` contains the source code of the examples with detailed exaplanations on how to use **CoAP-te**. A brief overview is show here:
 
 *Messages examples*:
-* `serialize_parse`: shows how the serialize message using 3 strategies (factory and manually using option list/array). Then parse this information (as it was received by network) and iterate through options.
-* `factory`: demostrate how to use a factory to construct a message, using internal/external features.
+* `serialize_parse`: shows how to serialize message using 3 strategies (factory and manually using option list/array). Then parse this information (as it was received by network) and iterate through options.
+* `factory`: demostrate how to use a factory to construct a message, using internal/external buffers.
 * `option`: shows how to manipulate options of different types. How to declare, serialize and parse.
-* `serialze_class`: explain the use of the `Serialize` class. This is a class to modified information that were
+* `serialze_class`: explain the use of the `Serialize` class. This is a class to modify the information that were
 already serilized (written to the buffer).
 
 *Transmission examples*:
@@ -78,9 +78,9 @@ already serilized (written to the buffer).
 * `raw_engine`: demonstrate how to configure and use your own engines, the central feature of **CoAP-te**. Engines
 deal with all CoAP transmission complexity. After configuration, makes a simple CoAP request.
 * `engine_server`: shows how to add resource to a engine, and how to make the response to specific methods, using different strategies.
-* `request_get_block_wise`: this example makes a *GET* request using *block2* block wise transfer, from a client to a server; 
-* `request_put_block_wise`: this example makes a *PUT* request using *block1* block wise transfer, from a client to a server; 
-* `response_block_wise`: this example is a server that responsts to the `request_get_block_wise` and `request_put_block_wise` examples above;
+* `request_get_block_wise`: this example makes a *GET* request using *block2* block wise transfer, from a client to a server. Use with `response_block_wise` example. 
+* `request_put_block_wise`: this example makes a *PUT* request using *block1* block wise transfer, from a client to a server. Use with `response_block_wise` example.
+* `response_block_wise`: this example is a server that responds to the `request_get_block_wise` and `request_put_block_wise` examples above;
 
 *URI examples*:
 * `decompose`: breaks a CoAP URI into internal structures of **CoAP-te**, ready to be used. Any percent-encoded characters is converted. 
@@ -118,8 +118,8 @@ unsigned random_generator() noexcept;
 > The default implementation uses `std::time` and `std::rand` as the functions above, respectivily, and uses `time_t` as `std::time_t`. If your system support this functions, just use then.   
 
 * Define a connection. A connection must define a endpoint, a receiving function, and a send function:
-  * The endpoint must be default constructable, copiable and comparable;
-  * The class connection must be moveable. The receiving/send functions MUST NOT block. Any error calling the functions must be reported at the last parameter (*CoAP::errc::socket_error*).
+  * The endpoint must be *default constructable*, *copiable* and *comparable*;
+  * The class connection must be *moveable*. The receiving/send functions *MUST NOT block*. Any error calling the functions must be reported at the last parameter (*CoAP::errc::socket_error*).
 
 ```c++
 struct my_connection{
@@ -129,5 +129,5 @@ struct my_connection{
 	std::size_t receive(void*, std::size_t, endpoint&, CoAP::Error&) noexcept;
 }
 ```
-> There is already a implmentation to UDP posix-like sockets.
+> There is already a implementation to UDP posix-like sockets.
 

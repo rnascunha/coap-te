@@ -11,12 +11,12 @@ namespace Debug{
 template<typename Callback_Functor>
 void print_resource_branch(CoAP::branch<CoAP::Resource::resource<Callback_Functor>>& br, int level /* = 0 */) noexcept
 {
-	std::printf("%d: %s:[", level, br.value().path() ? br.value().path() : ".");
+	std::printf("%d: %s:[", level, br.value().path() ? br.value().path() : "/");
 	CoAP::branch<CoAP::Resource::resource<Callback_Functor>>* n;
 	for(unsigned i = 0; (n = br[i]); i++)
 	{
 		if(i != 0) std::printf(" ");
-		std::printf("%s", n->value().path() ? n->value().path() : ".");
+		std::printf("%s", n->value().path() ? n->value().path() : "/");
 	}
 	std::printf("]\n");
 

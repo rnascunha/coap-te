@@ -11,6 +11,7 @@ set(EXAMPLES_LIST
 				${EXAMPLES_DIR}/message/option.cpp
 				${EXAMPLES_DIR}/message/serialize_class.cpp
 				${EXAMPLES_DIR}/uri/decompose.cpp
+				${EXAMPLES_DIR}/resource/discovery.cpp
 				${EXAMPLES_DIR}/transmission/raw_engine.cpp
 				${EXAMPLES_DIR}/transmission/raw_transaction.cpp
 				${EXAMPLES_DIR}/transmission/engine_server.cpp
