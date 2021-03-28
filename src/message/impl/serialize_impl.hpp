@@ -93,7 +93,7 @@ std::size_t serialize(std::uint8_t* buffer, std::size_t buffer_len,
 template<bool SortOptions /* = true */,
 		bool CheckOpOrder /* = !SortOptions */,
 		bool CheckOpRepeat /* = true */>
-static unsigned make_options(std::uint8_t* buffer, std::size_t buffer_len,
+unsigned make_options(std::uint8_t* buffer, std::size_t buffer_len,
 		Option::option* options, std::size_t option_num,
 		CoAP::Error& ec) noexcept
 {
@@ -109,10 +109,10 @@ static unsigned make_options(std::uint8_t* buffer, std::size_t buffer_len,
 	return offset;
 }
 
-template<bool SortOptions = true,
-		bool CheckOpOrder = !SortOptions,
-		bool CheckOpRepeat = true>
-static unsigned make_options(std::uint8_t* buffer,
+template<bool SortOptions /* = true */,
+		bool CheckOpOrder /* = !SortOptions */,
+		bool CheckOpRepeat /* = true */>
+unsigned make_options(std::uint8_t* buffer,
 		std::size_t buffer_len,
 		Option::node* list,
 		CoAP::Error& ec) noexcept
@@ -129,9 +129,9 @@ static unsigned make_options(std::uint8_t* buffer,
 	return offset;
 }
 
-template<bool CheckOpOrder = true,
-		bool CheckOpRepeat = true>
-static unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
+template<bool CheckOpOrder /* = true */,
+		bool CheckOpRepeat /* = true */>
+unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 							Option::option const& option, unsigned& delta,
 							Option::code& last_option,
 							CoAP::Error& ec) noexcept
@@ -172,13 +172,13 @@ static unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 		if(offset_delta <= 255)
 		{
 			delta_opt = static_cast<unsigned>(Option::delta_special::one_byte_extend);
-			delta_ext = offset_delta - 13;
+			delta_ext = static_cast<uint16_t>(offset_delta - 13);
 			option_size += 1;
 		}
 		else
 		{
 			delta_opt = static_cast<unsigned>(Option::delta_special::two_byte_extend);
-			delta_ext = offset_delta - 269;
+			delta_ext = static_cast<std::uint16_t>(offset_delta - 269);
 			option_size += 2;
 		}
 	}
@@ -192,13 +192,13 @@ static unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 		if(option.length <= 255)
 		{
 			length_opt = static_cast<unsigned>(Option::length_special::one_byte_extend);
-			length_ext = option.length - 13;
+			length_ext = static_cast<uint16_t>(option.length - 13);
 			option_size += 1;
 		}
 		else
 		{
 			length_opt = static_cast<unsigned>(Option::length_special::two_byte_extend);
-			length_ext = option.length - 269;
+			length_ext = static_cast<uint16_t>(option.length - 269);
 			option_size += 2;
 		}
 	}
@@ -212,7 +212,7 @@ static unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 	}
 
 	std::uint8_t byte[5];
-	byte[0] = (delta_opt << 4) | (length_opt);
+	byte[0] = static_cast<uint8_t>((delta_opt << 4) | (length_opt));
 	unsigned next_byte = 1;
 	switch(delta_opt)
 	{

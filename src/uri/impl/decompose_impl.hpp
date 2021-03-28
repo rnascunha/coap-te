@@ -51,7 +51,7 @@ bool decompose_port(uri<Host>& uri, char* uri_string, char** new_uri_string) noe
 		|| uri_string[0] == '?'
 		|| uri_string[0] == '#'
 		|| uri_string[0] == '\0') {
-		uri.port = std::strtoul(port, nullptr, 10);
+		uri.port = static_cast<uint16_t>(std::strtoul(port, nullptr, 10));
 		if(!i) return false;
 		return true;
 	}

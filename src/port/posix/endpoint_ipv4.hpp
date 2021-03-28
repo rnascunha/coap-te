@@ -13,7 +13,7 @@ namespace POSIX{
 
 class endpoint_ipv4{
 	public:
-		using native_type = struct sockaddr_in;
+		using native_type = sockaddr_in;
 		static constexpr const sa_family_t family = AF_INET;
 
 		endpoint_ipv4()
@@ -34,7 +34,7 @@ class endpoint_ipv4{
 
 		void set(in_addr_t addr, std::uint16_t port) noexcept
 		{
-			addr_.sin_family = family;
+			addr_.sin_family = endpoint_ipv4::family;
 			addr_.sin_port = htons(port);
 			addr_.sin_addr.s_addr = addr;
 		}
@@ -42,25 +42,29 @@ class endpoint_ipv4{
 		bool set(const char* addr_str, std::uint16_t port) noexcept
 		{
 			in_addr_t addr;
-			int ret = inet_pton(family, addr_str, &addr);
+			int ret = inet_pton(endpoint_ipv4::family, addr_str, &addr);
 			if(ret <= 0)
 			{
-				::bzero(&addr_, sizeof(struct sockaddr_in));
+				std::memset(&addr_, 0, sizeof(native_type));
 				return false;
 			}
 
-			addr_.sin_family = family;
+			addr_.sin_family = endpoint_ipv4::family;
 			addr_.sin_port = htons(port);
 			addr_.sin_addr.s_addr = addr;
 
 			return true;
 		}
 
-		struct sockaddr_in* native() noexcept{ return &addr_; }
+		native_type* native() noexcept{ return &addr_; }
 
 		const char* address(char* addr_str, std::size_t len = INET_ADDRSTRLEN) noexcept
 		{
+#ifdef _WIN32
+			return InetNtop(family, &addr_.sin_addr, addr_str, len);
+#else
 			return inet_ntop(family, &addr_.sin_addr, addr_str, len);
+#endif
 		}
 		const char* host(char* host_addr) noexcept { return address(host_addr); }
 
@@ -86,7 +90,7 @@ class endpoint_ipv4{
 			return !(*this == ep);
 		}
 	private:
-		struct sockaddr_in		addr_;
+		native_type		addr_;
 };
 
 }//POSIX

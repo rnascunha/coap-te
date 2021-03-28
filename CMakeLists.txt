@@ -11,7 +11,7 @@ message("Builder type: " ${CMAKE_BUILD_TYPE})
 
 if(MSVC)
 	message(STATUS "MSVC build")
-	set(CMAKE_CXX_FLAGS "/W4 /std:c++17 /EHsc /bigobj")
+	set(CMAKE_CXX_FLAGS "/std:c++latest /EHsc /bigobj")	#"/std:c++17 /W4"
 	set(CMAKE_CXX_FLAGS_RELEASE "/O2")
 	add_compile_definitions(BOOST_DATE_TIME_NO_LIB BOOST_REGEX_NO_LIB)
 else()

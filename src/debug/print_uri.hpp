@@ -2,7 +2,7 @@
 #define COAP_TE_DEBUG_PRINT_URI_HPP__
 
 #include "uri/types.hpp"
-#include <arpa/inet.h>
+#include "port/port.hpp"
 
 namespace CoAP{
 namespace Debug{

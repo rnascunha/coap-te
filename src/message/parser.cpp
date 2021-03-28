@@ -127,7 +127,7 @@ unsigned parse_header(message& msg,
 
 	if(msg.token_len)
 		msg.token = &buffer[4];
-	offset += msg.token_len;
+	offset += static_cast<unsigned>(msg.token_len);
 
 	return offset;
 }
@@ -167,7 +167,7 @@ static unsigned parse_payload(message& msg,
 	offset += 1;
 	msg.payload = &buffer[1];
 	msg.payload_len = buffer_len - 1;
-	offset += msg.payload_len;
+	offset += static_cast<unsigned>(msg.payload_len);
 
 	return offset;
 }

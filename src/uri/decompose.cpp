@@ -189,7 +189,7 @@ static bool split_to_list(std::uint8_t* buffer, std::size_t& buffer_len,
 				return false;
 			}
 			node->value.ocode = ocode;
-			node->value.length = length;
+			node->value.length = static_cast<unsigned>(length);
 			node->value.value = data + j;
 
 			list.add<true>(*node);
@@ -232,7 +232,7 @@ static bool split_to_list(std::uint8_t* buffer, std::size_t& buffer_len,
 				return false;
 			}
 			node->value.ocode = ocode;
-			node->value.length = length;
+			node->value.length = static_cast<unsigned>(length);
 			node->value.value = buffer;
 
 			buffer_len -= length;

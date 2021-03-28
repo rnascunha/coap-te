@@ -24,8 +24,8 @@ std::size_t percent_decode(char* buffer_out, std::size_t buffer_out_len,
 				if(is_hexa(buffer_in[i+1]) && is_hexa(buffer_in[i+2]))
 				{
 					//Characters are hexadecimal
-					buffer_out[j] = (hexa_char_to_int(buffer_in[i+1]) << 4) |
-									hexa_char_to_int(buffer_in[i+2]);
+					buffer_out[j] = static_cast<char>((hexa_char_to_int(buffer_in[i+1]) << 4) |
+									hexa_char_to_int(buffer_in[i+2]));
 					i += 3; j++;
 					continue;
 				}
@@ -53,8 +53,8 @@ std::size_t percent_decode(char* buffer, std::size_t buffer_len) noexcept
 				if(is_hexa(buffer[i+1]) && is_hexa(buffer[i+2]))
 				{
 					//Characters are hexadecimal
-					buffer[j] = (hexa_char_to_int(buffer[i+1]) << 4) |
-									hexa_char_to_int(buffer[i+2]);
+					buffer[j] = static_cast<char>((hexa_char_to_int(buffer[i+1]) << 4) |
+									hexa_char_to_int(buffer[i+2]));
 					i += 3; j++;
 					continue;
 				}

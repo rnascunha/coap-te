@@ -135,21 +135,21 @@ void exchange(node* first, node* second) noexcept
 	std::memcpy(&second->value, &middle.value, sizeof(option));
 }
 
-void sort(option* options, std::size_t num) noexcept
+void sort(option* optionss, std::size_t num) noexcept
 {
 	option* option = nullptr;
 	for(std::size_t i = 0; i < num; i++)
 	{
-		option = &options[i];
+		option = &optionss[i];
 		std::size_t exchange_index = i;
 		std::size_t j = i + 1;
 		for(; j < num; j++)
-			if(option->ocode > options[j].ocode)
-				if(options[exchange_index].ocode > options[j].ocode)
+			if(option->ocode > optionss[j].ocode)
+				if(optionss[exchange_index].ocode > optionss[j].ocode)
 					exchange_index = j;
 
 		if(i != exchange_index)
-			exchange(option, &options[exchange_index]);
+			exchange(option, &optionss[exchange_index]);
 	}
 }
 

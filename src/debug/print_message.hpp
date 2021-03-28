@@ -13,7 +13,7 @@ bool print_message(std::uint8_t const* const, std::size_t);
 void print_message_str(CoAP::Message::message const&) noexcept;
 
 
-bool print_byte_message(std::uint8_t const* const, std::size_t);
+bool print_byte_message(std::uint8_t const*, std::size_t);
 
 }//Debug
 }//CoAP

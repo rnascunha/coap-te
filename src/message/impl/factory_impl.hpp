@@ -125,7 +125,8 @@ serialize(
 }
 
 template<std::size_t BufferSize, typename MessageID>
-typename Factory<BufferSize, MessageID>::buffer_type const*
+//typename Factory<BufferSize, MessageID>::buffer_type const
+std::uint8_t const*
 Factory<BufferSize, MessageID>::
 buffer() const noexcept
 {

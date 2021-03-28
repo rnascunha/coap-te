@@ -12,11 +12,11 @@ namespace Debug{
 
 void print_message(CoAP::Message::message const& msg)
 {
-	std::printf("\tType: %s\n\tCode: %s\n\tMessage ID: 0x%04X\n\tToken[%lu]: ",
+	std::printf("\tType: %s\n\tCode: %s\n\tMessage ID: 0x%04X\n\tToken[%zu]: ",
 			type_string(msg.mtype), code_string(msg.mcode), msg.mid, msg.token_len);
 	print_array(msg.token, msg.token_len);
 
-	std::printf("\n\tOptions[%lu]:\n", msg.option_num);
+	std::printf("\n\tOptions[%zu]:\n", msg.option_num);
 	unsigned offset = 0, delta = 0;
 	for(std::size_t i = 0; i < msg.option_num; i++)
 	{
@@ -31,7 +31,7 @@ void print_message(CoAP::Message::message const& msg)
 		std::printf("\n");
 	}
 
-	std::printf("\tPayload[%lu]: ", msg.payload_len);
+	std::printf("\tPayload[%zu]: ", msg.payload_len);
 	print_array(msg.payload, msg.payload_len);
 	std::printf("\n");
 }
@@ -43,23 +43,23 @@ bool print_message(std::uint8_t const* const arr, std::size_t size)
 	CoAP::Message::parse(msg, arr, size, ec);
 	if(ec) return false;
 
-	std::printf("\tType: %s\n\tCode: %s\n\tMessage ID: 0x%04X\n\tToken[%lu]: ",
+	std::printf("\tType: %s\n\tCode: %s\n\tMessage ID: 0x%04X\n\tToken[%zu]: ",
 			type_string(msg.mtype), code_string(msg.mcode), msg.mid, msg.token_len);
 	print_array(msg.token, msg.token_len);
-	std::printf("\n\tOptions[%lu]:\n", msg.option_num);
+	std::printf("\n\tOptions[%zu]:\n", msg.option_num);
 	unsigned offset = 0, delta = 0;
 	for(std::size_t i = 0; i < msg.option_num; i++)
 	{
 		CoAP::Message::Option::option opt;
-		CoAP::Error ec;
+		CoAP::Error ec_;
 		offset += CoAP::Message::parse_option<false>(opt,
-				msg.option_init + offset, msg.options_len - offset, delta, ec);
+				msg.option_init + offset, msg.options_len - offset, delta, ec_);
 		delta = static_cast<unsigned>(opt.ocode);
 		std::printf("\t\t");
 		print_option(opt);
 		std::printf("\n");
 	}
-	std::printf("\tPayload[%lu]: ", msg.payload_len);
+	std::printf("\tPayload[%zu]: ", msg.payload_len);
 	print_array(msg.payload, msg.payload_len);
 	std::printf("\n");
 
@@ -68,10 +68,10 @@ bool print_message(std::uint8_t const* const arr, std::size_t size)
 
 void print_message_str(CoAP::Message::message const& msg) noexcept
 {
-	std::printf("\tType: %s\n\tCode: %s\n\tMessage ID: 0x%04X\n\tToken[%lu]: ",
+	std::printf("\tType: %s\n\tCode: %s\n\tMessage ID: 0x%04X\n\tToken[%zu]: ",
 			type_string(msg.mtype), code_string(msg.mcode), msg.mid, msg.token_len);
 	print_array_as_string(msg.token, msg.token_len);
-	std::printf("\n\tOptions[%lu]:\n", msg.option_num);
+	std::printf("\n\tOptions[%zu]:\n", msg.option_num);
 	unsigned offset = 0, delta = 0;
 	for(std::size_t i = 0; i < msg.option_num; i++)
 	{
@@ -90,14 +90,14 @@ void print_message_str(CoAP::Message::message const& msg) noexcept
 		print_option(opt);
 		std::printf("\n");
 	}
-	std::printf("\tPayload[%lu]: ", msg.payload_len);
+	std::printf("\tPayload[%zu]: ", msg.payload_len);
 	print_array_as_string(msg.payload, msg.payload_len);
 	std::printf("\n");
 }
 
-static void print_make_space(const char* header, std::size_t length, int size_data)
+static void print_make_space(const char* header, int size_data)
 {
-	int size_header = std::strlen(header);
+	int size_header = static_cast<int>(std::strlen(header));
 	int w_size = size_header > (size_data) ? size_data : size_header;
 	int diff = (w_size < size_data) ? size_data - w_size : 0;
 	int diff_a = 0, diff_b = 0;
@@ -113,7 +113,7 @@ static void print_make_space(const char* header, std::size_t length, int size_da
 	while(diff_b--) printf(" ");
 }
 
-bool print_byte_message(std::uint8_t const* const arr, std::size_t size)
+bool print_byte_message(std::uint8_t const* arr, std::size_t size)
 {
 	CoAP::Message::message msg;
 	CoAP::Error ec;
@@ -145,18 +145,18 @@ bool print_byte_message(std::uint8_t const* const arr, std::size_t size)
 	char temp[15];
 	if(msg.token_len)
 	{
-		std::snprintf(temp, 15, "Token[%lu]", msg.token_len);
-		print_make_space(temp, msg.token_len, s_token);
+		std::snprintf(temp, 15, "Token[%zu]", msg.token_len);
+		print_make_space(temp, s_token);
 	}
 	if(msg.options_len)
 	{
-		std::snprintf(temp, 15, "Options[%lu][%lu]", msg.options_len, msg.option_num);
-		print_make_space(temp, msg.options_len, s_options);
+		std::snprintf(temp, 15, "Options[%zu][%zu]", msg.options_len, msg.option_num);
+		print_make_space(temp, s_options);
 	}
 	if(msg.payload_len)
 	{
-		std::snprintf(temp, 15, "Payload[%lu]", msg.payload_len);
-		print_make_space(temp, msg.payload_len, s_payload);
+		std::snprintf(temp, 15, "Payload[%zu]", msg.payload_len);
+		print_make_space(temp, s_payload);
 	}
 	printf("\n");
 

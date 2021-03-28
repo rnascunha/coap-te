@@ -51,7 +51,7 @@ class endpoint_ipv6{
 			int ret = inet_pton(family, addr_str, &addr);
 			if(ret <= 0)
 			{
-				::bzero(&addr_, sizeof(native_type));
+				std::memset(&addr_, 0, sizeof(native_type));
 				return false;
 			}
 
@@ -66,8 +66,13 @@ class endpoint_ipv6{
 
 		const char* address(char* addr_str, std::size_t len = INET6_ADDRSTRLEN) noexcept
 		{
-			return inet_ntop(family, &addr_.sin6_addr, addr_str, len);
+#ifdef _WIN32
+			return InetNtop(family, &addr_.sin_addr, addr_str, len);
+#else
+			return inet_ntop(family, &addr_.sin_addr, addr_str, len);
+#endif
 		}
+		
 		const char* host(char* host_addr) noexcept { return address(host_addr); }
 
 		in6_addr address() noexcept{ return addr_.sin6_addr; }

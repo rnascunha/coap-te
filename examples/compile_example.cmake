@@ -35,6 +35,10 @@ foreach(example ${EXAMPLES_LIST})
 	    CXX_EXTENSIONS ON
 	)
 	
+	if(MSVC)
+		target_compile_features(${EXAMPLE_OUT} PUBLIC cxx_std_20)
+	endif()
+	
 	target_link_libraries(${EXAMPLE_OUT} ${PROJECT_NAME})
 	
 	if(WIN32)

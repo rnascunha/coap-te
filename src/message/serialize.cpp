@@ -43,7 +43,7 @@ unsigned make_header(std::uint8_t* buffer, std::size_t buffer_len,
 	std::uint8_t byte[4];
 
 	//first byte;
-	byte[0] = (version << 6) | (static_cast<std::uint8_t>(mtype) << 4) | token_len;
+	byte[0] = static_cast<uint8_t>((version << 6) | (static_cast<std::uint8_t>(mtype) << 4) | token_len);
 	byte[1] = static_cast<std::uint8_t>(mcode);
 	CoAP::Helper::interger_to_big_endian_array(&byte[2], message_id);
 	std::memcpy(buffer, byte, 4);
@@ -51,7 +51,7 @@ unsigned make_header(std::uint8_t* buffer, std::size_t buffer_len,
 
 	//Token
 	std::memcpy(buffer + offset, token, token_len);
-	offset += token_len;
+	offset += static_cast<unsigned>(token_len);
 
 	return offset;
 }
@@ -73,7 +73,7 @@ unsigned make_payload(uint8_t* buffer, std::size_t buffer_len,
 	std::memcpy(buffer, &payload_marker, 1);
 	std::memcpy(buffer + 1, payload, payload_len);
 
-	return payload_len + 1;
+	return static_cast<unsigned>(payload_len + 1);
 }
 
 Serialize::Serialize(std::uint8_t* buffer, std::size_t buffer_size)
@@ -229,7 +229,7 @@ bool Serialize::remove_option(Option::code op) noexcept
 		std::size_t s_after = Option::serialized_size(*next, before),
 					s_bef = Option::serialized_size(*next, current);
 
-		unsigned diff = s_after - s_bef;
+		unsigned diff = static_cast<unsigned>(s_after - s_bef);
 		if(diff)
 		{
 			CoAP::Helper::shift_right(n_buf + s_bef - next->length,

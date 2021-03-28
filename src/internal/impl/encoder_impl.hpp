@@ -67,11 +67,11 @@ int percent_encode(char* buffer, std::size_t buffer_used, std::size_t buffer_len
 		else
 		{
 			if(changes_needed) buffer[i + 2 * changes_needed] = buffer[i];
-			else return size_after_encoded;
+			else return static_cast<int>(size_after_encoded);
 		}
 		if(i == 0) break;
 	}
-	return size_after_encoded;
+	return static_cast<int>(size_after_encoded);
 }
 
 std::size_t percent_encoded_size(const char* buffer, std::size_t buffer_used,

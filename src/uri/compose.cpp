@@ -1,8 +1,8 @@
-#include "compose.hpp"
-#include "message/options.hpp"
 #include <cstring>
 #include <cstdio>
 
+#include "compose.hpp"
+#include "message/options.hpp"
 #include "internal/encoder.hpp"
 #include "internal/ascii.hpp"
 
@@ -115,26 +115,26 @@ std::size_t compose(char* buffer, std::size_t buffer_len,
 		switch(opt->ocode)
 		{
 			case Option::code::uri_host:
-				offset += compose_host(buffer + offset, buffer_len - offset,
-						reinterpret_cast<char const*>(opt->value), opt->length, ec);
+				offset += static_cast<unsigned>(compose_host(buffer + offset, buffer_len - offset,
+						reinterpret_cast<char const*>(opt->value), opt->length, ec));
 				if(ec) return offset;
 				break;
 			case Option::code::uri_port:
 			{
 				unsigned port = Option::parse_unsigned(*opt);
-				offset += compose_port(buffer + offset, buffer_len - offset, port, ec);
+				offset += static_cast<unsigned>(compose_port(buffer + offset, buffer_len - offset, port, ec));
 				if(ec) return offset;
 			}
 				break;
 			case Option::code::uri_path:
-				offset += compose_path(buffer + offset, buffer_len - offset,
-						reinterpret_cast<char const*>(opt->value), opt->length, ec);
+				offset += static_cast<unsigned>(compose_path(buffer + offset, buffer_len - offset,
+						reinterpret_cast<char const*>(opt->value), opt->length, ec));
 				if(ec) return offset;
 				break;
 			case Option::code::uri_query:
-				offset += compose_query(buffer + offset, buffer_len - offset,
+				offset += static_cast<unsigned>(compose_query(buffer + offset, buffer_len - offset,
 									reinterpret_cast<char const*>(opt->value), opt->length,
-									is_first_query, ec);
+									is_first_query, ec));
 				is_first_query = false;
 				if(ec) return offset;
 				break;

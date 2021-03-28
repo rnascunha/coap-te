@@ -13,7 +13,7 @@ template<std::size_t BufferSize = 0, typename MessageID = void*>
 class Factory{
 	private:
 		using empty = struct{};
-		using buffer_type = typename std::conditional<BufferSize == 0, empty, std::uint8_t>::type;
+		using buffer_type = typename std::conditional<BufferSize == 0, empty, std::uint8_t[BufferSize]>::type;
 		using message_id_type = typename std::conditional<std::is_same<MessageID, void*>::value, empty, MessageID>::type;
 	public:
 		Factory();
@@ -44,7 +44,8 @@ class Factory{
 		/**
 		 * To be used with internal buffer;
 		 */
-		buffer_type const* buffer() const noexcept;
+		//buffer_type 
+		std::uint8_t const* buffer() const noexcept;
 		template<bool SortOptions = true,
 						bool CheckOpOrder = !SortOptions,
 						bool CheckOpRepeat = true>
@@ -69,8 +70,8 @@ class Factory{
 		std::size_t serialize(CoAP::Error&) noexcept;
 
 	private:
-		buffer_type		buffer_[BufferSize];
-		message_id_type	mid_;
+		buffer_type			buffer_;
+		message_id_type		mid_;
 
 		CoAP::Message::type	type_ = type::confirmable;
 		CoAP::Message::code	code_ = code::get;

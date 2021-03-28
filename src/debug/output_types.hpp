@@ -1,7 +1,7 @@
 #ifndef COAP_TE_DEBUG_OUTPUT_TYPES_HPP__
 #define COAP_TE_DEBUG_OUTPUT_TYPES_HPP__
 
-#include "arpa/inet.h"
+#include "port/port.hpp"
 
 namespace CoAP{
 namespace Debug{

@@ -93,7 +93,7 @@ int main()
 	 */
 #if defined(USE_INTERNAL_BUFFER) && defined(USE_INTERNAL_MESSAGE_ID)
 	status(example_mod, "Internal buffer / Internal message id");
-	Factory<BUFFER_LEN, message_id> fac(message_id(CoAP::time()));
+	Factory<BUFFER_LEN, message_id> fac{message_id(CoAP::time())};
 #elif defined(USE_INTERNAL_BUFFER) && !defined(USE_INTERNAL_MESSAGE_ID)
 	status(example_mod, "Internal buffer / NO internal message id");
 	Factory<BUFFER_LEN> fac;
@@ -102,7 +102,7 @@ int main()
 	 * 0 buffer len means NO internal buffer
 	 */
 	status(example_mod, "NO internal buffer / Internal message id");
-	Factory<0, message_id> fac(message_id(CoAP::time()));
+	Factory<0, message_id> fac{message_id(CoAP::time())};
 #else
 	/**
 	 * 0 buffer len means NO internal buffer
@@ -114,7 +114,8 @@ int main()
 	/**
 	 * Adding all header/token/options/payload to the factory
 	 */
-	fac.header(CoAP::Message::type::confirmable, code::get)
+	fac
+		.header(CoAP::Message::type::confirmable, code::get)
 		.token(token, sizeof(token))
 		.add_option(content_op)
 		.add_option(path_op1)

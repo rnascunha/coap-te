@@ -6,7 +6,7 @@
 namespace CoAP{
 namespace Transmission{
 
-template<bool UseInternalBuffer = false,
+template<bool UseInternalBuffer /* = false */,
 		typename Engine>
 bool send_async_ack(Engine& engine,
 		typename Engine::endpoint const& ep, CoAP::Message::message const& response, CoAP::Error& ec) noexcept

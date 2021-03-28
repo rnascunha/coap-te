@@ -41,7 +41,7 @@ bool create(option& option, code code, const char* value) noexcept
 			return false;
 
 	option.ocode = code;
-	option.length = std::strlen(value);
+	option.length = static_cast<unsigned>(std::strlen(value));
 	option.value = value;
 
 	return true;
