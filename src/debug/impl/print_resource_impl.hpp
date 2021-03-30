@@ -8,11 +8,11 @@
 namespace CoAP{
 namespace Debug{
 
-template<typename Callback_Functor>
-void print_resource_branch(CoAP::branch<CoAP::Resource::resource<Callback_Functor>>& br, int level /* = 0 */) noexcept
+template<typename Resource>
+void print_resource_branch(CoAP::branch<Resource>& br, int level /* = 0 */) noexcept
 {
 	std::printf("%d: %s:[", level, br.value().path() ? br.value().path() : "/");
-	CoAP::branch<CoAP::Resource::resource<Callback_Functor>>* n;
+	CoAP::branch<Resource>* n;
 	for(unsigned i = 0; (n = br[i]); i++)
 	{
 		if(i != 0) std::printf(" ");
@@ -23,7 +23,7 @@ void print_resource_branch(CoAP::branch<CoAP::Resource::resource<Callback_Functo
 	++level;
 	for(unsigned i = 0; (n = br[i]); i++)
 	{
-		print_resource_branch<Callback_Functor>(*n, level);
+		print_resource_branch<Resource>(*n, level);
 	}
 }
 

@@ -9,10 +9,10 @@
 namespace CoAP{
 namespace Resource{
 
-template<typename Callback_Functor>
+template<typename Resource>
 class resource_root{
 	public:
-		using resource_t = resource<Callback_Functor>;
+		using resource_t = Resource;
 		using node_t = typename CoAP::branch<resource_t>;
 
 		resource_root() : root_(nullptr){}

@@ -54,6 +54,8 @@ set(SRC_DIR_DEBUG ${SRC_DIR}/debug)
 set(SRC_DIR_INTERNAL ${SRC_DIR}/internal)
 set(SRC_DIR_PORT ${SRC_DIR}/port)
 set(SRC_DIR_URI ${SRC_DIR}/uri)
+set(SRC_DIR_RESOURCE ${SRC_DIR}/resource)
+
 
 set(MAIN_SRC ${SRC_DIR}/error.cpp
 				${SRC_DIR_URI}/compose.cpp
@@ -71,7 +73,9 @@ set(MAIN_SRC ${SRC_DIR}/error.cpp
 				${SRC_DIR_DEBUG}/print_options.cpp
 				${SRC_DIR_DEBUG}/output_string.cpp
 				${SRC_DIR_DEBUG}/print_message.cpp
+				${SRC_DIR_DEBUG}/print_resource.cpp
 				${SRC_DIR_DEBUG}/print_uri.cpp
+				${SRC_DIR_RESOURCE}/link_format.cpp
 				)
 
 #if(NOT WIN32)

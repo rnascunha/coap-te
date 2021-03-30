@@ -16,13 +16,12 @@ static constexpr CoAP::Log::module engine_mod = {
 		.enable = true
 };
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+	typename Resource>
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 engine(Connection&& conn, MessageID&& message_id)
 : conn_(std::move(conn)), mid_(std::move(message_id))
 {
@@ -30,13 +29,12 @@ engine(Connection&& conn, MessageID&& message_id)
 		default_cb_ = nullptr;
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+	typename Resource>
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 engine(Connection&& conn, MessageID&& message_id, configure const& config)
 	: conn_(std::move(conn)), mid_(std::move(message_id)), config_(config)
 {
@@ -44,70 +42,65 @@ engine(Connection&& conn, MessageID&& message_id, configure const& config)
 		default_cb_ = nullptr;
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 void
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 default_cb(default_response_cb cb) noexcept
 {
 	static_assert(has_default_callback, "Default callback NOT set");
 	default_cb_ = cb;
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
-typename engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::resource&
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+	typename Resource>
+typename engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::resource&
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 root() noexcept
 {
-	static_assert(Profile == profile::server, "Resource just available at 'server' profile");
+	static_assert(get_profile() == profile::server, "Resource just available at 'server' profile");
 	return resource_root_.root();
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
-typename engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::resource_root&
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+	typename Resource>
+typename engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::resource_root&
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 root_node() noexcept
 {
-	static_assert(Profile == profile::server, "Resource just available at 'server' profile");
+	static_assert(get_profile() == profile::server, "Resource just available at 'server' profile");
 	return resource_root_;
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 std::uint16_t
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 mid() noexcept
 {
 	return mid_();
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 template<bool UseEndpointTransMatch>
 void
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 process(endpoint& ep, std::uint8_t const* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 {
 	CoAP::Message::message msg;
@@ -133,22 +126,21 @@ process(endpoint& ep, std::uint8_t const* buffer, std::size_t buffer_len, CoAP::
 	}
 	else //is_request;
 	{
-		if constexpr(Profile == profile::server)
+		if constexpr(get_profile() == profile::server)
 			process_request(ep, msg, buffer, ec);
 		else
 			ec = CoAP::errc::request_not_supported;
 	}
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 template<bool CheckEndpoint, bool CheckToken>
 void
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 process_response(endpoint& ep, CoAP::Message::message const& msg) noexcept
 {
 	if(list_.template check_all_response<CheckEndpoint, CheckToken>(ep, msg)) return;
@@ -156,14 +148,13 @@ process_response(endpoint& ep, CoAP::Message::message const& msg) noexcept
 		if(default_cb_) default_cb_(ep, msg, this);
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 void
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 process_request(endpoint& ep,
 		CoAP::Message::message const& request,
 		std::uint8_t const* buffer,
@@ -200,14 +191,13 @@ process_request(endpoint& ep,
 	}
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 void
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 check_transactions() noexcept
 {
 	int i = 0;
@@ -227,14 +217,13 @@ check_transactions() noexcept
 	}
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 bool
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 run(CoAP::Error& ec)
 {
 	endpoint ep;
@@ -253,14 +242,13 @@ run(CoAP::Error& ec)
 	return true;
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 bool
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 operator()(CoAP::Error& ec) noexcept
 {
 	return run(ec);

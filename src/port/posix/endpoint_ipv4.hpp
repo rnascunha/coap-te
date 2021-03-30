@@ -60,12 +60,9 @@ class endpoint_ipv4{
 
 		const char* address(char* addr_str, std::size_t len = INET_ADDRSTRLEN) noexcept
 		{
-#ifdef _WIN32
-			return InetNtop(family, &addr_.sin_addr, addr_str, len);
-#else
 			return inet_ntop(family, &addr_.sin_addr, addr_str, len);
-#endif
 		}
+
 		const char* host(char* host_addr) noexcept { return address(host_addr); }
 
 		in_addr_t address() noexcept{ return addr_.sin_addr.s_addr; }

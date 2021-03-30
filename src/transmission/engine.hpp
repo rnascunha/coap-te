@@ -15,12 +15,11 @@
 namespace CoAP{
 namespace Transmission{
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 class engine
 {
 		using empty = struct{};
@@ -31,11 +30,11 @@ class engine
 		using transaction_cb = typename transaction_t::transaction_cb;
 		using request = Request<endpoint, transaction_cb>;
 		using response = Response<endpoint>;
-		using resource = CoAP::Resource::resource<Callback_Resource_Functor>;
-		using resource_root = typename std::conditional<Profile == profile::server,
-				typename CoAP::Resource::resource_root<Callback_Resource_Functor>, empty>::type;
-		using resource_node = typename std::conditional<Profile == profile::server,
-				typename CoAP::Resource::resource_root<Callback_Resource_Functor>::node_t, empty>::type;
+		using resource = Resource;
+		using resource_root = typename std::conditional<!std::is_same<Resource, void*>::value,
+									typename CoAP::Resource::resource_root<resource>, empty>::type;
+		using resource_node = typename std::conditional<!std::is_same<Resource, void*>::value,
+									typename CoAP::Resource::resource_root<resource>::node_t, empty>::type;
 		using async_response = separate_response<endpoint>;
 
 		static constexpr const bool has_default_callback =
@@ -54,7 +53,7 @@ class engine
 
 		static constexpr profile get_profile()
 		{
-			return Profile;
+			return std::is_same<Resource, void*>::value ? profile::client : profile::server;
 		}
 
 		static constexpr unsigned max_packet_size()

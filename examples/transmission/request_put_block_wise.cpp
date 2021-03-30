@@ -45,7 +45,6 @@ static constexpr module example_mod = {
  * description os the options.
  */
 using engine = CoAP::Transmission::engine<
-		CoAP::Transmission::profile::client,
 		CoAP::socket,
 		CoAP::Message::message_id,
 		CoAP::Transmission::transaction_list<
@@ -56,8 +55,7 @@ using engine = CoAP::Transmission::engine<
 				4>,
 		CoAP::Transmission::default_cb<
 			CoAP::socket::endpoint>,
-		CoAP::Resource::callback<
-			CoAP::socket::endpoint>
+		CoAP::disable
 	>;
 
 /**
@@ -90,7 +88,7 @@ void request_cb(void const* trans, CoAP::Message::message const* response, void*
 	if(response)
 	{
 		status(example_mod, "Response received!");
-		CoAP::Debug::print_message_str(*response);
+		CoAP::Debug::print_message_string(*response);
 
 		using namespace CoAP::Message;
 

@@ -4,8 +4,6 @@
 #include <cstring>
 #include "../discovery.hpp"
 
-#include <cstdio>
-
 namespace CoAP{
 namespace Resource{
 
@@ -68,7 +66,7 @@ static std::size_t make_parents_path(path_list const* parents_path,
 	if(!parents_path) return 0;
 
 	std::size_t offset = 0;
-	for(path_node const* n = parents_path->head(); n;n = n->next)
+	for(path_node const* n = parents_path->head(); n; n = n->next)
 	{
 		std::size_t size = n->value ? std::strlen(n->value) : 0;
 		if(buffer_size < (offset + size + 1))
@@ -77,13 +75,13 @@ static std::size_t make_parents_path(path_list const* parents_path,
 			return offset;
 		}
 
-		buffer[offset++] = '/';
-
 		if(size)
 		{
 			std::memcpy(buffer + offset, n->value, size);
 			offset += size;
 		}
+
+		buffer[offset++] = '/';
 	}
 	return offset;
 }
@@ -117,13 +115,14 @@ std::size_t description(Resource const& root,
 		return offset;
 	}
 
-	buffer[offset] = '/';
-	offset += 1;
-
-	if(root.path())
+	if(size_path)
 	{
 		std::memcpy(buffer + offset, root.path(), size_path);
 		offset += size_path;
+	}
+	else
+	{
+		buffer[offset++] = '/';
 	}
 	buffer[offset++] = '>';
 
@@ -149,7 +148,6 @@ std::size_t description(Resource const& root,
 	if(offset < buffer_size)
 		buffer[offset] = '\0';
 
-	std::printf("path: %s\n", buffer);
 	return offset;
 
 }
@@ -161,7 +159,7 @@ static std::size_t discovery_impl(ResourceNode const& node,
 		path_list& list,
 		CoAP::Error& ec) noexcept
 {
-	if(max_depth && depth > max_depth) return 0;
+	if(max_depth && depth >= max_depth) return 0;
 	std::size_t offset = 0;
 
 	if(depth)
@@ -180,28 +178,24 @@ static std::size_t discovery_impl(ResourceNode const& node,
 	offset += description(node.value(), &list, buffer + offset, buffer_size - offset, ec);
 	if(ec) return offset;
 
-	printf("0\n");
 	ResourceNode const* n_node = node.next();
 	if(n_node)
 	{
-		printf("1\n");
 		offset += discovery_impl(*n_node, buffer + offset, buffer_size - offset, max_depth, depth, list, ec);
 		if(ec) return offset;
-//		n_node = n_node->next();
 	}
 
-	printf("2\n");
-//	path_node n{node.value().path()};
-//	list.add(n);
+	path_node n{node.value().path()};
+	list.add<false>(n);
 	depth += 1;
 	ResourceNode const* children = node.children();
 	if(children)
 	{
-		printf("3\n");
 		offset += discovery_impl(*children, buffer + offset, buffer_size - offset, max_depth, depth, list, ec);
 		if(ec) return offset;
-//		children = children->next();
+		children = children->next();
 	}
+	list.remove(n);
 
 	return offset;
 }
@@ -214,6 +208,14 @@ std::size_t discovery(ResourceNode const& node,
 {
 	path_list list;
 	return discovery_impl(node, buffer, buffer_size, max_depth, 0, list, ec);
+}
+
+template<typename ResourceNode>
+std::size_t discovery(ResourceNode const& node,
+		char* buffer, std::size_t buffer_size,
+		CoAP::Error& ec) noexcept
+{
+	return discovery(node, buffer, buffer_size, 0, ec);
 }
 
 }//Resource

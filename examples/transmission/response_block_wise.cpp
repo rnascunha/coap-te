@@ -72,7 +72,6 @@ static constexpr module example_mod = {
  * the default callback.
  */
 using engine = CoAP::Transmission::engine<
-		CoAP::Transmission::profile::server,
 		CoAP::socket,
 		CoAP::Message::message_id,
 		CoAP::Transmission::transaction_list<
@@ -82,7 +81,10 @@ using engine = CoAP::Transmission::engine<
 				CoAP::socket::endpoint>,
 			TRANSACT_NUM>,
 		void*,		//default callback disabled
-		CoAP::Resource::callback<CoAP::socket::endpoint>
+		CoAP::Resource::resource<
+			CoAP::Resource::callback<CoAP::socket::endpoint>,
+			false
+		>
 	>;
 
 /**
@@ -248,7 +250,7 @@ static void put_data_handler(CoAP::Message::message const& request,
 	using namespace CoAP::Message;
 
 	status(example_mod, "Received put data request");
-	CoAP::Debug::print_message_str(request);
+	CoAP::Debug::print_message_string(request);
 
 	Option::option opt;
 

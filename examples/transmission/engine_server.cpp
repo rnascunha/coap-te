@@ -4,11 +4,11 @@
  * We are going to create a resource tree as presented below.
  *
  * 	l0:			          	   root
- * 			____________________|__________________________________
- * 			|		 |			          |				|		   |
- * 	l1:	   time   sensors	 	      actuators	 	  dynamic  separate
- *				____|_______		______|_____
- *			   |     |      |       |     |     |
+ * 			____________________|_______________________________________________
+ * 			|		 |			          |				|		   |			|
+ * 	l1:	   time   sensors	 	      actuators	 	  dynamic  separate	   .well-known
+ *				____|_______		______|_____								|
+ *			   |     |      |       |     |     |							  core
  *	l2:		 temp  light humidity gpio0 gpio1 gpio2
  *
  * We are going to create appropriate response to each of the resources, using
@@ -34,8 +34,8 @@
  * ------
  * * separate: GET method only. Sends a separate response within a random time.
  * ------
- *
- *
+ * * .well-known/core: provide resource information as defined at RFC6690
+ * ------
  * For brevity, all resources return data as strings (content_format::text_plain).
  */
 
@@ -96,7 +96,6 @@ static constexpr module example_mod = {
  * the default callback.
  */
 using engine = CoAP::Transmission::engine<
-		CoAP::Transmission::profile::server,
 		CoAP::socket,
 		CoAP::Message::message_id,
 #ifdef USE_TRANSACTION_LIST_VECTOR
@@ -114,8 +113,11 @@ using engine = CoAP::Transmission::engine<
 				CoAP::socket::endpoint>,
 			TRANSACT_NUM>,
 #endif /* USE_TRANSACTION_LIST_VECTOR */
-		void*,		//default callback disabled
-		CoAP::Resource::callback<CoAP::socket::endpoint>
+		CoAP::disable,		//default callback disabled
+		CoAP::Resource::resource<
+			CoAP::Resource::callback<CoAP::socket::endpoint>,
+			true
+		>
 	>;
 
 /**
@@ -144,6 +146,8 @@ static void get_dynamic_handler(CoAP::Message::message const& request,
 static void delete_dynamic_handler(CoAP::Message::message const& request,
 								engine::response& response, void*) noexcept;
 static void get_separate_handler(CoAP::Message::message const& request,
+								engine::response& response, void*) noexcept;
+static void get_discovery_handler(CoAP::Message::message const& request,
 								engine::response& response, void*) noexcept;
 
 /**
@@ -206,7 +210,9 @@ int main()
 								res_gpio2{"gpio2", get_actuator_handler<2>, nullptr, put_actuator_handler<2>},
 										/* path			get							post			put */
 							res_dynamic{"dynamic", get_dynamic_list_handler, post_dynamic_handler, nullptr},
-							res_separate{"separate", get_separate_handler};
+							res_separate{"separate", get_separate_handler},
+							res_well_known{".well-known"},
+								res_core{"core", get_discovery_handler};
 
 	debug(example_mod, "Adding resources...");
 	/**
@@ -226,12 +232,14 @@ int main()
 	res_actuators.add_child(res_gpio0,
 							res_gpio1,
 							res_gpio2);
+	res_well_known.add_child(res_core);
 	coap_engine.root_node().add_child(
 			res_time,
 			res_sensors,
 			res_actuators,
 			res_dynamic,
-			res_separate);
+			res_separate,
+			res_well_known);
 #else
 	/*
 	 * Using add_branch
@@ -250,6 +258,7 @@ int main()
 	coap_engine.root_node().add_branch(res_actuators, res_gpio2);
 	coap_engine.root_node().add_branch(res_dynamic);
 	coap_engine.root_node().add_branch(res_separate);
+	coap_engine.root_node().add_branch(res_well_known, res_core);
 #endif
 
 	/**
@@ -821,4 +830,49 @@ static void get_separate_handler(CoAP::Message::message const& request,
 	 * because is called synchronously with engine processing
 	 */
 	std::thread{separated_response, static_cast<engine*>(engine_void), adata}.detach();
+}
+
+/**
+ * \/well-known/core [GET]
+ *
+ * Respond to request with resource information as defined at RFC6690
+ */
+static void get_discovery_handler(CoAP::Message::message const& request,
+								engine::response& response, void* eng_ptr) noexcept
+{
+	char buffer[512];
+	CoAP::Error ec;
+	engine* eng = static_cast<engine*>(eng_ptr);
+
+	/**
+	 * Constructing link format resource information
+	 */
+	std::size_t size = CoAP::Resource::discovery(eng->root_node().node(), buffer, 512, ec);
+
+	/**
+	 * Checking error
+	 */
+	if(ec)
+	{
+		response
+			.code(CoAP::Message::code::internal_server_error)
+			.payload(ec.message())
+			.serialize();
+		return;
+	}
+
+	/**
+	 * Setting content type as link format
+	 */
+	CoAP::Message::content_format format = CoAP::Message::content_format::application_link_format;
+	CoAP::Message::Option::node content{format};
+
+	/**
+	 * Sending response
+	 */
+	response
+		.code(CoAP::Message::code::content)
+		.add_option(content)
+		.payload(buffer, size)
+		.serialize();
 }

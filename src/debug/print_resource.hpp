@@ -1,15 +1,18 @@
 #ifndef COAP_TE_DEBUG_PRINT_RESOURCE_HPP__
 #define COAP_TE_DEBUG_PRINT_RESOURCE_HPP__
 
+#include <cstdlib>
 #include "internal/tree.hpp"
 #include "resource/resource.hpp"
 
 namespace CoAP{
 namespace Debug{
 
-template<typename Callback_Functor>
-void print_resource_branch(CoAP::branch<CoAP::Resource::resource<Callback_Functor>>& br,
+template<typename Resource>
+void print_resource_branch(CoAP::branch<Resource>& br,
 		int level = 0) noexcept;
+
+void print_link_format(const char* buffer, std::size_t length) noexcept;
 
 }//Resource
 }//Debug

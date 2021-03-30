@@ -14,4 +14,6 @@
 using sa_family_t = unsigned short int;
 using in_addr_t = std::uint32_t;
 
+#define inet_ntop(family, addr, addr_str, len)	InetNtop(family, addr, addr_str, len)
+
 #endif /* COAP_TE_PORT_WINDOWS_HPP__ */

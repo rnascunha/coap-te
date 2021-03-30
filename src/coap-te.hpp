@@ -29,6 +29,7 @@
 #include "resource/types.hpp"
 #include "resource/resource.hpp"
 #include "resource/node.hpp"
+#include "resource/discovery.hpp"
 
 //URI
 #include "uri/types.hpp"

@@ -79,6 +79,58 @@ class list{
 			for(;index-- && n; n = n->next);
 			return n;
 		}
+
+		template<typename U>
+		node* remove(U const& u) noexcept
+		{
+			if(!head_) return nullptr;
+
+			node* n = head_;
+			if(head_->value == u)
+			{
+				head_ = head_->next;
+				n->next = nullptr;
+				return n;
+			}
+
+			for(; n->next; n = n->next)
+			{
+				if(n->next->value == u)
+				{
+					node* res = n->next;
+					n->next = n->next->next;
+					res->next = nullptr;
+					return res;
+				}
+			}
+
+			return nullptr;
+		}
+
+		node* remove(node& u) noexcept
+		{
+			if(!head_) return nullptr;
+
+			if(head_ == &u)
+			{
+				head_ = u.next;
+				u.next = nullptr;
+				return &u;
+			}
+
+			node* n = head_;
+			for(; n->next; n = n->next)
+			{
+				if(n->next == &u)
+				{
+					n->next = u.next;
+					u.next = nullptr;
+					return &u;
+				}
+			}
+
+			return nullptr;
+		}
 	private:
 		node* head_ = nullptr;
 };

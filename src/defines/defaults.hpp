@@ -25,6 +25,8 @@ namespace CoAP{
 static constexpr std::uint16_t default_port = 5683;
 static constexpr std::uint16_t default_security_port = 5684;
 
+using disable = void*;
+
 }
 
 #endif /* COAT_TE_DEFINES_DEFAULTS_HPP__ */

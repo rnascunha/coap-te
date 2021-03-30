@@ -98,27 +98,52 @@ using transaction_list_t =
 #endif /* USE_TRANSACTION_LIST_VECTOR */
 
 /**
+ * Any request made with CoAP must be associated to a specific resource.
+ *
+ * If you are not intended to receive any request (like a client), you can
+ * use CoAP::disable (i.e. "void*") and any income request will generate a
+ * response error (this example could disable resource as we are just going
+ * to make a request, but we keeped here as reference).
+ *
+ * But if you expect to act like a server, you must provide a resource type
+ * to CoAP-te engine. Above is shown the default resource definition:
+ *----------
+ * (1) the callback function type that it will be called to any successful request.
+ * The function signature must be:
+ *
+ * void(*)(Message::message const&, engine::response& , void*) = CoAP::Resource::callback<Endpoint>;
+ * Where the parameters are: request, response and engine.
+ *
+ * You could also use:
+ *
+ * std::function<void(Message::message const&, engine::response& , void*)>
+ *
+ * And bind values, uses lambdas... and so on.
+ * --------
+ * (2) enable/disable resource description, as defined at RFC6690 (you can save some
+ * bytes (set to false) if this is not necessary).
+ */
+using resource = CoAP::Resource::resource<
+		CoAP::Resource::callback<CoAP::socket::endpoint>,	///< (1) resource callback
+		true>;												///< (2) enable/disable description
+
+/**
  * Engine: the pale blue dot
  *
  * Here we are going to show how to define a engine, and how each
  * parameters impacts:
  *-------
- * (1) Engine Profile: you can choose two profiles, 'client' or 'server'.
- * The 'client' profile doesn't accept any kind of requests, and doesn't hold
- * any resource, so you can save some memory and a few CPU cycles. The 'server'
- * profile, otherwise, can...
- *-------
- * (2) Connection type: CoAP was develop to work on top of UDP sockets, nevertheless,
+ * (1) Connection type: CoAP was develop to work on top of UDP sockets, nevertheless,
  * here you can use any type of connection that satisfy the CoAP-te connection
  * requirements. This means a endpoint type, and a send/receive function. More about
  * CoAP-te port at 'udp_socket' example. At this example we are using UDP sockets.
  *--------
- * (3) Message ID generator type: CoAP-te already defines a default MessageID generator,
+ * (2) Message ID generator type: CoAP-te already defines a default MessageID generator,
  * but you can define your own. Check 'message_id' at 'message/message_id'.
  *--------
- * (4) Transaction List type: a transaction list, as defined above.
+ * (3) Transaction List type: a transaction list, as defined above.
  *--------
- * (5) Default callback type: the callback function type to call. When this is called?
+ * (4) Default callback type: the callback function type to call. When this is called?
  * * When receiving a response from a non-confirmable request;
  * * When receiving a ack response from a transaction that timeout;
  * * When receiving response of separate type. The transaction was that holded the request
@@ -135,35 +160,17 @@ using transaction_list_t =
  * std::function<void(Endpoint const&, CoAP::Message::message const&,void*)>;
  *
  * And bind values, uses lambdas... and so on.
- *--------
- * (6) Callback resource type: the callback function type that it will be called to
- * any successful request. The function signature must be:
- *
- * void(*)(Message::message const&, engine::response& , void*) = CoAP::Resource::callback<Endpoint>;
- * Where the parameters are: request, response and engine.
- *
- * You could also use:
- *
- * std::function<void(Message::message const&, engine::response& , void*)>
- *
- * And bind values, uses lambdas... and so on.
- *
- * At this example, as we are using the client profile, this definition is unnecessary.
- * (could just use something like void*)
- *
  * ------
  *
  * So that it, that's us... CoAP-te...
  */
 using engine = CoAP::Transmission::engine<
-		CoAP::Transmission::profile::client,	/* (1) engine profile */
-		CoAP::socket,							/* (2) socket type */
-		CoAP::Message::message_id,				/* (3) message id generator type */
-		transaction_list_t,						/* (4) transaction list */
-		CoAP::Transmission::default_cb<			/* (5) default callback type */
+		CoAP::socket,							/* (1) socket type */
+		CoAP::Message::message_id,				/* (2) message id generator type */
+		transaction_list_t,						/* (3) transaction list */
+		CoAP::Transmission::default_cb<			/* (4) default callback type */
 			CoAP::socket::endpoint>,
-		CoAP::Resource::callback<				/* (6) resource callback */
-			CoAP::socket::endpoint>
+		resource								/* (5) resource callback */
 	>;
 
 /**
@@ -229,7 +236,7 @@ void request_cb(void const* trans, CoAP::Message::message const* response, void*
 	if(response)
 	{
 		status(example_mod, "Response received!");
-		CoAP::Debug::print_message(*response);
+		CoAP::Debug::print_message_string(*response);
 
 		/**
 		 * Checking if we received a empty acknowledgment. This means that we
@@ -296,7 +303,7 @@ int main()
 
 	debug(example_mod, "Constructing the request message...");
 
-//	CoAP::Message::Option::node path_op1{CoAP::Message::Option::code::uri_path, "async"};
+//	CoAP::Message::Option::node path_op1{CoAP::Message::Option::code::uri_path, "time"};
 	CoAP::Message::Option::node path_op1{CoAP::Message::Option::code::uri_path, ".well-known"};
 	CoAP::Message::Option::node path_op2{CoAP::Message::Option::code::uri_path, "core"};
 

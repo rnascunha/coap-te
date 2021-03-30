@@ -6,12 +6,11 @@
 namespace CoAP{
 namespace Transmission{
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 template<bool UseInternalBufferNon,
 	bool SortOptions,
 	bool CheckOpOrder,
@@ -19,7 +18,7 @@ template<bool UseInternalBufferNon,
 	std::size_t BufferSize,
 	typename Message_ID>
 std::size_t
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 send(endpoint& ep,
 		configure const& config,
 		CoAP::Message::Factory<BufferSize, Message_ID> const& fac,
@@ -56,12 +55,11 @@ send(endpoint& ep,
 	return size;
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 template<bool UseInternalBufferNon,
 		bool SortOptions,
 		bool CheckOpOrder,
@@ -69,7 +67,7 @@ template<bool UseInternalBufferNon,
 		std::size_t BufferSize,
 		typename Message_ID>
 std::size_t
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 send(endpoint& ep,
 		CoAP::Message::Factory<BufferSize, Message_ID> const& fac,
 		transaction_cb func, void* data,
@@ -78,12 +76,11 @@ send(endpoint& ep,
 	return send(ep, config_, fac, mid_(), data, func, ec);
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 template<bool UseInternalBufferNon,
 		bool SortOptions,
 		bool CheckOpOrder,
@@ -91,7 +88,7 @@ template<bool UseInternalBufferNon,
 		std::size_t BufferSize,
 		typename Message_ID>
 std::size_t
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 send(endpoint& ep,
 		CoAP::Message::Factory<BufferSize, Message_ID> const& fac,
 		std::uint16_t mid,
@@ -101,18 +98,17 @@ send(endpoint& ep,
 	return send(ep, config_, fac, mid, data, func, ec);
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 template<bool UseInternalBufferNon,
 		bool SortOptions,
 		bool CheckOpOrder,
 		bool CheckOpRepeat>
 std::size_t
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 send(request& req,
 	std::uint16_t mid,
 	CoAP::Error& ec) noexcept
@@ -121,18 +117,17 @@ send(request& req,
 						(req.endpoint(), config_, req.factory(), mid, req.callback(), req.data(), ec);
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 template<bool UseInternalBufferNon,
 		bool SortOptions,
 		bool CheckOpOrder,
 		bool CheckOpRepeat>
 std::size_t
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 send(request& req,
 	CoAP::Error& ec) noexcept
 {
@@ -140,12 +135,11 @@ send(request& req,
 						(req.endpoint(), config_, req.factory(), mid_(), req.callback(), req.data(), ec);
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 template<bool UseInternalBufferNon,
 	bool SortOptions,
 	bool CheckOpOrder,
@@ -153,7 +147,7 @@ template<bool UseInternalBufferNon,
 	std::size_t BufferSize,
 	typename Message_ID>
 std::size_t
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 send(endpoint& ep,
 		configure const& config,
 		CoAP::Message::Factory<BufferSize, Message_ID> const& fac,
@@ -163,18 +157,17 @@ send(endpoint& ep,
 	return send(ep, config, fac, mid_(), func, data, ec);
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 template<bool UseInternalBufferNon,
 		bool SortOptions,
 		bool CheckOpOrder,
 		bool CheckOpRepeat>
 std::size_t
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 send(request& req,
 			configure const& config,
 			std::uint16_t mid,
@@ -184,18 +177,17 @@ send(request& req,
 			(req.endpoint(), config, req.factory(), mid, req.callback(), req.data(), ec);
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 template<bool UseInternalBufferNon,
 		bool SortOptions,
 		bool CheckOpOrder,
 		bool CheckOpRepeat>
 std::size_t
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 send(request& req,
 		configure const& config,
 		CoAP::Error& ec) noexcept
@@ -204,14 +196,13 @@ send(request& req,
 			(req.endpoint(), config, req.factory(), mid_(), req.callback(), req.data(), ec);
 }
 
-template<profile Profile,
-	typename Connection,
+template<typename Connection,
 	typename MessageID,
 	typename TransactionList,
 	typename Callback_Default_Functor,
-	typename Callback_Resource_Functor>
+	typename Resource>
 std::size_t
-engine<Profile, Connection, MessageID, TransactionList, Callback_Default_Functor, Callback_Resource_Functor>::
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 send(endpoint& ep, const void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 {
 	return conn_.send(buffer, buffer_len, ep, ec);

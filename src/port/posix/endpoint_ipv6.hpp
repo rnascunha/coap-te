@@ -66,11 +66,7 @@ class endpoint_ipv6{
 
 		const char* address(char* addr_str, std::size_t len = INET6_ADDRSTRLEN) noexcept
 		{
-#ifdef _WIN32
-			return InetNtop(family, &addr_.sin_addr, addr_str, len);
-#else
-			return inet_ntop(family, &addr_.sin_addr, addr_str, len);
-#endif
+			return inet_ntop(family, &addr_.sin6_addr, addr_str, len);
 		}
 		
 		const char* host(char* host_addr) noexcept { return address(host_addr); }
