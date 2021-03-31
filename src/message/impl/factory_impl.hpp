@@ -125,7 +125,6 @@ serialize(
 }
 
 template<std::size_t BufferSize, typename MessageID>
-//typename Factory<BufferSize, MessageID>::buffer_type const
 std::uint8_t const*
 Factory<BufferSize, MessageID>::
 buffer() const noexcept
@@ -136,8 +135,8 @@ buffer() const noexcept
 
 template<std::size_t BufferSize, typename MessageID>
 template<bool SortOptions /* = true */,
-				bool CheckOpOrder /* = !SortOptions */,
-				bool CheckOpRepeat /* = true */>
+		bool CheckOpOrder /* = !SortOptions */,
+		bool CheckOpRepeat /* = true */>
 std::size_t
 Factory<BufferSize, MessageID>::
 serialize(
@@ -155,8 +154,8 @@ serialize(
 
 template<std::size_t BufferSize, typename MessageID>
 template<bool SortOptions /* = true */,
-				bool CheckOpOrder /* = !SortOptions */,
-				bool CheckOpRepeat /* = true */>
+		bool CheckOpOrder /* = !SortOptions */,
+		bool CheckOpRepeat /* = true */>
 std::size_t
 Factory<BufferSize, MessageID>::
 serialize(

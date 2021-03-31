@@ -1,9 +1,10 @@
 #ifndef COAP_TE_URI_TYPES_HPP__
 #define COAP_TE_URI_TYPES_HPP__
 
+#include "defines/defaults.hpp"
 #include <cstdlib>
 #include <cstdint>
-#include "message/options.hpp"
+#include "message/options/options.hpp"
 #include "port/port.hpp"
 
 namespace CoAP{
@@ -11,7 +12,13 @@ namespace URI{
 
 enum class scheme{
 	coap = 0,
-	coaps
+	coaps,
+#if COAP_TE_RELIABLE_CONNECTION == 1
+	coap_tcp,
+	coaps_tcp,
+	coap_ws,
+	coaps_ws
+#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 };
 
 enum class host_type{

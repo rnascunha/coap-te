@@ -3,6 +3,8 @@
 #include <cstring>
 
 #include "message/parser.hpp"
+#include "message/options/options.hpp"
+#include "message/options/parser.hpp"
 #include "helper.hpp"
 #include "output_string.hpp"
 #include "print_options.hpp"
@@ -22,7 +24,7 @@ void print_message(CoAP::Message::message const& msg)
 	{
 		CoAP::Message::Option::option opt;
 		CoAP::Error ec;
-		offset += CoAP::Message::parse_option<true>(opt,
+		offset += CoAP::Message::Option::parse<CoAP::Message::Option::code, true>(opt,
 				msg.option_init + offset, msg.options_len - offset, delta, ec);
 
 		delta = static_cast<unsigned>(opt.ocode);
@@ -52,7 +54,7 @@ bool print_message(std::uint8_t const* const arr, std::size_t size)
 	{
 		CoAP::Message::Option::option opt;
 		CoAP::Error ec_;
-		offset += CoAP::Message::parse_option<false>(opt,
+		offset += CoAP::Message::Option::parse<CoAP::Message::Option::code, false>(opt,
 				msg.option_init + offset, msg.options_len - offset, delta, ec_);
 		delta = static_cast<unsigned>(opt.ocode);
 		std::printf("\t\t");
@@ -77,7 +79,7 @@ void print_message_encoded_string(CoAP::Message::message const& msg) noexcept
 	{
 		CoAP::Message::Option::option opt;
 		CoAP::Error ec;
-		offset += CoAP::Message::parse_option<true>(opt,
+		offset += CoAP::Message::Option::parse<CoAP::Message::Option::code, true>(opt,
 				msg.option_init + offset, msg.options_len - offset, delta, ec);
 		if(ec)
 		{
@@ -106,7 +108,7 @@ void print_message_string(CoAP::Message::message const& msg) noexcept
 	{
 		CoAP::Message::Option::option opt;
 		CoAP::Error ec;
-		offset += CoAP::Message::parse_option<true>(opt,
+		offset += CoAP::Message::Option::parse<CoAP::Message::Option::code, true>(opt,
 				msg.option_init + offset, msg.options_len - offset, delta, ec);
 		if(ec)
 		{

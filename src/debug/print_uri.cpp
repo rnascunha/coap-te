@@ -1,4 +1,5 @@
 #include "print_uri.hpp"
+#include "output_string.hpp"
 #include <cstdio>
 
 namespace CoAP{
@@ -8,8 +9,7 @@ template<typename Host,
 		typename PrintHost>
 static void print_uri(CoAP::URI::uri<Host> const &uri, PrintHost print_host) noexcept
 {
-	std::printf("%s://",
-				uri.uri_scheme == CoAP::URI::scheme::coap ? "coap" : "coaps");
+	std::printf("%s://", scheme_string(uri.uri_scheme));
 	print_host(uri.host);
 	std::printf(":%u/%.*s?%.*s", uri.port,
 			static_cast<int>(uri.path_len), uri.path,
@@ -20,8 +20,7 @@ template<typename Host,
 		typename PrintHost>
 static void print_uri_decomposed(CoAP::URI::uri<Host> const &uri, PrintHost print_host) noexcept
 {
-	std::printf("Scheme: %s\n",
-				uri.uri_scheme == CoAP::URI::scheme::coap ? "coap" : "coaps");
+	std::printf("Scheme: %s\n", scheme_string(uri.uri_scheme));
 	std::printf("Host: ");
 	print_host(uri.host);
 	std::printf("\n");

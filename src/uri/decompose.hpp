@@ -4,13 +4,14 @@
 #include <cstdlib>
 
 #include "types.hpp"
-#include "message/options.hpp"
+#include "message/options/options.hpp"
 
 namespace CoAP{
 namespace URI{
 
 template<typename Host,
-		typename HostParser>
+		typename HostParser,
+		bool CheckReliable = true>
 bool decompose(uri<Host>& uri, char* uri_string, HostParser parser) noexcept;
 
 template<typename Host>
@@ -18,8 +19,11 @@ bool decompose_to_list(std::uint8_t* buffer, std::size_t& buffer_len,
 		uri<Host>& uri,
 		CoAP::Message::Option::List& list) noexcept;
 
+template<bool CheckReliable = true>
 bool decompose(uri<in_addr>& uri, char* uri_string) noexcept;
+template<bool CheckReliable = true>
 bool decompose(uri<in6_addr>& uri, char* uri_string) noexcept;
+template<bool CheckReliable = true>
 bool decompose(uri<ip_type>& uri, char* uri_string) noexcept;
 
 /**

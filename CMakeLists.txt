@@ -62,12 +62,13 @@ set(MAIN_SRC ${SRC_DIR}/error.cpp
 				${SRC_DIR_URI}/decompose.cpp
 				${SRC_DIR_INTERNAL}/helper.cpp
 				${SRC_DIR_INTERNAL}/decoder.cpp
-				${SRC_DIR_MESSAGE}/options.cpp
+				${SRC_DIR_MESSAGE}/options/options.cpp
 				${SRC_DIR_MESSAGE}/message_id.cpp
 				${SRC_DIR_MESSAGE}/types.cpp
 				${SRC_DIR_MESSAGE}/codes.cpp
 				${SRC_DIR_MESSAGE}/parser.cpp
 				${SRC_DIR_MESSAGE}/serialize.cpp
+				${SRC_DIR_MESSAGE}/reliable/serialize.cpp
 				${SRC_DIR_TRANSMISSION}/functions.cpp
 				${SRC_DIR_DEBUG}/helper.cpp
 				${SRC_DIR_DEBUG}/print_options.cpp

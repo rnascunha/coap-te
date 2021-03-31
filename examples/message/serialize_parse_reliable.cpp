@@ -61,9 +61,6 @@ int main()
 
 	//Message token
 	std::uint8_t token[] = {0x03, 0x04, 0x05, 0x06, 0x07};
-	//Message ID generator
-	message_id mid(CoAP::time());
-
 
 	CoAP::Message::accept content = accept::application_json;
 	const char* payload = "my data";
@@ -91,11 +88,9 @@ int main()
 	 * * list: just don't add any option to the list;
 	 * * payload/payload_len = nullptr/0;
 	 */
-	std::size_t size = serialize(
+	std::size_t size = Reliable::serialize(
 			buffer, BUFFER_LEN,					//Buffer/buffer length where data will be serialize
-			CoAP::Message::type::confirmable,	//Message type (check message/types.hpp)
 			code::get,							//Message code (check message/codes.hpp)
-			mid(),								//Message ID generator
 			token, sizeof(token),				//Token and token size
 			options, sizeof(options) / sizeof(Option::option), //Option array and length
 			payload, std::strlen(payload),		//Payload/payload length
@@ -107,7 +102,7 @@ int main()
 	 * Instantiation of factory (more about the template arguments at the
 	 * 'factory' example.
 	 */
-	Factory<> fac;
+	Reliable::Factory<> fac;
 
 	/**
 	 * Making the header. Defining the type of message (confirmable) and method (get)
@@ -116,7 +111,7 @@ int main()
 	 * All messages types can be checked at message/types.hpp
 	 * All messages code can be checked at message/codes.hpp
 	 */
-	fac.header(CoAP::Message::type::confirmable, code::get);
+	fac.header(code::get);
 	fac.token(token, sizeof(token));
 
 	/**
@@ -151,7 +146,7 @@ int main()
 	 * * Serialize returns how many bytes where serialized (don't use this data
 	 * to infer that serialization occur correctly).
 	 */
-	std::size_t size = fac.serialize(buffer, BUFFER_LEN, mid(), ec);
+	std::size_t size = fac.serialize(buffer, BUFFER_LEN, ec);
 
 	/**
 	 * After serialize, you can use the factory again, but first you need to call reset
@@ -196,11 +191,9 @@ int main()
 	 * * list: just don't add any option to the list;
 	 * * payload/payload_len = nullptr/0;
 	 */
-	std::size_t size = serialize(
+	std::size_t size = Reliable::serialize(
 			buffer, BUFFER_LEN,					//Buffer/buffer length where data will be serialize
-			CoAP::Message::type::confirmable,	//Message type (check message/types.hpp)
 			code::get,							//Message code (check message/codes.hpp)
-			mid(),								//Message ID generator
 			token, sizeof(token),				//Token and token size
 			list,								//The option list declared above
 			payload, std::strlen(payload),		//Payload/payload length
@@ -212,65 +205,68 @@ int main()
 	 */
 	if(ec) exit_error(ec, "serialize");
 
-	/**
-	 * Serialize succeeded
-	 */
-	debug(example_mod, "Serialize succeeded! size=%lu...", size);
-	debug(example_mod, "Printing message bytes...");
-	CoAP::Debug::print_byte_message(buffer, size);
-
-	/**
-	 * Now we are gonna parse the message that we just serialized
-	 * (supposed we received from network)
-	 */
-	debug(example_mod, "-------------");
-	status(example_mod, "Parsing message...");
-
-	/**
-	 * message struct will hold the information parsed.
-	 *
-	 * It doesn't copy any internally (except trivial values), it
-	 * just point to the buffer where the information is.
-	 *
-	 * check message/types.hpp (struct message) to examine each
-	 * field of message structure.
-	 */
-	message msg;
-	unsigned size_parse = parse(msg, buffer, size, ec);
-	/**
-	 * Checking parse
-	 */
-	if(ec) exit_error(ec, "parsing");
-	/**
-	 * Parsed succeeded!
-	 */
-	status(example_mod, "Parsing succeded! size=%u...", size_parse);
-	debug(example_mod, "Printing message...");
-	CoAP::Debug::print_message(msg);
-
-	/**
-	 * Showing how to iterate through options
-	 */
-	debug(example_mod, "--------------");
-	status("Iterate options... num/size=%lu/%lu", msg.option_num, msg.options_len);
-
-	/**
-	 * Options are composed to 3 fields:
-	 * * ocode: option code
-	 * * length: option length
-	 * * value: pointer to option value
-	 *
-	 * To verify all options code, see "message/options.hpp"
-	 */
-	Option::Parser<Option::code> op{msg};	//The parser will iterate through the options
-	Option::option const* opt;				//This will hold a pointer to the option
-	while((opt = op.next()))
-	{
-		CoAP::Debug::print_option(*opt);
-		std::printf("\n");
-	}
-
-	status(example_mod, "Success!");
+	std::printf("Printing buffer:\n");
+	CoAP::Debug::print_array(buffer, size);
+	std::printf("\n");
+//	/**
+//	 * Serialize succeeded
+//	 */
+//	debug(example_mod, "Serialize succeeded! size=%lu...", size);
+//	debug(example_mod, "Printing message bytes...");
+//	CoAP::Debug::print_byte_message(buffer, size);
+//
+//	/**
+//	 * Now we are gonna parse the message that we just serialized
+//	 * (supposed we received from network)
+//	 */
+//	debug(example_mod, "-------------");
+//	status(example_mod, "Parsing message...");
+//
+//	/**
+//	 * message struct will hold the information parsed.
+//	 *
+//	 * It doesn't copy any internally (except trivial values), it
+//	 * just point to the buffer where the information is.
+//	 *
+//	 * check message/types.hpp (struct message) to examine each
+//	 * field of message structure.
+//	 */
+//	message msg;
+//	unsigned size_parse = parse(msg, buffer, size, ec);
+//	/**
+//	 * Checking parse
+//	 */
+//	if(ec) exit_error(ec, "parsing");
+//	/**
+//	 * Parsed succeeded!
+//	 */
+//	status(example_mod, "Parsing succeded! size=%u...", size_parse);
+//	debug(example_mod, "Printing message...");
+//	CoAP::Debug::print_message(msg);
+//
+//	/**
+//	 * Showing how to iterate through options
+//	 */
+//	debug(example_mod, "--------------");
+//	status("Iterate options... num/size=%lu/%lu", msg.option_num, msg.options_len);
+//
+//	/**
+//	 * Options are composed to 3 fields:
+//	 * * ocode: option code
+//	 * * length: option length
+//	 * * value: pointer to option value
+//	 *
+//	 * To verify all options code, see "message/options.hpp"
+//	 */
+//	Option::Parser<Option::code> op{msg};	//The parser will iterate through the options
+//	Option::option const* opt;				//This will hold a pointer to the option
+//	while((opt = op.next()))
+//	{
+//		CoAP::Debug::print_option(*opt);
+//		std::printf("\n");
+//	}
+//
+//	status(example_mod, "Success!");
 
 	return EXIT_SUCCESS;
 }

@@ -104,7 +104,7 @@ engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resourc
 process(endpoint& ep, std::uint8_t const* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 {
 	CoAP::Message::message msg;
-	parse(msg, buffer, buffer_len, ec);
+	CoAP::Message::parse(msg, buffer, buffer_len, ec);
 
 	if(ec)
 	{

@@ -2,7 +2,8 @@
 #include <cstdio>
 
 #include "compose.hpp"
-#include "message/options.hpp"
+//#include "message/options/options.hpp"
+#include "message/options/functions2.hpp"
 #include "internal/encoder.hpp"
 #include "internal/ascii.hpp"
 
@@ -103,7 +104,7 @@ std::size_t compose_query(char* buffer, std::size_t buffer_len,
 }
 
 std::size_t compose(char* buffer, std::size_t buffer_len,
-		Option_Parser& list,
+		Option::Parser<Option::code>& list,
 		CoAP::Error& ec)
 {
 	unsigned offset = 0;

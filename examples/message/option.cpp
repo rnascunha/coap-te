@@ -146,9 +146,9 @@ int main()
 	 * We are going to parse only the option. First, lets declare
 	 * a Option_Parser
 	 */
-	Option_Parser parser{msg};
+	Option::Parser<Option::code> parser{msg};
 	Option::option const* opt;		//this will hold the option parsed.
-	Option::config const* config;	//this will hold option config.
+	Option::config<Option::code> const* config;	//this will hold option config.
 
 	/**
 	 * Let's iterate through the options and print it values
@@ -192,7 +192,7 @@ int main()
 				std::printf("uint: %u|%s|len: %u|payload: %u\n",
 						static_cast<unsigned>(opt->ocode),
 						CoAP::Debug::option_string(opt->ocode),
-						opt->length, Option::parse_unsigned(opt->ocode));
+						opt->length, Option::parse_unsigned<Option::code>(opt->ocode));
 				break;
 			default:
 				break;

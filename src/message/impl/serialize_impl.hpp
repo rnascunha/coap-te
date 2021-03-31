@@ -1,10 +1,15 @@
 #ifndef COAP_TE_MESSAGE_SERIALIZE_IMPL_HPP__
 #define COAP_TE_MESSAGE_SERIALIZE_IMPL_HPP__
 
-#include "../serialize.hpp"
 #include <cstring>
+
 #include "internal/helper.hpp"
+
+#include "../options/functions2.hpp"
+#include "../options/parser.hpp"
+#include "../serialize.hpp"
 #include "../parser.hpp"
+
 
 namespace CoAP{
 namespace Message{
@@ -25,7 +30,7 @@ std::size_t serialize(std::uint8_t* buffer, std::size_t buffer_len,
 					token, token_len, ec);
 	if(ec) return offset;
 
-	offset += make_options<SortOptions, CheckOpOrder, CheckOpRepeat>
+	offset += make_options<Option::code, SortOptions, CheckOpOrder, CheckOpRepeat>
 			(buffer + offset, buffer_len - offset,
 			options, option_num, ec);
 	if(ec)return offset;
@@ -52,7 +57,7 @@ std::size_t serialize(std::uint8_t* buffer, std::size_t buffer_len,
 						token, token_len, ec);
 	if(ec) return offset;
 
-	offset += make_options<SortOptions, CheckOpOrder, CheckOpRepeat>
+	offset += make_options<Option::code, SortOptions, CheckOpOrder, CheckOpRepeat>
 				(buffer + offset, buffer_len - offset,
 				options, ec);
 	if(ec)return offset;
@@ -79,7 +84,7 @@ std::size_t serialize(std::uint8_t* buffer, std::size_t buffer_len,
 						token, token_len, ec);
 	if(ec) return offset;
 
-	offset += make_options<SortOptions, CheckOpOrder, CheckOpRepeat>
+	offset += make_options<Option::code, SortOptions, CheckOpOrder, CheckOpRepeat>
 				(buffer + offset, buffer_len - offset,
 				options.head(), ec);
 	if(ec)return offset;
@@ -90,54 +95,57 @@ std::size_t serialize(std::uint8_t* buffer, std::size_t buffer_len,
 	return offset;
 }
 
-template<bool SortOptions /* = true */,
+template<typename OptionCode /* = Option::code */,
+		bool SortOptions /* = true */,
 		bool CheckOpOrder /* = !SortOptions */,
 		bool CheckOpRepeat /* = true */>
 unsigned make_options(std::uint8_t* buffer, std::size_t buffer_len,
-		Option::option* options, std::size_t option_num,
+		Option::option_template<OptionCode>* options, std::size_t option_num,
 		CoAP::Error& ec) noexcept
 {
 	if constexpr(SortOptions)
 		Option::sort(options, option_num);
 
 	unsigned delta = 0, offset = 0;
-	Option::code last_option = Option::code::invalid;
+	OptionCode last_option = Option::invalid<OptionCode>();
 	for(std::size_t i = 0; i < option_num; i++)
-		offset += make_option<CheckOpOrder, CheckOpRepeat>(buffer + offset, buffer_len - offset,
+		offset += make_option<OptionCode, CheckOpOrder, CheckOpRepeat>(buffer + offset, buffer_len - offset,
 				options[i], delta, last_option, ec);
 
 	return offset;
 }
 
-template<bool SortOptions /* = true */,
+template<typename OptionCode /* = Option::code */,
+		bool SortOptions /* = true */,
 		bool CheckOpOrder /* = !SortOptions */,
 		bool CheckOpRepeat /* = true */>
 unsigned make_options(std::uint8_t* buffer,
 		std::size_t buffer_len,
-		Option::node* list,
+		Option::node_option<OptionCode>* list,
 		CoAP::Error& ec) noexcept
 {
 	if constexpr(SortOptions)
-		Option::sort(list);
+		Option::sort<OptionCode>(list);
 
 	unsigned delta = 0, offset = 0;
-	Option::code last_option = Option::code::invalid;
+	OptionCode last_option = Option::invalid<OptionCode>();
 	for(Option::node* i = list; i != nullptr; i = i->next)
-		offset += make_option<CheckOpOrder, CheckOpRepeat>(buffer + offset, buffer_len - offset,
+		offset += make_option<OptionCode, CheckOpOrder, CheckOpRepeat>(buffer + offset, buffer_len - offset,
 				i->value, delta, last_option, ec);
 
 	return offset;
 }
 
-template<bool CheckOpOrder /* = true */,
+template<typename OptionCode /* = Option::code */,
+		bool CheckOpOrder /* = true */,
 		bool CheckOpRepeat /* = true */>
 unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
-							Option::option const& option, unsigned& delta,
-							Option::code& last_option,
+							Option::option_template<OptionCode> const& option, unsigned& delta,
+							OptionCode& last_option,
 							CoAP::Error& ec) noexcept
 {
 	unsigned offset = 0;
-	Option::config const * const config = Option::get_config(option.ocode);
+	Option::config<OptionCode> const * const config = Option::get_config(option.ocode);
 	if(config == nullptr)
 	{
 		ec = CoAP::errc::option_invalid;
@@ -252,10 +260,10 @@ bool Serialize::add_option(Option::option&& op) noexcept
 {
 	if constexpr(CheckRepeat)
 	{
-		Option::config const * const config = Option::get_config(op.ocode);
+		Option::config<Option::code> const * const config = Option::get_config(op.ocode);
 		if(!config->repeatable)
 		{
-			Option_Parser parser(msg_);
+			Option::Parser<Option::code> parser(msg_);
 			Option::option const* opt;
 			while((opt = parser.next()))
 			{
@@ -265,7 +273,7 @@ bool Serialize::add_option(Option::option&& op) noexcept
 		}
 	}
 
-	Option_Parser parser(msg_);
+	Option::Parser<Option::code> parser(msg_);
 	Option::option const *next;
 	Option::option current;
 
@@ -289,7 +297,7 @@ bool Serialize::add_option(Option::option&& op) noexcept
 	CoAP::Error ec;
 	unsigned delta = current ? static_cast<unsigned>(current.ocode) : 0;
 	Option::code c = current.ocode;
-	make_option<false, false>(n_buf, opt_size,
+	make_option<Option::code, false, false>(n_buf, opt_size,
 								op, delta,
 								c, ec);
 	if(ec) return false;
@@ -310,12 +318,12 @@ bool Serialize::add_option(Option::option&& op) noexcept
 		n_buf += opt_size;
 		CoAP::Error ec;
 		Option::option opt;
-		std::size_t off = parse_option(opt, n_buf, msg_.options_len - offset - opt_size, n_delta, ec);
+		std::size_t off = Option::parse<Option::code>(opt, n_buf, msg_.options_len - offset - opt_size, n_delta, ec);
 		if(ec) return false;
 
 		n_delta = static_cast<unsigned>(op.ocode);
 		Option::code c = op.ocode;
-		unsigned after = make_option<false, false>(n_buf, off,
+		unsigned after = make_option<Option::code, false, false>(n_buf, off,
 										opt, delta,
 										c, ec);
 		if(ec) return false;

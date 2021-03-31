@@ -4,7 +4,7 @@
 #include "internal/tree.hpp"
 #include "resource.hpp"
 #include "message/parser.hpp"
-#include "message/options.hpp"
+#include "message/options/options.hpp"
 
 namespace CoAP{
 namespace Resource{
@@ -38,7 +38,7 @@ class resource_root{
 			using namespace CoAP::Message::Option;
 			node_t* res = &root_;
 
-			Option_Parser op(msg);
+			Option::Parser<Option::code> op(msg);
 			option const* opt;
 			node_t* n = &root_;
 			while((opt = op.next()))
@@ -59,7 +59,7 @@ class resource_root{
 			using namespace CoAP::Message::Option;
 			node_t const* res = &root_;
 
-			Option_Parser op(msg);
+			Option::Parser<Option::code> op(msg);
 			option const* opt;
 			node_t const* n = &root_, *parent = nullptr;
 			while((opt = op.next()))
@@ -86,7 +86,7 @@ class resource_root{
 			using namespace CoAP::Message;
 			using namespace CoAP::Message::Option;
 
-			Option_Parser op(msg);
+			Option::Parser<Option::code> op(msg);
 			option const* opt;
 			node_t* n = &root_, *parent = nullptr;
 			while((opt = op.next()))

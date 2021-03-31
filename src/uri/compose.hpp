@@ -2,7 +2,8 @@
 #define COAP_TE_URI_COMPOSE_HPP__
 
 #include <cstdint>
-#include "message/parser.hpp"
+#include "message/options/options.hpp"
+#include "message/options/parser.hpp"
 #include "error.hpp"
 
 namespace CoAP{
@@ -17,7 +18,7 @@ std::size_t compose_path(char* buffer, std::size_t buffer_len,
 std::size_t compose_query(char* buffer, std::size_t buffer_len,
 		const char* query, std::size_t query_len, bool is_first, CoAP::Error&);
 std::size_t compose(char* buffer, std::size_t buffer_len,
-		CoAP::Message::Option_Parser&,
+		CoAP::Message::Option::Parser<CoAP::Message::Option::code>&,
 		CoAP::Error&);
 
 }//URI

@@ -1,9 +1,10 @@
 #include "output_string.hpp"
+#include "defines/defaults.hpp"
 
 namespace CoAP{
 namespace Debug{
 
-const char* type_string(CoAP::Message::type type)
+const char* type_string(CoAP::Message::type type) noexcept
 {
 	switch(type)
 	{
@@ -18,7 +19,7 @@ const char* type_string(CoAP::Message::type type)
 	return "undefined";
 }
 
-const char* code_string(CoAP::Message::code code)
+const char* code_string(CoAP::Message::code code) noexcept
 {
 	switch(code)
 	{
@@ -61,13 +62,20 @@ const char* code_string(CoAP::Message::code code)
 		case code::service_unavaiable: 	return "5.03 Service Unavailable";
 		case code::gateway_timeout: 	return "5.04 Gateway Timeout";
 		case code::proxying_not_supported: return "5.05 Proxying Not Supported";
+#if COAP_TE_RELIABLE_CONNECTION == 1
+		case code::csm:					return "7.01 CSM";
+		case code::ping:				return "7.02 Ping";
+		case code::pong:				return "7.03 Pong";
+		case code::release:				return "7.04 Release";
+		case code::abort:				return "7.05 Abort";
+#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 		default:
 			break;
 	}
 	return "undefiend";
 }
 
-const char* option_string(CoAP::Message::Option::code op)
+const char* option_string(CoAP::Message::Option::code op) noexcept
 {
 	switch(op)
 	{
@@ -98,7 +106,7 @@ const char* option_string(CoAP::Message::Option::code op)
 	return "undefined";
 }
 
-const char* content_format_string(CoAP::Message::content_format format)
+const char* content_format_string(CoAP::Message::content_format format) noexcept
 {
 	switch(format)
 	{
@@ -114,7 +122,7 @@ const char* content_format_string(CoAP::Message::content_format format)
 	return "undefined";
 }
 
-const char* transaction_status_string(CoAP::Transmission::status_t status)
+const char* transaction_status_string(CoAP::Transmission::status_t status) noexcept
 {
 	switch(status)
 	{
@@ -129,6 +137,32 @@ const char* transaction_status_string(CoAP::Transmission::status_t status)
 	}
 	return "undefined";
 }
+
+const char* scheme_string(CoAP::URI::scheme sch) noexcept
+{
+	switch(sch)
+	{
+		using namespace CoAP::URI;
+		case scheme::coap:
+			return "coap";
+		case scheme::coaps:
+			return "coaps";
+#if COAP_TE_RELIABLE_CONNECTION == 1
+		case scheme::coap_tcp:
+			return "coap+tcp";
+		case scheme::coaps_tcp:
+			return "coaps+tcp";
+		case scheme::coap_ws:
+			return "coap+ws";
+		case scheme::coaps_ws:
+			return "coaps+ws";
+#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+		default:
+			break;
+	}
+	return "undefined";
+}
+
 
 }//Debug
 }//CoAP

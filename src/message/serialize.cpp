@@ -191,7 +191,7 @@ bool Serialize::remove_token() noexcept
 
 bool Serialize::remove_option(Option::code op) noexcept
 {
-	Option_Parser parser(msg_);
+	Option::Parser<Option::code> parser(msg_);
 	Option::option const* next;
 	Option::option current, before;
 	unsigned offset = 0;
@@ -244,7 +244,7 @@ bool Serialize::remove_option(Option::code op) noexcept
 
 		Option::option opt;
 		CoAP::Error ec;
-		parse_option(opt, n_buf, s_bef, n_delta, ec);
+		Option::parse(opt, n_buf, s_bef, n_delta, ec);
 		if(ec) return false;
 
 		/**
@@ -255,7 +255,7 @@ bool Serialize::remove_option(Option::code op) noexcept
 
 		n_delta = before ? static_cast<unsigned>(before.ocode) : 0;
 		Option::code c = before ? before.ocode : static_cast<Option::code>(0);
-		make_option<false, false>(n_buf, s_after,
+		make_option<Option::code, false, false>(n_buf, s_after,
 										opt, n_delta,
 										c, ec);
 		if(ec) return false;

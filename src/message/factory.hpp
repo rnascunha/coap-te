@@ -3,7 +3,7 @@
 
 #include <cstdint>
 #include "types.hpp"
-#include "options.hpp"
+#include "options/options.hpp"
 #include "error.hpp"
 
 namespace CoAP{

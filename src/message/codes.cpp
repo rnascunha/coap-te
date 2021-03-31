@@ -80,5 +80,12 @@ bool is_error(code mcode) noexcept
 	return is_server_error(mcode) || is_client_error(mcode);
 }
 
+#if COAP_TE_RELIABLE_CONNECTION == 1
+bool is_signaling(code mcode) noexcept
+{
+	return mcode != code::empty && ((static_cast<std::uint8_t>(mcode) & 0b11100000) == code_class::signaling);
+}
+#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+
 }//Message
 }//CoAP

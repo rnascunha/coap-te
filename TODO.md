@@ -21,3 +21,10 @@
 * engine parameter profile and resource_callback seems to be ambiguos... is it?
 
 * ETSI tests. Do it...
+
+* https://tools.ietf.org/html/rfc6690 - Missing:
+** Need to make resource querying.
+** Construct the link format progressevelly (from packet to packet). I.e., if you don't have a buffer to fit all
+it won't work.
+
+* Better solution to function get_config from options.hpp

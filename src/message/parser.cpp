@@ -1,4 +1,6 @@
 #include "parser.hpp"
+#include "options/functions.hpp"
+#include "options/parser.hpp"
 
 namespace CoAP{
 namespace Message{
@@ -32,7 +34,7 @@ unsigned parse(message& msg,
 
 bool query_by_key(message const& msg, const char* key, const void** value, unsigned& length) noexcept
 {
-	Option_Parser parser(msg);
+	Option::Parser<Option::code> parser(msg);
 	Option::option const *opt;
 
 	while((opt = parser.next()))
@@ -142,7 +144,7 @@ static unsigned parse_options(message& msg,
 	while(buffer[offset] != payload_marker && (buffer_len - offset) != 0)
 	{
 		Option::option opt;
-		offset += parse_option<true>(opt, buffer + offset, buffer_len - offset, delta, ec);
+		offset += Option::parse<Option::code, true>(opt, buffer + offset, buffer_len - offset, delta, ec);
 		if(ec)
 			return offset;
 		delta = static_cast<unsigned>(opt.ocode);
@@ -170,36 +172,6 @@ static unsigned parse_payload(message& msg,
 	offset += static_cast<unsigned>(msg.payload_len);
 
 	return offset;
-}
-
-Option_Parser::Option_Parser(message const& msg)
-	: msg_(msg){}
-
-void Option_Parser::reset() noexcept
-{
-	current_opt_ = 0;
-	delta_ = 0;
-	offset_ = 0;
-}
-
-Option::option const* Option_Parser::current() const noexcept
-{
-	return &opt_;
-}
-
-unsigned Option_Parser::current_number() const noexcept
-{
-	return current_opt_;
-}
-
-std::size_t Option_Parser::total_number() const noexcept
-{
-	return msg_.option_num;
-}
-
-unsigned Option_Parser::offset() const noexcept
-{
-	return offset_;
 }
 
 }//Message

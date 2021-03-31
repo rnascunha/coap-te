@@ -14,7 +14,10 @@ enum code_class : std::uint8_t
 	//Response
 	success 		= 2,
 	client_error 	= 4,
-	server_error 	= 5
+	server_error 	= 5,
+#if COAP_TE_RELIABLE_CONNECTION == 1
+	signaling		= 7
+#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 };
 
 constexpr std::uint8_t make_code(code_class code_class, uint8_t detail)
@@ -62,6 +65,13 @@ enum class code : std::uint8_t
 	service_unavaiable 		= make_code(code_class::server_error, 3),	//5.03 Service Unavailable
 	gateway_timeout 		= make_code(code_class::server_error, 4),	//5.04 Gateway Timeout
 	proxying_not_supported 	= make_code(code_class::server_error, 5),	//5.05 Proxying Not Supported
+#if COAP_TE_RELIABLE_CONNECTION == 1
+	csm						= make_code(code_class::signaling, 1),		//7.01 CSM
+	ping					= make_code(code_class::signaling, 2),		//7.02 Ping
+	pong					= make_code(code_class::signaling, 3),		//7.03 Pong
+	release					= make_code(code_class::signaling, 4),		//7.04 Release
+	abort					= make_code(code_class::signaling, 5),		//7.05 Abort
+#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 };
 
 bool check_code(code) noexcept;
@@ -71,6 +81,9 @@ bool is_success(code) noexcept;
 bool is_client_error(code) noexcept;
 bool is_server_error(code) noexcept;
 bool is_error(code) noexcept;
+#if COAP_TE_RELIABLE_CONNECTION == 1
+bool is_signaling(code) noexcept;
+#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 
 }//Message
 }//CoAP

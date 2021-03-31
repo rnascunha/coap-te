@@ -3,10 +3,12 @@
 
 #include <cstdint>
 
+#include "defines/defaults.hpp"
+
 #include "error.hpp"
 #include "types.hpp"
 #include "codes.hpp"
-#include "options.hpp"
+#include "options/options.hpp"
 
 namespace CoAP{
 namespace Message{
@@ -16,26 +18,29 @@ unsigned make_header(std::uint8_t* buffer, std::size_t buffer_len,
 		void const* const token, std::size_t token_len,
 		CoAP::Error& ec) noexcept;
 
-template<bool SortOptions = true,
+template<typename OptionCode = Option::code,
+		bool SortOptions = true,
 		bool CheckOpOrder = !SortOptions,
 		bool CheckOpRepeat = true>
 unsigned make_options(std::uint8_t* buffer, std::size_t buffer_len,
-		Option::option* options, std::size_t option_num,
+		Option::option_template<OptionCode>* options, std::size_t option_num,
 		CoAP::Error& ec) noexcept;
 
-template<bool SortOptions = true,
+template<typename OptionCode = Option::code,
+		bool SortOptions = true,
 		bool CheckOpOrder = !SortOptions,
 		bool CheckOpRepeat = true>
 unsigned make_options(std::uint8_t* buffer,
 		std::size_t buffer_len,
-		Option::node* list,
+		Option::node_option<OptionCode>* list,
 		CoAP::Error& ec) noexcept;
 
-template<bool CheckOpOrder = true,
+template<typename OptionCode = Option::code,
+		bool CheckOpOrder = true,
 		bool CheckOpRepeat = true>
 unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
-		Option::option const& option, unsigned& delta,
-		Option::code& last_option,
+		Option::option_template<OptionCode> const& option, unsigned& delta,
+		OptionCode& last_option,
 		CoAP::Error& ec) noexcept;
 
 unsigned make_payload(uint8_t* buffer, std::size_t buffer_len,
@@ -106,7 +111,6 @@ class Serialize{
 
 		message 			msg_;
 };
-
 
 }//Message
 }//CoAP

@@ -6,18 +6,6 @@
 namespace CoAP{
 namespace URI{
 
-static bool parse_ipv4(in_addr& uri,
-		char* uri_string,
-		char** new_uri_string) noexcept;
-
-static bool parse_ipv6(in6_addr& uri,
-		char* uri_string,
-		char** new_uri_string) noexcept;
-
-static bool parse_ip_v4_v6(ip_type& uri,
-		char* uri_string,
-		char** new_uri_string) noexcept;
-
 static bool split_to_list(std::uint8_t* buffer, std::size_t& buffer_len,
 				const char* data, std::size_t data_length,
 				char delimiter, CoAP::Message::Option::code code,
@@ -26,21 +14,6 @@ static bool split_to_list(std::uint8_t* buffer, std::size_t& buffer_len,
 				char* data, std::size_t data_length,
 				char delimiter, CoAP::Message::Option::code code,
 				CoAP::Message::Option::List& list) noexcept;
-
-bool decompose(uri<in_addr>& uri, char* uri_string) noexcept
-{
-	return decompose(uri, uri_string, parse_ipv4);
-}
-
-bool decompose(uri<in6_addr>& uri, char* uri_string) noexcept
-{
-	return decompose(uri, uri_string, parse_ipv6);
-}
-
-bool decompose(uri<ip_type>& uri, char* uri_string) noexcept
-{
-	return decompose(uri, uri_string, parse_ip_v4_v6);
-}
 
 bool path_to_list(std::uint8_t* buffer, std::size_t& buffer_len,
 				char* path, std::size_t path_length,
@@ -85,80 +58,6 @@ bool query_to_list(std::uint8_t* buffer, std::size_t& buffer_len,
 /**
  *
  */
-
-static bool parse_ipv4(in_addr& host, char* uri_string, char** new_uri_string) noexcept
-{
-	char addr[16];
-	int i = 0;
-	while(uri_string[0] != '\0' && i != 16)
-	{
-		if(!CoAP::Helper::is_digit(uri_string[0]) && uri_string[0] != '.') break;
-		addr[i] = uri_string[0];
-		uri_string += 1;
-		i++;
-		addr[i] = '\0';
-	}
-	*new_uri_string = uri_string;
-
-	if(i == 0 || i == 16) return false;
-	if(uri_string[0] == '/'
-		|| uri_string[0] == '?'
-		|| uri_string[0] == ':'
-		|| uri_string[0] == '#'
-		|| uri_string[0] == '\0') {
-		int ret = inet_pton(AF_INET, addr, &host);
-		if(ret <= 0) return false;
-		return true;
-	}
-	return false;
-}
-
-static bool parse_ipv6(in6_addr& host, char* uri_string, char** new_uri_string) noexcept
-{
-	if(uri_string[0] != '[') return false;
-	uri_string += 1;
-
-	char addr[40];
-	int i = 0;
-	while(uri_string[0] != '\0' && i != 40)
-	{
-		if(!CoAP::Helper::is_digit(uri_string[0]) && uri_string[0] != ':') break;
-		addr[i] = uri_string[0];
-		uri_string += 1;
-		i++;
-		addr[i] = '\0';
-	}
-	*new_uri_string = uri_string;
-
-	if(uri_string[0] != ']') return false;
-	uri_string += 1;
-	*new_uri_string = uri_string;
-
-	if(i == 0 || i == 40) return false;
-	if(uri_string[0] == '/'
-		|| uri_string[0] == '?'
-		|| uri_string[0] == ':'
-		|| uri_string[0] == '#'
-		|| uri_string[0] == '\0') {
-		int ret = inet_pton(AF_INET6, addr, &host);
-		if(ret <= 0) return false;
-		return true;
-	}
-	return false;
-}
-
-static bool parse_ip_v4_v6(ip_type& host,
-		char* uri_string,
-		char** new_uri_string) noexcept
-{
-	if(uri_string[0] == '[')
-	{
-		host.type = host_type::ipv6;
-		return parse_ipv6(host.host.ip6, uri_string, new_uri_string);
-	}
-	host.type = host_type::ipv4;
-	return parse_ipv4(host.host.ip4, uri_string, new_uri_string);
-}
 
 static bool split_to_list(std::uint8_t* buffer, std::size_t& buffer_len,
 				char* data, std::size_t data_length,

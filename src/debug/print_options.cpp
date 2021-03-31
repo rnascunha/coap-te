@@ -43,7 +43,7 @@ static void print_payload(CoAP::Message::Option::option const& op)
 	}
 #endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
 
-	CoAP::Message::Option::config const* config = CoAP::Message::Option::get_config(op.ocode);
+	CoAP::Message::Option::config<CoAP::Message::Option::code> const* config = CoAP::Message::Option::get_config(op.ocode);
 	switch(config->otype)
 	{
 		using namespace CoAP::Message;

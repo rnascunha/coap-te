@@ -1,7 +1,7 @@
 #ifndef COAP_TE_DEBUG_PRINT_OPTIONS_HPP__
 #define COAP_TE_DEBUG_PRINT_OPTIONS_HPP__
 
-#include "message/options.hpp"
+#include "message/options/options.hpp"
 #include <cstddef>
 
 namespace CoAP{

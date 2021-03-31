@@ -357,7 +357,7 @@ static void get_sensor_handler(CoAP::Message::message const& request,
 	 * inspecting the last path
 	 * (we could archive this searching the path at the resource list)
 	 */
-	CoAP::Message::Option_Parser parser(request);
+	CoAP::Message::Option::Parser<CoAP::Message::Option::code> parser(request);
 	CoAP::Message::Option::option const *opt, *path_opt = nullptr;
 	while((opt = parser.next()))
 	{

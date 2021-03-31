@@ -112,6 +112,7 @@ int main()
 		 */
 		Parser_Attr parser_attr(lf->description, lf->desc_len);
 		attribute const* la;	//Holds attritube struct
+		//Runs until the last attribute
 		while((la = parser_attr.next()))
 		{
 			std::printf("\tattr[%lu]: %.*s\n",
@@ -123,6 +124,7 @@ int main()
 			 */
 			Parser_Value parser_value(la);
 			value const* lv;	//Holds value struct
+			//Runs until the last value
 			while((lv = parser_value.next()))
 			{
 				std::printf("\t\tvalue[%lu]: %.*s\n",
