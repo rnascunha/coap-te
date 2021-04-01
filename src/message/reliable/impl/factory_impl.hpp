@@ -9,28 +9,26 @@ namespace Message{
 namespace Reliable{
 
 template<std::size_t BufferSize,
-		typename OptionCode>
-Factory<BufferSize, OptionCode>::
+	CoAP::Message::code Code>
+Factory<BufferSize, Code>::
 Factory(){}
 
 template<std::size_t BufferSize,
-		typename OptionCode>
-Factory<BufferSize, OptionCode>&
-Factory<BufferSize, OptionCode>::
-header(CoAP::Message::code _code,
-		void const* const token /* = nullptr */, std::size_t token_len /* = 0 */) noexcept
+	CoAP::Message::code Code>
+Factory<BufferSize, Code>&
+Factory<BufferSize, Code>::
+code(CoAP::Message::code _code) noexcept
 {
+	static_assert(std::is_same<OptionCode, CoAP::Message::Option::code>::value, "Must be 'Option::code' type");
 	code_ = _code;
-	token_ = token;
-	token_len_ =  token_len;
 
 	return *this;
 }
 
 template<std::size_t BufferSize,
-		typename OptionCode>
-Factory<BufferSize, OptionCode>&
-Factory<BufferSize, OptionCode>::
+	CoAP::Message::code Code>
+Factory<BufferSize, Code>&
+Factory<BufferSize, Code>::
 token(void const* token, std::size_t token_len) noexcept
 {
 	token_ = token;
@@ -40,9 +38,9 @@ token(void const* token, std::size_t token_len) noexcept
 }
 
 template<std::size_t BufferSize,
-		typename OptionCode>
-Factory<BufferSize, OptionCode>&
-Factory<BufferSize, OptionCode>::
+	CoAP::Message::code Code>
+Factory<BufferSize, Code>&
+Factory<BufferSize, Code>::
 token(const char* token) noexcept
 {
 	token_ = token;
@@ -52,9 +50,9 @@ token(const char* token) noexcept
 }
 
 template<std::size_t BufferSize,
-		typename OptionCode>
-Factory<BufferSize, OptionCode>&
-Factory<BufferSize, OptionCode>::
+	CoAP::Message::code Code>
+Factory<BufferSize, Code>&
+Factory<BufferSize, Code>::
 add_option(Option::node_option<OptionCode>& node) noexcept
 {
 	opt_list_.add(node);
@@ -63,9 +61,9 @@ add_option(Option::node_option<OptionCode>& node) noexcept
 }
 
 template<std::size_t BufferSize,
-		typename OptionCode>
-Factory<BufferSize, OptionCode>&
-Factory<BufferSize, OptionCode>::
+	CoAP::Message::code Code>
+Factory<BufferSize, Code>&
+Factory<BufferSize, Code>::
 payload(void const* pd, std::size_t payload_len) noexcept
 {
 	payload_ = pd;
@@ -75,9 +73,9 @@ payload(void const* pd, std::size_t payload_len) noexcept
 }
 
 template<std::size_t BufferSize,
-		typename OptionCode>
-Factory<BufferSize, OptionCode>&
-Factory<BufferSize, OptionCode>::
+	CoAP::Message::code Code>
+Factory<BufferSize, Code>&
+Factory<BufferSize, Code>::
 payload(const char* pd) noexcept
 {
 	payload_ = pd;
@@ -87,9 +85,9 @@ payload(const char* pd) noexcept
 }
 
 template<std::size_t BufferSize,
-		typename OptionCode>
-Factory<BufferSize, OptionCode>&
-Factory<BufferSize, OptionCode>::
+	CoAP::Message::code Code>
+Factory<BufferSize, Code>&
+Factory<BufferSize, Code>::
 reset() noexcept
 {
 	code_ = code::get;
@@ -103,31 +101,31 @@ reset() noexcept
 }
 
 template<std::size_t BufferSize,
-		typename OptionCode>
+	CoAP::Message::code Code>
 CoAP::Message::code
-Factory<BufferSize, OptionCode>::
+Factory<BufferSize, Code>::
 code() const noexcept
 {
 	return code_;
 }
 
 template<std::size_t BufferSize,
-		typename OptionCode>
+	CoAP::Message::code Code>
 std::uint8_t const*
-Factory<BufferSize, OptionCode>::
+Factory<BufferSize, Code>::
 buffer() const noexcept
 {
 	return buffer_;
 }
 
 template<std::size_t BufferSize,
-	typename OptionCode>
+	CoAP::Message::code Code>
 template<bool SetLength /* = true */,
 		bool SortOptions /* = true */,
 		bool CheckOpOrder /* = !SortOptions */,
 		bool CheckOpRepeat /* = true */>
 std::size_t
-Factory<BufferSize, OptionCode>::
+Factory<BufferSize, Code>::
 serialize(
 		std::uint8_t* buffer, std::size_t buffer_len,
 		CoAP::Error& ec) noexcept
@@ -143,13 +141,13 @@ serialize(
 }
 
 template<std::size_t BufferSize,
-		typename OptionCode>
+	CoAP::Message::code Code>
 template<bool SetLength /* = true */,
 		bool SortOptions /* = true */,
 		bool CheckOpOrder /* = !SortOptions */,
 		bool CheckOpRepeat /* = true */>
 std::size_t
-Factory<BufferSize, OptionCode>::
+Factory<BufferSize, Code>::
 serialize(CoAP::Error& ec) noexcept
 {
 	return CoAP::Message::Reliable::serialize<SetLength, OptionCode, SortOptions, CheckOpOrder, CheckOpRepeat>(
@@ -163,6 +161,6 @@ serialize(CoAP::Error& ec) noexcept
 
 }//Reliable
 }//Message
-}//Factory
+}//CoAP
 
 #endif /* COAP_TE_MESSAGE_RELIABLE_FACTORY_IMPL_HPP__ */

@@ -3,7 +3,7 @@
 **CoAP-te** is a C++17 implementation (work in progress) of CoAP protocol ([RFC7252](https://tools.ietf.org/html/rfc7252)).
 
 The implemtation aims to:
-* Don't use any *dynamic allocation*;
+* Don't use any *dynamic allocation* or *exceptions*;
 * Configurable: the CoAP *engine* be configurable to your system/environment requirements;
 * Modularized: As much as possible, all modules work indenpenditly;
 * Portable: simple to port to your system/device.
@@ -17,7 +17,7 @@ It's NOT implemented (yet):
 * Security;
 * Resource Discovery ([RFC6690](https://tools.ietf.org/html/rfc6690));
 * Observing ([RFC7641](https://tools.ietf.org/html/rfc7641));
-* TCP support ([RFC8323](https://tools.ietf.org/html/rfc8323));
+* Reliable connections support ([RFC8323](https://tools.ietf.org/html/rfc8323));
 * Much more :(...
 
 ## Dependencies
@@ -70,8 +70,9 @@ If you build **CoAP-te** with the `-DWITH_EXAMPLES=1` flag, all example executab
 * `serialize_parse`: shows how to serialize message using 3 strategies (factory and manually using option list/array). Then parse this information (as it was received by network) and iterate through options.
 * `factory`: demostrate how to use a factory to construct a message, using internal/external buffers.
 * `option`: shows how to manipulate options of different types. How to declare, serialize and parse.
-* `serialze_class`: explain the use of the `Serialize` class. This is a class to modify the information that were
-already serilized (written to the buffer).
+* `serialze_class`: explain the use of the `Serialize` class. This is a class to modify the information that were already serilized (written to the buffer).
+* `serialize_parse_reliable`: the same of `serialize_parse` example, but for reliable connections (RFC8323).
+* `signaling`: explain how to make/parse a signaling message to reliable connections (RFC8323). 
 
 *Transmission examples*:
 * `raw_transaction`: explains the use of transactions. Transactions are not meant to be used directly, but through the *CoAP::engine*.

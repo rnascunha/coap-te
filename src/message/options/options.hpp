@@ -80,6 +80,8 @@ static constexpr const config<csm> options_csm[] = {
 	{csm::block_wise_transfer,	false,	type::empty}
 };
 
+using node_csm = node_option<csm>;
+
 enum class ping_pong{
 	custody				= 2,
 };
@@ -87,6 +89,9 @@ enum class ping_pong{
 static constexpr const config<ping_pong> options_ping_pong[] = {
 	{ping_pong::custody, 		false,	type::empty}
 };
+
+using node_ping = node_option<ping_pong>;
+using node_pong = node_option<ping_pong>;
 
 enum class release{
 	alternative_address	= 2,
@@ -98,6 +103,8 @@ static constexpr const config<release> options_release[] = {
 	{release::hold_off,				false,	type::uint}
 };
 
+using node_release = node_option<release>;
+
 enum class abort{
 	bad_csm_option		= 2,
 };
@@ -105,6 +112,8 @@ enum class abort{
 static constexpr const config<abort> options_abort[] = {
 	{abort::bad_csm_option,		false,	type::uint}
 };
+
+using node_abort = node_option<abort>;
 
 #endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 
@@ -121,26 +130,26 @@ config<OptionCode> const * get_config(OptionCode ocode) noexcept
 	else if constexpr(std::is_same<OptionCode, csm>::value)
 	{
 		for(unsigned i = 0; i < sizeof(options_csm) / sizeof(config<csm>); i++)
-			if(ocode == options[i].ocode)
-				return &options[i];
+			if(ocode == options_csm[i].ocode)
+				return &options_csm[i];
 	}
 	else if constexpr(std::is_same<OptionCode, ping_pong>::value)
 	{
 		for(unsigned i = 0; i < sizeof(options_ping_pong) / sizeof(config<ping_pong>); i++)
-			if(ocode == options[i].ocode)
-				return &options[i];
+			if(ocode == options_ping_pong[i].ocode)
+				return &options_ping_pong[i];
 	}
 	else if constexpr(std::is_same<OptionCode, release>::value)
 	{
 		for(unsigned i = 0; i < sizeof(options_release) / sizeof(config<release>); i++)
-			if(ocode == options[i].ocode)
-				return &options[i];
+			if(ocode == options_release[i].ocode)
+				return &options_release[i];
 	}
 	else if constexpr(std::is_same<OptionCode, abort>::value)
 	{
 		for(unsigned i = 0; i < sizeof(options_abort) / sizeof(config<abort>); i++)
-			if(ocode == options[i].ocode)
-				return &options[i];
+			if(ocode == options_abort[i].ocode)
+				return &options_abort[i];
 	}
 #endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 	return nullptr;

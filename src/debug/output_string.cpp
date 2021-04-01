@@ -106,6 +106,60 @@ const char* option_string(CoAP::Message::Option::code op) noexcept
 	return "undefined";
 }
 
+#if	COAP_TE_BLOCKWISE_TRANSFER == 1
+
+const char* option_string(CoAP::Message::Option::csm op) noexcept
+{
+	switch(op)
+	{
+		using namespace CoAP::Message::Option;
+		case csm::max_message_size: 	return "Max Message Size";
+		case csm::block_wise_transfer: 	return "Block Wise Transfer";
+		default:
+			break;
+	}
+	return "undefined";
+}
+
+const char* option_string(CoAP::Message::Option::ping_pong op) noexcept
+{
+	switch(op)
+	{
+		using namespace CoAP::Message::Option;
+		case ping_pong::custody: 	return "Custody";
+		default:
+			break;
+	}
+	return "undefined";
+}
+
+const char* option_string(CoAP::Message::Option::release op) noexcept
+{
+	switch(op)
+	{
+		using namespace CoAP::Message::Option;
+		case release::alternative_address: 	return "Alternative Address";
+		case release::hold_off:			 	return "Hold Off";
+		default:
+			break;
+	}
+	return "undefined";
+}
+
+const char* option_string(CoAP::Message::Option::abort op) noexcept
+{
+	switch(op)
+	{
+		using namespace CoAP::Message::Option;
+		case abort::bad_csm_option: 	return "Bad CSM Option";
+		default:
+			break;
+	}
+	return "undefined";
+}
+
+#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
+
 const char* content_format_string(CoAP::Message::content_format format) noexcept
 {
 	switch(format)

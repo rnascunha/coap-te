@@ -16,11 +16,12 @@ unsigned parse(option_template<OptionCode>& opt,
 		unsigned delta,
 		CoAP::Error& ec) noexcept;
 
-template<typename OptionCode>
+template<typename OptionCode,
+		typename Message = CoAP::Message::message>
 class Parser
 {
 	public:
-		Parser(CoAP::Message::message const&);
+		Parser(Message const&);
 
 		template<bool CheckOptions = false>
 		option_template<OptionCode> const* next() noexcept;
@@ -33,7 +34,7 @@ class Parser
 		std::size_t total_number() const noexcept;
 		unsigned offset() const noexcept;
 	private:
-		message const& msg_;
+		Message const& msg_;
 
 		option_template<OptionCode> opt_;
 
@@ -42,8 +43,9 @@ class Parser
 		unsigned offset_ = 0;
 };
 
-template<typename OptionCode>
-bool get_option(message const& msg,
+template<typename OptionCode,
+		typename Message = CoAP::Message::message>
+bool get_option(Message const& msg,
 		option_template<OptionCode>& opt,
 		OptionCode ocode, unsigned count = 0) noexcept;
 

@@ -1,23 +1,23 @@
 /**
- * The serialize/parse example shows how to... serialize a parse
- * a message. It uses different strategies to how to build a message,
- * and follows parsing and accessing this same message. At the end
- * it shows how to iterate through the message options.
+ * The serialize/parse reliable example shows how to... serialize and
+ * parse a reliable message. It uses different strategies to how to build
+ * a message, and follows parsing and accessing this same message. At the
+ * end it shows how to iterate through the message options.
  *
- * \note serialize is the act of write at the buffer all data to be sent,
+ * \note serialize is the act of write to a buffer all data to be sent,
  * as defined by the CoAP protocol.
  */
 
 #include <cstdint>
 
-#include "log.hpp"			//Log
-#include "coap-te.hpp"		//Convenient header
-#include "coap-te-debug.hpp" //Convenient debug header
+#include "log.hpp"				//Log
+#include "coap-te.hpp"			//Convenient header
+#include "coap-te-debug.hpp" 	//Convenient debug header
 
 #define BUFFER_LEN		512	//Buffer length
 
 /**
- * The following defines changes how to serialize a message, but the
+ * The following 'defines' changes how to serialize a message, but the
  * final result is the same.
  */
 /**
@@ -25,12 +25,12 @@
  * 'factory' example). Commenting this line will show how to manually
  * serialize a message.
  */
-#define TEST_FACTORY
+//#define TEST_FACTORY
 /**
  * When manually building a message, to include all options, you can
  * make a list or use a array. Let it uncommented to see how to use a list
  */
-#define TEST_LIST
+//#define TEST_LIST
 
 using namespace CoAP::Message;
 using namespace CoAP::Log;
@@ -105,13 +105,13 @@ int main()
 	Reliable::Factory<> fac;
 
 	/**
-	 * Making the header. Defining the type of message (confirmable) and method (get)
+	 * Making the header. Defining method (get)
 	 * Also adding the token.
 	 *
 	 * All messages types can be checked at message/types.hpp
 	 * All messages code can be checked at message/codes.hpp
 	 */
-	fac.header(code::get);
+	fac.code(code::get);
 	fac.token(token, sizeof(token));
 
 	/**
@@ -205,68 +205,65 @@ int main()
 	 */
 	if(ec) exit_error(ec, "serialize");
 
-	std::printf("Printing buffer:\n");
-	CoAP::Debug::print_array(buffer, size);
-	std::printf("\n");
-//	/**
-//	 * Serialize succeeded
-//	 */
-//	debug(example_mod, "Serialize succeeded! size=%lu...", size);
-//	debug(example_mod, "Printing message bytes...");
-//	CoAP::Debug::print_byte_message(buffer, size);
-//
-//	/**
-//	 * Now we are gonna parse the message that we just serialized
-//	 * (supposed we received from network)
-//	 */
-//	debug(example_mod, "-------------");
-//	status(example_mod, "Parsing message...");
-//
-//	/**
-//	 * message struct will hold the information parsed.
-//	 *
-//	 * It doesn't copy any internally (except trivial values), it
-//	 * just point to the buffer where the information is.
-//	 *
-//	 * check message/types.hpp (struct message) to examine each
-//	 * field of message structure.
-//	 */
-//	message msg;
-//	unsigned size_parse = parse(msg, buffer, size, ec);
-//	/**
-//	 * Checking parse
-//	 */
-//	if(ec) exit_error(ec, "parsing");
-//	/**
-//	 * Parsed succeeded!
-//	 */
-//	status(example_mod, "Parsing succeded! size=%u...", size_parse);
-//	debug(example_mod, "Printing message...");
-//	CoAP::Debug::print_message(msg);
-//
-//	/**
-//	 * Showing how to iterate through options
-//	 */
-//	debug(example_mod, "--------------");
-//	status("Iterate options... num/size=%lu/%lu", msg.option_num, msg.options_len);
-//
-//	/**
-//	 * Options are composed to 3 fields:
-//	 * * ocode: option code
-//	 * * length: option length
-//	 * * value: pointer to option value
-//	 *
-//	 * To verify all options code, see "message/options.hpp"
-//	 */
-//	Option::Parser<Option::code> op{msg};	//The parser will iterate through the options
-//	Option::option const* opt;				//This will hold a pointer to the option
-//	while((opt = op.next()))
-//	{
-//		CoAP::Debug::print_option(*opt);
-//		std::printf("\n");
-//	}
-//
-//	status(example_mod, "Success!");
+	/**
+	 * Serialize succeeded
+	 */
+	debug(example_mod, "Serialize succeeded! size=%lu...", size);
+	debug(example_mod, "Printing message bytes...");
+	CoAP::Debug::print_byte_reliable_message(buffer, size);
+
+	/**
+	 * Now we are gonna parse the message that we just serialized
+	 * (supposed we received from network)
+	 */
+	debug(example_mod, "-------------");
+	status(example_mod, "Parsing message...");
+
+	/**
+	 * message struct will hold the information parsed.
+	 *
+	 * It doesn't copy any internally (except trivial values), it
+	 * just point to the buffer where the information is.
+	 *
+	 * check message/types.hpp (struct message) to examine each
+	 * field of message structure.
+	 */
+	Reliable::message msg;
+	unsigned size_parse = Reliable::parse(msg, buffer, size, ec);
+	/**
+	 * Checking parse
+	 */
+	if(ec) exit_error(ec, "parsing");
+	/**
+	 * Parsed succeeded!
+	 */
+	status(example_mod, "Parsing succeded! size=%u...", size_parse);
+	debug(example_mod, "Printing message...");
+	CoAP::Debug::print_message(msg);
+
+	/**
+	 * Showing how to iterate through options
+	 */
+	debug(example_mod, "--------------");
+	status("Iterate options... num/size=%lu/%lu", msg.option_num, msg.options_len);
+
+	/**
+	 * Options are composed to 3 fields:
+	 * * ocode: option code
+	 * * length: option length
+	 * * value: pointer to option value
+	 *
+	 * To verify all options code, see "message/options.hpp"
+	 */
+	Option::Parser<Option::code, Reliable::message> op{msg};	//The parser will iterate through the options
+	Option::option const* opt;				//This will hold a pointer to the option
+	while((opt = op.next()))
+	{
+		CoAP::Debug::print_option(*opt);
+		std::printf("\n");
+	}
+
+	status(example_mod, "Success!");
 
 	return EXIT_SUCCESS;
 }

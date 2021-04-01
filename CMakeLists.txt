@@ -69,9 +69,9 @@ set(MAIN_SRC ${SRC_DIR}/error.cpp
 				${SRC_DIR_MESSAGE}/parser.cpp
 				${SRC_DIR_MESSAGE}/serialize.cpp
 				${SRC_DIR_MESSAGE}/reliable/serialize.cpp
+				${SRC_DIR_MESSAGE}/reliable/parser.cpp
 				${SRC_DIR_TRANSMISSION}/functions.cpp
 				${SRC_DIR_DEBUG}/helper.cpp
-				${SRC_DIR_DEBUG}/print_options.cpp
 				${SRC_DIR_DEBUG}/output_string.cpp
 				${SRC_DIR_DEBUG}/print_message.cpp
 				${SRC_DIR_DEBUG}/print_resource.cpp

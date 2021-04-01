@@ -44,6 +44,13 @@ bool check_code(code mcode) noexcept
 		case code::service_unavaiable:			//5.03 Service Unavailable
 		case code::gateway_timeout:				//5.04 Gateway Timeout
 		case code::proxying_not_supported:		//5.05 Proxying Not Supported
+#if COAP_TE_RELIABLE_CONNECTION == 1
+		case code::csm:							//7.01 CSM
+		case code::ping:						//7.02 Ping
+		case code::pong:						//7.03 Pong
+		case code::release:						//7.04 Release
+		case code::abort:						//7.05 Abort
+#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 			return true;
 		default: break;
 	}
@@ -83,7 +90,7 @@ bool is_error(code mcode) noexcept
 #if COAP_TE_RELIABLE_CONNECTION == 1
 bool is_signaling(code mcode) noexcept
 {
-	return mcode != code::empty && ((static_cast<std::uint8_t>(mcode) & 0b11100000) == code_class::signaling);
+	return mcode != code::empty && ((static_cast<std::uint8_t>(mcode) >> 5) == code_class::signaling);
 }
 #endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 

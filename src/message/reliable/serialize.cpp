@@ -1,5 +1,7 @@
 #include "serialize.hpp"
 
+#include "types.hpp"
+
 namespace CoAP{
 namespace Message{
 namespace Reliable{
@@ -55,16 +57,19 @@ std::size_t set_message_length(std::uint8_t* buffer,
 	{
 		opt_len = extend_length::one_byte;
 		shift = 1;
+		size -= 13;
 	}
 	else if(size < 65805)
 	{
 		opt_len = extend_length::two_bytes;
 		shift = 2;
+		size -= 269;
 	}
 	else
 	{
 		opt_len = extend_length::three_bytes;
 		shift = 3;
+		size -= 65805;
 	}
 
 	if((buffer_len - buffer_used) < shift)
@@ -73,7 +78,7 @@ std::size_t set_message_length(std::uint8_t* buffer,
 		return buffer_used;
 	}
 
-	buffer[0] |= (static_cast<std::uint8_t>(opt_len) << 4);
+	buffer[0] |= (opt_len != extend_length::normal ? (static_cast<std::uint8_t>(opt_len) << 4) : (size << 4));
 	if(shift)
 	{
 		CoAP::Helper::shift_right(buffer + shift, buffer_used - 1, shift);

@@ -3,6 +3,7 @@
 #include <cstring>
 
 #include "message/parser.hpp"
+#include "message/reliable/parser.hpp"
 #include "message/options/options.hpp"
 #include "message/options/parser.hpp"
 #include "helper.hpp"
@@ -12,7 +13,7 @@
 namespace CoAP{
 namespace Debug{
 
-void print_message(CoAP::Message::message const& msg)
+void print_message(CoAP::Message::message const& msg) noexcept
 {
 	std::printf("\tType: %s\n\tCode: %s\n\tMessage ID: 0x%04X\n\tToken[%zu]: ",
 			type_string(msg.mtype), code_string(msg.mcode), msg.mid, msg.token_len);
@@ -38,7 +39,7 @@ void print_message(CoAP::Message::message const& msg)
 	std::printf("\n");
 }
 
-bool print_message(std::uint8_t const* const arr, std::size_t size)
+bool print_message(std::uint8_t const* const arr, std::size_t size) noexcept
 {
 	CoAP::Message::message msg;
 	CoAP::Error ec;
@@ -126,7 +127,7 @@ void print_message_string(CoAP::Message::message const& msg) noexcept
 	std::printf("\n");
 }
 
-static void print_make_space(const char* header, int size_data)
+static void print_make_space(const char* header, int size_data) noexcept
 {
 	int size_header = static_cast<int>(std::strlen(header));
 	int w_size = size_header > (size_data) ? size_data : size_header;
@@ -144,7 +145,7 @@ static void print_make_space(const char* header, int size_data)
 	while(diff_b--) printf(" ");
 }
 
-bool print_byte_message(std::uint8_t const* arr, std::size_t size)
+bool print_byte_message(std::uint8_t const* arr, std::size_t size) noexcept
 {
 	CoAP::Message::message msg;
 	CoAP::Error ec;
@@ -193,6 +194,126 @@ bool print_byte_message(std::uint8_t const* arr, std::size_t size)
 
 	return true;
 }
+
+#if COAP_TE_RELIABLE_CONNECTION == 1
+template<typename OptionCode>
+static void print_message_options(CoAP::Message::Reliable::message const& msg,
+		const char* prefix = "\t\t") noexcept
+{
+	CoAP::Message::Option::Parser<OptionCode, CoAP::Message::Reliable::message> parser(msg);
+	CoAP::Message::Option::option_template<OptionCode> const* opt;
+	while((opt = parser.next()))
+	{
+		std::printf("%s", prefix);
+		print_option(*opt, true);
+		std::printf("\n");
+	}
+}
+
+static void print_option_choose(CoAP::Message::Reliable::message const& msg) noexcept
+{
+	if(CoAP::Message::is_signaling(msg.mcode))
+	{
+		switch(msg.mcode)
+		{
+			case CoAP::Message::code::csm:
+				print_message_options<CoAP::Message::Option::csm>(msg);
+				break;
+			case CoAP::Message::code::ping:
+			case CoAP::Message::code::pong:
+				print_message_options<CoAP::Message::Option::ping_pong>(msg);
+				break;
+			case CoAP::Message::code::release:
+				print_message_options<CoAP::Message::Option::release>(msg);
+				break;
+			case CoAP::Message::code::abort:
+				print_message_options<CoAP::Message::Option::abort>(msg);
+				break;
+			default:
+				break;
+		}
+		return;
+	}
+	print_message_options<CoAP::Message::Option::code>(msg);
+}
+
+void print_message(CoAP::Message::Reliable::message const& msg) noexcept
+{
+	std::printf("\tLen: %u\n\tCode: %s\n\tToken[%zu]: ",
+			msg.len, code_string(msg.mcode), msg.token_len);
+	print_array(msg.token, msg.token_len);
+
+	std::printf("\n\tOptions[%zu]:\n", msg.option_num);
+	print_option_choose(msg);
+	std::printf("\tPayload[%zu]: ", msg.payload_len);
+	print_array(msg.payload, msg.payload_len);
+	std::printf("\n");
+}
+
+bool print_byte_reliable_message(std::uint8_t const* arr, std::size_t size) noexcept
+{
+	CoAP::Message::Reliable::message msg;
+	CoAP::Error ec;
+	CoAP::Message::Reliable::parse(msg, arr, size, ec);
+	if(ec) return false;
+
+	printf("%02X", arr[0]);
+	int index = 0;
+	if(msg.len >= 13)
+		printf("|%02X", arr[++index]);
+	if(msg.len >= 269)
+		printf("|%02X", arr[++index]);
+	if(msg.len >= 65805)
+		printf("|%02X", arr[++index]);
+
+	int s_token = 0, s_options = 0, s_payload = 0;
+	if(msg.token_len)
+	{
+		printf("|");
+		s_token = print_array(msg.token, msg.token_len, 2);
+	}
+	if(msg.options_len)
+	{
+		printf("|");
+		s_options = print_array(msg.option_init, msg.options_len, 2);
+	}
+	if(msg.payload_len)
+	{
+		printf("|");
+		s_payload = print_array(msg.payload, msg.payload_len, 2);
+	}
+	printf("\n");
+
+	//Making header
+	printf("He");
+	char temp[15];
+	if(index)
+	{
+		std::snprintf(temp, 15, "Ext[%u]", index);
+		print_make_space(temp, 2 * index);
+	}
+
+	if(msg.token_len)
+	{
+		std::snprintf(temp, 15, "Token[%zu]", msg.token_len);
+		print_make_space(temp, s_token);
+	}
+	if(msg.options_len)
+	{
+		std::snprintf(temp, 15, "Options[%zu][%zu]", msg.options_len, msg.option_num);
+		print_make_space(temp, s_options);
+	}
+	if(msg.payload_len)
+	{
+		std::snprintf(temp, 15, "Payload[%zu]", msg.payload_len);
+		print_make_space(temp, s_payload);
+	}
+	printf("\n");
+
+	return true;
+}
+
+#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 
 }//Debug
 }//CoAP

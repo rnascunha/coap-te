@@ -2,6 +2,7 @@
 #define COAP_TE_MESSAGE_RELIABLE_FACTORY_HPP__
 
 #include <cstdint>
+#include "types.hpp"
 #include "../types.hpp"
 #include "../options/options.hpp"
 #include "error.hpp"
@@ -11,15 +12,17 @@ namespace Message{
 namespace Reliable{
 
 template<std::size_t BufferSize = 0,
-		typename OptionCode = Option::code>
+		CoAP::Message::code Code = CoAP::Message::code::get>
 class Factory{
 	private:
 		using empty = struct{};
 		using buffer_type = typename std::conditional<BufferSize == 0, empty, std::uint8_t[BufferSize]>::type;
 	public:
+		using OptionCode = typename option_type<Code>::type;
+
 		Factory();
 
-		Factory& header(code, void const* const token = nullptr, std::size_t token_len = 0) noexcept;
+		Factory& code(code) noexcept;
 
 		Factory& token(void const* token, std::size_t token_len) noexcept;
 		Factory& token(const char*) noexcept;
@@ -58,7 +61,7 @@ class Factory{
 	private:
 		buffer_type			buffer_;
 
-		CoAP::Message::code	code_ = code::get;
+		CoAP::Message::code	code_ = Code;
 		void const*			token_ = nullptr;
 		std::size_t			token_len_ = 0;
 		CoAP::Message::Option::List_Option<OptionCode>		opt_list_;

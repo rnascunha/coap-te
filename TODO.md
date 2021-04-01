@@ -28,3 +28,5 @@
 it won't work.
 
 * Better solution to function get_config from options.hpp
+
+* Make Serialize class to reliable connection

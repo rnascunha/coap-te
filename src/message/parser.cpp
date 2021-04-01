@@ -5,19 +5,9 @@
 namespace CoAP{
 namespace Message{
 
-static unsigned parse_header(message& msg,
-		std::uint8_t const* const buffer, std::size_t buffer_len,
-		CoAP::Error& ec);
-static unsigned parse_options(message& msg,
-		std::uint8_t const* const buffer, std::size_t buffer_len,
-		CoAP::Error& ec);
-static unsigned parse_payload(message& msg,
-		std::uint8_t const* const buffer, std::size_t buffer_len,
-		CoAP::Error& ec);
-
 unsigned parse(message& msg,
 		std::uint8_t const* const buffer, std::size_t buffer_len,
-		CoAP::Error& ec)
+		CoAP::Error& ec) noexcept
 {
 	unsigned offset = parse_header(msg, buffer, buffer_len, ec);
 	if(ec || (buffer_len - offset) == 0)
@@ -32,50 +22,9 @@ unsigned parse(message& msg,
 	return offset;
 }
 
-bool query_by_key(message const& msg, const char* key, const void** value, unsigned& length) noexcept
-{
-	Option::Parser<Option::code> parser(msg);
-	Option::option const *opt;
-
-	while((opt = parser.next()))
-	{
-		if(opt->ocode == Option::code::uri_query)
-		{
-			const char *nkey = key, *opt_value = static_cast<const char*>(opt->value);
-			unsigned len = opt->length;
-			int i = 0;
-			while(len && nkey[i] && nkey[i] == opt_value[i])
-			{
-				i++; len--;
-			}
-			if(!nkey[i])
-			{
-				if(len > 0 && opt_value[i] == '=')
-				{
-					*value = (opt_value + i) + 1;
-					length = len;
-					return true;
-				}
-				if(len == 0)
-				{
-					length = 0;
-					return true;
-				}
-			}
-		}
-	}
-	return false;
-}
-
-/**
- *
- *
- *
- */
-
 unsigned parse_header(message& msg,
 		std::uint8_t const* const buffer, std::size_t buffer_len,
-		CoAP::Error& ec)
+		CoAP::Error& ec) noexcept
 {
 	unsigned offset = 0;
 	if(buffer_len < 4)
@@ -130,46 +79,6 @@ unsigned parse_header(message& msg,
 	if(msg.token_len)
 		msg.token = &buffer[4];
 	offset += static_cast<unsigned>(msg.token_len);
-
-	return offset;
-}
-
-static unsigned parse_options(message& msg,
-		std::uint8_t const* const buffer, std::size_t buffer_len,
-		CoAP::Error& ec)
-{
-	unsigned offset = 0, delta = 0;
-
-	msg.option_init = buffer;
-	while(buffer[offset] != payload_marker && (buffer_len - offset) != 0)
-	{
-		Option::option opt;
-		offset += Option::parse<Option::code, true>(opt, buffer + offset, buffer_len - offset, delta, ec);
-		if(ec)
-			return offset;
-		delta = static_cast<unsigned>(opt.ocode);
-		msg.option_num++;
-	}
-	msg.options_len = offset;
-
-	return offset;
-}
-
-static unsigned parse_payload(message& msg,
-		std::uint8_t const* const buffer, std::size_t buffer_len,
-		CoAP::Error& ec)
-{
-	unsigned offset = 0;
-	if(buffer[0] != payload_marker)
-	{
-		ec = CoAP::errc::payload_no_marker;
-		return offset;
-	}
-
-	offset += 1;
-	msg.payload = &buffer[1];
-	msg.payload_len = buffer_len - 1;
-	offset += static_cast<unsigned>(msg.payload_len);
 
 	return offset;
 }

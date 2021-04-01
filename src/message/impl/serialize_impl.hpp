@@ -129,7 +129,7 @@ unsigned make_options(std::uint8_t* buffer,
 
 	unsigned delta = 0, offset = 0;
 	OptionCode last_option = Option::invalid<OptionCode>();
-	for(Option::node* i = list; i != nullptr; i = i->next)
+	for(Option::node_option<OptionCode>* i = list; i != nullptr; i = i->next)
 		offset += make_option<OptionCode, CheckOpOrder, CheckOpRepeat>(buffer + offset, buffer_len - offset,
 				i->value, delta, last_option, ec);
 

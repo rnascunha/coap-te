@@ -20,6 +20,7 @@
 #include "message/message_id.hpp"
 #include "message/reliable/serialize.hpp"
 #include "message/reliable/factory.hpp"
+#include "message/reliable/parser.hpp"
 
 //Resource
 #include "resource/types.hpp"
