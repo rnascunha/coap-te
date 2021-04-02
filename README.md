@@ -94,6 +94,8 @@ deal with all CoAP transmission complexity. After configuration, makes a simple 
 *Port examples*: here are show the raw use of connections/plataform dependent functions. Not intended to the end user.
 * `udp_server`: the use of the implemented posix-like UDP socket. Run a echo UDP server;
 * `udp_client`: the use of the implemented posix-like UDP socket. Run a UDP client making a request and wait for a response;
+* `tcp_server`: the use of the implemented posix-like TCP socket (RFC8323). Run a echo TCP server;
+* `tcp_client`: the use of the implemented posix-like TCP socket (RFC8323). Run a TCP client making a request and wait for a response;
 
 ## Portability
 

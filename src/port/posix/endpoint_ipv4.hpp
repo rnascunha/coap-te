@@ -63,10 +63,33 @@ class endpoint_ipv4{
 			return inet_ntop(family, &addr_.sin_addr, addr_str, len);
 		}
 
-		const char* host(char* host_addr) noexcept { return address(host_addr); }
+		const char* host(char* host_addr, std::size_t len = INET_ADDRSTRLEN) noexcept
+		{
+			return address(host_addr, len);
+		}
 
 		in_addr_t address() noexcept{ return addr_.sin_addr.s_addr; }
 		std::uint16_t port() const noexcept{ return ntohs(addr_.sin_port); }
+
+		bool copy_sock_address(int socket) noexcept
+		{
+			socklen_t size = sizeof(native_type);
+			if(::getpeername(socket,
+					reinterpret_cast<sockaddr*>(&addr_),
+					&size) == -1)
+				return false;
+			return true;
+		}
+
+		bool copy_peer_address(int socket) noexcept
+		{
+			socklen_t size = sizeof(native_type);
+			if(::getpeername(socket,
+					reinterpret_cast<sockaddr*>(&addr_),
+					&size) == -1)
+				return false;
+			return true;
+		}
 
 		endpoint_ipv4& operator=(endpoint_ipv4 const& ep) noexcept
 		{

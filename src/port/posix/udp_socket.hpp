@@ -4,13 +4,14 @@
 #include <cstdlib>
 #include <cstdint>
 #include "error.hpp"
+#include "../port.hpp"
 
 namespace CoAP{
 namespace Port{
 namespace POSIX{
 
 template<class Endpoint,
-		int Flags = 0>
+		int Flags = MSG_DONTWAIT>
 class udp{
 	public:
 		using endpoint = Endpoint;

@@ -1,12 +1,12 @@
 /**
- * This examples shows the use of UDP posix-like socket, used
+ * This examples shows the use of TCP client posix-like socket, used
  * at CoAP protocol
  *
  * We are going to implement a simple client request and wait for a answer.
  *
  * This example is implemented using IPv4 and IPv6.
  *
- * \note Before running this example, run udp_server to open a server UDP socket
+ * \note Before running this example, run tcp_server to open a server TCP socket
  */
 
 #include <cstdlib>
@@ -14,12 +14,12 @@
 #include <cstdint>
 
 #include "error.hpp"
-#include "port/posix/udp_socket.hpp"
+#include "port/posix/tcp_client.hpp"
 
 /**
  * Using IPv6. Commenting the following line to use IPv4
  */
-//#define USE_IPV6
+#define USE_IPV6
 
 using namespace CoAP;
 
@@ -47,62 +47,77 @@ using endpoint = Port::POSIX::endpoint_ipv4;
  */
 static void exit_error(Error& ec, const char* what = "")
 {
-	printf("ERROR! [%d] %s [%s]", ec.value(), ec.message(), what);
+	printf("ERROR! [%d] %s [%s]\n", ec.value(), ec.message(), what);
 	exit(EXIT_FAILURE);
 }
 
 #define BUFFER_LEN		1000
 
 /**
- * Defining the UDP socket.
+ * Defining the TCP socket.
  *
- * The fisrt argument is the endpoint (IPv4 or IPv6) that we are
+ * The template argument is the endpoint (IPv4 or IPv6) that we are
  * going to open and connect.
- * The seconds is a socket receiving flag, instructing the socket
- * not to block (as must be at CoAP-te);
- * The last is the socket send flag (no flag).
  */
-using udp_socket = Port::POSIX::udp<endpoint>;
+using tcp_client = Port::POSIX::tcp_client<endpoint>;
 
 int main()
 {
 	Error ec;
-	std::uint8_t buffer[BUFFER_LEN];
 
-	const char* payload = "Teste";
-	std::size_t payload_len = std::strlen(payload);
-
-	std::memcpy(buffer, payload, payload_len + 1);
-
-	udp_socket::endpoint to{LOCALHOST_ADDR, 8080, ec};
+	/**
+	 * Endpoint of the host to connect
+	 */
+	tcp_client::endpoint to{LOCALHOST_ADDR, 8080, ec};
 	if(ec)
 	{
 		printf("Error parsing address\n");
 		return 1;
 	}
 
-	udp_socket conn;
+	/**
+	 * TCP client instance
+	 */
+	tcp_client conn;
 
-	conn.open(ec);
+	/**
+	 * Connecting to host
+	 */
+	conn.open(to, ec);
 	if(ec) exit_error(ec, "open");
 
-	conn.send(buffer, payload_len, to, ec);
+	/**
+	 * Sending a payload
+	 */
+	conn.send("teste", std::strlen("teste"), ec);
 	if(ec) exit_error(ec, "send");
 	printf("Send succeced!\n");
 
-	udp_socket::endpoint from;
+	/**
+	 * Receiving buffer
+	 */
+	std::uint8_t buffer[BUFFER_LEN];
+
+	/**
+	 * Loop to wait for a answer
+	 */
 	while(true)
 	{
-		std::size_t size = conn.receive(buffer, BUFFER_LEN, from, ec);
+		/**
+		 * Waiting for a response
+		 */
+		std::size_t size = conn.receive(buffer, BUFFER_LEN, ec);
 		if(ec) exit_error(ec, "read");
 		if(size == 0)
 		{
-//			std::printf(".");
 			continue;
 		}
 
-		char addr_str[46];
-		std::printf("Received [%s]:%u [%lu]: %s\n", from.address(addr_str), from.port(), size, buffer);
+		/**
+		 * Printing response received
+		 */
+		std::printf("Received[%lu]: %s\n", size, buffer);
+
 		break;
 	}
 	return EXIT_SUCCESS;
