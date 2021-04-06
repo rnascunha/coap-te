@@ -96,7 +96,7 @@ static constexpr module example_mod = {
  * the default callback.
  */
 using engine = CoAP::Transmission::engine<
-		CoAP::socket,
+		CoAP::Port::POSIX::udp<CoAP::Port::POSIX::endpoint_ipv4>,
 		CoAP::Message::message_id,
 #ifdef USE_TRANSACTION_LIST_VECTOR
 		CoAP::Transmission::transaction_list_vector<
@@ -110,12 +110,12 @@ using engine = CoAP::Transmission::engine<
 			CoAP::Transmission::transaction<
 				BUFFER_LEN,
 				CoAP::Transmission::transaction_cb,
-				CoAP::socket::endpoint>,
+				CoAP::Port::POSIX::endpoint_ipv4>,
 			TRANSACT_NUM>,
 #endif /* USE_TRANSACTION_LIST_VECTOR */
 		CoAP::disable,		//default callback disabled
 		CoAP::Resource::resource<
-			CoAP::Resource::callback<CoAP::socket::endpoint>,
+			CoAP::Resource::callback<CoAP::Port::POSIX::endpoint_ipv4>,
 			true
 		>
 	>;
@@ -169,7 +169,7 @@ int main()
 	engine::endpoint ep{HOST_ADDR, COAP_PORT, ec};
 	if(ec) exit_error(ec);
 
-	CoAP::socket socket;
+	engine::connection socket;
 
 	socket.open(ec);
 	if(ec) exit_error(ec, "Error trying to open socket...");

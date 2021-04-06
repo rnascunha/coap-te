@@ -43,16 +43,16 @@ static constexpr const CoAP::Transmission::configure tconfigure = {
  * description os the options.
  */
 using engine = CoAP::Transmission::engine<
-		CoAP::socket,
+		CoAP::Port::POSIX::udp<CoAP::Port::POSIX::endpoint_ipv4>,
 		CoAP::Message::message_id,
 		CoAP::Transmission::transaction_list<
 			CoAP::Transmission::transaction<
 					TRANSC_BUFFER_LEN,
 					CoAP::Transmission::transaction_cb,
-					CoAP::socket::endpoint>,
+					CoAP::Port::POSIX::endpoint_ipv4>,
 				4>,
 		CoAP::Transmission::default_cb<
-			CoAP::socket::endpoint>,
+			CoAP::Port::POSIX::endpoint_ipv4>,
 			CoAP::disable
 	>;
 
@@ -216,7 +216,7 @@ int main()
 	/**
 	 * Socket
 	 */
-	CoAP::socket conn;
+	engine::connection conn;
 
 	conn.open(ec);
 	if(ec) exit_error(ec, "Error trying to open socket...");
@@ -246,7 +246,7 @@ int main()
 	/**
 	 * Endpoint that request will be sent
 	 */
-	CoAP::socket::endpoint ep{HOST_ADDR, COAP_PORT, ec};
+	engine::endpoint ep{HOST_ADDR, COAP_PORT, ec};
 	if(ec) exit_error(ec);
 
 	/**

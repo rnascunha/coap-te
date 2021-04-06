@@ -74,6 +74,7 @@ enum class code : std::uint8_t
 #endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 };
 
+bool is_empty(code) noexcept;
 bool check_code(code) noexcept;
 bool is_request(code) noexcept;
 bool is_response(code) noexcept;

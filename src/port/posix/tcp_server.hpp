@@ -17,6 +17,9 @@ template<class Endpoint,
 		int Flags = MSG_DONTWAIT>
 class tcp_server{
 	public:
+		static constexpr bool set_length = true;
+		static constexpr bool is_server = true;
+
 		using endpoint = Endpoint;
 		tcp_server();
 
@@ -28,8 +31,8 @@ class tcp_server{
 			auto* OpenCb = (void*)nullptr,
 			auto* CloseCb = (void*)nullptr,
 			unsigned MaxEvents = 32>
-		bool run(void* buffer, std::size_t buffer_len, CoAP::Error&) noexcept;
-		std::size_t send(const void*, std::size_t, endpoint&, CoAP::Error&)  noexcept;
+		bool receive(void* buffer, std::size_t buffer_len, CoAP::Error&) noexcept;
+		std::size_t send(int to_socket, const void*, std::size_t, CoAP::Error&)  noexcept;
 
 		void close();
 	private:

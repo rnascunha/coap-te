@@ -128,7 +128,7 @@ std::size_t
 Factory<BufferSize, Code>::
 serialize(
 		std::uint8_t* buffer, std::size_t buffer_len,
-		CoAP::Error& ec) noexcept
+		CoAP::Error& ec) const noexcept
 {
 	return CoAP::Message::Reliable::serialize<SetLength, OptionCode, SortOptions, CheckOpOrder, CheckOpRepeat>(
 				buffer, buffer_len,

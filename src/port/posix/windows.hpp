@@ -1,5 +1,5 @@
-#ifndef COAP_TE_PORT_WINDOWS_HPP__
-#define COAP_TE_PORT_WINDOWS_HPP__
+#ifndef COAP_TE_PORT_POSIX_WINDOWS_HPP__
+#define COAP_TE_PORT_POSIX_WINDOWS_HPP__
 
 #include <cstdint>
 
@@ -16,4 +16,4 @@ using in_addr_t = std::uint32_t;
 
 #define inet_ntop(family, addr, addr_str, len)	InetNtop(family, addr, addr_str, len)
 
-#endif /* COAP_TE_PORT_WINDOWS_HPP__ */
+#endif /* COAP_TE_PORT_POSIX_WINDOWS_HPP__ */

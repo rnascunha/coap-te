@@ -10,12 +10,9 @@
 #endif
 
 #include "endpoint_ipv4.hpp"
+#include "endpoint_ipv6.hpp"
 #include "udp_socket.hpp"
-
-namespace CoAP{
-
-using socket = Port::POSIX::udp<Port::POSIX::endpoint_ipv4, MSG_DONTWAIT>;
-
-}//CoAP
+#include "tcp_client.hpp"
+#include "tcp_server.hpp"
 
 #endif /* COAP_TE_PORT_POSIX_HPP__ */

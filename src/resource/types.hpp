@@ -14,6 +14,13 @@ using callback = void(
 		CoAP::Transmission::Response<Endpoint>&,
 		void*) noexcept;
 
+template<typename Message,
+		typename Response>
+using callback_reliable = void(
+		Message const&,
+		Response&,
+		void*) noexcept;
+
 namespace Link_Format{
 
 struct link_format{

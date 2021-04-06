@@ -51,19 +51,6 @@ open(endpoint& ep, CoAP::Error& ec) noexcept
 
 template<class Endpoint,
 		int Flags>
-void
-tcp_client<Endpoint, Flags>::
-accept(int socket, endpoint const& ep) noexcept
-{
-	socket_ = socket;
-	ep_ = ep;
-
-	if constexpr(Flags & MSG_DONTWAIT)
-		nonblock_socket(socket_);
-}
-
-template<class Endpoint,
-		int Flags>
 bool
 tcp_client<Endpoint, Flags>::
 is_open() noexcept

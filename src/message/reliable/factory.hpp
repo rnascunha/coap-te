@@ -47,7 +47,7 @@ class Factory{
 				bool CheckOpRepeat = true>
 		std::size_t serialize(
 				std::uint8_t* buffer, std::size_t buffer_len,
-				CoAP::Error&) noexcept;
+				CoAP::Error&) const noexcept;
 
 		/**
 		 * To be used with internal buffer and internal message id;

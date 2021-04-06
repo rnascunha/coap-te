@@ -8,7 +8,8 @@
 namespace CoAP{
 namespace Resource{
 
-template<typename Callback_Functor, bool HasDescription = false>
+template<typename Callback_Functor,
+		bool HasDescription = false>
 class resource
 {
 	using empty = struct{};
@@ -72,10 +73,11 @@ class resource
 			return *this;
 		}
 
-		template<typename Endpoint>
+		template<typename Message,
+				typename Response>
 		bool call(CoAP::Message::code code,
-			CoAP::Message::message const& request,
-			CoAP::Transmission::Response<Endpoint>& response,
+			Message const& request,
+			Response& response,
 			void* engine) const noexcept
 		{
 			switch(code)

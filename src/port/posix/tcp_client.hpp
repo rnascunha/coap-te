@@ -14,6 +14,9 @@ template<class Endpoint,
 		int Flags = MSG_DONTWAIT>
 class tcp_client{
 	public:
+		static constexpr bool set_length = true;
+		static constexpr bool is_server = false;
+
 		using endpoint = Endpoint;
 		tcp_client();
 		~tcp_client();
@@ -21,8 +24,7 @@ class tcp_client{
 		int native() const noexcept;
 
 		void open(endpoint&, CoAP::Error&) noexcept;
-		//To be used with server
-		void accept(int socket, endpoint const& ep) noexcept;
+
 		bool is_open() noexcept;
 		void close() noexcept;
 

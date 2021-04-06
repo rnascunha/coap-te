@@ -24,6 +24,7 @@ class engine
 {
 		using empty = struct{};
 	public:
+		using connection = Connection;
 		using endpoint = typename Connection::endpoint;
 		using transaction_list = TransactionList;
 		using transaction_t = typename TransactionList::transaction_t;
@@ -61,7 +62,7 @@ class engine
 			return packet_size;
 		}
 
-		constexpr Connection& connection() noexcept
+		constexpr Connection& get_connection() noexcept
 		{
 			return conn_;
 		}

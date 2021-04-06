@@ -146,14 +146,14 @@ int main()
 	/**
 	 * Working loop
 	 *
-	 * The run function template parameter are:
+	 * The receive function template parameter are:
 	 * * read callback
-	 * * block time in miliseconds: 0 (no block), -1 (indefenily)
+	 * * block time in miliseconds: 0 (no block), -1 (blocks indefinitely)
 	 * * open connection callback
 	 * * close connection callback
 	 * * max event permited (ommited, defaulted to 32)
 	 */
-	while(conn.run<read_cb, 0 , open_cb, close_cb>(buffer, BUFFER_LEN, ec))
+	while(conn.receive<read_cb, 1000, open_cb, close_cb>(buffer, BUFFER_LEN, ec))
 	{
 		/**
 		 * Your code

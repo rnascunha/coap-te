@@ -196,6 +196,7 @@ bool print_byte_message(std::uint8_t const* arr, std::size_t size) noexcept
 }
 
 #if COAP_TE_RELIABLE_CONNECTION == 1
+
 template<typename OptionCode>
 static void print_message_options(CoAP::Message::Reliable::message const& msg,
 		const char* prefix = "\t\t") noexcept
@@ -247,6 +248,19 @@ void print_message(CoAP::Message::Reliable::message const& msg) noexcept
 	print_option_choose(msg);
 	std::printf("\tPayload[%zu]: ", msg.payload_len);
 	print_array(msg.payload, msg.payload_len);
+	std::printf("\n");
+}
+
+void print_message_string(CoAP::Message::Reliable::message const& msg) noexcept
+{
+	std::printf("\tLen: %u\n\tCode: %s\n\tToken[%zu]: ",
+			msg.len, code_string(msg.mcode), msg.token_len);
+	print_array(msg.token, msg.token_len);
+
+	std::printf("\n\tOptions[%zu]:\n", msg.option_num);
+	print_option_choose(msg);
+	std::printf("\tPayload[%zu]: ", msg.payload_len);
+	std::printf("%.*s", static_cast<int>(msg.payload_len), static_cast<char const*>(msg.payload));
 	std::printf("\n");
 }
 

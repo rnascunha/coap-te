@@ -80,6 +80,7 @@ static constexpr const config<csm> options_csm[] = {
 	{csm::block_wise_transfer,	false,	type::empty}
 };
 
+using option_csm = option_template<csm>;
 using node_csm = node_option<csm>;
 
 enum class ping_pong{
@@ -90,7 +91,9 @@ static constexpr const config<ping_pong> options_ping_pong[] = {
 	{ping_pong::custody, 		false,	type::empty}
 };
 
+using option_ping = option_template<ping_pong>;
 using node_ping = node_option<ping_pong>;
+using option_pong = option_template<ping_pong>;
 using node_pong = node_option<ping_pong>;
 
 enum class release{

@@ -32,13 +32,14 @@ class resource_root{
 			return root_.template add_child<true, false>(std::forward<Args>(args)...);
 		}
 
-		node_t* search_node(CoAP::Message::message const& msg) noexcept
+		template<typename Message>
+		node_t* search_node(Message const& msg) noexcept
 		{
 			using namespace CoAP::Message;
 			using namespace CoAP::Message::Option;
 			node_t* res = &root_;
 
-			Option::Parser<Option::code> op(msg);
+			Option::Parser<Option::code, Message> op(msg);
 			option const* opt;
 			node_t* n = &root_;
 			while((opt = op.next()))
@@ -53,13 +54,14 @@ class resource_root{
 			return res;
 		}
 
-		node_t* search_parent(CoAP::Message::message const& msg) noexcept
+		template<typename Message>
+		node_t* search_parent(Message const& msg) noexcept
 		{
 			using namespace CoAP::Message;
 			using namespace CoAP::Message::Option;
 			node_t const* res = &root_;
 
-			Option::Parser<Option::code> op(msg);
+			Option::Parser<Option::code, Message> op(msg);
 			option const* opt;
 			node_t const* n = &root_, *parent = nullptr;
 			while((opt = op.next()))
@@ -75,18 +77,20 @@ class resource_root{
 			return parent;
 		}
 
-		resource_t const* search(CoAP::Message::message const& msg) noexcept
+		template<typename Message>
+		resource_t const* search(Message const& msg) noexcept
 		{
 			node_t const* node = search_node(msg);
 			return node ? &node->value() : nullptr;
 		}
 
-		node_t* remove_node(CoAP::Message::message const& msg) noexcept
+		template<typename Message>
+		node_t* remove_node(Message const& msg) noexcept
 		{
 			using namespace CoAP::Message;
 			using namespace CoAP::Message::Option;
 
-			Option::Parser<Option::code> op(msg);
+			Option::Parser<Option::code, Message> op(msg);
 			option const* opt;
 			node_t* n = &root_, *parent = nullptr;
 			while((opt = op.next()))

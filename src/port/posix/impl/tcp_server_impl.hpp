@@ -119,6 +119,8 @@ accept(CoAP::Error& ec) noexcept
 	{
 		if(!add_socket_poll(s, EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP))
 			ec = CoAP::errc::socket_error;
+		if(Flags & MSG_DONTWAIT)
+			nonblock_socket(s);
 	}
 	return s;
 }
@@ -132,7 +134,7 @@ template<auto* ReadCb,
 	unsigned MaxEvents /* = 32 */>
 bool
 tcp_server<Endpoint, Flags>::
-run(void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
+receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 {
 	struct epoll_event events[MaxEvents];
 
@@ -178,9 +180,17 @@ template<class Endpoint,
 		int Flags>
 std::size_t
 tcp_server<Endpoint, Flags>::
-send(const void*, std::size_t, endpoint&, CoAP::Error&)  noexcept
+send(int to_socket, const void* buffer, std::size_t buffer_len, CoAP::Error& ec)  noexcept
 {
-	return 0;
+	int size = ::send(to_socket, buffer, buffer_len, 0);
+	if(size == -1)
+	{
+		if constexpr(Flags & MSG_DONTWAIT)
+			if(!(errno == EAGAIN || errno == EWOULDBLOCK))
+				ec = CoAP::errc::socket_error;
+		return 0;
+	}
+	return size;
 }
 
 }//POSIX

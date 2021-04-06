@@ -44,7 +44,11 @@ unsigned byte_offset(unsigned value) noexcept
 
 bool make_block_raw(unsigned& value, unsigned number, bool more, unsigned size) noexcept
 {
+#if COAP_TE_RELIABLE_CONNECTION == 1
+	if(!(/* size >= 0 && */ size <= 7)) return false;
+#else
 	if(!(/* size >= 0 && */ size <= 6)) return false;
+#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 
 	value =  number << 4 | more << 3 | size;
 

@@ -18,10 +18,11 @@
 #include "message/factory.hpp"
 #include "message/parser.hpp"
 #include "message/message_id.hpp"
+#if COAP_TE_RELIABLE_CONNECTION == 1
 #include "message/reliable/serialize.hpp"
 #include "message/reliable/factory.hpp"
 #include "message/reliable/parser.hpp"
-
+#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 //Resource
 #include "resource/types.hpp"
 #include "resource/resource.hpp"
@@ -41,5 +42,13 @@
 #include "transmission/transaction_list.hpp"
 #include "transmission/transaction.hpp"
 #include "transmission/engine.hpp"
-
+#if COAP_TE_RELIABLE_CONNECTION == 1
+#include "transmission/reliable/types.hpp"
+#include "transmission/reliable/functions.hpp"
+#include "transmission/reliable/request.hpp"
+#include "transmission/reliable/response.hpp"
+#include "transmission/reliable/transaction.hpp"
+#include "transmission/reliable/transaction_list.hpp"
+#include "transmission/reliable/engine_client.hpp"
+#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 #endif /* COAP_TE_MAIN_HPP__ */

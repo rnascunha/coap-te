@@ -56,7 +56,7 @@ using transaction_cb = void(*)(void const*,
 							void*) noexcept;
 
 enum class status_t{
-	none = 0,	///<  not been used
+	none = 0,	///< not been used
 	sending,	///< in used
 	canceled,	///< canceled
 	success,	///< received a response

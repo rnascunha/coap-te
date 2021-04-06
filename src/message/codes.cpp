@@ -57,6 +57,11 @@ bool check_code(code mcode) noexcept
 	return false;
 }
 
+bool is_empty(code mcode) noexcept
+{
+	return mcode == code::empty;
+}
+
 bool is_request(code mcode) noexcept
 {
 	return mcode != code::empty && ((static_cast<std::uint8_t>(mcode) & 0b11100000) == code_class::request);

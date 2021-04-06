@@ -84,11 +84,11 @@ void exit_error(CoAP::Error& ec, const char* what = nullptr)
 #ifdef USE_INTERNAL_BUFFER
 using transaction_t = transaction<BUFFER_LEN,					//max packet size != 0
 							CoAP::Transmission::transaction_cb,	//Default callback signature
-							CoAP::socket::endpoint>;			//Socket endpoint
+							CoAP::Port::POSIX::endpoint_ipv4>;	//Socket endpoint
 #else
 using transaction_t = transaction<0,							//max packet size == 0 (use external buffer)
 							CoAP::Transmission::transaction_cb,	//Default callback signature
-							CoAP::socket::endpoint>;			//Socket endpoint
+							CoAP::Port::POSIX::endpoint_ipv4>;			//Socket endpoint
 #endif
 
 /**
@@ -130,14 +130,14 @@ int main()
 	/**
 	 * Socket
 	 */
-	CoAP::socket conn;
+	CoAP::Port::POSIX::udp<CoAP::Port::POSIX::endpoint_ipv4> conn;
 
 	conn.open(ec);
 	if(ec) exit_error(ec, "Error trying to open socket...");
 
 	debug(example_mod, "Socket opened...");
 
-	CoAP::socket::endpoint ep{HOST_ADDR, COAP_PORT, ec};
+	transaction_t::endpoint_t ep{HOST_ADDR, COAP_PORT, ec};
 	if(ec) exit_error(ec);
 
 	status(example_mod, "Constructing message...");
@@ -234,7 +234,7 @@ int main()
 	std::uint8_t buffer_recv[BUFFER_LEN];	//Receiving buffer;
 	char print_buffer[20];					//auxiliary buffer to print
 
-	CoAP::socket::endpoint ep_recv;			//endpoint that will hold response endpoint
+	transaction_t::endpoint_t ep_recv;			//endpoint that will hold response endpoint
 	CoAP::Message::message response;		//Where the receiving message will be parsed
 	std::size_t size_recv = 0;
 

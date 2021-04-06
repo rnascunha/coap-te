@@ -4,7 +4,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include "error.hpp"
-#include "../port.hpp"
+#include "port.hpp"
 
 namespace CoAP{
 namespace Port{
