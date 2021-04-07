@@ -83,7 +83,7 @@ void
 transaction_list_vector<Transaction>::
 clear_unsused() noexcept
 {
-	auto it = std::remove_if(nodes_.begin(), nodes_.end(), [](node t){ return !t.transaction.is_busy(); });
+	auto it = std::remove_if(nodes_.begin(), nodes_.end(), [](node& t){ return !t.transaction.is_busy(); });
 	nodes_.erase(it, nodes_.end());
 }
 

@@ -74,7 +74,7 @@ using transaction_t = CoAP::Transmission::Reliable::transaction<
  * As trasaction_list_vector uses std::vector (i.e., dynamic allocation) as
  * internal container, you must explicitly included it
  */
-#include "transmission/transaction_list_vector.hpp"
+#include "transmission/reliable/transaction_list_vector.hpp"
 
 /**
  * This transaction list implementation can hold a unlimited number
@@ -84,7 +84,7 @@ using transaction_t = CoAP::Transmission::Reliable::transaction<
  * As template parameter, just the (1) transaction type.
  */
 using transaction_list_t =
-		CoAP::Transmission::transaction_list_vector<
+		CoAP::Transmission::Reliable::transaction_list_vector<
 			transaction_t		/* (1) transaction type */
 		>;
 #else /* USE_TRANSACTION_LIST_VECTOR */
