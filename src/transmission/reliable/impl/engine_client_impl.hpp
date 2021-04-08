@@ -32,6 +32,17 @@ template<typename Connection,
 	typename TransactionList,
 	typename CallbackDefaultFunctor,
 	typename Resource>
+engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
+~engine_client()
+{
+	close<false>();
+}
+
+template<typename Connection,
+	csm_configure const& Config,
+	typename TransactionList,
+	typename CallbackDefaultFunctor,
+	typename Resource>
 bool
 engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
 open(endpoint& ep, CoAP::Error& ec) noexcept
@@ -39,21 +50,10 @@ open(endpoint& ep, CoAP::Error& ec) noexcept
 	conn_.open(ep, ec);
 	if(ec) return false;
 
-	using namespace CoAP::Message;
-	request<code::csm> req{conn_.native()};
+	std::size_t size = make_csm_message<Connection::set_length>(Config, buffer_, Config.max_message_size, ec);
+	if(ec) return false;
 
-	unsigned max_size = Config.max_message_size;
-	Option::node_csm max_size_op{Option::csm::max_message_size, max_size};
-	Option::node_csm block_wise_op{Option::csm::block_wise_transfer};
-
-	req.add_option(max_size_op);
-
-	if(Config.block_wise_transfer)
-	{
-		req.add_option(block_wise_op);
-	}
-
-	send<false, false, false, false>(req, ec);
+	send(buffer_, size, ec);
 	return ec ? false : true;
 }
 
@@ -62,16 +62,24 @@ template<typename Connection,
 	typename TransactionList,
 	typename CallbackDefaultFunctor,
 	typename Resource>
+template<bool SendAbortMessage>
 void
 engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
-close() noexcept
+close(const char* payload /* = nullptr */ [[maybe_unused]]) noexcept
 {
+	if(!conn_.is_open()) return;
+
 	if constexpr(has_transaction_list)
 	{
-		unsigned i = 0;
-		while(list_[i])
-			list_[i++]->cancel();
+		list_.cancel_all();
 	}
+
+	if constexpr(SendAbortMessage)
+	{
+		CoAP::Error ec;
+		send_abort(payload, ec);
+	}
+
 	conn_.close();
 }
 
@@ -128,7 +136,7 @@ process(std::uint8_t const* buffer, std::size_t buffer_len,
 	else //is_request;
 	{
 		if constexpr(get_profile() == profile::server)
-			process_request(msg, buffer, ec);
+			process_request(msg, ec);
 		else
 		{
 			/**
@@ -169,7 +177,6 @@ template<typename Connection,
 void
 engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
 process_request(CoAP::Message::Reliable::message const& request,
-							std::uint8_t const* buffer,
 							CoAP::Error& ec) noexcept
 {
 	resource const* res = resource_root_.search(request);
@@ -249,7 +256,7 @@ process_signaling_csm(CoAP::Message::Reliable::message const& msg) noexcept
 {
 	using namespace CoAP::Message;
 
-	Option::Parser<Option::csm, CoAP::Message::Reliable::message> parse(msg);
+	Option::Parser<Option::csm> parse(msg);
 	Option::option_csm const* opt;
 	while((opt = parse.next()))
 	{
@@ -324,7 +331,7 @@ engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resou
 process_signaling_abort(CoAP::Message::Reliable::message const&) noexcept
 {
 	debug(engine_mod, "Abort message received");
-	close();
+	close<false>();
 }
 
 template<typename Connection,
@@ -379,7 +386,7 @@ run(CoAP::Error& ec) noexcept
 	if(ec)
 	{
 		error(engine_mod, ec, "read");
-		close();
+		close<false>();
 		return false;
 	}
 

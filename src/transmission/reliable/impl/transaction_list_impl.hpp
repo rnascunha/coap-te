@@ -49,6 +49,27 @@ check_all_response(int socket, CoAP::Message::Reliable::message const& msg) noex
 
 template<typename Transaction,
 		unsigned Size>
+void
+transaction_list<Transaction, Size>::
+cancel_all() noexcept
+{
+	for(unsigned i = 0; i < Size; i++)
+		list_[i].cancel();
+}
+
+template<typename Transaction,
+		unsigned Size>
+void
+transaction_list<Transaction, Size>::
+cancel_all(int socket) noexcept
+{
+	for(unsigned i = 0; i < Size; i++)
+		if(list_[i].socket() == socket)
+			list_[i].cancel();
+}
+
+template<typename Transaction,
+		unsigned Size>
 Transaction*
 transaction_list<Transaction, Size>::
 operator[](unsigned index) noexcept

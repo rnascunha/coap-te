@@ -127,7 +127,7 @@ process(endpoint& ep, std::uint8_t const* buffer, std::size_t buffer_len, CoAP::
 	else //is_request;
 	{
 		if constexpr(get_profile() == profile::server)
-			process_request(ep, msg, buffer, ec);
+			process_request(ep, msg, ec);
 		else
 			ec = CoAP::errc::request_not_supported;
 	}
@@ -157,7 +157,6 @@ void
 engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 process_request(endpoint& ep,
 		CoAP::Message::message const& request,
-		std::uint8_t const* buffer,
 		CoAP::Error& ec) noexcept
 {
 	resource const* res = resource_root_.search(request);

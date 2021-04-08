@@ -201,7 +201,7 @@ template<typename OptionCode>
 static void print_message_options(CoAP::Message::Reliable::message const& msg,
 		const char* prefix = "\t\t") noexcept
 {
-	CoAP::Message::Option::Parser<OptionCode, CoAP::Message::Reliable::message> parser(msg);
+	CoAP::Message::Option::Parser<OptionCode> parser(msg);
 	CoAP::Message::Option::option_template<OptionCode> const* opt;
 	while((opt = parser.next()))
 	{

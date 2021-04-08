@@ -46,6 +46,9 @@ static constexpr const CoAP::Transmission::Reliable::csm_configure csm = {
 		.block_wise_transfer = true
 };
 
+using connection_list_t = CoAP::Transmission::Reliable::connection_list<
+		CoAP::Transmission::Reliable::Connection, 5>;
+
 /**
  * Definiting a transaction.
  *
@@ -169,12 +172,14 @@ using resource = CoAP::Resource::resource<
  *
  * So that it, that's us... CoAP-te...
  */
-using engine = CoAP::Transmission::Reliable::engine_client<
-		CoAP::Port::POSIX::tcp_client<			///< (1) TCP client socket definition
+using engine = CoAP::Transmission::Reliable::engine_server<
+		CoAP::Port::POSIX::tcp_server<			///< (1) TCP client socket definition
 			CoAP::Port::POSIX::endpoint_ipv4
 		>,
 		csm,									///< (2) CSM paramenter configuration
-		transaction_list_t,						///< (3) Trasaction list as defined above
+		connection_list_t,
+		CoAP::disable,
+//		transaction_list_t,						///< (3) Trasaction list as defined above
 		CoAP::Transmission::Reliable::default_cb,	///< (4) Default callback signature function
 		resource>;								///< (5) Resource definition
 
@@ -192,11 +197,6 @@ void exit_error(CoAP::Error& ec, const char* what = nullptr)
 	exit(EXIT_FAILURE);
 }
 
-//Response flag to check if response was received
-static bool response_flag = false;
-//Pong flag to check if pong message was received
-static bool pong_flag = false;
-
 /**
  * This default callback response to signal response
  */
@@ -206,42 +206,11 @@ void default_callback(int socket,
 {
 	debug(example_mod, "default cb called");
 	CoAP::Debug::print_message(response);
-
-	if(CoAP::Message::is_signaling(response.mcode))
-	{
-		if(response.mcode == CoAP::Message::code::pong)
-			pong_flag = true;
-		return;
-	}
-	response_flag = true;
+	debug(example_mod, "OUT default cb called");
 }
 
-/**
- * Request callback (signature defined at transaction)
- */
-void request_cb(void const* trans, CoAP::Message::Reliable::message const* response, void*) noexcept
-{
-	debug(example_mod, "Request callback called...");
-
-	auto const* t = static_cast<engine::transaction_t const*>(trans);
-	status(example_mod, "Status: %s", CoAP::Debug::transaction_status_string(t->status()));
-	if(response)
-	{
-		status(example_mod, "Response received!");
-		CoAP::Debug::print_message_string(*response);
-	}
-	else
-	{
-		/**
-		 * Function timeout or transaction was cancelled
-		 */
-		status(example_mod, "Response NOT received");
-	}
-	/**
-	 * Setting flag that response was received
-	 */
-	response_flag = true;
-}
+static void get_discovery_handler(CoAP::Message::Reliable::message const& request,
+					engine::response& response, void*) noexcept;
 
 int main()
 {
@@ -269,63 +238,17 @@ int main()
 	coap_engine.default_cb(default_callback);
 
 	/**
+	 * Resource
+	 */
+	engine::resource_node res_well_known{".well-known"},
+								res_core{"core", get_discovery_handler};
+	coap_engine.root_node().add_branch(res_well_known, res_core);
+
+	/**
 	 * Connection to the server
 	 */
 	coap_engine.open(ep, ec);
-	if(ec) exit_error(ec, "connect");
-
-
-//	sleep(1);
-	/**
-	 * First we are going to send a ping signal to the server
-	 */
-	/**
-	 * Making the ping message
-	 */
-	engine::request<CoAP::Message::code::ping> req_ping;
-
-	/**
-	 * Sending...
-	 */
-	coap_engine.send(req_ping, ec);
-	if(ec) exit_error(ec, "ping");
-	status(example_mod, "Ping message sent...");
-	/**
-	 * Waiting for the pong response
-	 */
-	status(example_mod, "Waiting pong signal...");
-	while(!pong_flag && coap_engine(ec));
-
-	if(ec) exit_error(ec, "pong");
-
-	debug(example_mod, "Constructing the request message...");
-
-//	CoAP::Message::Option::node path_op1{CoAP::Message::Option::code::uri_path, "time"};
-	CoAP::Message::Option::node path_op1{CoAP::Message::Option::code::uri_path, ".well-known"};
-	CoAP::Message::Option::node path_op2{CoAP::Message::Option::code::uri_path, "core"};
-
-	/**
-	 * We are going to create a request to be sent. Request are a lot
-	 * like factory, but you also must defined a callback function.
-	 */
-	engine::request<CoAP::Message::code::get> request;
-	request.code(CoAP::Message::code::get)
-			.token("token")
-			.add_option(path_op1)
-			.add_option(path_op2)
-			.callback(request_cb/*, data */);
-
-	debug(example_mod, "Sending the request...");
-	/**
-	 * Sending the request.
-	 *
-	 * The second parameter defines that this request will never timeout... Until
-	 * the connection exist, we are going to wait for a response
-	 */
-	coap_engine.send(request, CoAP::Transmission::Reliable::no_expiration, ec);
-	if(ec) exit_error(ec, "send");
-
-	debug(example_mod, "Message sended");
+	if(ec) exit_error(ec, "open");
 
 	debug(example_mod, "Initiating engine loop");
 	/**
@@ -335,7 +258,7 @@ int main()
 	 * all the transaction timers. If engine is set to server profile it will monitor any
 	 * receiving request and deliver the request to the appropriate resource.
 	 */
-	while(!response_flag && coap_engine(ec))
+	while(coap_engine.run(ec))
 	{
 		/**
 		 * Your code, some code, who knows...? (or whom?)
@@ -344,4 +267,49 @@ int main()
 	if(ec) exit_error(ec, "run");
 
 	return EXIT_SUCCESS;
+}
+
+/**
+ * \/well-known/core [GET]
+ *
+ * Respond to request with resource information as defined at RFC6690
+ */
+static void get_discovery_handler(CoAP::Message::Reliable::message const& request,
+								engine::response& response, void* eng_ptr) noexcept
+{
+	char buffer[512];
+	CoAP::Error ec;
+	engine* eng = static_cast<engine*>(eng_ptr);
+
+	/**
+	 * Constructing link format resource information
+	 */
+	std::size_t size = CoAP::Resource::discovery(eng->root_node().node(), buffer, 512, ec);
+
+	/**
+	 * Checking error
+	 */
+	if(ec)
+	{
+		response
+			.code(CoAP::Message::code::internal_server_error)
+			.payload(ec.message())
+			.serialize();
+		return;
+	}
+
+	/**
+	 * Setting content type as link format
+	 */
+	CoAP::Message::content_format format = CoAP::Message::content_format::application_link_format;
+	CoAP::Message::Option::node content{format};
+
+	/**
+	 * Sending response
+	 */
+	response
+		.code(CoAP::Message::code::content)
+		.add_option(content)
+		.payload(buffer, size)
+		.serialize();
 }

@@ -21,6 +21,8 @@ class transaction_list{
 
 		void check_all() noexcept;
 		Transaction* check_all_response(int socket, CoAP::Message::Reliable::message const&) noexcept;
+		void cancel_all() noexcept;
+		void cancel_all(int socket) noexcept;
 
 		Transaction* operator[](unsigned index) noexcept;
 		constexpr unsigned size() const noexcept;

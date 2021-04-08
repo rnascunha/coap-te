@@ -39,7 +39,7 @@ class resource_root{
 			using namespace CoAP::Message::Option;
 			node_t* res = &root_;
 
-			Option::Parser<Option::code, Message> op(msg);
+			Option::Parser op(msg);
 			option const* opt;
 			node_t* n = &root_;
 			while((opt = op.next()))
@@ -61,7 +61,7 @@ class resource_root{
 			using namespace CoAP::Message::Option;
 			node_t const* res = &root_;
 
-			Option::Parser<Option::code, Message> op(msg);
+			Option::Parser op(msg);
 			option const* opt;
 			node_t const* n = &root_, *parent = nullptr;
 			while((opt = op.next()))
@@ -90,7 +90,7 @@ class resource_root{
 			using namespace CoAP::Message;
 			using namespace CoAP::Message::Option;
 
-			Option::Parser<Option::code, Message> op(msg);
+			Option::Parser op(msg);
 			option const* opt;
 			node_t* n = &root_, *parent = nullptr;
 			while((opt = op.next()))

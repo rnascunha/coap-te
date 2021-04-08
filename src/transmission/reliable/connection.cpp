@@ -4,15 +4,17 @@ namespace CoAP{
 namespace Transmission{
 namespace Reliable{
 
+#if COAP_TE_RELIABLE_CONNECTION == 1
+
 Connection::Connection(){}
 
-void Connection::init(int socket) noexcept
+void Connection::init(handler socket) noexcept
 {
 	socket_ = socket;
 	csm_.reset();
 }
 
-void Connection::init(int socket, csm_configure const& csm) noexcept
+void Connection::init(handler socket, csm_configure const& csm) noexcept
 {
 	socket_ = socket;
 	csm_ = csm;
@@ -28,9 +30,9 @@ void Connection::update(csm_configure const& csm) noexcept
 	csm_ = csm;
 }
 
-int Connection::socket() const noexcept
+Connection::handler Connection::socket() const noexcept
 {
-	return socket;
+	return socket_;
 }
 
 csm_configure const& Connection::csm() const noexcept
@@ -38,11 +40,18 @@ csm_configure const& Connection::csm() const noexcept
 	return csm_;
 }
 
-void Connection::clear()
+csm_configure& Connection::csm() noexcept
+{
+	return csm_;
+}
+
+void Connection::clear() noexcept
 {
 	socket_ = 0;
 	csm_.reset();
 }
+
+#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 
 }//Reliable
 }//Transmission

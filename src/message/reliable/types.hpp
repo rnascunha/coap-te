@@ -31,6 +31,17 @@ struct message{
 	std::size_t		payload_len = 0;	///< Size of payload
 
 	std::size_t size() const noexcept;
+	void reset()
+	{
+		len = 0;
+		token_len = 0;
+		token = nullptr;
+		option_init = nullptr;
+		options_len = 0;
+		option_num = 0;
+		payload = nullptr;
+		payload_len = 0;
+	}
 };
 
 template<CoAP::Message::code Code>

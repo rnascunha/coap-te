@@ -1,9 +1,13 @@
 #ifndef COAP_TE_TRANSMISSION_RELIABLE_CONNECTION_LIST_HPP__
 #define COAP_TE_TRANSMISSION_RELIABLE_CONNECTION_LIST_HPP__
 
+#include "defines/defaults.hpp"
+
 namespace CoAP{
 namespace Transmission{
 namespace Reliable{
+
+#if COAP_TE_RELIABLE_CONNECTION == 1
 
 template<typename Connection,
 		unsigned Size>
@@ -16,15 +20,18 @@ class connection_list{
 		Connection* find(int socket) noexcept;
 		Connection* find_free_slot() noexcept;
 
-		Connection* operator[](unsigned index) noexcept
-		{
-			return index >= Size ? nullptr : &nodes_[index];
-		}
+		void close(int socket) noexcept;
+		void close_all() noexcept;
 
-		constexpr unsigned size() const noexcept{ return Size; }
+		Connection* operator[](unsigned index) noexcept;
+
+		unsigned ocupied() const noexcept;
+		constexpr unsigned size() const noexcept;
 	private:
 		Connection	nodes_[Size];
 };
+
+#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 
 }//CoAP
 }//Transmission

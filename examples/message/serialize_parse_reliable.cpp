@@ -255,7 +255,7 @@ int main()
 	 *
 	 * To verify all options code, see "message/options.hpp"
 	 */
-	Option::Parser<Option::code, Reliable::message> op{msg};	//The parser will iterate through the options
+	Option::Parser op{msg};	//The parser will iterate through the options
 	Option::option const* opt;				//This will hold a pointer to the option
 	while((opt = op.next()))
 	{

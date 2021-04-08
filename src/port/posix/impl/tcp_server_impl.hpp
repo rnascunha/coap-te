@@ -64,6 +64,14 @@ open(endpoint& ep, CoAP::Error& ec) noexcept
 
 template<class Endpoint,
 		int Flags>
+bool tcp_server<Endpoint, Flags>::
+is_open() const noexcept
+{
+	return socket_ != 0;
+}
+
+template<class Endpoint,
+		int Flags>
 bool
 tcp_server<Endpoint, Flags>::
 open_poll() noexcept
@@ -96,10 +104,21 @@ add_socket_poll(int socket, std::uint32_t events) noexcept
 template<class Endpoint,
 		int Flags>
 void tcp_server<Endpoint, Flags>::
-close()
+close() noexcept
 {
+	epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, socket_, NULL);
 	if(socket_) ::close(socket_);
 	if(epoll_fd_) ::close(epoll_fd_);
+	socket_ = 0;
+}
+
+template<class Endpoint,
+	int Flags>
+void tcp_server<Endpoint, Flags>::
+close_client(handler socket) noexcept
+{
+	epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, socket, NULL);
+	::close(socket);
 }
 
 template<class Endpoint,
@@ -108,7 +127,7 @@ int
 tcp_server<Endpoint, Flags>::
 accept(CoAP::Error& ec) noexcept
 {
-	int s = 0;
+	handler s = 0;
 	endpoint ep;
 	socklen_t len = sizeof(typename endpoint::native_type);
 	if((s = ::accept(socket_, reinterpret_cast<struct sockaddr*>(ep.native()), &len)) == -1)
@@ -143,7 +162,7 @@ receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 	{
 		if (events[i].data.fd == socket_)
 		{
-			[[maybe_unused]] int c = accept(ec);
+			[[maybe_unused]] handler c = accept(ec);
 			if constexpr(!std::is_same<void*, decltype(OpenCb)>::value)
 			{
 				OpenCb(c);
@@ -175,6 +194,66 @@ receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 	}
 	return ec ? false : true;
 }
+
+template<class Endpoint,
+		int Flags>
+template<
+		int BlockTimeMs /* = 0 */,
+		unsigned MaxEvents /* = 32 */,
+		typename ReadCb,
+		typename OpenCb /* = void* */,
+		typename CloseCb /* = void* */>
+bool
+tcp_server<Endpoint, Flags>::
+receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec,
+		ReadCb read_cb,
+		OpenCb open_cb/* = nullptr */ [[maybe_unused]],
+		CloseCb close_cb/* = nullptr */ [[maybe_unused]]) noexcept
+{
+	struct epoll_event events[MaxEvents];
+
+	int event_num = epoll_wait(epoll_fd_, events, MaxEvents, BlockTimeMs);
+	for (int i = 0; i < event_num; i++)
+	{
+		if (events[i].data.fd == socket_)
+		{
+			[[maybe_unused]] int c = accept(ec);
+			if constexpr(!std::is_same<void*, OpenCb>::value)
+			{
+				open_cb(c);
+			}
+		}
+		else if (events[i].events & EPOLLIN)
+		{
+			/* handle EPOLLIN event */
+			for (;;)
+			{
+				ssize_t bytes = read(events[i].data.fd, buffer, buffer_len);
+				if (bytes <= 0 /* || errno == EAGAIN */ )
+				{
+					break;
+				}
+				else
+				{
+					handler s = events[i].data.fd;
+					read_cb(s, buffer, bytes);
+				}
+			}
+		}
+		/* check if the connection is closing */
+		if (events[i].events & (EPOLLRDHUP | EPOLLHUP))
+		{
+			handler s = events[i].data.fd;
+			if constexpr(!std::is_same<void*, OpenCb>::value)
+			{
+				close_cb(s);
+			}
+			close_client(s);
+		}
+	}
+	return ec ? false : true;
+}
+
 
 template<class Endpoint,
 		int Flags>

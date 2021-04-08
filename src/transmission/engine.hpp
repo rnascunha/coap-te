@@ -170,7 +170,6 @@ class engine
 		template<bool CheckEndpoint = true, bool CheckToken = false>
 		void process_response(endpoint& ep, CoAP::Message::message const&) noexcept;
 		void process_request(endpoint& ep, CoAP::Message::message const&,
-				std::uint8_t const* buffer,
 				CoAP::Error& ec) noexcept;
 
 		transaction_list list_;

@@ -25,7 +25,7 @@
 using namespace CoAP;
 
 /**
- * Defining the endpoint
+ * Defining the endpoint type
  */
 #ifdef USE_IPV6
 /**

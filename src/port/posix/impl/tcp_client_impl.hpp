@@ -6,6 +6,8 @@
 
 #include <cerrno>
 
+#include <cstdio>
+
 namespace CoAP{
 namespace Port{
 namespace POSIX{
@@ -53,7 +55,7 @@ template<class Endpoint,
 		int Flags>
 bool
 tcp_client<Endpoint, Flags>::
-is_open() noexcept
+is_open() const noexcept
 {
 	return socket_ != 0;
 }
@@ -64,6 +66,7 @@ void
 tcp_client<Endpoint, Flags>::
 close() noexcept
 {
+
 	::shutdown(socket_, SHUT_RDWR);
 	::close(socket_);
 	socket_ = 0;

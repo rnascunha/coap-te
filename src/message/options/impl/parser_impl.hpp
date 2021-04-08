@@ -120,59 +120,53 @@ unsigned parse(option_template<OptionCode>& opt,
 	return offset;
 }
 
-template<typename OptionCode,
-		typename Message>
-Parser<OptionCode, Message>::Parser(Message const& msg) // @suppress("Member declaration not found")
-	: msg_(msg){}
+template<typename OptionCode>
+template<typename Message>
+Parser<OptionCode>::Parser(Message const& msg) // @suppress("Member declaration not found")
+	: length_(msg.options_len), init_(msg.option_init), total_num_(msg.option_num){}
 
-template<typename OptionCode,
-		typename Message>
-void Parser<OptionCode, Message>::reset() noexcept
+template<typename OptionCode>
+void Parser<OptionCode>::reset() noexcept
 {
 	current_opt_ = 0;
 	delta_ = 0;
 	offset_ = 0;
 }
 
-template<typename OptionCode,
-		typename Message>
-option_template<OptionCode> const* Parser<OptionCode, Message>::current() const noexcept
+template<typename OptionCode>
+option_template<OptionCode> const* Parser<OptionCode>::current() const noexcept
 {
 	return &opt_;
 }
 
-template<typename OptionCode,
-		typename Message>
-unsigned Parser<OptionCode, Message>::current_number() const noexcept
+template<typename OptionCode>
+unsigned Parser<OptionCode>::current_number() const noexcept
 {
 	return current_opt_;
 }
 
-template<typename OptionCode,
-		typename Message>
-std::size_t Parser<OptionCode, Message>::total_number() const noexcept
+template<typename OptionCode>
+std::size_t Parser<OptionCode>::total_number() const noexcept
 {
-	return msg_.option_num;
+	return total_num_;
 }
 
-template<typename OptionCode,
-		typename Message>
-unsigned Parser<OptionCode, Message>::offset() const noexcept
+template<typename OptionCode>
+unsigned Parser<OptionCode>::offset() const noexcept
 {
 	return offset_;
 }
 
-template<typename OptionCode,
-		typename Message>
+template<typename OptionCode>
 template<bool CheckOptions /* = false */>
 option_template<OptionCode> const*
-Parser<OptionCode, Message>::next() noexcept
+Parser<OptionCode>::next() noexcept
 {
 	CoAP::Error ec;
-	if((msg_.options_len - offset_) != 0)
+	if((length_ - offset_) != 0)
 	{
-		offset_ += parse<OptionCode, CheckOptions>(opt_, msg_.option_init + offset_,
-															msg_.options_len - offset_,
+		offset_ += parse<OptionCode, CheckOptions>(opt_, init_ + offset_,
+															length_ - offset_,
 															delta_, ec);
 		if(ec)
 		{
@@ -186,15 +180,15 @@ Parser<OptionCode, Message>::next() noexcept
 	return &opt_;
 }
 
-template<typename OptionCode,
-		typename Message>
+template<typename OptionCode>
 template<bool CheckOptions /* = true */>
-option_template<OptionCode> const* Parser<OptionCode, Message>::next(CoAP::Error& ec) noexcept
+option_template<OptionCode> const*
+Parser<OptionCode>::next(CoAP::Error& ec) noexcept
 {
-	if((msg_.options_len - offset_) != 0)
+	if((length_ - offset_) != 0)
 	{
-		offset_ += parse<OptionCode, CheckOptions>(opt_, msg_.option_init + offset_,
-															msg_.options_len - offset_,
+		offset_ += parse<OptionCode, CheckOptions>(opt_, init_ + offset_,
+															length_ - offset_,
 															delta_, ec);
 		if(ec)
 			return nullptr;
@@ -212,7 +206,7 @@ bool get_option(Message const& msg,
 		option_template<OptionCode>& opt,
 		OptionCode ocode, unsigned count /* = 0 */) noexcept
 {
-	Parser<OptionCode, Message> parser(msg);
+	Parser<OptionCode> parser(msg);
 	option_template<OptionCode> const* op;
 	unsigned c = 0;
 	while((op = parser.next()))

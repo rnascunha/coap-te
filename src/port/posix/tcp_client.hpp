@@ -16,6 +16,7 @@ class tcp_client{
 	public:
 		static constexpr bool set_length = true;
 		static constexpr bool is_server = false;
+		using handler = int;
 
 		using endpoint = Endpoint;
 		tcp_client();
@@ -25,7 +26,7 @@ class tcp_client{
 
 		void open(endpoint&, CoAP::Error&) noexcept;
 
-		bool is_open() noexcept;
+		bool is_open() const noexcept;
 		void close() noexcept;
 
 		endpoint const& get_endpoint() const noexcept;
@@ -33,7 +34,7 @@ class tcp_client{
 		std::size_t send(const void*, std::size_t, CoAP::Error&)  noexcept;
 		std::size_t receive(void*, std::size_t, CoAP::Error&) noexcept;
 	private:
-		int socket_;
+		handler socket_;
 		endpoint ep_;
 };
 

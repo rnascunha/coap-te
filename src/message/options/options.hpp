@@ -106,6 +106,7 @@ static constexpr const config<release> options_release[] = {
 	{release::hold_off,				false,	type::uint}
 };
 
+using option_release = option_template<release>;
 using node_release = node_option<release>;
 
 enum class abort{
@@ -116,6 +117,7 @@ static constexpr const config<abort> options_abort[] = {
 	{abort::bad_csm_option,		false,	type::uint}
 };
 
+using option_abort = option_template<abort>;
 using node_abort = node_option<abort>;
 
 #endif /* COAP_TE_RELIABLE_CONNECTION == 1 */

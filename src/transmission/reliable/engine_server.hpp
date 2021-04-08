@@ -1,5 +1,5 @@
-#ifndef COAP_TE_TRANSMISSION_RELIABLE_ENGINE_CLIENT_HPP__
-#define COAP_TE_TRANSMISSION_RELIABLE_ENGINE_CLIENT_HPP__
+#ifndef COAP_TE_TRANSMISSION_RELIABLE_ENGINE_SERVER_HPP__
+#define COAP_TE_TRANSMISSION_RELIABLE_ENGINE_SERVER_HPP__
 
 #include "defines/defaults.hpp"
 #include "types.hpp"
@@ -11,36 +11,47 @@
 
 #include <type_traits>
 
+#include <cstdio>
+
 namespace CoAP{
 namespace Transmission{
 namespace Reliable{
 
 template<typename Connection,
 	csm_configure const& Config,
+	typename ConnectionList,
 	typename TransactionList,
 	typename CallbackDefaultFunctor,
 	typename Resource>
-class engine_client
+class engine_server
 {
 		using empty = struct{};
 	public:
-		using socket = int;
+		using socket = typename Connection::handler;
 		using connection = Connection;
 		static constexpr const bool set_length = Connection::set_length;
 		using endpoint = typename Connection::endpoint;
 
-		static constexpr const bool has_transaction_list = !std::is_same<TransactionList, CoAP::disable>::value;
+		/**
+		 * Connection type
+		 */
+		static constexpr const bool has_connection_list =
+				!std::is_same<ConnectionList, CoAP::disable>::value;
+		using connection_list_type = typename std::conditional<
+				has_connection_list,
+					ConnectionList, connection_list_empty>::type;
+		using connection_hold_t = typename connection_list_type::connection_t;
+
+		/**
+		 * Transaction type
+		 */
+		static constexpr const bool has_transaction_list =
+				!std::is_same<TransactionList, CoAP::disable>::value;
 		using transaction_list_type = typename std::conditional<
 				has_transaction_list,
-					TransactionList, empty>::type;
-
-		using transaction_t = typename std::conditional<
-				has_transaction_list,
-					typename TransactionList::transaction_t, empty>::type;
-
-		using transaction_cb = typename std::conditional<
-				has_transaction_list,
-					typename transaction_t::transaction_cb, void*>::type;
+					TransactionList, transaction_list_empty>::type;
+		using transaction_t = typename transaction_list_type::transaction_t;
+		using transaction_cb = typename transaction_t::transaction_cb;
 
 		template<CoAP::Message::code Code = CoAP::Message::code::get>
 		using request = Request<transaction_cb, Code>;
@@ -54,7 +65,6 @@ class engine_client
 					typename CoAP::Resource::resource_root<resource>::node_t, empty>::type;
 		using async_response = separate_response;
 
-
 		static constexpr const unsigned max_packet_size = Config.max_message_size;
 
 		static constexpr const bool has_default_callback =
@@ -66,12 +76,17 @@ class engine_client
 		using default_response_cb = typename std::conditional<has_default_callback,
 				CallbackDefaultFunctor, empty>::type;
 
-		engine_client();
-		~engine_client();
+		engine_server();
+		~engine_server();
 
 		bool open(endpoint& ep, CoAP::Error&) noexcept;
 		template<bool SendAbortMessage = false>
-		void close(const char* payload = nullptr) noexcept;
+		void close() noexcept;
+
+		template<bool SendAbortMessage = false>
+		void close_client(socket) noexcept;
+		template<bool SendAbortMessage = false>
+		void close_client(socket, const char* payload) noexcept;
 
 		static constexpr profile get_profile()
 		{
@@ -83,12 +98,17 @@ class engine_client
 			return conn_;
 		}
 
+		constexpr ConnectionList& get_connection_list() noexcept
+		{
+			return conn_list_;
+		}
+
 		template<bool SortOptions = true,
 				bool CheckOpOrder = !SortOptions,
 				bool CheckOpRepeat = true,
 				std::size_t BufferSize,
 				CoAP::Message::code Code>
-		std::size_t send(CoAP::Message::Reliable::Factory<BufferSize, Code> const&,
+		std::size_t send(socket, CoAP::Message::Reliable::Factory<BufferSize, Code> const&,
 				transaction_cb func, void* data,
 				CoAP::Error&) noexcept;
 
@@ -97,7 +117,7 @@ class engine_client
 				bool CheckOpRepeat = true,
 				std::size_t BufferSize,
 				CoAP::Message::code Code>
-		std::size_t send(CoAP::Message::Reliable::Factory<BufferSize, Code> const&,
+		std::size_t send(socket, CoAP::Message::Reliable::Factory<BufferSize, Code> const&,
 				expiration_time_type,
 				transaction_cb func, void* data,
 				CoAP::Error&) noexcept;
@@ -124,45 +144,53 @@ class engine_client
 				bool CheckOpRepeat = true,
 				std::size_t BufferSize,
 				CoAP::Message::code Code>
-		std::size_t send(CoAP::Message::Reliable::Factory<BufferSize, Code> const&,
+		std::size_t send(socket, CoAP::Message::Reliable::Factory<BufferSize, Code> const&,
 						CoAP::Error& ec) noexcept;
 
-		std::size_t send(const void* buffer, std::size_t buffer_len,
+		std::size_t send(socket, const void* buffer, std::size_t buffer_len,
 				CoAP::Error&) noexcept;
 
-		std::size_t send_abort(const char* payload, CoAP::Error& ec) noexcept;
-		std::size_t send_abort(CoAP::Message::Option::option_abort&,
+		std::size_t send_abort(socket,
 				const char* payload, CoAP::Error& ec) noexcept;
-
-		csm_configure const& server_csm() const noexcept;
+		std::size_t send_abort(socket, CoAP::Message::Option::option_abort&,
+				const char* payload, CoAP::Error& ec) noexcept;
 
 		resource& root() noexcept;
 		resource_root& root_node() noexcept;
 
 		void default_cb(default_response_cb cb) noexcept;
 
-		void process(std::uint8_t const* buffer, std::size_t buffer_len,
+		void process(socket, std::uint8_t const* buffer, std::size_t buffer_len,
 				CoAP::Error& ec) noexcept;
 
 		void check_transactions() noexcept;
+
+		template<int BlockTimeMs = 0,
+				unsigned MaxEvents = 32>
 		bool run(CoAP::Error& ec) noexcept;
+		template<int BlockTimeMs = 0,
+				unsigned MaxEvents = 32>
 		bool operator()(CoAP::Error& ec) noexcept;
 	private:
-		void process_response(CoAP::Message::Reliable::message const&) noexcept;
-		void process_request(CoAP::Message::Reliable::message const&,
+		void process_response(socket, CoAP::Message::Reliable::message const&) noexcept;
+		void process_request(socket, CoAP::Message::Reliable::message const&,
 							CoAP::Error& ec) noexcept;
-		void process_signaling(CoAP::Message::Reliable::message const&) noexcept;
-		void process_signaling_csm(CoAP::Message::Reliable::message const&) noexcept;
-		void process_signaling_ping(CoAP::Message::Reliable::message const&) noexcept;
-		void process_signaling_pong(CoAP::Message::Reliable::message const&) noexcept;
-		void process_signaling_release(CoAP::Message::Reliable::message const&) noexcept;
-		void process_signaling_abort(CoAP::Message::Reliable::message const&) noexcept;
+		void process_signaling(socket, CoAP::Message::Reliable::message const&) noexcept;
+		void process_signaling_csm(socket, CoAP::Message::Reliable::message const&) noexcept;
+		void process_signaling_ping(socket, CoAP::Message::Reliable::message const&) noexcept;
+		void process_signaling_pong(socket, CoAP::Message::Reliable::message const&) noexcept;
+		void process_signaling_release(socket, CoAP::Message::Reliable::message const&) noexcept;
+		void process_signaling_abort(socket, CoAP::Message::Reliable::message const&) noexcept;
+
+		void on_read(socket, void*, std::size_t) noexcept;
+		void on_open(socket) noexcept;
+		void on_close(socket) noexcept;
 
 		resource_root		resource_root_;
 
-		transaction_list_type list_;
+		transaction_list_type 	list_;
+		connection_list_type	conn_list_;
 
-		csm_configure		server_csm_;
 		Connection			conn_;
 		std::uint8_t		buffer_[max_packet_size];
 
@@ -173,7 +201,7 @@ class engine_client
 }//Transmission
 }//Reliable
 
-#include "impl/engine_client_send_impl.hpp"
-#include "impl/engine_client_impl.hpp"
+#include "impl/engine_server_send_impl.hpp"
+#include "impl/engine_server_impl.hpp"
 
-#endif /* COAP_TE_TRANSMISSION_RELIABLE_ENGINE_CLIENT_HPP__ */
+#endif /* COAP_TE_TRANSMISSION_RELIABLE_ENGINE_SERVER_HPP__ */
