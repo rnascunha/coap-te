@@ -45,7 +45,6 @@ open(endpoint& ep, CoAP::Error& ec) noexcept
 		close();
 		return;
 	}
-	ep_ = ep;
 
 	if constexpr(Flags & MSG_DONTWAIT)
 		nonblock_socket(socket_);
@@ -74,16 +73,7 @@ close() noexcept
 
 template<class Endpoint,
 		int Flags>
-Endpoint const&
-tcp_client<Endpoint, Flags>::
-get_endpoint() const noexcept
-{
-	return ep_;
-}
-
-template<class Endpoint,
-		int Flags>
-int
+typename tcp_client<Endpoint, Flags>::handler
 tcp_client<Endpoint, Flags>::
 native() const noexcept
 {

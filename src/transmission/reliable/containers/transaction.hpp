@@ -1,8 +1,8 @@
 #ifndef COAP_TE_TRANSMISSION_RELIABLE_TRANSACTION_HPP__
 #define COAP_TE_TRANSMISSION_RELIABLE_TRANSACTION_HPP__
 
-#include "types.hpp"
 #include "../types.hpp"
+#include "../../types.hpp"
 #include <cstdint>
 #include <type_traits>
 

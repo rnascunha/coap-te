@@ -11,13 +11,13 @@ The implemtation aims to:
 It's implemented:
 * CoAP ([RFC7252](https://tools.ietf.org/html/rfc7252));
 * Block-wise transfer ([RFC7959](https://tools.ietf.org/html/rfc7959));
+* Reliable connections ([RFC8323](https://tools.ietf.org/html/rfc8323));
 
 It's NOT implemented (yet):
 * Cache strategie;
 * Security;
 * Resource Discovery ([RFC6690](https://tools.ietf.org/html/rfc6690));
 * Observing ([RFC7641](https://tools.ietf.org/html/rfc7641));
-* Reliable connections support ([RFC8323](https://tools.ietf.org/html/rfc8323));
 * Much more :(...
 
 ## Dependencies
@@ -81,7 +81,9 @@ deal with all CoAP transmission complexity. After configuration, makes a simple 
 * `engine_server`: shows how to add resource to a engine, and how to make the response to specific methods, using different strategies.
 * `request_get_block_wise`: this example makes a *GET* request using *block2* block wise transfer, from a client to a server. Use with `response_block_wise` example. 
 * `request_put_block_wise`: this example makes a *PUT* request using *block1* block wise transfer, from a client to a server. Use with `response_block_wise` example.
-* `response_block_wise`: this example is a server that responds to the `request_get_block_wise` and `request_put_block_wise` examples above;
+* `response_block_wise`: this example is a server that responds to the `request_get_block_wise` and `request_put_block_wise` examples above.
+* `engine_tcp_client`: demonstrate how configure and use a reliable (RFC8323) client engine.
+* `engine_tcp_server`: demonstrate how configure and use a reliable (RFC8323) server engine.
 
 *URI examples*:
 * `decompose`: breaks a CoAP URI into internal structures of **CoAP-te**, ready to be used. Any percent-encoded characters is converted. 
@@ -99,8 +101,8 @@ deal with all CoAP transmission complexity. After configuration, makes a simple 
 
 ## Portability
 
-To port **CoAP-te** to your system, you must:
-* Define the following functions:
+To port **CoAP-te** to your system, you must define:
+* the following *free functions*:
 
 ```c++
 namespace CoAP{
@@ -120,9 +122,14 @@ unsigned random_generator() noexcept;
 ```
 > The default implementation uses `std::time` and `std::rand` as the functions above, respectivily, and uses `time_t` as `std::time_t`. If your system support this functions, just use then.   
 
-* Define a connection. A connection must define a endpoint, a receiving function, and a send function:
-  * The endpoint must be *default constructable*, *copiable* and *comparable*;
-  * The class connection must be *moveable*. The receiving/send functions *MUST NOT block*. Any error calling the functions must be reported at the last parameter (*CoAP::errc::socket_error*).
+* *Endpoint*: endpoints must be *default constructable*, *copiable* and *comparable*;
+* *Connection*: connection can be of type unreliable (UDP) or reliable (TCP, Websocket). A connection must define a *endpoint* (as defined above), and MUST not block. Each type of connection is discussed. 
+
+> There is already a implementation to posix-like sockets that should be used as example. Check `src/port/posix` directory. You will see the implementation of endpoints IPv4 and IPv6, unreliable UDP sockets, and reliable TCP client and server sockets. The uses of this implementaions can be analyzed at the `examples/port` directory.
+
+### Unreliable
+
+To implement a unrealible connection type (as defined RFC7252) you must define a class as follows: 
 
 ```c++
 struct my_connection{
@@ -132,5 +139,91 @@ struct my_connection{
 	std::size_t receive(void*, std::size_t, endpoint&, CoAP::Error&) noexcept;
 }
 ```
-> There is already a implementation to UDP posix-like sockets.
+This class must be *moveable*. The receiving/send functions *MUST NOT block*. Any error calling the functions must be reported at the last parameter (*CoAP::errc::socket_error*). And... that's it folks.
 
+### Reliable
+
+Reliable connections (as defined RFC8323) must be separated in client (connect to one server) and server (many clients connects to it). Also, depending on the connection (TCP or Websocket) it also reflects the message format.
+
+#### Client
+
+It follows the example of a reliable client connection:
+
+```c++
+class my_client{
+	public:
+		static constexpr bool set_length = <message_format_style>;
+		using handler = <some_handler_type>;
+		using endpoint = <some_endpoint type>;
+	
+		handler native() const noexcept;
+
+		void open(endpoint&, CoAP::Error&) noexcept;
+
+		bool is_open() const noexcept;
+		void close() noexcept;
+
+		std::size_t send(const void*, std::size_t, CoAP::Error&)  noexcept;
+		std::size_t receive(void*, std::size_t, CoAP::Error&) noexcept;
+};
+```
+
+* `set_length`: tells the connection message format, i.e., if the message format will have the length of the
+message. *TCP* must be **true**, *Websocket* must be **false**;
+* `handler`: handler that holds the socket (**int** to POSIX type);
+* `endpoint`: endpoint type. Could be `endpoint_ipv4` or `endpoint_ipv6` to *TCP*/*Websocket*;
+* `native` function: returns connection handler; 
+* `open` function: connects to the server. This function can block until it connects. It must set the socket to non-block mode (if necessary);
+* `is_open` function: check if the socket is opened;
+* `close` function: closes the socket;
+* `send` function: sends buffer to the server;
+* `receive` function: receives data from the the server. It must return the buffer read size. If the connection is *TCP*, it can return all the buffer read. If its *Websocket*, it must return packet by packet. It's very important this function NOT BLOCK.
+
+#### Server
+
+It follows the example of a reliable server connection:
+
+```c++
+class my_server{
+	public:
+		static constexpr bool set_length = <message_format_style>;
+		using handler = <some_handler_type>;
+		using endpoint = <some_endpoint type>;
+
+		my_server();
+
+		void open(endpoint&, CoAP::Error&) noexcept;
+		bool is_open() const noexcept;
+
+		template<
+			int BlockTimeMs,
+			unsigned MaxEvents,
+			typename ReadCb,
+			typename OpenCb,
+			typename CloseCb>
+		bool receive(void* buffer, std::size_t buffer_len, CoAP::Error&,
+				ReadCb read_cb, OpenCb open_cb, CloseCb close_cb) noexcept;
+
+		std::size_t send(handler, const void*, std::size_t, CoAP::Error&)  noexcept;
+
+		void close() noexcept;
+		void close_client(handler) noexcept;
+}
+```
+
+* `set_length`: tells the connection message format, i.e., if the message format will have the length of the
+message. *TCP* must be **true**, *Websocket* must be **false**;
+* `handler`: handler that holds the socket (**int** to POSIX type);
+* `endpoint`: endpoint type. Could be `endpoint_ipv4` or `endpoint_ipv6` to *TCP*/*Websocket*;
+* `open` function: open socket and bind endpoint server address;
+* `is_open` function: check if the socket is opened;
+* `close` function: closes the socket;
+* `close_client` function: closes client socket;
+* `send` function: sends buffer to the client;
+* `receive` function: this function must: 
+ * accept incoming connections: every incoming connection MUST call the `open_cb` function, with the handler passed at the argument; 
+ * receives data from the the server: it must return the buffer read size. If the connection is *TCP*, call the `read_cb` function with the whole readed buffer. If its *Websocket*, it must call `read_cb` packet by packet;
+ * check closed connection: call `close_cb` at any closed clients call, with the handler of the client;
+ * any socket error must be reported at the `CoAP::Error&` argument.
+ 
+> The template parameters `BlockTimeMs` and `MaxEvents` are passed to the `epoll_wait` call and may not have use at other envirioments. 

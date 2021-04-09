@@ -1,8 +1,8 @@
 #ifndef COAP_TE_TRANSMISSION_RELIABLE_TRANSACTION_EMPTY_HPP__
 #define COAP_TE_TRANSMISSION_RELIABLE_TRANSACTION_EMPTY_HPP__
 
-#include "types.hpp"
 #include "../types.hpp"
+#include "../../types.hpp"
 #include <cstdint>
 #include <type_traits>
 
@@ -14,7 +14,7 @@ class transaction_empty
 {
 	public:
 		static bool constexpr const is_external_storage = 0;
-		using transaction_cb = CoAP::Transmission::transaction_cb;
+		using transaction_cb = CoAP::Transmission::Reliable::transaction_cb;
 
 		static constexpr unsigned max_packet_size()
 		{

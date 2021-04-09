@@ -29,19 +29,18 @@ class engine_client
 		static constexpr const bool set_length = Connection::set_length;
 		using endpoint = typename Connection::endpoint;
 
-		static constexpr const bool has_transaction_list = !std::is_same<TransactionList, CoAP::disable>::value;
+		/**
+		 * Transaction type
+		 */
+		static constexpr const bool has_transaction_list =
+				!std::is_same<TransactionList, CoAP::disable>::value;
 		using transaction_list_type = typename std::conditional<
 				has_transaction_list,
-					TransactionList, empty>::type;
+					TransactionList, transaction_list_empty>::type;
+		using transaction_t = typename transaction_list_type::transaction_t;
+		using transaction_cb = typename transaction_t::transaction_cb;
 
-		using transaction_t = typename std::conditional<
-				has_transaction_list,
-					typename TransactionList::transaction_t, empty>::type;
-
-		using transaction_cb = typename std::conditional<
-				has_transaction_list,
-					typename transaction_t::transaction_cb, void*>::type;
-
+		using message = CoAP::Message::Reliable::message;
 		template<CoAP::Message::code Code = CoAP::Message::code::get>
 		using request = Request<transaction_cb, Code>;
 		using response = Response;
@@ -55,7 +54,7 @@ class engine_client
 		using async_response = separate_response;
 
 
-		static constexpr const unsigned max_packet_size = Config.max_message_size;
+		static constexpr const unsigned packet_size = Config.max_message_size;
 
 		static constexpr const bool has_default_callback =
 						std::is_invocable< // @suppress("Symbol is not resolved")
@@ -70,6 +69,7 @@ class engine_client
 		~engine_client();
 
 		bool open(endpoint& ep, CoAP::Error&) noexcept;
+
 		template<bool SendAbortMessage = false>
 		void close(const char* payload = nullptr) noexcept;
 
@@ -130,7 +130,7 @@ class engine_client
 		std::size_t send(const void* buffer, std::size_t buffer_len,
 				CoAP::Error&) noexcept;
 
-		std::size_t send_abort(const char* payload, CoAP::Error& ec) noexcept;
+		std::size_t send_abort(	const char* payload, CoAP::Error& ec) noexcept;
 		std::size_t send_abort(CoAP::Message::Option::option_abort&,
 				const char* payload, CoAP::Error& ec) noexcept;
 
@@ -145,6 +145,7 @@ class engine_client
 				CoAP::Error& ec) noexcept;
 
 		void check_transactions() noexcept;
+
 		bool run(CoAP::Error& ec) noexcept;
 		bool operator()(CoAP::Error& ec) noexcept;
 	private:
@@ -164,7 +165,7 @@ class engine_client
 
 		csm_configure		server_csm_;
 		Connection			conn_;
-		std::uint8_t		buffer_[max_packet_size];
+		std::uint8_t		buffer_[packet_size];
 
 		default_response_cb default_cb_;
 };

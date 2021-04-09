@@ -11,8 +11,6 @@
 
 #include <type_traits>
 
-#include <cstdio>
-
 namespace CoAP{
 namespace Transmission{
 namespace Reliable{
@@ -53,6 +51,7 @@ class engine_server
 		using transaction_t = typename transaction_list_type::transaction_t;
 		using transaction_cb = typename transaction_t::transaction_cb;
 
+		using message = CoAP::Message::Reliable::message;
 		template<CoAP::Message::code Code = CoAP::Message::code::get>
 		using request = Request<transaction_cb, Code>;
 		using response = Response;
@@ -65,7 +64,7 @@ class engine_server
 					typename CoAP::Resource::resource_root<resource>::node_t, empty>::type;
 		using async_response = separate_response;
 
-		static constexpr const unsigned max_packet_size = Config.max_message_size;
+		static constexpr const unsigned packet_size = Config.max_message_size;
 
 		static constexpr const bool has_default_callback =
 						std::is_invocable< // @suppress("Symbol is not resolved")
@@ -192,7 +191,7 @@ class engine_server
 		connection_list_type	conn_list_;
 
 		Connection			conn_;
-		std::uint8_t		buffer_[max_packet_size];
+		std::uint8_t		buffer_[packet_size];
 
 		default_response_cb default_cb_;
 };

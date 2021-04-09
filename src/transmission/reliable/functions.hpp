@@ -26,6 +26,9 @@ std::size_t make_abort_message(CoAP::Message::Option::option_abort&,
 		void* buffer, std::size_t buffer_len,
 		CoAP::Error& ec) noexcept;
 
+void process_signaling_csm(csm_configure&,
+		CoAP::Message::Reliable::message const&) noexcept;
+
 }//Reliable
 }//Transmission
 }//CoAP

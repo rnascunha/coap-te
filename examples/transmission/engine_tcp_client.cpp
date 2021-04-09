@@ -9,6 +9,10 @@
  *
  * This examples shows how to send a ping signal, wait for a response, and then
  * make a simple request, and print the response (if any).
+ *
+ * To configure a CoAP-te Reliable client engine, you must choose:
+ * * Connection/Endpoint type: TCP or Websocket (not implemented), IPv4 or IPv6
+ * * Transaction list type (if any)
  */
 
 #include "log.hpp"				//Log header
@@ -16,16 +20,9 @@
 #include "coap-te-debug.hpp"	//Convenient debug header
 
 /**
- * Uncommenting this line the select transaction_list_vector as Tranasction List
- *
- * More about Transaction List below
+ * Logging namespace
  */
-//#define USE_TRANSACTION_LIST_VECTOR
-
 using namespace CoAP::Log;
-
-#define COAP_PORT		CoAP::default_port		//5683
-#define HOST_ADDR		"127.0.0.1"				//Address
 
 /**
  * Log module
@@ -36,7 +33,33 @@ static constexpr module example_mod = {
 };
 
 /**
- * Reliable connection MUST exachange CSM signaling message when connect.
+ * Connection port
+ */
+#define COAP_PORT		CoAP::default_port		//5683
+
+/**
+ * Choosing the endpoint type
+ *
+ * Uncomment the following line to use IPv4 configuration
+ */
+//#define USE_ENDPOINT_IPV4
+
+#ifdef USE_ENDPOINT_IPV4
+/**
+ * Endpoint IPv4 defined and connect address
+ */
+using endpoint_t = CoAP::Port::POSIX::endpoint_ipv4;
+#define HOST_ADDR		"127.0.0.1"				//localhost
+#else
+/**
+ * Endpoint IPv6 defined and connect address
+ */
+using endpoint_t = CoAP::Port::POSIX::endpoint_ipv6;
+#define HOST_ADDR		"::1"					//localhost
+#endif
+
+/**
+ * Reliable connection MUST exchange CSM signaling message when connect.
  * This is our client configuration:
  * * Max message size = 1152 (default)
  * * Accept block wise transfer
@@ -60,21 +83,33 @@ using transaction_t = CoAP::Transmission::Reliable::transaction<
 		CoAP::Transmission::Reliable::transaction_cb>;
 
 /**
- * Transaction List are what holds all the transactions inside the
- * engine. You can also implement your own transaction list, if needed.
+ * Choosing transaction list type.
  *
- * Every time you make a request, a transaction
- * slot is occupied at the transaction list, and is only released
- * when cancelled, timeout or successfully receives a response.
+ * Transaction are essential when using unreliable connections, as
+ * the CoAP layer is response to retransmit any unanswered (ack) response.
  *
- * There are two implementations, as follows.
+ * To reliable connection they are still need to associate a request with a response
+ * (by the token). A transaction list holds the request until receives a response (or
+ * timeout). Transaction also holds a specific callback function that will be called
+ * if a response arrive, or a error (cancel, timeout...) occur.
+ *
+ * If you don't need this feature, you can disable it using CoAP::disable
+ * as transaction list (comment both define statements below).
  */
+/**
+ * (Un)comment the following lines the select transaction list
+ */
+//#define USE_TRANSACTION_LIST_DEFAULT
+//#define USE_TRANSACTION_LIST_VECTOR
+
 #ifdef USE_TRANSACTION_LIST_VECTOR
 /**
  * As trasaction_list_vector uses std::vector (i.e., dynamic allocation) as
- * internal container, you must explicitly included it
+ * internal container. As dynamic allocation is a feature not used in all CoAP-te
+ * we choose to keep it apart from the default implementation. So, you must
+ * explicitly included it
  */
-#include "transmission/reliable/transaction_list_vector.hpp"
+#include "transmission/reliable/containers/transaction_list_vector.hpp"
 
 /**
  * This transaction list implementation can hold a unlimited number
@@ -87,7 +122,7 @@ using transaction_list_t =
 		CoAP::Transmission::Reliable::transaction_list_vector<
 			transaction_t		/* (1) transaction type */
 		>;
-#else /* USE_TRANSACTION_LIST_VECTOR */
+#elif defined(USE_TRANSACTION_LIST_DEFAULT)
 /**
  * This is the default implementation, and recommended to constrained devices.
  * It uses a simple array to hold the transaction. The template parameters are:
@@ -98,42 +133,24 @@ using transaction_list_t =
 		CoAP::Transmission::Reliable::transaction_list<
 			transaction_t,	/* (1) transaction type */
 			4>;				/* (2) number of transaction */
+#else
+/**
+ * This will disable transactions. Any responses received must
+ * be handled at the 'default callback'.
+ */
+using transaction_list_t = CoAP::disable;
 #endif /* USE_TRANSACTION_LIST_VECTOR */
 
 /**
- * Any request made with CoAP must be associated to a specific resource.
+ * Any request received must be associated to a specific resource.
  *
  * If you are not intended to receive any request (like a client), you can
- * use CoAP::disable (i.e. "void*") and any income request will generate a
- * response error (this example could disable resource as we are just going
- * to make a request, but we keeped here as reference).
+ * use CoAP::disable and any income request will generate a
+ * response error.
  *
- * But if you expect to act like a server, you must provide a resource type
- * to CoAP-te engine. Above is shown the default resource definition:
- *----------
- * (1) the callback function type that it will be called to any successful request.
- * The function signature must be:
- *
- * void(*)(Message const&, Response& , void*) =
- * 		CoAP::Resource::callback_reliable<CoAP::Message::Reliable::message,
- * 										CoAP::Transmission::Reliable::Response>;
- * Where the parameters are: request, response and engine.
- *
- * You could also use:
- *
- * std::function<void(Message::message const&, engine::response& , void*)>
- *
- * And bind values, uses lambdas... and so on.
- * --------
- * (2) enable/disable resource description, as defined at RFC6690 (you can save some
- * bytes (set to false) if this is not necessary).
+ * If you want to know how define a resource, check the 'engine_tcp_server'.
  */
-using resource = CoAP::Resource::resource<
-		CoAP::Resource::callback_reliable<
-			CoAP::Message::Reliable::message,
-			CoAP::Transmission::Reliable::Response
-		>,		///< (1) resource callback
-		true>;												///< (2) enable/disable description
+using resource = CoAP::disable;
 
 /**
  * Engine: the pale blue dot
@@ -143,9 +160,8 @@ using resource = CoAP::Resource::resource<
  *-------
  * (1) Connection type: RFC 8323 defines CoAP to reliable connections. Here you can
  * use any type of connection that satisfy the CoAP-te Reliable connection
- * requirements. This means a endpoint type, and a send/receive function. More about
- * CoAP-te reliable connection port at 'tcp_client/tcp_server' example. At this example
- * we are using TCP sockets.
+ * requirements.  More about CoAP-te reliable connection port at 'tcp_client/tcp_server'
+ * example. At this example we are using TCP Client sockets.
  *--------
  * (2) CSM signal configuration. This configuration will be exchanged at connection
  *--------
@@ -154,11 +170,13 @@ using resource = CoAP::Resource::resource<
  * (4) Default callback type: the callback function type to call. When this is called?
  * * When receiving a signal code response;
  * * When receiving a response from a transaction that timeout or just wasn't expected;
+ * * When you disable transactions. Any response will call this functions;
  *
  * The callback signature is:
  *
- * void(*)(int socket, CoAP::Message::Reliable::message const&,void*) = CoAP::Transmission::Reliable::default_cb;
- * Where the paremeters are: socket, response, engine.
+ * void(*)(socket, CoAP::Message::Reliable::message const&,void*) =
+ * 												CoAP::Transmission::Reliable::default_cb;
+ * Where the parameters are: socket, response, engine.
  *
  * You could use:
  *
@@ -166,17 +184,17 @@ using resource = CoAP::Resource::resource<
  *
  * And bind values, uses lambdas... and so on.
  * ------
- *
+ * (5) resource type, as defined above;
+ *------
  * So that it, that's us... CoAP-te...
  */
 using engine = CoAP::Transmission::Reliable::engine_client<
 		CoAP::Port::POSIX::tcp_client<			///< (1) TCP client socket definition
-			CoAP::Port::POSIX::endpoint_ipv4
-		>,
+			endpoint_t>,
 		csm,									///< (2) CSM paramenter configuration
 		transaction_list_t,						///< (3) Trasaction list as defined above
 		CoAP::Transmission::Reliable::default_cb,	///< (4) Default callback signature function
-		resource>;								///< (5) Resource definition
+		resource>;								///< (5) Resource definition (disabled)
 
 /**
  *
@@ -205,10 +223,12 @@ void default_callback(int socket,
 		void* engine_ptr) noexcept
 {
 	debug(example_mod, "default cb called");
-	CoAP::Debug::print_message(response);
+	CoAP::Debug::print_message_string(response);
 
+	//Check if is a signal response
 	if(CoAP::Message::is_signaling(response.mcode))
 	{
+		//Check if is a pong
 		if(response.mcode == CoAP::Message::code::pong)
 			pong_flag = true;
 		return;
@@ -243,6 +263,9 @@ void request_cb(void const* trans, CoAP::Message::Reliable::message const* respo
 	response_flag = true;
 }
 
+/**
+ * Main function
+ */
 int main()
 {
 	debug(example_mod, "Init engine code...");
@@ -263,19 +286,19 @@ int main()
 	if(ec) exit_error(ec);
 
 	/**
-	 * Setting the default callback function the untracked
-	 * responses or signal response.
+	 * Setting the default callback function to track signal
+	 * response
 	 */
 	coap_engine.default_cb(default_callback);
 
 	/**
 	 * Connection to the server
+	 *
+	 * This call will block until connect or receive a error
 	 */
 	coap_engine.open(ep, ec);
 	if(ec) exit_error(ec, "connect");
 
-
-//	sleep(1);
 	/**
 	 * First we are going to send a ping signal to the server
 	 */
@@ -308,7 +331,7 @@ int main()
 	 * We are going to create a request to be sent. Request are a lot
 	 * like factory, but you also must defined a callback function.
 	 */
-	engine::request<CoAP::Message::code::get> request;
+	engine::request<> request;
 	request.code(CoAP::Message::code::get)
 			.token("token")
 			.add_option(path_op1)

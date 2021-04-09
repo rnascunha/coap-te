@@ -22,20 +22,17 @@ class tcp_client{
 		tcp_client();
 		~tcp_client();
 
-		int native() const noexcept;
+		handler native() const noexcept;
 
 		void open(endpoint&, CoAP::Error&) noexcept;
 
 		bool is_open() const noexcept;
 		void close() noexcept;
 
-		endpoint const& get_endpoint() const noexcept;
-
 		std::size_t send(const void*, std::size_t, CoAP::Error&)  noexcept;
 		std::size_t receive(void*, std::size_t, CoAP::Error&) noexcept;
 	private:
 		handler socket_;
-		endpoint ep_;
 };
 
 }//POSIX

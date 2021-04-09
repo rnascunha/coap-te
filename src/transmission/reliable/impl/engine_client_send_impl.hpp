@@ -45,28 +45,35 @@ template<bool SortOptions /* = true */,
 std::size_t
 engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
 send(CoAP::Message::Reliable::Factory<BufferSize, Code> const& fac,
-		expiration_time_type time_ex,
-		transaction_cb func, void* data,
+		expiration_time_type time_ex [[maybe_unused]],
+		transaction_cb func [[maybe_unused]], void* data [[maybe_unused]],
 		CoAP::Error& ec) noexcept
 {
-	static_assert(has_transaction_list, "Transaction list must be available");
-
-	transaction_t* trans = list_.find_free_slot();
-	if(!trans)
+	if constexpr(has_transaction_list)
 	{
-		ec = CoAP::errc::transaction_ocupied;
-		return 0;
+		transaction_t* trans = list_.find_free_slot();
+		if(!trans)
+		{
+			ec = CoAP::errc::transaction_ocupied;
+			return 0;
+		}
+		std::size_t size = trans->template serialize<set_length, SortOptions, CheckOpOrder, CheckOpRepeat>(
+				fac, ec);
+		if(ec) return size;
+
+		send(trans->buffer(), trans->buffer_used(), ec);
+		if(ec) return size;
+
+		/**
+		 * As signals are processed, they would be never associated with a transaction
+		 * (or for some does't even expect a response)
+		 */
+		if(CoAP::Message::is_signaling(fac.code())) time_ex = no_transaction;
+		trans->init(conn_.native(), func, data, time_ex, ec);
+
+		return size;
 	}
-	std::size_t size = trans->template serialize<set_length, SortOptions, CheckOpOrder, CheckOpRepeat>(
-			fac, ec);
-	if(ec) return size;
-
-	send(trans->buffer(), trans->buffer_used(), ec);
-	if(ec) return size;
-
-	trans->init(conn_.native(), func, data, time_ex, ec);
-
-	return size;
+	return send<false, SortOptions, CheckOpOrder, CheckOpRepeat>(fac, ec);
 }
 
 template<typename Connection,
@@ -84,15 +91,13 @@ engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resou
 send(request<Code>& req,
 		CoAP::Error& ec) noexcept
 {
-	if constexpr(UseTransaction)
+	if constexpr(UseTransaction && has_transaction_list)
 	{
-		static_assert(has_transaction_list, "Transaction list must be available");
-
 		return send<SortOptions, CheckOpOrder, CheckOpRepeat>(
 				req.factory(), default_expiration, req.callback(), req.data(), ec);
 	}
 
-	return send<SortOptions, CheckOpOrder, CheckOpRepeat>(
+	return send<false, SortOptions, CheckOpOrder, CheckOpRepeat>(
 				req.factory(), ec);
 }
 
@@ -111,8 +116,6 @@ send(request<Code>& req,
 	expiration_time_type time_ex,
 	CoAP::Error& ec) noexcept
 {
-	static_assert(has_transaction_list, "Transaction list must be available");
-
 	return send<SortOptions, CheckOpOrder, CheckOpRepeat>(
 			req.factory(), time_ex, req.callback(), req.data(), ec);
 }
@@ -132,13 +135,13 @@ std::size_t
 engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
 send(CoAP::Message::Reliable::Factory<BufferSize, Code> const& fac, CoAP::Error& ec) noexcept
 {
-	if constexpr(UseTransaction)
+	if constexpr(UseTransaction && has_transaction_list)
 	{
 		return send<SortOptions, CheckOpOrder, CheckOpRepeat>(fac, no_transaction, nullptr, nullptr, ec);
 	}
 
 	std::size_t size =  fac.template serialize<set_length, SortOptions, CheckOpOrder, CheckOpRepeat>(
-			buffer_, max_packet_size, ec);
+			buffer_, packet_size, ec);
 	if(ec) return size;
 
 	return send(buffer_, size, ec);

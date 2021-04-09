@@ -14,13 +14,14 @@ template<typename Connection,
 class connection_list{
 	public:
 		using connection_t = Connection;
+		using handler = typename Connection::handler;
 
 		connection_list();
 
-		Connection* find(int socket) noexcept;
+		Connection* find(handler socket) noexcept;
 		Connection* find_free_slot() noexcept;
 
-		void close(int socket) noexcept;
+		void close(handler socket) noexcept;
 		void close_all() noexcept;
 
 		Connection* operator[](unsigned index) noexcept;

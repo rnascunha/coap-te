@@ -15,12 +15,6 @@ namespace CoAP{
 namespace Transmission{
 namespace Reliable{
 
-static constexpr CoAP::Log::module engine_mod2 = {
-		.name = "ENGINE",
-		.max_level = CoAP::Log::type::debug,
-		.enable = true
-};
-
 template<typename Connection,
 	csm_configure const& Config,
 	typename ConnectionList,
@@ -53,6 +47,7 @@ engine_server<Connection, Config, ConnectionList, TransactionList, CallbackDefau
 open(endpoint& ep, CoAP::Error& ec) noexcept
 {
 	debug(engine_mod, "Opening");
+
 	conn_.open(ep, ec);
 	if(ec) return false;
 	return true;
@@ -70,6 +65,7 @@ engine_server<Connection, Config, ConnectionList, TransactionList, CallbackDefau
 close() noexcept
 {
 	debug(engine_mod, "Closing");
+
 	if(!conn_.is_open()) return;
 
 	if constexpr(has_connection_list)
@@ -323,23 +319,7 @@ process_signaling_csm(socket sock, CoAP::Message::Reliable::message const& msg) 
 	connection_hold_t* conn = conn_list_.find(sock);
 	if(!conn) return;
 
-	Option::Parser<Option::csm> parse(msg);
-	Option::option_csm const* opt;
-	csm_configure& csm = conn->csm();
-	while((opt = parse.next()))
-	{
-		switch(opt->ocode)
-		{
-			case Option::csm::max_message_size:
-				csm.max_message_size = Option::parse_unsigned<Option::csm>(*opt);
-				break;
-			case Option::csm::block_wise_transfer:
-				csm.block_wise_transfer = true;
-				break;
-			default:
-				break;
-		}
-	}
+	CoAP::Transmission::Reliable::process_signaling_csm(conn->csm(), msg);
 }
 
 template<typename Connection,
@@ -366,7 +346,6 @@ process_signaling_ping(socket sock, CoAP::Message::Reliable::message const& msg)
 
 	CoAP::Error ec;
 	send<false, false, false, false>(req, ec);
-	debug(engine_mod, "Pong message sent");
 }
 
 template<typename Connection,
@@ -466,7 +445,7 @@ run(CoAP::Error& ec) noexcept
 	using engine = engine_server<Connection, Config, ConnectionList, TransactionList, CallbackDefaultFunctor, Resource>;
 	using namespace std::placeholders;
 	conn_.template receive<BlockTimeMs, MaxEvents>(
-			buffer_, max_packet_size, ec,
+			buffer_, packet_size, ec,
 			std::bind(&engine::on_read, this, _1, _2, _3),
 			std::bind(&engine::on_open, this, _1),
 			std::bind(&engine::on_close, this, _1));
@@ -523,7 +502,7 @@ on_open(socket sock) noexcept
 
 			return;
 		}
-		debug(engine_mod, "Init conn[%d]", sock);
+		debug(engine_mod, "Init conn[%d/%u]", sock, conn_list_.size());
 		conn->init(sock);
 	}
 
@@ -546,8 +525,9 @@ void
 engine_server<Connection, Config, ConnectionList, TransactionList, CallbackDefaultFunctor, Resource>::
 on_close(socket sock) noexcept
 {
-	debug(engine_mod, "Closed socket[%d]", sock);
+	debug(engine_mod, "Closed socket[%d/%u]", sock, conn_list_.size());
 	close_client<false>(sock);
+	debug(engine_mod, "Closed [%u]", conn_list_.size());
 }
 
 template<typename Connection,

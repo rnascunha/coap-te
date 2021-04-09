@@ -105,52 +105,69 @@ engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resou
 process(std::uint8_t const* buffer, std::size_t buffer_len,
 				CoAP::Error& ec) noexcept
 {
+	debug(engine_mod, "Processing buffer");
 	CoAP::Message::Reliable::message msg;
-	CoAP::Message::Reliable::parse(msg, buffer, buffer_len, ec);
 
-	if(ec)
+	std::size_t total_size = 0;
+	while(true)
 	{
-		if(ec == CoAP::errc::insufficient_buffer)
-		{
-			std::size_t bu = make_response_code_error<set_length>(msg,
-					buffer_, Config.max_message_size,
-					CoAP::Message::code::request_entity_too_large);
-			conn_.send(buffer_, bu, ec);
-		}
-		return;
-	}
+		msg.reset();
+		std::size_t size = CoAP::Message::Reliable::parse(msg,
+				buffer  + total_size, buffer_len - total_size,
+				ec);
 
-	/**
-	 * https://tools.ietf.org/html/rfc8323#section-3.4
-	 *
-	 * Empty messages (Code 0.00) can always be sent and MUST be ignored by
-   	 * the recipient.  This provides a basic keepalive function that can
-   	 * refresh NAT bindings.
-	 */
-	if(CoAP::Message::is_empty(msg.mcode)) return;
-
-	if(CoAP::Message::is_signaling(msg.mcode))
-		process_signaling(msg);
-	else if(CoAP::Message::is_response(msg.mcode))
-		process_response(msg);
-	else //is_request;
-	{
-		if constexpr(get_profile() == profile::server)
-			process_request(msg, ec);
-		else
+		if(ec)
 		{
-			/**
-			 * https://tools.ietf.org/html/rfc8323#section-3.3
-			 *
-			 * If one side does not implement a CoAP server, an error response
-			 * MUST be returned for all CoAP requests from the other side. The
-			 * simplest approach is to always return 5.01 (Not Implemented)
-			 */
-			std::size_t bu = make_response_code_error<set_length>(msg,
-							buffer_, Config.max_message_size,
-							CoAP::Message::code::not_implemented);
-			conn_.send(buffer_, bu, ec);
+			debug(engine_mod, "Error parsing received message...");
+			if(ec == CoAP::errc::insufficient_buffer)
+			{
+				std::size_t bu = make_response_code_error<set_length>(msg,
+						buffer_, Config.max_message_size,
+						CoAP::Message::code::request_entity_too_large);
+				conn_.send(buffer_, bu, ec);
+			}
+			return;
 		}
+
+		/**
+		 * https://tools.ietf.org/html/rfc8323#section-3.4
+		 *
+		 * Empty messages (Code 0.00) can always be sent and MUST be ignored by
+		 * the recipient.  This provides a basic keepalive function that can
+		 * refresh NAT bindings.
+		 */
+		if(CoAP::Message::is_empty(msg.mcode))
+		{
+			debug(engine_mod, "Empty message received... Ignoring");
+			return;
+		}
+
+		if(CoAP::Message::is_signaling(msg.mcode))
+			process_signaling(msg);
+		else if(CoAP::Message::is_response(msg.mcode))
+			process_response(msg);
+		else //is_request;
+		{
+			if constexpr(get_profile() == profile::server)
+				process_request(msg, ec);
+			else
+			{
+				/**
+				 * https://tools.ietf.org/html/rfc8323#section-3.3
+				 *
+				 * If one side does not implement a CoAP server, an error response
+				 * MUST be returned for all CoAP requests from the other side. The
+				 * simplest approach is to always return 5.01 (Not Implemented)
+				 */
+				std::size_t bu = make_response_code_error<set_length>(msg,
+								buffer_, Config.max_message_size,
+								CoAP::Message::code::not_implemented);
+				conn_.send(buffer_, bu, ec);
+			}
+		}
+
+		total_size += size;
+		if(total_size >= buffer_len) break;
 	}
 }
 
@@ -254,24 +271,7 @@ void
 engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
 process_signaling_csm(CoAP::Message::Reliable::message const& msg) noexcept
 {
-	using namespace CoAP::Message;
-
-	Option::Parser<Option::csm> parse(msg);
-	Option::option_csm const* opt;
-	while((opt = parse.next()))
-	{
-		switch(opt->ocode)
-		{
-			case Option::csm::max_message_size:
-				server_csm_.max_message_size = Option::parse_unsigned<Option::csm>(*opt);
-				break;
-			case Option::csm::block_wise_transfer:
-				server_csm_.block_wise_transfer = true;
-				break;
-			default:
-				break;
-		}
-	}
+	CoAP::Transmission::Reliable::process_signaling_csm(server_csm_, msg);
 }
 
 template<typename Connection,
@@ -382,7 +382,7 @@ bool
 engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
 run(CoAP::Error& ec) noexcept
 {
-	std::size_t size = conn_.receive(buffer_, max_packet_size, ec);
+	std::size_t size = conn_.receive(buffer_, packet_size, ec);
 	if(ec)
 	{
 		error(engine_mod, ec, "read");

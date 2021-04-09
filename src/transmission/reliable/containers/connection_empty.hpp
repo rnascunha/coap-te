@@ -1,7 +1,7 @@
 #ifndef COAP_TE_TRANSMISSION_RELIABLE_CONNECTION_EMPTY_HPP__
 #define COAP_TE_TRANSMISSION_RELIABLE_CONNECTION_EMPTY_HPP__
 
-#include "types.hpp"
+#include "../types.hpp"
 
 namespace CoAP{
 namespace Transmission{

@@ -48,8 +48,8 @@ template<bool SortOptions /* = true */,
 std::size_t
 engine_server<Connection, Config, ConnectionList, TransactionList, CallbackDefaultFunctor, Resource>::
 send(socket sock, CoAP::Message::Reliable::Factory<BufferSize, Code> const& fac,
-		expiration_time_type time_ex,
-		transaction_cb func, void* data,
+		expiration_time_type time_ex [[maybe_unused]],
+		transaction_cb func [[maybe_unused]], void* data [[maybe_unused]],
 		CoAP::Error& ec) noexcept
 {
 	if constexpr(has_transaction_list)
@@ -64,14 +64,19 @@ send(socket sock, CoAP::Message::Reliable::Factory<BufferSize, Code> const& fac,
 				fac, ec);
 		if(ec) return size;
 
-		send(trans->buffer(), trans->buffer_used(), ec);
+		/**
+		 * As signals are processed, they would be never associated with a transaction
+		 * (or for some does't even expect a response)
+		 */
+		if(CoAP::Message::is_signaling(fac.code())) time_ex = no_transaction;
+		send(sock, trans->buffer(), trans->buffer_used(), ec);
 		if(ec) return size;
 
 		trans->init(sock, func, data, time_ex, ec);
 
 		return size;
 	}
-	return send(sock, fac, ec);
+	return send<false, SortOptions, CheckOpOrder, CheckOpRepeat>(sock, fac, ec);
 }
 
 template<typename Connection,
@@ -91,10 +96,10 @@ send(request<Code>& req,
 		CoAP::Error& ec) noexcept
 {
 	if constexpr(UseTransaction && has_transaction_list)
-		return send<SortOptions, CheckOpOrder, CheckOpRepeat>(
+		return send<SortOptions, CheckOpOrder, CheckOpRepeat>(req.socket(),
 				req.factory(), default_expiration, req.callback(), req.data(), ec);
 
-	return send<SortOptions, CheckOpOrder, CheckOpRepeat>(
+	return send<false, SortOptions, CheckOpOrder, CheckOpRepeat>(
 			req.socket(), req.factory(), ec);
 }
 
@@ -140,7 +145,7 @@ send(socket sock, CoAP::Message::Reliable::Factory<BufferSize, Code> const& fac,
 	}
 
 	std::size_t size =  fac.template serialize<set_length, SortOptions, CheckOpOrder, CheckOpRepeat>(
-			buffer_, max_packet_size, ec);
+			buffer_, packet_size, ec);
 	if(ec) return size;
 
 	return send(sock, buffer_, size, ec);

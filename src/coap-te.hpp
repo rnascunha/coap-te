@@ -47,13 +47,14 @@
 #include "transmission/reliable/functions.hpp"
 #include "transmission/reliable/request.hpp"
 #include "transmission/reliable/response.hpp"
-#include "transmission/reliable/transaction.hpp"
-#include "transmission/reliable/transaction_list_empty.hpp"
-#include "transmission/reliable/transaction_list.hpp"
-#include "transmission/reliable/connection.hpp"
-#include "transmission/reliable/connection_list_empty.hpp"
-#include "transmission/reliable/connection_list.hpp"
+#include "transmission/reliable/containers/transaction.hpp"
+#include "transmission/reliable/containers/transaction_list_empty.hpp"
+#include "transmission/reliable/containers/transaction_list.hpp"
+#include "transmission/reliable/containers/connection.hpp"
+#include "transmission/reliable/containers/connection_list_empty.hpp"
+#include "transmission/reliable/containers/connection_list.hpp"
 #include "transmission/reliable/engine_client.hpp"
 #include "transmission/reliable/engine_server.hpp"
 #endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+
 #endif /* COAP_TE_MAIN_HPP__ */

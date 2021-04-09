@@ -14,7 +14,7 @@ connection_list<Connection, Size>::connection_list(){}
 template<typename Connection,
 		unsigned Size>
 Connection* connection_list<Connection, Size>::
-find(int socket) noexcept
+find(handler socket) noexcept
 {
 	for(unsigned i = 0; i < Size; i++)
 		if(nodes_[i].socket() == socket)
@@ -39,7 +39,7 @@ template<typename Connection,
 		unsigned Size>
 void
 connection_list<Connection, Size>::
-close(int socket) noexcept
+close(handler socket) noexcept
 {
 	Connection* conn = find(socket);
 	if(conn) conn->clear();

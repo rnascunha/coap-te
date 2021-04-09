@@ -70,7 +70,7 @@ set(MAIN_SRC ${SRC_DIR}/error.cpp
 				${SRC_DIR_MESSAGE}/reliable/serialize.cpp
 				${SRC_DIR_MESSAGE}/reliable/parser.cpp
 				${SRC_DIR_TRANSMISSION}/functions.cpp
-				${SRC_DIR_TRANSMISSION}/reliable/connection.cpp
+				${SRC_DIR_TRANSMISSION}/reliable/containers/connection.cpp
 				${SRC_DIR_DEBUG}/helper.cpp
 				${SRC_DIR_DEBUG}/output_string.cpp
 				${SRC_DIR_DEBUG}/print_message.cpp

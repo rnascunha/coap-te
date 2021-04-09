@@ -259,7 +259,7 @@ template<class Endpoint,
 		int Flags>
 std::size_t
 tcp_server<Endpoint, Flags>::
-send(int to_socket, const void* buffer, std::size_t buffer_len, CoAP::Error& ec)  noexcept
+send(handler to_socket, const void* buffer, std::size_t buffer_len, CoAP::Error& ec)  noexcept
 {
 	int size = ::send(to_socket, buffer, buffer_len, 0);
 	if(size == -1)

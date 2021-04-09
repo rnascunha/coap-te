@@ -70,6 +70,29 @@ std::size_t make_abort_message(CoAP::Message::Option::option_abort& op,
 	return fac.serialize<SetLength, false, false, false>(static_cast<std::uint8_t*>(buffer), buffer_len, ec);
 }
 
+void process_signaling_csm(csm_configure& csm,
+		CoAP::Message::Reliable::message const& msg) noexcept
+{
+	using namespace CoAP::Message;
+
+	Option::Parser<Option::csm> parse(msg);
+	Option::option_csm const* opt;
+	while((opt = parse.next()))
+	{
+		switch(opt->ocode)
+		{
+			case Option::csm::max_message_size:
+				csm.max_message_size = Option::parse_unsigned<Option::csm>(*opt);
+				break;
+			case Option::csm::block_wise_transfer:
+				csm.block_wise_transfer = true;
+				break;
+			default:
+				break;
+		}
+	}
+}
+
 }//Reliable
 }//Transmission
 }//CoAP

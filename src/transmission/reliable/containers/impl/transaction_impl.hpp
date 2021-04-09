@@ -2,7 +2,7 @@
 #define COAP_TE_TRANSMISSION_RELIABLE_TRANSACTION_IMPL_HPP__
 
 #include "log.hpp"
-#include "../functions.hpp"
+#include "../../functions.hpp"
 #include "port/port.hpp"
 #include "message/reliable/parser.hpp"
 #include "../transaction.hpp"
