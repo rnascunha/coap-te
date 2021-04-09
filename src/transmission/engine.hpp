@@ -29,6 +29,8 @@ class engine
 		using transaction_list = TransactionList;
 		using transaction_t = typename TransactionList::transaction_t;
 		using transaction_cb = typename transaction_t::transaction_cb;
+
+		using message = CoAP::Message::message;
 		using request = Request<endpoint, transaction_cb>;
 		using response = Response<endpoint>;
 		using resource = Resource;

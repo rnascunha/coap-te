@@ -5,7 +5,7 @@
 The implemtation aims to:
 * Don't use any *dynamic allocation* or *exceptions*;
 * Configurable: the CoAP *engine* be configurable to your system/environment requirements;
-* Modularized: As much as possible, all modules work indenpenditly;
+* Modularized: As much as possible, all modules work independently;
 * Portable: simple to port to your system/device.
 
 It's implemented:
@@ -22,10 +22,10 @@ It's NOT implemented (yet):
 
 ## Dependencies
 
-As external library dependency, **CoAP-te** uses just [Tree Trunks](https://github.com/rnascunha/tree_trunks) as log system (same author).
+As external library dependency, **CoAP-te** uses [Tree Trunks](https://github.com/rnascunha/tree_trunks) as log system (same author).
 
-It also needs the following softwares:
-* Compiler that support C++17 standard;
+It also needs the following applications to build/compile:
+* C++17 compiler;
 * [git](https://git-scm.com/) to download;
 * [CMake](https://cmake.org/) to build and compile;
 
@@ -66,7 +66,7 @@ This will generate one excutable to each example.
 
 If you build **CoAP-te** with the `-DWITH_EXAMPLES=1` flag, all example executables are at your build directory. The directory `examples` contains the source code of the examples with detailed exaplanations on how to use **CoAP-te**. A brief overview is show here:
 
-*Messages examples*:
+*Messages* examples:
 * `serialize_parse`: shows how to serialize message using 3 strategies (factory and manually using option list/array). Then parse this information (as it was received by network) and iterate through options.
 * `factory`: demostrate how to use a factory to construct a message, using internal/external buffers.
 * `option`: shows how to manipulate options of different types. How to declare, serialize and parse.
@@ -74,7 +74,7 @@ If you build **CoAP-te** with the `-DWITH_EXAMPLES=1` flag, all example executab
 * `serialize_parse_reliable`: the same of `serialize_parse` example, but for reliable connections (RFC8323).
 * `signaling`: explain how to make/parse a signaling message to reliable connections (RFC8323). 
 
-*Transmission examples*:
+*Transmission* examples:
 * `raw_transaction`: explains the use of transactions. Transactions are not meant to be used directly, but through the *CoAP::engine*.
 * `raw_engine`: demonstrate how to configure and use your own engines, the central feature of **CoAP-te**. Engines
 deal with all CoAP transmission complexity. After configuration, makes a simple CoAP request.
@@ -123,7 +123,7 @@ unsigned random_generator() noexcept;
 > The default implementation uses `std::time` and `std::rand` as the functions above, respectivily, and uses `time_t` as `std::time_t`. If your system support this functions, just use then.   
 
 * *Endpoint*: endpoints must be *default constructable*, *copiable* and *comparable*;
-* *Connection*: connection can be of type unreliable (UDP) or reliable (TCP, Websocket). A connection must define a *endpoint* (as defined above), and MUST not block. Each type of connection is discussed. 
+* *Connection*: connection can be of type unreliable (*UDP*) or reliable (*TCP*/*Websocket*). A connection must define a *endpoint* (as shown above), and MUST not block. Each type of connection is discussed. 
 
 > There is already a implementation to posix-like sockets that should be used as example. Check `src/port/posix` directory. You will see the implementation of endpoints IPv4 and IPv6, unreliable UDP sockets, and reliable TCP client and server sockets. The uses of this implementaions can be analyzed at the `examples/port` directory.
 
@@ -168,8 +168,7 @@ class my_client{
 };
 ```
 
-* `set_length`: tells the connection message format, i.e., if the message format will have the length of the
-message. *TCP* must be **true**, *Websocket* must be **false**;
+* `set_length`: tells the connection message format, i.e., if the message will have the length (first field) of the packet. *TCP* must be **true**, *Websocket* must be **false**;
 * `handler`: handler that holds the socket (**int** to POSIX type);
 * `endpoint`: endpoint type. Could be `endpoint_ipv4` or `endpoint_ipv6` to *TCP*/*Websocket*;
 * `native` function: returns connection handler; 
@@ -177,7 +176,7 @@ message. *TCP* must be **true**, *Websocket* must be **false**;
 * `is_open` function: check if the socket is opened;
 * `close` function: closes the socket;
 * `send` function: sends buffer to the server;
-* `receive` function: receives data from the the server. It must return the buffer read size. If the connection is *TCP*, it can return all the buffer read. If its *Websocket*, it must return packet by packet. It's very important this function NOT BLOCK.
+* `receive` function: receives data from the the server. It must return the buffer read size. If the connection is *TCP*, it can return all the buffer read. If it's *Websocket*, it must return packet by packet. It's very important this function **NOT BLOCK**.
 
 #### Server
 
@@ -211,8 +210,7 @@ class my_server{
 }
 ```
 
-* `set_length`: tells the connection message format, i.e., if the message format will have the length of the
-message. *TCP* must be **true**, *Websocket* must be **false**;
+* `set_length`: tells the connection message format, i.e., if the message will have the length (first field) of the packet. *TCP* must be **true**, *Websocket* must be **false**;
 * `handler`: handler that holds the socket (**int** to POSIX type);
 * `endpoint`: endpoint type. Could be `endpoint_ipv4` or `endpoint_ipv6` to *TCP*/*Websocket*;
 * `open` function: open socket and bind endpoint server address;
@@ -221,9 +219,9 @@ message. *TCP* must be **true**, *Websocket* must be **false**;
 * `close_client` function: closes client socket;
 * `send` function: sends buffer to the client;
 * `receive` function: this function must: 
- * accept incoming connections: every incoming connection MUST call the `open_cb` function, with the handler passed at the argument; 
- * receives data from the the server: it must return the buffer read size. If the connection is *TCP*, call the `read_cb` function with the whole readed buffer. If its *Websocket*, it must call `read_cb` packet by packet;
- * check closed connection: call `close_cb` at any closed clients call, with the handler of the client;
- * any socket error must be reported at the `CoAP::Error&` argument.
+	* accept incoming connections: every incoming connection MUST call the `open_cb` function, with the handler passed at the argument; 
+	* receives data from the the server: if the connection is *TCP*, call the `read_cb` function with the whole readed buffer. If its *Websocket*, it must call `read_cb` packet by packet;
+	* check closed connection: call `close_cb` at any closed clients call, with the handler of the client;
+	* any socket error must be reported at the `CoAP::Error&` argument.
  
 > The template parameters `BlockTimeMs` and `MaxEvents` are passed to the `epoll_wait` call and may not have use at other envirioments. 

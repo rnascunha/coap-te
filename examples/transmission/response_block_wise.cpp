@@ -92,9 +92,9 @@ using engine = CoAP::Transmission::engine<
  *
  * Detailed explanation of the callbacks below 'main'
  */
-static void get_data_handler(CoAP::Message::message const& request,
+static void get_data_handler(engine::message const& request,
 								engine::response& response, void*) noexcept;
-static void put_data_handler(CoAP::Message::message const& request,
+static void put_data_handler(engine::message const& request,
 								engine::response& response, void*) noexcept;
 
 /**
@@ -159,7 +159,7 @@ int main()
  * This handler will check the 'block2' option of the request, and respond
  * to the client accordingly
  */
-static void get_data_handler(CoAP::Message::message const& request,
+static void get_data_handler(engine::message const& request,
 								engine::response& response, void*) noexcept
 {
 	using namespace CoAP::Message;
@@ -244,7 +244,7 @@ static void get_data_handler(CoAP::Message::message const& request,
  * sent to a local buffer. It will respond to the client accordingly and wait
  * for the next data to be sent. At end, prints all data received
  */
-static void put_data_handler(CoAP::Message::message const& request,
+static void put_data_handler(engine::message const& request,
 								engine::response& response, void*) noexcept
 {
 	using namespace CoAP::Message;

@@ -125,29 +125,29 @@ using engine = CoAP::Transmission::engine<
  *
  * Detailed explanation of the callbacks below 'main'
  */
-static void get_root_handler(CoAP::Message::message const& request,
+static void get_root_handler(engine::message const& request,
 								engine::response& response, void*) noexcept;
-static void get_time_handler(CoAP::Message::message const& request,
+static void get_time_handler(engine::message const& request,
 								engine::response& response, void*) noexcept;
-static void get_sensor_handler(CoAP::Message::message const& request,
-								engine::response& response, void*) noexcept;
-template<int GPIONum>
-static void get_actuator_handler(CoAP::Message::message const& request,
+static void get_sensor_handler(engine::message const& request,
 								engine::response& response, void*) noexcept;
 template<int GPIONum>
-static void put_actuator_handler(CoAP::Message::message const& request,
+static void get_actuator_handler(engine::message const& request,
 								engine::response& response, void*) noexcept;
-static void get_dynamic_list_handler(CoAP::Message::message const& request,
+template<int GPIONum>
+static void put_actuator_handler(engine::message const& request,
 								engine::response& response, void*) noexcept;
-static void post_dynamic_handler(CoAP::Message::message const& request,
+static void get_dynamic_list_handler(engine::message const& request,
 								engine::response& response, void*) noexcept;
-static void get_dynamic_handler(CoAP::Message::message const& request,
+static void post_dynamic_handler(engine::message const& request,
 								engine::response& response, void*) noexcept;
-static void delete_dynamic_handler(CoAP::Message::message const& request,
+static void get_dynamic_handler(engine::message const& request,
 								engine::response& response, void*) noexcept;
-static void get_separate_handler(CoAP::Message::message const& request,
+static void delete_dynamic_handler(engine::message const& request,
 								engine::response& response, void*) noexcept;
-static void get_discovery_handler(CoAP::Message::message const& request,
+static void get_separate_handler(engine::message const& request,
+								engine::response& response, void*) noexcept;
+static void get_discovery_handler(engine::message const& request,
 								engine::response& response, void*) noexcept;
 
 /**
@@ -279,10 +279,10 @@ int main()
  * Resource callback definition
  *
  * The resource callback signature is:
- * void(*)(CoAP::Message::message const&, engine::response&, void*) noexcept;
+ * void(*)(engine::message const&, engine::response&, void*) noexcept;
  *
  * You could use
- * std::function<void(CoAP::Message::message const&, engine::response&, void*) noexcept>
+ * std::function<void(engine::message const&, engine::response&, void*) noexcept>
  *
  * as a more flexible type.
  */
@@ -293,7 +293,7 @@ int main()
  * Just a warming up example. It prints the resource tree and respond
  * a OK.
  */
-static void get_root_handler(CoAP::Message::message const&,
+static void get_root_handler(engine::message const&,
 								engine::response& response, void* engine_void) noexcept
 {
 	debug(example_mod, "Called get root handler");
@@ -316,7 +316,7 @@ static void get_root_handler(CoAP::Message::message const&,
  *
  * Retrieve local time in epoch format.
  */
-static void get_time_handler(CoAP::Message::message const& request,
+static void get_time_handler(engine::message const& request,
 								engine::response& response, void*) noexcept
 {
 	debug(example_mod, "Called get time handler");
@@ -347,7 +347,7 @@ static void get_time_handler(CoAP::Message::message const& request,
  *
  * Same callback to all the sensors
  */
-static void get_sensor_handler(CoAP::Message::message const& request,
+static void get_sensor_handler(engine::message const& request,
 								engine::response& response, void*) noexcept
 {
 	debug(example_mod, "Called get sensor handler");
@@ -413,7 +413,7 @@ static bool gpios[3] = {false, false, false};
  * as the sensor callback.
  */
 template<int GPIONum>
-static void get_actuator_handler(CoAP::Message::message const& request,
+static void get_actuator_handler(engine::message const& request,
 								engine::response& response, void*) noexcept
 {
 	debug(example_mod, "Called get actuator handler");
@@ -446,7 +446,7 @@ static void get_actuator_handler(CoAP::Message::message const& request,
  * key 'value', we are going to report a error.
  */
 template<int GPIONum>
-static void put_actuator_handler(CoAP::Message::message const& request,
+static void put_actuator_handler(engine::message const& request,
 								engine::response& response, void*) noexcept
 {
 	debug(example_mod, "Called put actuator handler");
@@ -492,7 +492,7 @@ static void put_actuator_handler(CoAP::Message::message const& request,
  * The dynamic resources lets us create sons to it (dyn1/dyn2/dyn3). The GET
  * methods retrieves the list of resources created.
  */
-static void get_dynamic_list_handler(CoAP::Message::message const& request,
+static void get_dynamic_list_handler(engine::message const& request,
 								engine::response& response, void* engine_void) noexcept
 {
 	debug(example_mod, "Called get dynamic list handler");
@@ -565,7 +565,7 @@ static engine::resource_node dynamics[] = {
  * Creates the dynamic son. Which dynamic son to create must be passed by a query
  * (?dyn=<1|2|3>). Not setting the query or a query invalid option will report a error.
  */
-static void post_dynamic_handler(CoAP::Message::message const& request,
+static void post_dynamic_handler(engine::message const& request,
 								engine::response& response, void* engine_void) noexcept
 {
 	debug(example_mod, "Called post dynamic handler");
@@ -650,7 +650,7 @@ static void post_dynamic_handler(CoAP::Message::message const& request,
  * This call is made from one of the created sons. Just retrieve the
  * its own path.
  */
-static void get_dynamic_handler(CoAP::Message::message const& request,
+static void get_dynamic_handler(engine::message const& request,
 		engine::response& response, void* engine_void) noexcept
 {
 	debug(example_mod, "Called get dynamic handler");
@@ -675,7 +675,7 @@ static void get_dynamic_handler(CoAP::Message::message const& request,
  *
  * Delete the node (remove from the resource tree).
  */
-static void delete_dynamic_handler(CoAP::Message::message const& request,
+static void delete_dynamic_handler(engine::message const& request,
 		engine::response& response, void* engine_void) noexcept
 {
 	debug(example_mod, "Called delete dynamic handler");
@@ -716,7 +716,7 @@ static void delete_dynamic_handler(CoAP::Message::message const& request,
  *
  * This function just report if the request was arrived to the client.
  */
-void cb(void const* trans, CoAP::Message::message const* r, void*) noexcept
+void cb(void const* trans, engine::message const* r, void*) noexcept
 {
 	auto const* t = static_cast<engine::transaction_t const*>(trans);
 	status(example_mod, "Status: %s", CoAP::Debug::transaction_status_string(t->status()));
@@ -808,7 +808,7 @@ static void separated_response(engine* eng, engine::async_response data)
  *
  * Making a separated response
  */
-static void get_separate_handler(CoAP::Message::message const& request,
+static void get_separate_handler(engine::message const& request,
 		engine::response& response, void* engine_void) noexcept
 {
 	debug(example_mod, "Called get separate handler");
@@ -837,7 +837,7 @@ static void get_separate_handler(CoAP::Message::message const& request,
  *
  * Respond to request with resource information as defined at RFC6690
  */
-static void get_discovery_handler(CoAP::Message::message const& request,
+static void get_discovery_handler(engine::message const& request,
 								engine::response& response, void* eng_ptr) noexcept
 {
 	char buffer[512];

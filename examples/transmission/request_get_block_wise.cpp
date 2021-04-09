@@ -80,7 +80,7 @@ static char buffer[BUFFER_LEN];
 /**
  * Request callback (signature defined at transaction)
  */
-void request_cb(void const* trans, CoAP::Message::message const* response, void* eng_ptr) noexcept
+void request_cb(void const* trans, engine::message const* response, void* eng_ptr) noexcept
 {
 	debug(example_mod, "Request callback called...");
 
