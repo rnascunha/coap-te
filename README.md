@@ -12,11 +12,11 @@ It's implemented:
 * CoAP ([RFC7252](https://tools.ietf.org/html/rfc7252));
 * Block-wise transfer ([RFC7959](https://tools.ietf.org/html/rfc7959));
 * Reliable connections ([RFC8323](https://tools.ietf.org/html/rfc8323));
+* Resource Discovery ([RFC6690](https://tools.ietf.org/html/rfc6690));
 
 It's NOT implemented (yet):
 * Cache strategie;
 * Security;
-* Resource Discovery ([RFC6690](https://tools.ietf.org/html/rfc6690));
 * Observing ([RFC7641](https://tools.ietf.org/html/rfc7641));
 * Much more :(...
 

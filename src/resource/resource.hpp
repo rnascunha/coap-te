@@ -73,6 +73,11 @@ class resource
 			return *this;
 		}
 
+		bool has_callback() const noexcept
+		{
+			return get_ != nullptr || post_ != nullptr || del_ != nullptr || put_ != nullptr;
+		}
+
 		template<typename Message,
 				typename Response>
 		bool call(CoAP::Message::code code,

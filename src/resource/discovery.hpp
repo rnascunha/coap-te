@@ -34,6 +34,20 @@ std::size_t discovery(ResourceNode const&,
 		char* buffer, std::size_t buffer_size,
 		CoAP::Error& ec) noexcept;
 
+template<typename ResourceNode, typename Criteria>
+std::size_t discovery(ResourceNode const& node,
+		char* buffer, std::size_t buffer_size,
+		unsigned max_depth, Criteria func,
+		CoAP::Error& ec) noexcept;
+
+/**
+ * Resource Discovery criteria
+ */
+using no_criteria_type = void(*)() noexcept;
+void no_criteria() noexcept{}
+template<typename ResourceNode>
+bool default_criteria(ResourceNode const&, path_list const&) noexcept;
+
 }//Resource
 }//CoAP
 

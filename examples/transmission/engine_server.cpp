@@ -847,7 +847,8 @@ static void get_discovery_handler(engine::message const& request,
 	/**
 	 * Constructing link format resource information
 	 */
-	std::size_t size = CoAP::Resource::discovery(eng->root_node().node(), buffer, 512, ec);
+	std::size_t size = CoAP::Resource::discovery(eng->root_node().node(),
+			buffer, 512, ec);
 
 	/**
 	 * Checking error

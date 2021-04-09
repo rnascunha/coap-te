@@ -153,35 +153,67 @@ std::size_t description(Resource const& root,
 }
 
 template<typename ResourceNode>
+bool default_criteria(ResourceNode const& node, path_list const& plist) noexcept
+{
+	if(plist.size() == 2
+			&& plist.head()->next->value
+			&& std::strcmp(plist.head()->next->value, ".well-known") == 0
+			&& std::strcmp(node.value().path(), "core") == 0) return false;
+	return node.value().has_callback();
+}
+
+template<typename ResourceNode, typename Criteria>
 static std::size_t discovery_impl(ResourceNode const& node,
 		char* buffer, std::size_t buffer_size,
 		unsigned max_depth, unsigned depth,
-		path_list& list,
+		path_list& list, Criteria func [[maybe_unused]],
 		CoAP::Error& ec) noexcept
 {
 	if(max_depth && depth >= max_depth) return 0;
 	std::size_t offset = 0;
 
-	if(depth)
+	if constexpr(!std::is_same<decltype(func), no_criteria_type>::value)
 	{
-		if(buffer_size > 0)
+		if(func && func(node, list))
 		{
-			buffer[offset++] = ',';
-		}
-		else
-		{
-			ec = CoAP::errc::insufficient_buffer;
-			return offset;
+			if(depth)
+			{
+				if(buffer_size > 0)
+				{
+					buffer[offset++] = ',';
+				}
+				else
+				{
+					ec = CoAP::errc::insufficient_buffer;
+					return offset;
+				}
+			}
+			offset += description(node.value(), &list, buffer + offset, buffer_size - offset, ec);
 		}
 	}
-
-	offset += description(node.value(), &list, buffer + offset, buffer_size - offset, ec);
+	else
+	{
+		if(depth)
+		{
+			if(buffer_size > 0)
+			{
+				buffer[offset++] = ',';
+			}
+			else
+			{
+				ec = CoAP::errc::insufficient_buffer;
+				return offset;
+			}
+		}
+		offset += description(node.value(), &list, buffer + offset, buffer_size - offset, ec);
+	}
 	if(ec) return offset;
 
 	ResourceNode const* n_node = node.next();
 	if(n_node)
 	{
-		offset += discovery_impl(*n_node, buffer + offset, buffer_size - offset, max_depth, depth, list, ec);
+		offset += discovery_impl(*n_node, buffer + offset, buffer_size - offset, max_depth,
+				depth, list, func, ec);
 		if(ec) return offset;
 	}
 
@@ -191,7 +223,8 @@ static std::size_t discovery_impl(ResourceNode const& node,
 	ResourceNode const* children = node.children();
 	if(children)
 	{
-		offset += discovery_impl(*children, buffer + offset, buffer_size - offset, max_depth, depth, list, ec);
+		offset += discovery_impl(*children, buffer + offset, buffer_size - offset, max_depth,
+				depth, list, func, ec);
 		if(ec) return offset;
 		children = children->next();
 	}
@@ -207,7 +240,9 @@ std::size_t discovery(ResourceNode const& node,
 		CoAP::Error& ec) noexcept
 {
 	path_list list;
-	return discovery_impl(node, buffer, buffer_size, max_depth, 0, list, ec);
+	return discovery_impl<ResourceNode, decltype(default_criteria<ResourceNode>)>(node, buffer, buffer_size,
+			max_depth, 0,
+			list, default_criteria, ec);
 }
 
 template<typename ResourceNode>
@@ -216,6 +251,18 @@ std::size_t discovery(ResourceNode const& node,
 		CoAP::Error& ec) noexcept
 {
 	return discovery(node, buffer, buffer_size, 0, ec);
+}
+
+template<typename ResourceNode, typename Criteria>
+std::size_t discovery(ResourceNode const& node,
+		char* buffer, std::size_t buffer_size,
+		unsigned max_depth, Criteria func,
+		CoAP::Error& ec) noexcept
+{
+	path_list list;
+	return discovery_impl<ResourceNode, Criteria>(node, buffer, buffer_size,
+			max_depth, 0,
+			list, func, ec);
 }
 
 }//Resource
