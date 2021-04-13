@@ -38,7 +38,6 @@ close(handler socket) noexcept
 {
 	auto it = std::remove_if(nodes_.begin(), nodes_.end(),
 			[&socket](Connection& c){ return c.socket() == socket; });
-//	it->clear();
 	nodes_.erase(it, nodes_.end());
 }
 

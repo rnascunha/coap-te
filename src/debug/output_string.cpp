@@ -82,6 +82,9 @@ const char* option_string(CoAP::Message::Option::code op) noexcept
 		using namespace CoAP::Message::Option;
 		case code::content_format:	return "Content-Format";
 		case code::etag: 			return "ETag";
+#if COAP_TE_OBSERVABLE_RESOURCE == 1
+		case code::observe:			return "Observe";
+#endif /* COAP_TE_OBSERVABLE_RESOURCE == 1 */
 		case code::location_path: 	return "Location-Path";
 		case code::location_query: 	return "Location-Query";
 #if	COAP_TE_BLOCKWISE_TRANSFER == 1

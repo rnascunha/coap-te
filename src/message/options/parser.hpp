@@ -46,7 +46,7 @@ class Parser
 };
 
 template<typename OptionCode,
-		typename Message = CoAP::Message::message>
+		typename Message>
 bool get_option(Message const& msg,
 		option_template<OptionCode>& opt,
 		OptionCode ocode, unsigned count = 0) noexcept;

@@ -122,7 +122,7 @@ process(endpoint& ep, std::uint8_t const* buffer, std::size_t buffer_len, CoAP::
 	if(CoAP::Message::is_response(msg.mcode)
 		|| msg.mcode == CoAP::Message::code::empty)
 	{
-		process_response(ep, msg);
+		process_response(ep, msg, ec);
 	}
 	else //is_request;
 	{
@@ -141,11 +141,21 @@ template<typename Connection,
 template<bool CheckEndpoint, bool CheckToken>
 void
 engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
-process_response(endpoint& ep, CoAP::Message::message const& msg) noexcept
+process_response(endpoint& ep, CoAP::Message::message const& msg, CoAP::Error& ec) noexcept
 {
 	if(list_.template check_all_response<CheckEndpoint, CheckToken>(ep, msg)) return;
 	if constexpr(has_default_callback)
 		if(default_cb_) default_cb_(ep, msg, this);
+
+	if(msg.mtype == CoAP::Message::type::confirmable)
+	{
+		request req{ep};
+		req.header(
+				CoAP::Message::type::acknowledgment,
+				CoAP::Message::code::empty);
+
+		send(req, msg.mid, ec);
+	}
 }
 
 template<typename Connection,
@@ -210,7 +220,10 @@ check_transactions() noexcept
 			debug(engine_mod, "[%04X] Retransmitting...", trans->mid());
 			conn_.send(trans->buffer(), trans->buffer_used(), trans->endpoint(), ec);
 			if(ec)
-				error(engine_mod, "[%04X]Error sending...", trans->mid());
+			{
+				error(engine_mod, ec, "Error sending...");// trans->mid());
+				trans->cancel();
+			}
 			trans->retransmit();
 		}
 	}

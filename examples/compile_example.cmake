@@ -22,6 +22,8 @@ set(EXAMPLES_LIST
 				${EXAMPLES_DIR}/transmission/response_block_wise.cpp
 				${EXAMPLES_DIR}/transmission/engine_tcp_client.cpp
 				${EXAMPLES_DIR}/transmission/engine_tcp_server.cpp
+				${EXAMPLES_DIR}/observe/client_observe.cpp
+				${EXAMPLES_DIR}/observe/server_observe.cpp
 				${EXAMPLES_DIR}/port/endpoint_ipv6.cpp
 				${EXAMPLES_DIR}/port/udp_server.cpp
 				${EXAMPLES_DIR}/port/udp_client.cpp
@@ -50,7 +52,9 @@ foreach(example ${EXAMPLES_LIST})
 	if(WIN32)
 		target_link_libraries(${EXAMPLE_OUT} wsock32 ws2_32)
 	else()
-		if(${EXAMPLE_OUT} STREQUAL engine_server OR ${EXAMPLE_OUT} STREQUAL engine_tcp_server)
+		if(${EXAMPLE_OUT} STREQUAL engine_server OR 
+		${EXAMPLE_OUT} STREQUAL engine_tcp_server OR
+		${EXAMPLE_OUT} STREQUAL server_observe)
 			target_link_libraries(${EXAMPLE_OUT} pthread)
 		endif()
 	endif()

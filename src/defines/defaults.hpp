@@ -28,6 +28,14 @@
 #define COAP_TE_RELIABLE_CONNECTION 1
 #endif /* COAP_TE_RELIABLE_CONNECTION */
 
+/**
+ * RFC7641 - Observing Resources in the Constrained Application Protocol (CoAP)
+ * https://tools.ietf.org/html/rfc7641
+ */
+#ifndef COAP_TE_OBSERVABLE_RESOURCE
+#define COAP_TE_OBSERVABLE_RESOURCE 1
+#endif /* COAP_TE_OBSERVABLE_RESOURCE */
+
 namespace CoAP{
 
 static constexpr std::uint16_t default_port = 5683;

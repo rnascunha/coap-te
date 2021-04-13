@@ -165,7 +165,7 @@ bool default_criteria(ResourceNode const& node, path_list const& plist) noexcept
 template<typename ResourceNode, typename Criteria>
 static std::size_t discovery_impl(ResourceNode const& node,
 		char* buffer, std::size_t buffer_size,
-		unsigned max_depth, unsigned depth,
+		unsigned max_depth, unsigned depth, unsigned& count,
 		path_list& list, Criteria func [[maybe_unused]],
 		CoAP::Error& ec) noexcept
 {
@@ -176,7 +176,7 @@ static std::size_t discovery_impl(ResourceNode const& node,
 	{
 		if(func && func(node, list))
 		{
-			if(depth)
+			if(depth && count)
 			{
 				if(buffer_size > 0)
 				{
@@ -189,11 +189,12 @@ static std::size_t discovery_impl(ResourceNode const& node,
 				}
 			}
 			offset += description(node.value(), &list, buffer + offset, buffer_size - offset, ec);
+			count++;
 		}
 	}
 	else
 	{
-		if(depth)
+		if(depth && count)
 		{
 			if(buffer_size > 0)
 			{
@@ -206,6 +207,7 @@ static std::size_t discovery_impl(ResourceNode const& node,
 			}
 		}
 		offset += description(node.value(), &list, buffer + offset, buffer_size - offset, ec);
+		count++;
 	}
 	if(ec) return offset;
 
@@ -213,7 +215,7 @@ static std::size_t discovery_impl(ResourceNode const& node,
 	if(n_node)
 	{
 		offset += discovery_impl(*n_node, buffer + offset, buffer_size - offset, max_depth,
-				depth, list, func, ec);
+				depth, count, list, func, ec);
 		if(ec) return offset;
 	}
 
@@ -224,7 +226,7 @@ static std::size_t discovery_impl(ResourceNode const& node,
 	if(children)
 	{
 		offset += discovery_impl(*children, buffer + offset, buffer_size - offset, max_depth,
-				depth, list, func, ec);
+				depth, count, list, func, ec);
 		if(ec) return offset;
 		children = children->next();
 	}
@@ -240,8 +242,9 @@ std::size_t discovery(ResourceNode const& node,
 		CoAP::Error& ec) noexcept
 {
 	path_list list;
+	unsigned count = 0;
 	return discovery_impl<ResourceNode, decltype(default_criteria<ResourceNode>)>(node, buffer, buffer_size,
-			max_depth, 0,
+			max_depth, 0, count,
 			list, default_criteria, ec);
 }
 
@@ -260,8 +263,9 @@ std::size_t discovery(ResourceNode const& node,
 		CoAP::Error& ec) noexcept
 {
 	path_list list;
+	unsigned count = 0;
 	return discovery_impl<ResourceNode, Criteria>(node, buffer, buffer_size,
-			max_depth, 0,
+			max_depth, 0, count,
 			list, func, ec);
 }
 

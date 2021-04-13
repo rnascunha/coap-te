@@ -15,6 +15,7 @@ bool check_code(code mcode) noexcept
 		case code::cdelete:						//0.04 DELETE
 		//response
 		//success
+		case code::success:						//2.00 Success
 		case code::created:						//2.01 Created
 		case code::deleted:						//2.02 Deleted
 		case code::valid:						//2.03 Valid

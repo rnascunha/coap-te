@@ -13,11 +13,11 @@ It's implemented:
 * Block-wise transfer ([RFC7959](https://tools.ietf.org/html/rfc7959));
 * Reliable connections ([RFC8323](https://tools.ietf.org/html/rfc8323));
 * Resource Discovery ([RFC6690](https://tools.ietf.org/html/rfc6690));
+* Observing ([RFC7641](https://tools.ietf.org/html/rfc7641));
 
 It's NOT implemented (yet):
 * Cache strategie;
 * Security;
-* Observing ([RFC7641](https://tools.ietf.org/html/rfc7641));
 * Much more :(...
 
 ## Dependencies
@@ -85,15 +85,19 @@ deal with all CoAP transmission complexity. After configuration, makes a simple 
 * `engine_tcp_client`: demonstrate how configure and use a reliable (RFC8323) client engine.
 * `engine_tcp_server`: demonstrate how configure and use a reliable (RFC8323) server engine.
 
-*URI examples*:
+*Observe* examples: observe resource as defined at RFC7641.
+* `client_observe`: client CoAP making 3 request to observe 3 different resources (confirmable and non-confirmable messages). To be used with `server_observe` example. 
+* `server_observe`: server CoAP that holds 3 resource that can be observed, sending confirmable or non-confirmable message. To be used with `client_observe` example.
+
+*URI* examples:
 * `decompose`: breaks a CoAP URI into internal structures of **CoAP-te**, ready to be used. Any percent-encoded characters is converted. 
 
-*Internal examples*: this examples are to test internal functions used, not intended to the end user.
+*Internal* examples: this examples are to test internal functions used, not intended to the end user.
 * `tree`: shows how to work with *trees*, the structure that holds all the resources.
 * `percent_encode`: demonstrate the use of function `percent_encode` used to compose URI strings;
 * `percent_decode`: demonstrate the use of function `percent_decode` used to decompose URI strings;
 
-*Port examples*: here are show the raw use of connections/plataform dependent functions. Not intended to the end user.
+*Port* examples: here are show the raw use of connections/plataform dependent functions. Not intended to the end user.
 * `udp_server`: the use of the implemented posix-like UDP socket. Run a echo UDP server;
 * `udp_client`: the use of the implemented posix-like UDP socket. Run a UDP client making a request and wait for a response;
 * `tcp_server`: the use of the implemented posix-like TCP socket (RFC8323). Run a echo TCP server;

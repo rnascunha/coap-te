@@ -57,4 +57,11 @@
 #include "transmission/reliable/engine_server.hpp"
 #endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 
+#if COAP_TE_OBSERVABLE_RESOURCE == 1
+#include "observe/types.hpp"
+#include "observe/functions.hpp"
+#include "observe/observer.hpp"
+#include "observe/list.hpp"
+#endif /* COAP_TE_OBSERVABLE_RESOURCE == 1 */
+
 #endif /* COAP_TE_MAIN_HPP__ */

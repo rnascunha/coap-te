@@ -1,9 +1,14 @@
 #ifndef COAP_TE_TRANSMISSION_REQUEST_HPP__
 #define COAP_TE_TRANSMISSION_REQUEST_HPP__
 
+#include "defines/defaults.hpp"
 #include "types.hpp"
 #include "port/port.hpp"
 #include "message/factory.hpp"
+
+#if COAP_TE_OBSERVABLE_RESOURCE == 1
+#include "observe/observer.hpp"
+#endif /* COAP_TE_OBSERVABLE_RESOURCE == 1 */
 
 namespace CoAP{
 namespace Transmission{
@@ -24,6 +29,27 @@ class Request{
 		{
 			fac_.header(mtype, mcode, data.token, data.token_len);
 		}
+
+#if COAP_TE_OBSERVABLE_RESOURCE == 1
+		Request(CoAP::Observe::observe<Endpoint> const& obs,
+				CoAP::Message::type mtype,
+				CoAP::Message::code mcode = CoAP::Message::code::content)
+		: ep_(obs.endpoint())
+		{
+			fac_.header(mtype,
+					mcode,
+					obs.token(), obs.token_len());
+		}
+
+		Request(CoAP::Observe::observe<Endpoint> const& obs,
+				CoAP::Message::code mcode = CoAP::Message::code::content)
+		: ep_(obs.endpoint())
+		{
+			fac_.header(CoAP::Message::type::nonconfirmable,
+					mcode,
+					obs.token(), obs.token_len());
+		}
+#endif /* COAP_TE_OBSERVABLE_RESOURCE == 1 */
 
 		CoAP::Message::Factory<>& factory(){ return fac_; }
 

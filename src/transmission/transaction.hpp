@@ -91,13 +91,14 @@ class transaction
 
 		transaction_param transaction_parameters() const noexcept;
 	private:
+		void clear() noexcept;
+
 		bool init_impl(configure const& config,
 				endpoint_t const& ep,
 				std::uint8_t* buffer, std::size_t size,
 				Callback_Functor func, void* data, CoAP::Error& ec) noexcept;
 
 		void call_cb(CoAP::Message::message const* response) noexcept;
-		void clear() noexcept;
 
 		CoAP::Message::message	request_;
 		endpoint_t				ep_;

@@ -21,6 +21,9 @@ enum class code {
 	uri_host		= 3,	//Uri-Host
 	etag			= 4,	//ETag
 	if_none_match	= 5,	//If-None-Match
+#if COAP_TE_OBSERVABLE_RESOURCE == 1
+	observe			= 6,	//Observe
+#endif /* COAP_TE_OBSERVABLE_RESOURCE == 1 */
 	uri_port		= 7,	//Uri-Port
 	location_path	= 8,	//Location-Path
 	uri_path		= 11,	//Uri-Path
@@ -44,6 +47,9 @@ static constexpr const config<code> options[] = {
 	{code::uri_host, 		false,	type::string},
 	{code::etag, 			true, 	type::opaque},
 	{code::if_none_match, 	false, 	type::empty},
+#if COAP_TE_OBSERVABLE_RESOURCE == 1
+	{code::observe,			false,	type::uint},
+#endif /* COAP_TE_OBSERVABLE_RESOURCE == 1 */
 	{code::uri_port, 		false, 	type::uint},
 	{code::location_path, 	true, 	type::string},
 	{code::uri_path, 		true, 	type::string},

@@ -220,11 +220,8 @@ init_impl(configure const& config,
 	if(ec) return false;
 	if(request_.mtype != CoAP::Message::type::confirmable)
 	{
-		CoAP::Log::warning(transaction_mod, "No need transaction to NOT confirmable message");
 		return true;
 	}
-
-	status_ = status_t::sending;
 
 	max_span_timeout_ = static_cast<double>(CoAP::time()) + max_transmit_span(config);
 	retransmission_remaining_ = config.max_restransmission;
@@ -235,6 +232,8 @@ init_impl(configure const& config,
 								next_expiration_time_,
 								next_expiration_time_ - static_cast<double>(CoAP::time()),
 								expiration_time_factor_);
+
+	status_ = status_t::sending;
 
 	ep_ = ep;
 	cb_ = func;

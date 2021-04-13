@@ -170,8 +170,11 @@ class engine
 		bool operator()(CoAP::Error& ec) noexcept;
 	private:
 		template<bool CheckEndpoint = true, bool CheckToken = false>
-		void process_response(endpoint& ep, CoAP::Message::message const&) noexcept;
-		void process_request(endpoint& ep, CoAP::Message::message const&,
+		void process_response(endpoint& ep,
+				CoAP::Message::message const&,
+				CoAP::Error& ec) noexcept;
+		void process_request(endpoint& ep,
+				CoAP::Message::message const&,
 				CoAP::Error& ec) noexcept;
 
 		transaction_list list_;
