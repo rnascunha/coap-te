@@ -97,8 +97,13 @@ void close_cb(int socket) noexcept
 /**
  * Receving data callback
  */
-void read_cb(int socket, void* buffer, std::size_t buffer_len) noexcept
+void read_cb(int socket, tcp_server& conn) noexcept
 {
+	char buffer[BUFFER_LEN];
+	CoAP::Error ec;
+	std::size_t size = conn.receive(socket, buffer, BUFFER_LEN, ec);
+	if(ec) exit_error(ec, "read");
+
 	tcp_server::endpoint ep;
 	if(!ep.copy_peer_address(socket))
 		return;
@@ -106,14 +111,14 @@ void read_cb(int socket, void* buffer, std::size_t buffer_len) noexcept
 	char buf[46];
 	printf(">[%s]:%u[%zu]: %.*s\n",
 			ep.address(buf), ep.port(),
-			buffer_len,
-			static_cast<int>(buffer_len),
-			static_cast<const char*>(buffer));
+			size,
+			static_cast<int>(size),
+			buffer);
 
 	/**
 	 * Echoing data received back
 	 */
-	::send(socket, buffer, buffer_len, MSG_DONTWAIT);
+	conn.send(socket, buffer, size, ec);
 }
 
 int main()
@@ -139,21 +144,16 @@ int main()
 	std::printf("Listening: [%s]:%u\n", ep.address(addr_str), ep.port());
 
 	/**
-	 * Receiving buffer
-	 */
-	std::uint8_t buffer[BUFFER_LEN];
-
-	/**
 	 * Working loop
 	 *
-	 * The receive function template parameter are:
+	 * The run function template parameter are:
 	 * * read callback
 	 * * block time in miliseconds: 0 (no block), -1 (blocks indefinitely)
 	 * * open connection callback
 	 * * close connection callback
 	 * * max event permited (ommited, defaulted to 32)
 	 */
-	while(conn.receive<read_cb, 1000, open_cb, close_cb>(buffer, BUFFER_LEN, ec))
+	while(conn.run<read_cb, 1000, open_cb, close_cb>(ec))
 	{
 		/**
 		 * Your code

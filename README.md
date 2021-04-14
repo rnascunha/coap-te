@@ -202,14 +202,15 @@ class my_server{
 		bool is_open() const noexcept;
 
 		template<
-			int BlockTimeMs,
-			unsigned MaxEvents,
+			int BlockTimeMs = 0,
+			unsigned MaxEvents = 32,
 			typename ReadCb,
-			typename OpenCb,
-			typename CloseCb>
-		bool receive(void* buffer, std::size_t buffer_len, CoAP::Error&,
-				ReadCb read_cb, OpenCb open_cb, CloseCb close_cb) noexcept;
+			typename OpenCb = void*,
+			typename CloseCb = void*>
+		bool run(CoAP::Error&,
+				ReadCb, OpenCb, CloseCb) noexcept;
 
+		std::size_t receive(handler socket, void* buffer, std::size_t, CoAP::Error&) noexcept;
 		std::size_t send(handler, const void*, std::size_t, CoAP::Error&)  noexcept;
 
 		void close() noexcept;
@@ -224,10 +225,11 @@ class my_server{
 * `is_open` function: check if the socket is opened;
 * `close` function: closes the socket;
 * `close_client` function: closes client socket;
-* `send` function: sends buffer to the client;
-* `receive` function: this function must: 
+* `send` function: sends data buffer to client;
+* `receive` function: receive data from client;
+* `run` function: this function must: 
 	* accept incoming connections: every incoming connection MUST call the `open_cb` function, with the handler passed at the argument; 
-	* receives data from the the server: if the connection is *TCP*, call the `read_cb` function with the whole readed buffer. If its *Websocket*, it must call `read_cb` packet by packet;
+	* check if there is data to receive from clients: if there is, call `read_cb` function with the client handler passed as argument;
 	* check closed connection: call `close_cb` at any closed clients call, with the handler of the client;
 	* any socket error must be reported at the `CoAP::Error&` argument.
  

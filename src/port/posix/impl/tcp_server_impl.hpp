@@ -172,7 +172,7 @@ run(CoAP::Error& ec) noexcept
 		{
 			/* handle EPOLLIN event */
 			handler s = events[i].data.fd;
-			ReadCb(s);
+			ReadCb(s, *this);
 		}
 		/* check if the connection is closing */
 		if (events[i].events & (EPOLLRDHUP | EPOLLHUP))
