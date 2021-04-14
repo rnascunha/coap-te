@@ -58,7 +58,7 @@ struct separate_response{
 };
 
 using default_cb = void(*)(int socket,
-							CoAP::Message::Reliable::message const&,
+							CoAP::Message::Reliable::message const*,
 							void*) noexcept;
 
 using transaction_cb = void(*)(void const*,

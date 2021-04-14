@@ -1,10 +1,10 @@
 /**
- * Here we are going to implement a client CoAP device that will make 3
+ * Here we are going to implement a TCP client CoAP device that will make 3
  * request and register to observe 3 different servers resources: 'time',
  * 'type' and 'sensor'. A full description of this resources can be seen
- * at 'server_observer' example.
+ * at 'tcp_server_observer' example.
  *
- * This example is to be run with 'server_observer'.
+ * This example is to be run with 'tcp_server_observer'.
  */
 
 #include "log.hpp"				//Log header
@@ -37,23 +37,30 @@ static constexpr module example_mod = {
 using endpoint = CoAP::Port::POSIX::endpoint_ipv4;
 
 /**
- * Engine definition
- *
- * To know how to define a engine, see 'raw_engine'/'server_engine' examples
+ * CSM signal configuration
  */
-using engine = CoAP::Transmission::engine<
-		CoAP::Port::POSIX::udp<endpoint>,			/* socket type */
-		CoAP::Message::message_id,					/* message id generator type */
-		CoAP::Transmission::transaction_list<		/* transaction list */
-				CoAP::Transmission::transaction<	/* transaction type */
-						512,								/* transaction packet size */
-						CoAP::Transmission::transaction_cb,	/* transaction callback type */
-						endpoint>,							/* transaction endpoint type */
-				4>									/* number of transaction */,
-		CoAP::Transmission::default_cb<				/* default callback type */
+static constexpr const CoAP::Transmission::Reliable::csm_configure csm = {
+		.max_message_size = CoAP::Transmission::Reliable::default_max_message_size,
+		.block_wise_transfer = true
+};
+
+/**
+ * Client Reliable Engine definition
+ *
+ * To know how to define a engine, see 'engine_tcp_client'/'engine_tcp_server'
+ * examples
+ */
+using engine = CoAP::Transmission::Reliable::engine_client<
+		CoAP::Port::POSIX::tcp_client<			///< TCP client socket definition
 			endpoint>,
-		CoAP::disable								/* disable resource */
-	>;
+		csm,									///< CSM paramenter configuration
+		CoAP::Transmission::Reliable::transaction_list<	///< transaction list type
+			CoAP::Transmission::Reliable::transaction<	///< trasnaction type
+				csm.max_message_size,
+				CoAP::Transmission::Reliable::transaction_cb>,
+			4>,											///< transaction list size
+		CoAP::Transmission::Reliable::default_cb,	///< Default callback signature function
+		CoAP::disable>;								///< Disable resource
 
 /**
  *
@@ -87,21 +94,17 @@ static constexpr const char* sensor_token = "sensor";	//sensor resource
  * order parameters. Without it, we are just going to assume that the
  * incoming message is the freshnest
  */
-static CoAP::Observe::observe<endpoint, false> time_obs;
-static CoAP::Observe::observe<endpoint, true> type_obs;
-static CoAP::Observe::observe<endpoint, true> sensor_obs;
+static CoAP::Observe::observe<engine::socket, false> time_obs;
+static CoAP::Observe::observe<engine::socket, true> type_obs;
+static CoAP::Observe::observe<engine::socket, true> sensor_obs;
 
 /**
  * As observable are sent asynchronously, not associated with
  * a specific request, they will call the default callback engine
  * function.
- *
- * Notification can be sent of type confirmable or non-confirmable.
- * Confirmable notification must sent back a ack, but this is already
- * handled by the CoAP-te engine.
  */
-void default_callback(engine::endpoint const& ep,
-		CoAP::Message::message const* response,
+void default_callback(engine::socket ep,
+		engine::message const* response,
 		void* engine_ptr) noexcept
 {
 	debug(example_mod, "default cb called");
@@ -186,21 +189,21 @@ void request_cb(void const* trans, engine::message const* response, void*) noexc
 			 */
 			if(std::memcmp(response->token, time_token, response->token_len) == 0)
 			{
-				time_obs.set(t->endpoint(), *response);
+				time_obs.set(t->socket(), *response);
 			}
 			/**
 			 * Is type resource request?
 			 */
 			else if(std::memcmp(response->token, type_token, response->token_len) == 0)
 			{
-				type_obs.set(t->endpoint(), *response);
+				type_obs.set(t->socket(), *response);
 			}
 			/**
 			 * Is sensor resource request?
 			 */
 			else if(std::memcmp(response->token, sensor_token, response->token_len) == 0)
 			{
-				sensor_obs.set(t->endpoint(), *response);
+				sensor_obs.set(t->socket(), *response);
 			}
 			else
 			{
@@ -224,23 +227,24 @@ int main()
 	CoAP::Error ec;
 
 	/**
-	 * Socket
+	 * Instantiating a endpoint of server we are going to connect
 	 */
-	engine::connection conn;
-
-	conn.open(ec);
-	if(ec) exit_error(ec, "Error trying to open socket...");
-
-	debug(example_mod, "Socket opened...");
+	engine::endpoint ep{HOST_ADDR, COAP_PORT, ec};
+	if(ec) exit_error(ec);
 
 	debug(example_mod, "Initating the engine...");
+	/**
+	 * Instantiate the engine.
+	 */
+	engine coap_engine;
 
 	/**
-	 * After successfully opened the socket, we are going to
-	 * instantiate the engine.
+	 * Connection to server
 	 */
-	engine coap_engine(std::move(conn),
-			CoAP::Message::message_id(CoAP::time()));
+	coap_engine.open(ep, ec);
+	if(ec) exit_error(ec, "Error trying to connect to socket...");
+
+	debug(example_mod, "Socket opened...");
 
 	/**
 	 * Setting the default callback function. All notification will
@@ -258,25 +262,20 @@ int main()
 	CoAP::Message::Option::node obs_op{CoAP::Message::Option::code::observe, regi};
 
 	/**
-	 * Instantiating a endpoint that the request will be sent.
-	 */
-	engine::endpoint ep{HOST_ADDR, COAP_PORT, ec};
-	if(ec) exit_error(ec);
-
-	/**
 	 * Instatiation a request
 	 */
-	engine::request request(ep);
+	engine::request<> request;
 
 	/**
 	 * Setting the time resource request and sending
 	 */
 	CoAP::Message::Option::node path_op1{CoAP::Message::Option::code::uri_path, "time"};
-	request.header(CoAP::Message::type::confirmable, CoAP::Message::code::get)
-			.token(time_token)
-			.add_option(obs_op)
-			.add_option(path_op1)
-			.callback(request_cb/*, data */);
+	request
+		.code(CoAP::Message::code::get)
+		.token(time_token)
+		.add_option(obs_op)
+		.add_option(path_op1)
+		.callback(request_cb/*, data */);
 
 	coap_engine.send(request, ec);
 	if(ec) exit_error(ec, "send");
@@ -289,15 +288,16 @@ int main()
 
 	request.reset();
 
-	request.header(CoAP::Message::type::confirmable, CoAP::Message::code::get)
-				.token(type_token)
-				.add_option(obs_op)
-				.add_option(path_op2)
-				.callback(request_cb/*, data */);
+	request
+		.code(CoAP::Message::code::get)
+		.token(type_token)
+		.add_option(obs_op)
+		.add_option(path_op2)
+		.callback(request_cb/*, data */);
 
 	coap_engine.send(request, ec);
 	if(ec) exit_error(ec, "send");
-	debug(example_mod, "Message type observe sended");
+	debug(example_mod, "Message type observe sended [%zu]");
 
 	/**
 	 * Setting the sensor resource request and sending
@@ -310,22 +310,21 @@ int main()
 	CoAP::Message::Option::node path_op3{CoAP::Message::Option::code::uri_path, "sensor"};
 	CoAP::Message::Option::node query_op{CoAP::Message::Option::code::uri_query, "freq=15"};
 
-	request.header(CoAP::Message::type::confirmable, CoAP::Message::code::get)
-				.token(sensor_token)
-				.add_option(obs_op)
-				.add_option(path_op3)
-				.add_option(query_op)
-				.callback(request_cb/*, data */);
+	request
+		.code(CoAP::Message::code::get)
+		.token(sensor_token)
+		.add_option(obs_op)
+		.add_option(path_op3)
+		.add_option(query_op)
+		.callback(request_cb/*, data */);
 
 	coap_engine.send(request, ec);
 	if(ec) exit_error(ec, "send");
 	debug(example_mod, "Message sensor observe sended");
 
-
 	debug(example_mod, "Initiating engine loop");
 	/**
-	 * This loop will run until receive a successful response or the transaction
-	 * timeout.
+	 * This loop will run indefinitely
 	 */
 	while(coap_engine(ec))
 	{

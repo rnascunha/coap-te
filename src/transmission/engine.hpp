@@ -44,7 +44,7 @@ class engine
 						std::is_invocable< // @suppress("Symbol is not resolved")
 										Callback_Default_Functor,
 										endpoint const&,
-										CoAP::Message::message const&, void*>::value;
+										CoAP::Message::message const*, void*>::value;
 
 		using default_response_cb = typename std::conditional<has_default_callback,
 				Callback_Default_Functor, empty>::type;

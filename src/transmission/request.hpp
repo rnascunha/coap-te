@@ -31,7 +31,8 @@ class Request{
 		}
 
 #if COAP_TE_OBSERVABLE_RESOURCE == 1
-		Request(CoAP::Observe::observe<Endpoint> const& obs,
+		template<bool SetOrderValue>
+		Request(CoAP::Observe::observe<Endpoint, SetOrderValue> const& obs,
 				CoAP::Message::type mtype,
 				CoAP::Message::code mcode = CoAP::Message::code::content)
 		: ep_(obs.endpoint())
@@ -41,7 +42,8 @@ class Request{
 					obs.token(), obs.token_len());
 		}
 
-		Request(CoAP::Observe::observe<Endpoint> const& obs,
+		template<bool SetOrderValue>
+		Request(CoAP::Observe::observe<Endpoint, SetOrderValue> const& obs,
 				CoAP::Message::code mcode = CoAP::Message::code::content)
 		: ep_(obs.endpoint())
 		{

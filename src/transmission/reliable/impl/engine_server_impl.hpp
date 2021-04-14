@@ -22,7 +22,11 @@ template<typename Connection,
 	typename CallbackDefaultFunctor,
 	typename Resource>
 engine_server<Connection, Config, ConnectionList, TransactionList, CallbackDefaultFunctor, Resource>::
-engine_server(){}
+engine_server()
+{
+	if(has_default_callback)
+		default_cb_ = nullptr;
+}
 
 template<typename Connection,
 	csm_configure const& Config,
@@ -135,7 +139,7 @@ process(socket sock, std::uint8_t
 		const* buffer, std::size_t buffer_len,
 				CoAP::Error& ec) noexcept
 {
-	debug(engine_mod, "Processing buffer");
+	debug(engine_mod, "Processing buffer[%zu]", buffer_len);
 	CoAP::Message::Reliable::message msg;
 
 	std::size_t total_size = 0;
@@ -143,21 +147,22 @@ process(socket sock, std::uint8_t
 	{
 		msg.reset();
 		std::size_t size = CoAP::Message::Reliable::parse(msg,
-				buffer  + total_size, buffer_len - total_size,
+				buffer + total_size, buffer_len - total_size,
 				ec);
 
 		if(ec)
 		{
-			debug(engine_mod, "Error parsing received message...");
+			error(engine_mod, ec, "Error parsing received message...");
 			if(ec == CoAP::errc::insufficient_buffer)
 			{
 				std::size_t bu = make_response_code_error<set_length>(msg,
-						buffer_, Config.max_message_size,
+						wbuffer_, Config.max_message_size,
 						CoAP::Message::code::request_entity_too_large);
-				conn_.send(sock, buffer_, bu, ec);
+				conn_.send(sock, wbuffer_, bu, ec);
 			}
 			return;
 		}
+
 
 		/**
 		 * https://tools.ietf.org/html/rfc8323#section-3.4
@@ -169,7 +174,8 @@ process(socket sock, std::uint8_t
 		if(CoAP::Message::is_empty(msg.mcode))
 		{
 			debug(engine_mod, "Empty message received... Ignoring");
-			return;
+			total_size += size;
+			continue;
 		}
 
 		if(CoAP::Message::is_signaling(msg.mcode))
@@ -190,9 +196,9 @@ process(socket sock, std::uint8_t
 				 * simplest approach is to always return 5.01 (Not Implemented)
 				 */
 				std::size_t bu = make_response_code_error<set_length>(msg,
-								buffer_, Config.max_message_size,
+								wbuffer_, Config.max_message_size,
 								CoAP::Message::code::not_implemented);
-				conn_.send(sock, buffer_, bu, ec);
+				conn_.send(sock, wbuffer_, bu, ec);
 			}
 		}
 
@@ -215,7 +221,7 @@ process_response(socket sock, CoAP::Message::Reliable::message const& msg) noexc
 	if constexpr(has_transaction_list)
 		if(list_.template check_all_response(sock, msg)) return;
 	if constexpr(has_default_callback)
-		if(default_cb_) default_cb_(sock, msg, this);
+		if(default_cb_) default_cb_(sock, &msg, this);
 }
 
 template<typename Connection,
@@ -235,16 +241,17 @@ process_request(socket sock,
 	if(!res)
 	{
 		std::size_t bu = make_response_code_error<set_length>(
-				request, buffer_, Config.max_message_size,
+				request, wbuffer_, Config.max_message_size,
 				CoAP::Message::code::not_found);
-		conn_.send(sock, buffer_, bu, ec);
+		conn_.send(sock, wbuffer_, bu, ec);
 	}
 	else
 	{
 		debug(engine_mod, "Found resource %s", res->path());
+
 		response response(sock,
 				request.token, request.token_len,
-				buffer_, Config.max_message_size);
+				wbuffer_, Config.max_message_size);
 		if(res->call(request.mcode, request, response, this))
 		{
 			debug(engine_mod, "Method found");
@@ -256,9 +263,9 @@ process_request(socket sock,
 		else
 		{
 			std::size_t bu = make_response_code_error<set_length>(
-					request, buffer_, Config.max_message_size,
+					request, wbuffer_, Config.max_message_size,
 					CoAP::Message::code::method_not_allowed);
-			conn_.send(sock, buffer_, bu, ec);
+			conn_.send(sock, wbuffer_, bu, ec);
 		}
 	}
 }
@@ -297,7 +304,7 @@ process_signaling(socket sock, CoAP::Message::Reliable::message const& msg) noex
 			return;
 	}
 	if constexpr(has_default_callback)
-		if(default_cb_) default_cb_(sock, msg, this);
+		if(default_cb_) default_cb_(sock, &msg, this);
 }
 
 template<typename Connection,
@@ -508,11 +515,11 @@ on_open(socket sock) noexcept
 
 	debug(engine_mod, "Making CSM");
 	CoAP::Error ec;
-	std::size_t size = make_csm_message<set_length>(Config, buffer_, Config.max_message_size, ec);
+	std::size_t size = make_csm_message<set_length>(Config, wbuffer_, Config.max_message_size, ec);
 	if(ec) return;
 
 	debug(engine_mod, "Sending CSM[%lu]", size);
-	send(sock, buffer_, size, ec);
+	send(sock, wbuffer_, size, ec);
 }
 
 template<typename Connection,
@@ -526,6 +533,8 @@ engine_server<Connection, Config, ConnectionList, TransactionList, CallbackDefau
 on_close(socket sock) noexcept
 {
 	debug(engine_mod, "Closed socket[%d/%u]", sock, conn_list_.size());
+	if constexpr(has_default_callback)
+		if(default_cb_) default_cb_(sock, nullptr, this);
 	close_client<false>(sock);
 	debug(engine_mod, "Closed [%u]", conn_list_.size());
 }

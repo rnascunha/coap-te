@@ -24,7 +24,7 @@ class engine_client
 {
 		using empty = struct{};
 	public:
-		using socket = int;
+		using socket = typename Connection::handler;
 		using connection = Connection;
 		static constexpr const bool set_length = Connection::set_length;
 		using endpoint = typename Connection::endpoint;
@@ -60,7 +60,7 @@ class engine_client
 						std::is_invocable< // @suppress("Symbol is not resolved")
 							CallbackDefaultFunctor,
 								socket&,
-								CoAP::Message::Reliable::message const&, void*>::value;
+								CoAP::Message::Reliable::message const*, void*>::value;
 
 		using default_response_cb = typename std::conditional<has_default_callback,
 				CallbackDefaultFunctor, empty>::type;
@@ -166,6 +166,7 @@ class engine_client
 		csm_configure		server_csm_;
 		Connection			conn_;
 		std::uint8_t		buffer_[packet_size];
+		std::uint8_t		wbuffer_[packet_size];
 
 		default_response_cb default_cb_;
 };

@@ -25,7 +25,11 @@ template<typename Connection,
 	typename CallbackDefaultFunctor,
 	typename Resource>
 engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
-engine_client(){}
+engine_client()
+{
+	if(has_default_callback)
+		default_cb_ = nullptr;
+}
 
 template<typename Connection,
 	csm_configure const& Config,
@@ -50,10 +54,10 @@ open(endpoint& ep, CoAP::Error& ec) noexcept
 	conn_.open(ep, ec);
 	if(ec) return false;
 
-	std::size_t size = make_csm_message<Connection::set_length>(Config, buffer_, Config.max_message_size, ec);
+	std::size_t size = make_csm_message<Connection::set_length>(Config, wbuffer_, Config.max_message_size, ec);
 	if(ec) return false;
 
-	send(buffer_, size, ec);
+	send(wbuffer_, size, ec);
 	return ec ? false : true;
 }
 
@@ -122,9 +126,9 @@ process(std::uint8_t const* buffer, std::size_t buffer_len,
 			if(ec == CoAP::errc::insufficient_buffer)
 			{
 				std::size_t bu = make_response_code_error<set_length>(msg,
-						buffer_, Config.max_message_size,
+						wbuffer_, Config.max_message_size,
 						CoAP::Message::code::request_entity_too_large);
-				conn_.send(buffer_, bu, ec);
+				conn_.send(wbuffer_, bu, ec);
 			}
 			return;
 		}
@@ -160,9 +164,9 @@ process(std::uint8_t const* buffer, std::size_t buffer_len,
 				 * simplest approach is to always return 5.01 (Not Implemented)
 				 */
 				std::size_t bu = make_response_code_error<set_length>(msg,
-								buffer_, Config.max_message_size,
+								wbuffer_, Config.max_message_size,
 								CoAP::Message::code::not_implemented);
-				conn_.send(buffer_, bu, ec);
+				conn_.send(wbuffer_, bu, ec);
 			}
 		}
 
@@ -183,7 +187,7 @@ process_response(CoAP::Message::Reliable::message const& msg) noexcept
 	if constexpr(has_transaction_list)
 		if(list_.template check_all_response(conn_.native(), msg)) return;
 	if constexpr(has_default_callback)
-		if(default_cb_) default_cb_(conn_.native(), msg, this);
+		if(default_cb_) default_cb_(conn_.native(), &msg, this);
 }
 
 template<typename Connection,
@@ -200,16 +204,16 @@ process_request(CoAP::Message::Reliable::message const& request,
 	if(!res)
 	{
 		std::size_t bu = make_response_code_error<set_length>(
-				request, buffer_, Config.max_message_size,
+				request, wbuffer_, Config.max_message_size,
 				CoAP::Message::code::not_found);
-		conn_.send(buffer_, bu, ec);
+		conn_.send(wbuffer_, bu, ec);
 	}
 	else
 	{
 		debug(engine_mod, "Found resource %s", res->path());
 		response response(conn_.native(),
 				request.token, request.token_len,
-				buffer_, Config.max_message_size);
+				wbuffer_, Config.max_message_size);
 		if(res->call(request.mcode, request, response, this))
 		{
 			debug(engine_mod, "Method found");
@@ -221,9 +225,9 @@ process_request(CoAP::Message::Reliable::message const& request,
 		else
 		{
 			std::size_t bu = make_response_code_error<set_length>(
-					request, buffer_, Config.max_message_size,
+					request, wbuffer_, Config.max_message_size,
 					CoAP::Message::code::method_not_allowed);
-			conn_.send(buffer_, bu, ec);
+			conn_.send(wbuffer_, bu, ec);
 		}
 	}
 }
@@ -259,7 +263,7 @@ process_signaling(CoAP::Message::Reliable::message const& msg) noexcept
 			return;
 	}
 	if constexpr(has_default_callback)
-		if(default_cb_) default_cb_(conn_.native(), msg, this);
+		if(default_cb_) default_cb_(conn_.native(), &msg, this);
 }
 
 template<typename Connection,
@@ -386,6 +390,8 @@ run(CoAP::Error& ec) noexcept
 	if(ec)
 	{
 		error(engine_mod, ec, "read");
+		if constexpr(has_default_callback)
+			if(default_cb_) default_cb_(conn_.native(), nullptr, this);
 		close<false>();
 		return false;
 	}

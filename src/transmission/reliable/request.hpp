@@ -26,6 +26,16 @@ class Request{
 			fac_.token(data.token, data.token_len);
 		}
 
+#if COAP_TE_OBSERVABLE_RESOURCE == 1
+		template<bool SetOrderValue>
+		Request(CoAP::Observe::observe<int, SetOrderValue> const& obs,
+				CoAP::Message::code mcode = CoAP::Message::code::content)
+		: socket_(obs.endpoint())
+		{
+			fac_.code(mcode).token(obs.token(), obs.token_len());
+		}
+#endif /* COAP_TE_OBSERVABLE_RESOURCE == 1 */
+
 		CoAP::Message::Reliable::Factory<0, Code>& factory(){ return fac_; }
 
 		template<typename ...Args>
@@ -85,10 +95,10 @@ class Request{
 			return data_;
 		}
 
-		template<bool SetLength,
-				bool SortOptions,
-				bool CheckOpOrder,
-				bool CheckOpRepeat,
+		template<bool SetLength = true,
+				bool SortOptions = true,
+				bool CheckOpOrder = !SortOptions,
+				bool CheckOpRepeat = true,
 				typename ...Args>
 		std::size_t serialize(Args&&... args) const noexcept
 		{

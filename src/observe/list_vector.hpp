@@ -24,6 +24,9 @@ class list_vector{
 		template<typename Message>
 		bool remove(endpoint const&, Message const&) noexcept;
 
+		void cancel() noexcept;
+		void cancel(endpoint const&) noexcept;
+
 		Observe* operator[](unsigned index) noexcept;
 	private:
 		std::vector<Observe> list_;

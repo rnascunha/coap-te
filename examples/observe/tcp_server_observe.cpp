@@ -1,5 +1,5 @@
 /**
- * This examples implements a server with 3 resources that can be
+ * This examples implements a TCP server with 3 resources that can be
  * observed, and the discovery '.well-know/core' resource.
  *
  * We are going to create a resource tree as presented below.
@@ -26,16 +26,7 @@
  * * .well-known/core: provide resource information as defined at RFC6690
  * ------
  *
- * Notification can be sent in a confirmable or non-confirmable way. time and sensor resource
- * are sent non-confirmable, type resource is confirmable.
- *
- * \note When using confirmable type to send notification, it will allocate one transaction slot
- * that will be only released after receive a ack from the client. If there is no available slots,
- * You must wait to free one slot to send the remaining notifications. This behaivour is NOT handled
- * by the CoAP-te engine... So prefer using non-confirmable notifications or limit the number of
- * observers...
- *
- * This example is to be run with the 'client_observe' example.
+ * This example is to be run with the 'tcp_client_observe' example.
  */
 
 #include <cstdio>
@@ -66,33 +57,39 @@ static constexpr module example_mod = {
 /**
  * Endpoint type
  */
-using endpoint = CoAP::Port::POSIX::endpoint_ipv4;
+using endpoint_t = CoAP::Port::POSIX::endpoint_ipv4;
 
 /**
  * Observers must be held in a container. To use the vector implementation,
  * uncomment the following line.
  */
-//#define USE_OBSERVER_VECTOR
+#define USE_OBSERVER_VECTOR
+
+static constexpr const CoAP::Transmission::Reliable::csm_configure csm = {
+		.max_message_size = CoAP::Transmission::Reliable::default_max_message_size,
+		.block_wise_transfer = true
+};
 
 /**
- * Engine definition
+ * Reliable Server Engine definition
  *
- * To know how to define a engine, see 'raw_engine'/'server_engine' examples
+ * To know how to define a engine, see 'engine_tcp_client'/'engine_tcp_server'
+ * examples
  */
-using engine = CoAP::Transmission::engine<
-		CoAP::Port::POSIX::udp<endpoint>,			/* socket type */
-		CoAP::Message::message_id,					/* message id generator type */
-		CoAP::Transmission::transaction_list<		/* transaction list */
-			CoAP::Transmission::transaction<		/* transaction list */
-				512,									/* transaction packet size */
-				CoAP::Transmission::transaction_cb,		/* transaction callback type */
-				endpoint>,								/* transaction endpoint type */
-			4>,										/* number of transaction */
-		CoAP::disable,								/* default callback disabled */
-		CoAP::Resource::resource<					/* resource */
-			CoAP::Resource::callback<endpoint>,			/* resource callback type */
-			true										/* enabling resource description */
-		>
+using engine = CoAP::Transmission::Reliable::engine_server<
+		CoAP::Port::POSIX::tcp_server<			///< TCP server socket definition
+			endpoint_t
+		>,
+		csm,									///< CSM paramenter configuration
+		CoAP::disable,							///< Connection list disabled
+		CoAP::disable,							///< Trasaction list disabled
+		CoAP::Transmission::Reliable::default_cb,	///< Default callback signature function
+		CoAP::Resource::resource<				/// Resource definition
+			CoAP::Resource::callback_reliable<
+				CoAP::Message::Reliable::message,
+				CoAP::Transmission::Reliable::Response
+			>,
+		true>
 	>;
 
 /**
@@ -119,7 +116,7 @@ static void get_discovery_handler(engine::message const& request,
  */
 #include "observe/list_vector.hpp"
 
-using observe_list = CoAP::Observe::list_vector<CoAP::Observe::observe<endpoint, false>>;
+using observe_list = CoAP::Observe::list_vector<CoAP::Observe::observe<engine::socket, false>>;
 #else
 /**
  * The default observe container. It can hold a predefined number of observers... if
@@ -127,7 +124,7 @@ using observe_list = CoAP::Observe::list_vector<CoAP::Observe::observe<endpoint,
  */
 using observe_list = CoAP::Observe::list<
 						CoAP::Observe::observe<				//Observer type
-							endpoint,						//Endpoint
+							engine::socket,					//Socket
 							false							//Don't store order information (used just at clients)
 						>,
 						5									//Observer number
@@ -153,7 +150,7 @@ static char typed = 0;
  */
 class Sensor_Observe{
 	public:
-		using observe_type = CoAP::Observe::observe<endpoint, false>;
+		using observe_type = CoAP::Observe::observe<engine::socket, false>;
 		using endpoint_t = observe_type::endpoint_t;
 		Sensor_Observe(){};
 
@@ -185,6 +182,7 @@ class Sensor_Observe{
 			obs_.clear();
 		}
 
+		endpoint_t const& endpoint() const noexcept{ return obs_.endpoint(); }
 		/**
 		 * Check if this observe variable is been used
 		 */
@@ -249,10 +247,8 @@ static void thread_time(engine& engine)
 					debug(example_mod, "sending time");
 					/**
 					 * Making a request
-					 *
-					 * By default it uses non-confirmable type message
 					 */
-					engine::request req{*time_list[i]};
+					engine::request<> req{*time_list[i]};
 
 					/**
 					 * All observe notification must be associated with a observe
@@ -274,9 +270,12 @@ static void thread_time(engine& engine)
 
 					/**
 					 * Sending
+					 *
+					 * The second option MUST be 'no_transaction'. As we are not going to
+					 * receive any response, we must not hold a transaction
 					 */
 					CoAP::Error ec;
-					engine.send(req, ec);
+					engine.send(req, CoAP::Transmission::Reliable::no_transaction, ec);
 				}
 			}
 		}
@@ -289,33 +288,7 @@ static void thread_time(engine& engine)
  * character typed (input by the user) at the server. It will only
  * send if the character typed is different from the last one (if
  * the state changed).
- *
- * All notitications from this example are sent confirmable.
  */
-
-/**
- * As the messages are sent confirmable, a ack message is expected back.
- *
- * If we do not receive a ack (transaction timeout) we are going to remove
- * the observer from the observe list.
- *
- * This callback will be call at timeout/success transaction
- */
-static void type_callback(const void* transaction,
-		engine::message const* response,
-		void*) noexcept
-{
-	auto const* t = static_cast<engine::transaction_t const*>(transaction);
-	if(t->status() == CoAP::Transmission::status_t::timeout)	//Checking if it was timeout
-	{
-		/**
-		 * Message timeout, removing from list
-		 */
-		status(example_mod, "Type Observable timeout... removing from list");
-		type_list.remove(t->endpoint(), t->request());
-	}
-}
-
 /**
  * Type thread reading from input every second
  */
@@ -343,17 +316,9 @@ static void thread_type(engine& engine)
 					debug(example_mod, "sending type");
 
 					/**
-					 * Making a confirmable request
+					 * Making request
 					 */
-					engine::request req{*type_list[i],
-						CoAP::Message::type::confirmable,
-						CoAP::Message::code::content};
-
-					/**
-					 * Setting callback that will remove observer if
-					 * transaction timeout
-					 */
-					req.callback(type_callback);
+					engine::request<> req{*type_list[i], CoAP::Message::code::content};
 
 					/**
 					 * All observe notification must be associated with a observe
@@ -375,9 +340,12 @@ static void thread_type(engine& engine)
 
 					/**
 					 * Sending
+					 *
+					 * The second option MUST be 'no_transaction'. As we are not going to
+					 * receive any response, we must not hold a transaction
 					 */
 					CoAP::Error ec;
-					engine.send(req, ec);
+					engine.send(req, CoAP::Transmission::Reliable::no_transaction, ec);
 				}
 			}
 		}
@@ -425,7 +393,7 @@ static void thread_sensor(engine& engine)
 					/**
 					 * Making the request
 					 */
-					engine::request req{sensor_list[i]->observe(),
+					engine::request<> req{sensor_list[i]->observe(),
 						CoAP::Message::code::content};
 
 					/**
@@ -448,9 +416,12 @@ static void thread_sensor(engine& engine)
 
 					/**
 					 * Sending
+					 *
+					 * The second option MUST be 'no_transaction'. As we are not going to
+					 * receive any response, we must not hold a transaction
 					 */
 					CoAP::Error ec;
-					engine.send(req, ec);
+					engine.send(req, CoAP::Transmission::Reliable::no_transaction, ec);
 				}
 			}
 		}
@@ -458,31 +429,43 @@ static void thread_sensor(engine& engine)
 	}
 }
 
+static void default_callback(engine::socket socket, engine::message const* response, void*) noexcept
+{
+	/**
+	 * Checking if socket was closed (response == nullptr)
+	 */
+	if(!response)
+	{
+		status(example_mod, "Socket [%d] closed! Deregistering from any observe list", socket);
+		time_list.cancel(socket);
+		type_list.cancel(socket);
+		sensor_list.cancel(socket);
+	}
+}
+
 int main()
 {
 	CoAP::Error ec;
-	/**
-	 * Socket
-	 */
+
 	//Initiating the endpoint to bind
 	engine::endpoint ep{HOST_ADDR, COAP_PORT, ec};
 	if(ec) exit_error(ec);
 
-	engine::connection socket;
-
-	socket.open(ec);
-	if(ec) exit_error(ec, "Error trying to open socket...");
-	socket.bind(ep, ec);
-	if(ec) exit_error(ec, "Error trying to bind socket...");
-
-	debug(example_mod, "Socket opened and binded...");
-
-	debug(example_mod, "Initiating server engine...");
 	/**
 	 * Initiating CoAP engine
 	 */
-	engine coap_engine(std::move(socket),
-			CoAP::Message::message_id(CoAP::time()));
+	engine coap_engine;
+
+	/**
+	 * Open, binding and configuring socket
+	 */
+	coap_engine.open(ep, ec);
+	if(ec) exit_error(ec, "open");
+
+	/**
+	 * Instaling default callback
+	 */
+	coap_engine.default_cb(default_callback);
 
 	/**
 	 * Resource instantiation
@@ -529,6 +512,9 @@ int main()
 		 */
 	}
 
+	/**
+	 * Joining threads
+	 */
 	ttime.join();
 	ttype.join();
 	tsensor.join();
@@ -556,7 +542,7 @@ static void get_time_handler(engine::message const& request,
 	 * register/deregister as necessary. If it returns true you
 	 * must add the observe option
 	 */
-	if(time_list.process(response.endpoint(), request))
+	if(time_list.process(response.socket(), request))
 	{
 		status(example_mod, "Time resource obseravable register");
 		response.add_option(obs_op);
@@ -587,7 +573,7 @@ static void get_type_handler(engine::message const& request,
 	 * register/deregister as necessary. If it returns true you
 	 * must add the observe option
 	 */
-	if(type_list.process(response.endpoint(), request))
+	if(type_list.process(response.socket(), request))
 	{
 		status(example_mod, "Type resource obseravable register");
 		response.add_option(obs_op);
@@ -631,7 +617,7 @@ static void get_sensor_handler(engine::message const& request,
 	 * register/deregister as necessary. If it returns true you
 	 * must add the observe option.
 	 */
-	if(sensor_list.process(response.endpoint(), request, freq))
+	if(sensor_list.process(response.socket(), request, freq))
 	{
 		status(example_mod, "Sensor resource obseravable register [%u]", freq);
 		response.add_option(obs_op);

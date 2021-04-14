@@ -48,7 +48,7 @@ struct separate_response{
 
 template<typename Endpoint>
 using default_cb = void(*)(Endpoint const&,
-							CoAP::Message::message const&,
+							CoAP::Message::message const*,
 							void*) noexcept;
 
 using transaction_cb = void(*)(void const*,
@@ -61,7 +61,7 @@ enum class status_t{
 	canceled,	///< canceled
 	success,	///< received a response
 	timeout,	///< timeout
-	empty		///< received a empty response
+	empty		///< received a empty response,
 };
 
 enum class profile{

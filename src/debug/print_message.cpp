@@ -280,6 +280,9 @@ bool print_byte_reliable_message(std::uint8_t const* arr, std::size_t size) noex
 	if(msg.len >= 65805)
 		printf("|%02X", arr[++index]);
 
+	//Code
+	printf("|%02X", arr[index + 1]);
+
 	int s_token = 0, s_options = 0, s_payload = 0;
 	if(msg.token_len)
 	{
@@ -306,6 +309,8 @@ bool print_byte_reliable_message(std::uint8_t const* arr, std::size_t size) noex
 		std::snprintf(temp, 15, "Ext[%u]", index);
 		print_make_space(temp, 2 * index);
 	}
+	//Code
+	printf("|Co");
 
 	if(msg.token_len)
 	{

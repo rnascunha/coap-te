@@ -32,7 +32,7 @@ Factory<BufferSize, Code>::
 token(void const* token, std::size_t token_len) noexcept
 {
 	token_ = token;
-	token_len_ =  token_len;
+	token_len_ = token_len;
 
 	return *this;
 }

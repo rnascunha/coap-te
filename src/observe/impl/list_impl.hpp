@@ -84,6 +84,27 @@ remove(endpoint const& ep, Message const& msg) noexcept
 
 template<typename Observe,
 		unsigned Size>
+void
+list<Observe, Size>::
+cancel() noexcept
+{
+	for(unsigned i = 0; i < Size; i++)
+		list_[i].clear();
+}
+
+template<typename Observe,
+		unsigned Size>
+void
+list<Observe, Size>::
+cancel(endpoint const& ep) noexcept
+{
+	for(unsigned i = 0; i < Size; i++)
+		if(list_[i].endpoint() == ep)
+			list_[i].clear();
+}
+
+template<typename Observe,
+		unsigned Size>
 Observe* list<Observe, Size>::
 operator[](unsigned index) noexcept
 {

@@ -70,6 +70,24 @@ remove(endpoint const& ep, Message const& msg) noexcept
 }
 
 template<typename Observe>
+void
+list_vector<Observe>::
+cancel() noexcept
+{
+	list_.clear();
+}
+
+template<typename Observe>
+void
+list_vector<Observe>::
+cancel(endpoint const& ep) noexcept
+{
+	auto it = std::remove_if(list_.begin(), list_.end(),
+					[&ep](Observe& obs){ return obs.endpoint() == ep; });
+	list_.erase(it, list_.end());
+}
+
+template<typename Observe>
 Observe* list_vector<Observe>::
 operator[](unsigned index) noexcept
 {

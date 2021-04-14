@@ -6,8 +6,6 @@
 
 #include <cerrno>
 
-#include <cstdio>
-
 namespace CoAP{
 namespace Port{
 namespace POSIX{

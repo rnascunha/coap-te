@@ -219,17 +219,26 @@ static bool pong_flag = false;
  * This default callback response to signal response
  */
 void default_callback(int socket,
-		CoAP::Message::Reliable::message const& response,
+		CoAP::Message::Reliable::message const* response,
 		void* engine_ptr) noexcept
 {
 	debug(example_mod, "default cb called");
-	CoAP::Debug::print_message_string(response);
+	/**
+	 * Checking response. If null means that the socket was closed
+	 */
+	if(!response)
+	{
+		error(example_mod, "Socket closed");
+		return;
+	}
+
+	CoAP::Debug::print_message_string(*response);
 
 	//Check if is a signal response
-	if(CoAP::Message::is_signaling(response.mcode))
+	if(CoAP::Message::is_signaling(response->mcode))
 	{
 		//Check if is a pong
-		if(response.mcode == CoAP::Message::code::pong)
+		if(response->mcode == CoAP::Message::code::pong)
 			pong_flag = true;
 		return;
 	}

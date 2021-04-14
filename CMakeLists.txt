@@ -55,6 +55,7 @@ set(SRC_DIR_INTERNAL ${SRC_DIR}/internal)
 set(SRC_DIR_PORT ${SRC_DIR}/port)
 set(SRC_DIR_URI ${SRC_DIR}/uri)
 set(SRC_DIR_RESOURCE ${SRC_DIR}/resource)
+set(SRC_DIR_OBSERVE ${SRC_DIR}/observe)
 
 set(MAIN_SRC ${SRC_DIR}/error.cpp
 				${SRC_DIR_URI}/compose.cpp
@@ -77,6 +78,7 @@ set(MAIN_SRC ${SRC_DIR}/error.cpp
 				${SRC_DIR_DEBUG}/print_resource.cpp
 				${SRC_DIR_DEBUG}/print_uri.cpp
 				${SRC_DIR_RESOURCE}/link_format.cpp
+				${SRC_DIR_OBSERVE}/functions.cpp
 				${SRC_DIR_PORT}/posix/functions.cpp
 				)
 

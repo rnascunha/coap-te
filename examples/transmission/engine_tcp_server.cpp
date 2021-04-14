@@ -282,11 +282,21 @@ static void get_discovery_handler(engine::message const& request,
  * This default callback response to signal response
  */
 void default_callback(int socket,
-		engine::message const& response,
+		engine::message const* response,
 		void* engine_ptr) noexcept
 {
 	debug(example_mod, "default cb called");
-	CoAP::Debug::print_message(response);
+
+	/**
+	 * Checking response. If null means that the socket was closed
+	 */
+	if(!response)
+	{
+		error(example_mod, "Socket closed");
+		return;
+	}
+
+	CoAP::Debug::print_message(*response);
 }
 
 /**

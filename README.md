@@ -88,6 +88,8 @@ deal with all CoAP transmission complexity. After configuration, makes a simple 
 *Observe* examples: observe resource as defined at RFC7641.
 * `client_observe`: client CoAP making 3 request to observe 3 different resources (confirmable and non-confirmable messages). To be used with `server_observe` example. 
 * `server_observe`: server CoAP that holds 3 resource that can be observed, sending confirmable or non-confirmable message. To be used with `client_observe` example.
+* `tcp_client_observe`: the same of `client_observe` example, but using reliable connection (TCP), as defined at (RFC8323).
+* `tcp_server_oberver`: the same of `server_observe` example, but using reliable connection (TCP), as defined at (RFC8323). 
 
 *URI* examples:
 * `decompose`: breaks a CoAP URI into internal structures of **CoAP-te**, ready to be used. Any percent-encoded characters is converted. 

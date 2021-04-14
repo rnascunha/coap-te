@@ -145,7 +145,7 @@ process_response(endpoint& ep, CoAP::Message::message const& msg, CoAP::Error& e
 {
 	if(list_.template check_all_response<CheckEndpoint, CheckToken>(ep, msg)) return;
 	if constexpr(has_default_callback)
-		if(default_cb_) default_cb_(ep, msg, this);
+		if(default_cb_) default_cb_(ep, &msg, this);
 
 	if(msg.mtype == CoAP::Message::type::confirmable)
 	{

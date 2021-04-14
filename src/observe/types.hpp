@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "port/port.hpp"
 #include "message/types.hpp"
 #include "message/options/options.hpp"
 #include "message/options/parser.hpp"
@@ -24,6 +25,13 @@ enum message_status{
 	deregister = 1,
 	not_found,
 
+};
+
+static constexpr const unsigned max_option_value = 8388608; //2^23
+
+struct order{
+	unsigned 		value = 0;
+	CoAP::time_t	time = 0;
 };
 
 }//CoAP

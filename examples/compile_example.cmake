@@ -3,32 +3,34 @@ message(STATUS "Compile examples...")
 set(EXAMPLES_DIR ./examples)
 
 set(EXAMPLES_LIST	
-				${EXAMPLES_DIR}/internal/percent_encode.cpp
-				${EXAMPLES_DIR}/internal/tree.cpp
-				${EXAMPLES_DIR}/internal/percent_decode.cpp
-				${EXAMPLES_DIR}/message/factory.cpp
-				${EXAMPLES_DIR}/message/serialize_parse.cpp
-				${EXAMPLES_DIR}/message/option.cpp
-				${EXAMPLES_DIR}/message/serialize_class.cpp
-				${EXAMPLES_DIR}/message/serialize_parse_reliable.cpp
-				${EXAMPLES_DIR}/message/signaling.cpp
-				${EXAMPLES_DIR}/uri/decompose.cpp
-				${EXAMPLES_DIR}/resource/discovery.cpp
-				${EXAMPLES_DIR}/transmission/raw_transaction.cpp
-				${EXAMPLES_DIR}/transmission/raw_engine.cpp
-				${EXAMPLES_DIR}/transmission/engine_server.cpp
-				${EXAMPLES_DIR}/transmission/request_get_block_wise.cpp
-				${EXAMPLES_DIR}/transmission/request_put_block_wise.cpp
-				${EXAMPLES_DIR}/transmission/response_block_wise.cpp
-				${EXAMPLES_DIR}/transmission/engine_tcp_client.cpp
-				${EXAMPLES_DIR}/transmission/engine_tcp_server.cpp
-				${EXAMPLES_DIR}/observe/client_observe.cpp
-				${EXAMPLES_DIR}/observe/server_observe.cpp
-				${EXAMPLES_DIR}/port/endpoint_ipv6.cpp
-				${EXAMPLES_DIR}/port/udp_server.cpp
-				${EXAMPLES_DIR}/port/udp_client.cpp
-				${EXAMPLES_DIR}/port/tcp_client.cpp
-				${EXAMPLES_DIR}/port/tcp_server.cpp
+#				${EXAMPLES_DIR}/internal/percent_encode.cpp
+#				${EXAMPLES_DIR}/internal/tree.cpp
+#				${EXAMPLES_DIR}/internal/percent_decode.cpp
+#				${EXAMPLES_DIR}/message/factory.cpp
+#				${EXAMPLES_DIR}/message/serialize_parse.cpp
+#				${EXAMPLES_DIR}/message/option.cpp
+#				${EXAMPLES_DIR}/message/serialize_class.cpp
+#				${EXAMPLES_DIR}/message/serialize_parse_reliable.cpp
+#				${EXAMPLES_DIR}/message/signaling.cpp
+#				${EXAMPLES_DIR}/uri/decompose.cpp
+#				${EXAMPLES_DIR}/resource/discovery.cpp
+#				${EXAMPLES_DIR}/transmission/raw_transaction.cpp
+#				${EXAMPLES_DIR}/transmission/raw_engine.cpp
+#				${EXAMPLES_DIR}/transmission/engine_server.cpp
+#				${EXAMPLES_DIR}/transmission/request_get_block_wise.cpp
+#				${EXAMPLES_DIR}/transmission/request_put_block_wise.cpp
+#				${EXAMPLES_DIR}/transmission/response_block_wise.cpp
+#				${EXAMPLES_DIR}/transmission/engine_tcp_client.cpp
+#				${EXAMPLES_DIR}/transmission/engine_tcp_server.cpp
+#				${EXAMPLES_DIR}/observe/client_observe.cpp
+#				${EXAMPLES_DIR}/observe/server_observe.cpp
+				${EXAMPLES_DIR}/observe/tcp_client_observe.cpp
+				${EXAMPLES_DIR}/observe/tcp_server_observe.cpp
+#				${EXAMPLES_DIR}/port/endpoint_ipv6.cpp
+#				${EXAMPLES_DIR}/port/udp_server.cpp
+#				${EXAMPLES_DIR}/port/udp_client.cpp
+#				${EXAMPLES_DIR}/port/tcp_client.cpp
+#				${EXAMPLES_DIR}/port/tcp_server.cpp
 			)
 
 foreach(example ${EXAMPLES_LIST})
@@ -54,7 +56,8 @@ foreach(example ${EXAMPLES_LIST})
 	else()
 		if(${EXAMPLE_OUT} STREQUAL engine_server OR 
 		${EXAMPLE_OUT} STREQUAL engine_tcp_server OR
-		${EXAMPLE_OUT} STREQUAL server_observe)
+		${EXAMPLE_OUT} STREQUAL server_observe OR
+		${EXAMPLE_OUT} STREQUAL tcp_server_observe)
 			target_link_libraries(${EXAMPLE_OUT} pthread)
 		endif()
 	endif()

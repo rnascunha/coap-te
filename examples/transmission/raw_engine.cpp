@@ -195,11 +195,11 @@ static bool response_flag = false;
  * async responses or timed out transaction
  */
 void default_callback(engine::endpoint const& ep,
-		CoAP::Message::message const& response,
+		CoAP::Message::message const* response,
 		void* engine_ptr) noexcept
 {
 	debug(example_mod, "default cb called");
-	CoAP::Debug::print_message(response);
+	CoAP::Debug::print_message(*response);
 
 	/**
 	 * If we are receiving a response in a confirmable message (probably from a
@@ -212,7 +212,7 @@ void default_callback(engine::endpoint const& ep,
 	 * Highly recommended to always call this function if you expect a separated response
 	 */
 	CoAP::Error ec;
-	if(CoAP::Transmission::send_async_ack(*static_cast<engine*>(engine_ptr), ep, response, ec))
+	if(CoAP::Transmission::send_async_ack(*static_cast<engine*>(engine_ptr), ep, *response, ec))
 	{
 		debug(example_mod, "Confirmable response received");
 		if(ec) exit_error(ec, "send async");

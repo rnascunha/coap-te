@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <type_traits>
 
 #include "types.hpp"
 #include "message/types.hpp"
@@ -14,10 +15,14 @@
 namespace CoAP{
 namespace Observe{
 
-template<typename Endpoint>
+template<typename Endpoint,
+		bool SetOrderParameters = true>
 class observe{
+	using empty = struct{};
 	public:
 		using endpoint_t = Endpoint;
+		using order_type =
+				typename std::conditional<SetOrderParameters, order, empty>::type;
 
 		template<typename Message>
 		void set(endpoint_t const& ep, Message const& msg) noexcept
@@ -27,11 +32,6 @@ class observe{
 			std::memcpy(token_, msg.token, token_len_);
 
 			using namespace CoAP::Message;
-			Option::option opt;
-			if(Option::get_option(msg, opt, Option::code::accept))
-			{
-				format_ = static_cast<content_format>(Option::parse_unsigned(opt));
-			}
 
 			used_ = true;
 		}
@@ -39,7 +39,6 @@ class observe{
 		Endpoint const& endpoint() const noexcept{ return ep_; }
 		std::uint8_t const* token() const noexcept{ return token_; }
 		std::size_t token_len() const noexcept{ return token_len_; }
-		CoAP::Message::content_format format() const noexcept { return format_; }
 
 		template<typename Message>
 		bool check(endpoint_t const& ep, Message const& msg) const noexcept
@@ -50,7 +49,6 @@ class observe{
 		void clear() noexcept
 		{
 			token_len_ = 0;
-			format_ = invalid_format;
 			used_ = false;
 		}
 
@@ -63,13 +61,20 @@ class observe{
 					&& std::memcmp(token_, msg.token, token_len_) == 0;
 		}
 
+		order_type& fresh_data() noexcept
+		{
+			static_assert(SetOrderParameters, "Order parameter not enabled");
+			return order_;
+		}
+
 	private:
 		Endpoint		ep_;
 		std::uint8_t	token_[8];
 		std::size_t		token_len_ = 0;
-		CoAP::Message::content_format format_ = invalid_format;
 
 		bool used_ = false;
+
+		order_type		order_;
 };
 
 }//CoAP
