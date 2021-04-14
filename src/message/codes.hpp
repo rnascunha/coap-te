@@ -33,6 +33,12 @@ enum class code : std::uint8_t
 	post					= make_code(code_class::request, 2),	//0.02 POST
 	put						= make_code(code_class::request, 3),	//0.03 PUT
 	cdelete					= make_code(code_class::request, 4),	//0.04 DELETE
+#if	COAP_TE_FETCH_PATCH	== 1
+	//https://tools.ietf.org/html/rfc8132#section-6
+	fetch					= make_code(code_class::request, 5),	//0.05 FETCH
+	patch					= make_code(code_class::request, 6),	//0.06 PATCH
+	ipatch					= make_code(code_class::request, 7),	//0.07 PATCH
+#endif /* COAP_TE_FETCH_PATCH == 1 */
 	//response - https://tools.ietf.org/html/rfc7252#section-12.1.2
 	//success
 	success					= make_code(code_class::success, 0),	//2.00 Success
@@ -55,9 +61,17 @@ enum class code : std::uint8_t
 #if	COAP_TE_BLOCKWISE_TRANSFER == 1
 	request_entity_incomplete = make_code(code_class::client_error, 8),	//4.08 Request Entity Incomplete
 #endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
+#if	COAP_TE_FETCH_PATCH	== 1
+	//https://tools.ietf.org/html/rfc8132#section-6
+	conflict				= make_code(code_class::client_error, 9),	//4.09 Conflict
+#endif /* COAP_TE_FETCH_PATCH == 1 */
 	precondition_failed 	= make_code(code_class::client_error, 12),	//4.12 Precondition Failed
 	request_entity_too_large = make_code(code_class::client_error, 13), //4.13 Request Entity Too Large
 	unsupported_content_format = make_code(code_class::client_error, 15),	//4.15 Unsupported Content-Format
+#if	COAP_TE_FETCH_PATCH	== 1
+	//https://tools.ietf.org/html/rfc8132#section-6
+	unprocessable_untity	= make_code(code_class::client_error, 22),	//4.22 Unprocessable Entity
+#endif /* COAP_TE_FETCH_PATCH == 1 */
 	//Server Error
 	internal_server_error 	= make_code(code_class::server_error, 0),	//5.00 Internal Server Error
 	not_implemented 		= make_code(code_class::server_error, 1),	//5.01 Not Implemented

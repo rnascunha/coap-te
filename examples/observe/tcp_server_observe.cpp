@@ -251,12 +251,12 @@ static void thread_time(engine& engine)
 					engine::request<> req{*time_list[i]};
 
 					/**
-					 * All observe notification must be associated with a observe
-					 * option with a sync number.
-					 *
-					 * We are going to generate this number based on the system clock
+					 * At unreliable connection, all observe notification must be
+					 * associated with a observe option with a sync number. This is not
+					 * necessary for realiable connection. We are just going to use a dump
+					 * number (0 by preference will set to option to empty)
 					 */
-					unsigned num = CoAP::Observe::generate_option_value_from_clock();
+					unsigned num = 0;
 					CoAP::Message::Option::node obs_op{CoAP::Message::Option::code::observe, num};
 					req.add_option(obs_op);
 
@@ -321,12 +321,12 @@ static void thread_type(engine& engine)
 					engine::request<> req{*type_list[i], CoAP::Message::code::content};
 
 					/**
-					 * All observe notification must be associated with a observe
-					 * option with a sync number.
-					 *
-					 * We are going to generate this number based on the system clock
+					 * At unreliable connection, all observe notification must be
+					 * associated with a observe option with a sync number. This is not
+					 * necessary for realiable connection. We are just going to use a dump
+					 * number (0 by preference will set to option to empty)
 					 */
-					unsigned num = CoAP::Observe::generate_option_value_from_clock();
+					unsigned num = 0;
 					CoAP::Message::Option::node obs_op{CoAP::Message::Option::code::observe, num};
 					req.add_option(obs_op);
 
@@ -371,10 +371,6 @@ static unsigned read_sensor()
  */
 static void thread_sensor(engine& engine)
 {
-	/**
-	 * Variable that will be updated and sent as observe value
-	 */
-	unsigned option_value = 0;
 	while(true)
 	{
 		CoAP::time_t t = CoAP::time();
@@ -397,12 +393,12 @@ static void thread_sensor(engine& engine)
 						CoAP::Message::code::content};
 
 					/**
-					 * All observe notification must be associated with a observe
-					 * option with a sync number.
-					 *
-					 * We are going to generate this value by updating a variable
+					 * At unreliable connection, all observe notification must be
+					 * associated with a observe option with a sync number. This is not
+					 * necessary for realiable connection. We are just going to use a dump
+					 * number (0 by preference will set to option to empty)
 					 */
-					unsigned num = ++option_value;
+					unsigned num = 0;
 					CoAP::Message::Option::node obs_op{CoAP::Message::Option::code::observe, num};
 					req.add_option(obs_op);
 

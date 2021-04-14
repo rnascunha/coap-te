@@ -1,6 +1,7 @@
 #ifndef COAP_TE_RESOURCE_HPP__
 #define COAP_TE_RESOURCE_HPP__
 
+#include "defines/defaults.hpp"
 #include <cstring>
 #include "message/codes.hpp"
 #include "internal/list.hpp"
@@ -9,7 +10,8 @@ namespace CoAP{
 namespace Resource{
 
 template<typename Callback_Functor,
-		bool HasDescription = false>
+		bool HasDescription = false,
+		bool UseExtraMethods = false>
 class resource
 {
 	using empty = struct{};
@@ -17,6 +19,10 @@ class resource
 		static constexpr const bool has_description = HasDescription;
 		using description_type = typename std::conditional<HasDescription, const char*, empty>::type;
 		using callback_t = Callback_Functor;
+
+		using callback_ex_t = typename std::conditional<UseExtraMethods, callback_t, empty>::type;
+		using callback_ex_ptr_t = typename std::conditional<UseExtraMethods, callback_t*, empty>::type;
+
 		resource(const char* path,
 				callback_t get = nullptr, callback_t post = nullptr,
 				callback_t put = nullptr, callback_t del = nullptr)
@@ -73,9 +79,37 @@ class resource
 			return *this;
 		}
 
+#if COAP_TE_FETCH_PATCH == 1
+		resource& fetch(callback_t cb = nullptr) noexcept
+		{
+			static_assert(UseExtraMethods, "Disabled extra methods");
+			fetch_ = cb;
+			return *this;
+		}
+
+		resource& patch(callback_t cb = nullptr) noexcept
+		{
+			static_assert(UseExtraMethods, "Disabled extra methods");
+			patch_ = cb;
+			return *this;
+		}
+
+		resource& ipatch(callback_t cb = nullptr) noexcept
+		{
+			static_assert(UseExtraMethods, "Disabled extra methods");
+			ipatch_ = cb;
+			return *this;
+		}
+#endif /* COAP_TE_FETCH_PATCH == 1 */
 		bool has_callback() const noexcept
 		{
-			return get_ != nullptr || post_ != nullptr || del_ != nullptr || put_ != nullptr;
+			if constexpr(!UseExtraMethods)
+				return get_ != nullptr || post_ != nullptr || del_ != nullptr || put_ != nullptr;
+#if COAP_TE_FETCH_PATCH == 1
+			else
+				return get_ != nullptr || post_ != nullptr || del_ != nullptr || put_ != nullptr
+						|| fetch_ != nullptr || patch_ != nullptr || ipatch_ != nullptr;
+#endif /* COAP_TE_FETCH_PATCH == 1 */
 		}
 
 		template<typename Message,
@@ -101,6 +135,20 @@ class resource
 					return del_ ? del_(request, response, engine), true : false;
 					break;
 				default:
+#if COAP_TE_FETCH_PATCH == 1
+					if constexpr(UseExtraMethods)
+					{
+						switch(code)
+						{
+							case code::fetch:
+								return fetch_ ? fetch_(request, response, engine), true : false;
+							case code::patch:
+								return patch_ ? patch_(request, response, engine), true : false;
+							case code::ipatch:
+								return ipatch_ ? ipatch_(request, response, engine), true : false;
+						}
+					}
+#endif /* COAP_TE_FETCH_PATCH == 1 */
 					break;
 			}
 			return false;
@@ -138,6 +186,12 @@ class resource
 		callback_t*			post_;
 		callback_t*			put_;
 		callback_t*			del_;
+
+#if COAP_TE_FETCH_PATCH == 1
+		callback_ex_ptr_t	fetch_;
+		callback_ex_ptr_t	patch_;
+		callback_ex_ptr_t	ipatch_;
+#endif /* COAP_TE_FETCH_PATCH == 1 */
 
 		description_type	desc_;
 };

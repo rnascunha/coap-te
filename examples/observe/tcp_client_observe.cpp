@@ -91,12 +91,13 @@ static constexpr const char* sensor_token = "sensor";	//sensor resource
  * check if the message is from what resource
  *
  * The second template parameter is to enable/disable the storage of
- * order parameters. Without it, we are just going to assume that the
- * incoming message is the freshnest
+ * order parameters. As we are using a reliable connection type (TCP)
+ * that garantees do order of the packets received, we don't need it.
+ * We are going to disable setting it to false.
  */
 static CoAP::Observe::observe<engine::socket, false> time_obs;
-static CoAP::Observe::observe<engine::socket, true> type_obs;
-static CoAP::Observe::observe<engine::socket, true> sensor_obs;
+static CoAP::Observe::observe<engine::socket, false> type_obs;
+static CoAP::Observe::observe<engine::socket, false> sensor_obs;
 
 /**
  * As observable are sent asynchronously, not associated with
@@ -120,26 +121,12 @@ void default_callback(engine::socket ep,
 	}
 	else if(type_obs.check(ep, *response)) 		//Is from type resource?
 	{
-		/**
-		 * The freshness fuction will check if the received message if fresher than the stored
-		 * one. If it is, returns true and update the order parameters. Otherwise, return false.
-		 */
-		if(CoAP::Observe::freshness(type_obs.fresh_data(), *response))
-			status(example_mod, "typed: %c", *static_cast<const char*>(response->payload));
-		else
-			status(example_mod, "Message received not fresh");
+		status(example_mod, "typed: %c", *static_cast<const char*>(response->payload));
 	}
 	else if(sensor_obs.check(ep, *response))		//Is from sensor resource?
 	{
-		/**
-		 * The freshness fuction will check if the received message if fresher than the stored
-		 * one. If it is, returns true and update the order parameters. Otherwise, return false.
-		 */
-		if(CoAP::Observe::freshness(sensor_obs.fresh_data(), *response))
-			status(example_mod, "sensor: %.*s",
+		status(example_mod, "sensor: %.*s",
 				static_cast<int>(response->payload_len), static_cast<const char*>(response->payload));
-		else
-			status(example_mod, "Message received not fresh");
 	}
 	else
 		warning(example_mod, "Response is not from a observable request...");

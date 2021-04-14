@@ -14,6 +14,7 @@ It's implemented:
 * Reliable connections ([RFC8323](https://tools.ietf.org/html/rfc8323));
 * Resource Discovery ([RFC6690](https://tools.ietf.org/html/rfc6690));
 * Observing ([RFC7641](https://tools.ietf.org/html/rfc7641));
+* Fetch, Patch and iPatch methods ([RFC8132](https://tools.ietf.org/html/rfc8132));
 
 It's NOT implemented (yet):
 * Cache strategie;

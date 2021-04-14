@@ -36,6 +36,14 @@
 #define COAP_TE_OBSERVABLE_RESOURCE 1
 #endif /* COAP_TE_OBSERVABLE_RESOURCE */
 
+/**
+ * RFC8132 - PATCH and FETCH Methods for the Constrained Application Protocol (CoAP)
+ * https://tools.ietf.org/html/rfc8132
+ */
+#ifndef COAP_TE_FETCH_PATCH
+#define COAP_TE_FETCH_PATCH	1
+#endif /* COAP_TE_FETCH_PATCH */
+
 namespace CoAP{
 
 static constexpr std::uint16_t default_port = 5683;

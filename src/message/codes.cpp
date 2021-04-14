@@ -13,6 +13,11 @@ bool check_code(code mcode) noexcept
 		case code::post:						//0.02 POST
 		case code::put:							//0.03 PUT
 		case code::cdelete:						//0.04 DELETE
+#if	COAP_TE_FETCH_PATCH	== 1
+		case code::fetch:						//0.05 FETCH
+		case code::patch:						//0.06 PATCH
+		case code::ipatch:						//0.07 PATCH
+#endif /* COAP_TE_FETCH_PATCH == 1 */
 		//response
 		//success
 		case code::success:						//2.00 Success
@@ -35,9 +40,15 @@ bool check_code(code mcode) noexcept
 #if	COAP_TE_BLOCKWISE_TRANSFER == 1
 		case code::request_entity_incomplete:	//4.08 Request Entity Incomplete
 #endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
+#if	COAP_TE_FETCH_PATCH	== 1
+		case code::conflict:					//4.09 Conflict
+#endif /* COAP_TE_FETCH_PATCH == 1 */
 		case code::precondition_failed:			//4.12 Precondition Failed
 		case code::request_entity_too_large:	//4.13 Request Entity Too Large
 		case code::unsupported_content_format:	//4.15 Unsupported Content-Format
+#if	COAP_TE_FETCH_PATCH	== 1
+		case code::unprocessable_untity:		//4.22 Unprocessable Entity
+#endif /* COAP_TE_FETCH_PATCH == 1 */
 		//Server Error
 		case code::internal_server_error:		//5.00 Internal Server Error
 		case code::not_implemented:				//5.01 Not Implemented

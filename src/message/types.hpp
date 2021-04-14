@@ -26,6 +26,11 @@ enum class content_format : unsigned
 	application_octet_stream = 42, 	//application/octet-stream
 	application_exi			= 47, 	//application/exi
 	application_json		= 50,	//application/json
+#if COAP_TE_FETCH_PATCH == 1
+	//https://tools.ietf.org/html/rfc8132#section-6
+	 application_json_patch_json = 51,	//application/json-patch+json
+	 application_merge_patch_json = 52	//application/merge-patch+json
+#endif /* COAP_TE_FETCH_PATCH == 1 */
 };
 
 using accept = content_format;
