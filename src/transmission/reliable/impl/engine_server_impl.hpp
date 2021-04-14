@@ -156,9 +156,9 @@ process(socket sock, std::uint8_t
 			if(ec == CoAP::errc::insufficient_buffer)
 			{
 				std::size_t bu = make_response_code_error<set_length>(msg,
-						wbuffer_, Config.max_message_size,
+						buffer_, Config.max_message_size,
 						CoAP::Message::code::request_entity_too_large);
-				conn_.send(sock, wbuffer_, bu, ec);
+				conn_.send(sock, buffer_, bu, ec);
 			}
 			return;
 		}
@@ -196,9 +196,9 @@ process(socket sock, std::uint8_t
 				 * simplest approach is to always return 5.01 (Not Implemented)
 				 */
 				std::size_t bu = make_response_code_error<set_length>(msg,
-								wbuffer_, Config.max_message_size,
+								buffer_, Config.max_message_size,
 								CoAP::Message::code::not_implemented);
-				conn_.send(sock, wbuffer_, bu, ec);
+				conn_.send(sock, buffer_, bu, ec);
 			}
 		}
 
@@ -241,9 +241,9 @@ process_request(socket sock,
 	if(!res)
 	{
 		std::size_t bu = make_response_code_error<set_length>(
-				request, wbuffer_, Config.max_message_size,
+				request, buffer_, Config.max_message_size,
 				CoAP::Message::code::not_found);
-		conn_.send(sock, wbuffer_, bu, ec);
+		conn_.send(sock, buffer_, bu, ec);
 	}
 	else
 	{
@@ -251,7 +251,7 @@ process_request(socket sock,
 
 		response response(sock,
 				request.token, request.token_len,
-				wbuffer_, Config.max_message_size);
+				buffer_, Config.max_message_size);
 		if(res->call(request.mcode, request, response, this))
 		{
 			debug(engine_mod, "Method found");
@@ -263,9 +263,9 @@ process_request(socket sock,
 		else
 		{
 			std::size_t bu = make_response_code_error<set_length>(
-					request, wbuffer_, Config.max_message_size,
+					request, buffer_, Config.max_message_size,
 					CoAP::Message::code::method_not_allowed);
-			conn_.send(sock, wbuffer_, bu, ec);
+			conn_.send(sock, buffer_, bu, ec);
 		}
 	}
 }
@@ -451,15 +451,16 @@ run(CoAP::Error& ec) noexcept
 {
 	using engine = engine_server<Connection, Config, ConnectionList, TransactionList, CallbackDefaultFunctor, Resource>;
 	using namespace std::placeholders;
-	conn_.template receive<BlockTimeMs, MaxEvents>(
-			buffer_, packet_size, ec,
-			std::bind(&engine::on_read, this, _1, _2, _3),
-			std::bind(&engine::on_open, this, _1),
-			std::bind(&engine::on_close, this, _1));
+
+	conn_.template run<BlockTimeMs, MaxEvents>(
+				ec,
+				std::bind(&engine::on_read, this, _1),
+				std::bind(&engine::on_open, this, _1),
+				std::bind(&engine::on_close, this, _1));
 
 	if(ec)
 	{
-		error(engine_mod, ec, "read");
+		error(engine_mod, ec, "run");
 		close<false>();
 		return false;
 	}
@@ -477,11 +478,76 @@ template<typename Connection,
 	typename Resource>
 void
 engine_server<Connection, Config, ConnectionList, TransactionList, CallbackDefaultFunctor, Resource>::
-on_read(socket sock, void* buffer, std::size_t size) noexcept
+on_read(socket sock) noexcept
 {
-	debug(engine_mod, "Received %zu bytes [%d]", size, sock);
+	debug(engine_mod, "On read [%d]", sock);
 	CoAP::Error ec;
-	process(sock, buffer_, size, ec);
+
+	while(true)
+	{
+		std::size_t size = conn_.receive(sock, buffer_, 1, ec);
+
+		if(ec)
+		{
+			error(engine_mod, ec, "read");
+			break;
+		}
+
+		if(size == 0) break;
+
+		using namespace CoAP::Message::Reliable;
+		unsigned shift = 0, length_s = 0;
+		extend_length length;
+
+		length = static_cast<extend_length>(buffer_[0] >> 4);
+		if(length == extend_length::one_byte)
+		{
+			shift = 1;
+			length_s = 13;
+		}
+		else if(length == extend_length::two_bytes)
+		{
+			shift = 2;
+			length_s = 269;
+		}
+		else if(length == extend_length::three_bytes)
+		{
+			shift = 3;
+			length_s = 65805;
+		}
+		else
+			length_s = static_cast<unsigned>(length);
+
+		if(shift)
+		{
+			size = conn_.receive(sock, buffer_ + 1, shift, ec);
+			if(size < shift)
+			{
+				error(engine_mod, "message to small [%zd/u]", size, shift);
+				break;
+			}
+
+			unsigned value = 0;
+			CoAP::Helper::array_to_unsigned(buffer_ + 1, shift, value);
+			length_s += value;
+		}
+		length_s += (buffer_[0] & 0x0F) /*token*/ + 1 /*code*/;
+		size = conn_.receive(sock, buffer_ + 1 + shift, length_s, ec);
+
+		if(size < length_s)
+		{
+			error(engine_mod, "message to small [%zd/u]", size, length_s);
+			break;
+		}
+
+		process(sock, buffer_, size + 1 + shift, ec);
+
+		if(ec)
+		{
+			error(engine_mod, ec, "process");
+			break;
+		}
+	}
 }
 
 template<typename Connection,
@@ -515,11 +581,11 @@ on_open(socket sock) noexcept
 
 	debug(engine_mod, "Making CSM");
 	CoAP::Error ec;
-	std::size_t size = make_csm_message<set_length>(Config, wbuffer_, Config.max_message_size, ec);
+	std::size_t size = make_csm_message<set_length>(Config, buffer_, Config.max_message_size, ec);
 	if(ec) return;
 
 	debug(engine_mod, "Sending CSM[%lu]", size);
-	send(sock, wbuffer_, size, ec);
+	send(sock, buffer_, size, ec);
 }
 
 template<typename Connection,

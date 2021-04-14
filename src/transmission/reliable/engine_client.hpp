@@ -149,6 +149,8 @@ class engine_client
 		bool run(CoAP::Error& ec) noexcept;
 		bool operator()(CoAP::Error& ec) noexcept;
 	private:
+		void read_packet(CoAP::Error& ec) noexcept;
+
 		void process_response(CoAP::Message::Reliable::message const&) noexcept;
 		void process_request(CoAP::Message::Reliable::message const&,
 							CoAP::Error& ec) noexcept;
@@ -166,7 +168,6 @@ class engine_client
 		csm_configure		server_csm_;
 		Connection			conn_;
 		std::uint8_t		buffer_[packet_size];
-		std::uint8_t		wbuffer_[packet_size];
 
 		default_response_cb default_cb_;
 };

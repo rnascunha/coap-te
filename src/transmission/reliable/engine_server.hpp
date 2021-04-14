@@ -181,7 +181,7 @@ class engine_server
 		void process_signaling_release(socket, CoAP::Message::Reliable::message const&) noexcept;
 		void process_signaling_abort(socket, CoAP::Message::Reliable::message const&) noexcept;
 
-		void on_read(socket, void*, std::size_t) noexcept;
+		void on_read(socket) noexcept;
 		void on_open(socket) noexcept;
 		void on_close(socket) noexcept;
 
@@ -192,7 +192,6 @@ class engine_server
 
 		Connection			conn_;
 		std::uint8_t		buffer_[packet_size];
-		std::uint8_t		wbuffer_[packet_size];
 
 		default_response_cb default_cb_;
 };

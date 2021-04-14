@@ -54,10 +54,10 @@ open(endpoint& ep, CoAP::Error& ec) noexcept
 	conn_.open(ep, ec);
 	if(ec) return false;
 
-	std::size_t size = make_csm_message<Connection::set_length>(Config, wbuffer_, Config.max_message_size, ec);
+	std::size_t size = make_csm_message<Connection::set_length>(Config, buffer_, Config.max_message_size, ec);
 	if(ec) return false;
 
-	send(wbuffer_, size, ec);
+	send(buffer_, size, ec);
 	return ec ? false : true;
 }
 
@@ -126,9 +126,9 @@ process(std::uint8_t const* buffer, std::size_t buffer_len,
 			if(ec == CoAP::errc::insufficient_buffer)
 			{
 				std::size_t bu = make_response_code_error<set_length>(msg,
-						wbuffer_, Config.max_message_size,
+						buffer_, Config.max_message_size,
 						CoAP::Message::code::request_entity_too_large);
-				conn_.send(wbuffer_, bu, ec);
+				conn_.send(buffer_, bu, ec);
 			}
 			return;
 		}
@@ -164,9 +164,9 @@ process(std::uint8_t const* buffer, std::size_t buffer_len,
 				 * simplest approach is to always return 5.01 (Not Implemented)
 				 */
 				std::size_t bu = make_response_code_error<set_length>(msg,
-								wbuffer_, Config.max_message_size,
+								buffer_, Config.max_message_size,
 								CoAP::Message::code::not_implemented);
-				conn_.send(wbuffer_, bu, ec);
+				conn_.send(buffer_, bu, ec);
 			}
 		}
 
@@ -204,16 +204,16 @@ process_request(CoAP::Message::Reliable::message const& request,
 	if(!res)
 	{
 		std::size_t bu = make_response_code_error<set_length>(
-				request, wbuffer_, Config.max_message_size,
+				request, buffer_, Config.max_message_size,
 				CoAP::Message::code::not_found);
-		conn_.send(wbuffer_, bu, ec);
+		conn_.send(buffer_, bu, ec);
 	}
 	else
 	{
 		debug(engine_mod, "Found resource %s", res->path());
 		response response(conn_.native(),
 				request.token, request.token_len,
-				wbuffer_, Config.max_message_size);
+				buffer_, Config.max_message_size);
 		if(res->call(request.mcode, request, response, this))
 		{
 			debug(engine_mod, "Method found");
@@ -225,9 +225,9 @@ process_request(CoAP::Message::Reliable::message const& request,
 		else
 		{
 			std::size_t bu = make_response_code_error<set_length>(
-					request, wbuffer_, Config.max_message_size,
+					request, buffer_, Config.max_message_size,
 					CoAP::Message::code::method_not_allowed);
-			conn_.send(wbuffer_, bu, ec);
+			conn_.send(buffer_, bu, ec);
 		}
 	}
 }
@@ -386,7 +386,8 @@ bool
 engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
 run(CoAP::Error& ec) noexcept
 {
-	std::size_t size = conn_.receive(buffer_, packet_size, ec);
+	read_packet(ec);
+
 	if(ec)
 	{
 		error(engine_mod, ec, "read");
@@ -396,15 +397,86 @@ run(CoAP::Error& ec) noexcept
 		return false;
 	}
 
-	if(size)
-	{
-		CoAP::Log::debug(engine_mod, "Received %zu bytes", size);
-		process(buffer_, size, ec);
-	}
-
 	check_transactions();
 
 	return true;
+}
+
+template<typename Connection,
+	csm_configure const& Config,
+	typename TransactionList,
+	typename CallbackDefaultFunctor,
+	typename Resource>
+void
+engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
+read_packet(CoAP::Error& ec) noexcept
+{
+	while(true)
+	{
+		std::size_t size = conn_.receive(buffer_, 1, ec);
+
+		if(ec)
+		{
+			error(engine_mod, ec, "read");
+			break;
+		}
+
+		if(size == 0) break;
+
+		using namespace CoAP::Message::Reliable;
+		unsigned shift = 0, length_s = 0;
+		extend_length length;
+
+		length = static_cast<extend_length>(buffer_[0] >> 4);
+		if(length == extend_length::one_byte)
+		{
+			shift = 1;
+			length_s = 13;
+		}
+		else if(length == extend_length::two_bytes)
+		{
+			shift = 2;
+			length_s = 269;
+		}
+		else if(length == extend_length::three_bytes)
+		{
+			shift = 3;
+			length_s = 65805;
+		}
+		else
+			length_s = static_cast<unsigned>(length);
+
+		if(shift)
+		{
+			size = conn_.receive(buffer_ + 1, shift, ec);
+			if(size < shift)
+			{
+				error(engine_mod, "message to small [%zd/u]", size, shift);
+				break;
+			}
+
+			unsigned value = 0;
+			CoAP::Helper::array_to_unsigned(buffer_ + 1, shift, value);
+			length_s += value;
+		}
+		length_s += (buffer_[0] & 0x0F) /*token*/ + 1 /*code*/;
+		size = conn_.receive(buffer_ + 1 + shift, length_s, ec);
+
+		if(size < length_s)
+		{
+			error(engine_mod, "message to small [%zd/u]", size, length_s);
+			break;
+		}
+
+		CoAP::Error ecp;
+		process(buffer_, size + 1 + shift, ecp);
+
+		if(ecp)
+		{
+			error(engine_mod, ecp, "process");
+			break;
+		}
+	}
 }
 
 template<typename Connection,
@@ -442,4 +514,3 @@ operator()(CoAP::Error& ec) noexcept
 }//CoAP
 
 #endif /* COAP_TE_TRANSMISSION_RELIABLE_TRANSACTION_IMPL_HPP__ */
-

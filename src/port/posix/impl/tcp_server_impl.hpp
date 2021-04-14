@@ -153,7 +153,7 @@ template<auto* ReadCb,
 	unsigned MaxEvents /* = 32 */>
 bool
 tcp_server<Endpoint, Flags>::
-receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
+run(CoAP::Error& ec) noexcept
 {
 	struct epoll_event events[MaxEvents];
 
@@ -171,14 +171,8 @@ receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 		else if (events[i].events & EPOLLIN)
 		{
 			/* handle EPOLLIN event */
-			for (;;)
-			{
-				ssize_t bytes = read(events[i].data.fd, buffer, buffer_len);
-				if (bytes <= 0 /* || errno == EAGAIN */ )
-					break;
-				else
-					ReadCb(events[i].data.fd, buffer, bytes);
-			}
+			handler s = events[i].data.fd;
+			ReadCb(s);
 		}
 		/* check if the connection is closing */
 		if (events[i].events & (EPOLLRDHUP | EPOLLHUP))
@@ -205,7 +199,7 @@ template<
 		typename CloseCb /* = void* */>
 bool
 tcp_server<Endpoint, Flags>::
-receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec,
+run(CoAP::Error& ec,
 		ReadCb read_cb,
 		OpenCb open_cb/* = nullptr */ [[maybe_unused]],
 		CloseCb close_cb/* = nullptr */ [[maybe_unused]]) noexcept
@@ -226,25 +220,14 @@ receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec,
 		else if (events[i].events & EPOLLIN)
 		{
 			/* handle EPOLLIN event */
-			for (;;)
-			{
-				ssize_t bytes = read(events[i].data.fd, buffer, buffer_len);
-				if (bytes <= 0 /* || errno == EAGAIN */ )
-				{
-					break;
-				}
-				else
-				{
-					handler s = events[i].data.fd;
-					read_cb(s, buffer, bytes);
-				}
-			}
+			handler s = events[i].data.fd;
+			read_cb(s);
 		}
 		/* check if the connection is closing */
 		if (events[i].events & (EPOLLRDHUP | EPOLLHUP))
 		{
 			handler s = events[i].data.fd;
-			if constexpr(!std::is_same<void*, OpenCb>::value)
+			if constexpr(!std::is_same<void*, CloseCb>::value)
 			{
 				close_cb(s);
 			}
@@ -254,6 +237,25 @@ receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec,
 	return ec ? false : true;
 }
 
+
+template<class Endpoint,
+		int Flags>
+std::size_t
+tcp_server<Endpoint, Flags>::
+receive(handler socket, void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
+{
+	ssize_t bytes = read(socket, buffer, buffer_len);
+	if (bytes < 0)
+	{
+		if constexpr(Flags & MSG_DONTWAIT)
+		{
+			if(!(errno == EAGAIN || errno == EWOULDBLOCK))
+				ec = CoAP::errc::socket_error;
+		}
+		return 0;
+	}
+	return bytes;
+}
 
 template<class Endpoint,
 		int Flags>

@@ -33,7 +33,7 @@ class tcp_server{
 			auto* OpenCb = (void*)nullptr,
 			auto* CloseCb = (void*)nullptr,
 			unsigned MaxEvents = 32>
-		bool receive(void* buffer, std::size_t buffer_len, CoAP::Error&) noexcept;
+		bool run(CoAP::Error&) noexcept;
 
 		template<
 			int BlockTimeMs = 0,
@@ -41,9 +41,10 @@ class tcp_server{
 			typename ReadCb,
 			typename OpenCb = void*,
 			typename CloseCb = void*>
-		bool receive(void* buffer, std::size_t buffer_len, CoAP::Error&,
+		bool run(CoAP::Error&,
 				ReadCb, OpenCb = nullptr, CloseCb = nullptr) noexcept;
 
+		std::size_t receive(handler socket, void* buffer, std::size_t, CoAP::Error&) noexcept;
 		std::size_t send(handler to_socket, const void*, std::size_t, CoAP::Error&)  noexcept;
 
 		void close() noexcept;

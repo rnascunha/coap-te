@@ -109,6 +109,13 @@ void default_callback(engine::socket ep,
 		void* engine_ptr) noexcept
 {
 	debug(example_mod, "default cb called");
+
+	if(!response)
+	{
+		status(example_mod, "Socket closed!");
+		return;
+	}
+
 	CoAP::Debug::print_message_string(*response);
 
 	/**
