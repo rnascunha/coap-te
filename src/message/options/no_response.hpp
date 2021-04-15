@@ -3,6 +3,7 @@
 
 #include "../codes.hpp"
 #include "types.hpp"
+#include "template_class.hpp"
 
 namespace CoAP{
 namespace Message{

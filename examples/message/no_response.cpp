@@ -60,9 +60,16 @@ int main()
 	Factory<> fac;
 
 	/**
-	 * We are going to suppress any error message
+	 * We are going to suppress any error message (comment/uncomment
+	 * the following lines to change this behaviour
 	 */
-	Option::suppress sup = Option::suppress::client_error | Option::suppress::server_error;
+	Option::suppress sup =
+//			Option::suppress::success
+//			|
+			Option::suppress::client_error
+			|
+			Option::suppress::server_error
+			;
 	Option::node no_response_op{sup};
 
 	fac

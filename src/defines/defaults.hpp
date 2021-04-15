@@ -52,6 +52,14 @@
 #define COAP_TE_OPTION_NO_RESPONSE	1
 #endif /* COAP_TE_OPTION_NO_RESPONSE */
 
+/**
+ * RFC8768 - Constrained Application Protocol (CoAP) Hop-Limit Option
+ * https://tools.ietf.org/html/rfc8768
+ */
+#ifndef COAP_TE_OPTION_HOP_LIMIT
+#define COAP_TE_OPTION_HOP_LIMIT 1
+#endif /* COAP_TE_OPTION_HOP_LIMIT */
+
 namespace CoAP{
 
 static constexpr std::uint16_t default_port = 5683;

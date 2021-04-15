@@ -73,6 +73,9 @@ const char* code_string(CoAP::Message::code code) noexcept
 		case code::service_unavaiable: 	return "5.03 Service Unavailable";
 		case code::gateway_timeout: 	return "5.04 Gateway Timeout";
 		case code::proxying_not_supported: return "5.05 Proxying Not Supported";
+#if COAP_TE_OPTION_HOP_LIMIT == 1
+		case code::hop_limit_reached:	return "5.08 Hop Limit Reached";
+#endif /* COAP_TE_OPTION_HOP_LIMIT == 1 */
 #if COAP_TE_RELIABLE_CONNECTION == 1
 		case code::csm:					return "7.01 CSM";
 		case code::ping:				return "7.02 Ping";
@@ -110,6 +113,9 @@ const char* option_string(CoAP::Message::Option::code op) noexcept
 		case code::uri_path: 		return "Uri-Path";
 		case code::uri_port: 		return "Uri-Port";
 		case code::uri_query: 		return "Uri-Query";
+#if COAP_TE_OPTION_HOP_LIMIT == 1
+		case code::hop_limit:		return "Hop-Limit";
+#endif /* COAP_TE_OPTION_HOP_LIMIT == 1 */
 		case code::accept: 			return "Accept";
 		case code::if_match: 		return "If-Match";
 		case code::if_none_match: 	return "If-None-Match";

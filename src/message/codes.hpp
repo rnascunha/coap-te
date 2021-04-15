@@ -79,6 +79,9 @@ enum class code : std::uint8_t
 	service_unavaiable 		= make_code(code_class::server_error, 3),	//5.03 Service Unavailable
 	gateway_timeout 		= make_code(code_class::server_error, 4),	//5.04 Gateway Timeout
 	proxying_not_supported 	= make_code(code_class::server_error, 5),	//5.05 Proxying Not Supported
+#if COAP_TE_OPTION_HOP_LIMIT == 1
+	hop_limit_reached	 	= make_code(code_class::server_error, 8),	//5.08 Hop Limit Reached
+#endif /* COAP_TE_OPTION_HOP_LIMIT == 1 */
 #if COAP_TE_RELIABLE_CONNECTION == 1
 	csm						= make_code(code_class::signaling, 1),		//7.01 CSM
 	ping					= make_code(code_class::signaling, 2),		//7.02 Ping

@@ -1,15 +1,17 @@
 #ifndef COAP_TE_DEBUG_PRINT_OPTIONS_IMPL_HPP__
 #define COAP_TE_DEBUG_PRINT_OPTIONS_IMPL_HPP__
 
-#include "defines/defaults.hpp"
-#include "../print_options.hpp"
 #include <iostream>
 #include <type_traits>
+
+#include "defines/defaults.hpp"
+#include "../print_options.hpp"
 
 #include "../output_string.hpp"
 #include "../helper.hpp"
 #include "message/types.hpp"
 #include "internal/helper.hpp"
+#include "message/options/no_response.hpp"
 
 namespace CoAP{
 namespace Debug{
@@ -17,7 +19,7 @@ namespace Debug{
 template<typename OptionCode>
 static void print_payload(CoAP::Message::Option::option_template<OptionCode> const& op)
 {
-	if constexpr(std::is_same<OptionCode, CoAP::Message::code>::value)
+	if constexpr(std::is_same<OptionCode, CoAP::Message::Option::code>::value)
 	{
 		if(op.ocode == CoAP::Message::Option::code::content_format)
 		{
@@ -34,8 +36,29 @@ static void print_payload(CoAP::Message::Option::option_template<OptionCode> con
 		}
 	}
 
+#if COAP_TE_OPTION_NO_RESPONSE == 1
+	if constexpr(std::is_same<OptionCode, CoAP::Message::Option::code>::value)
+	{
+		using namespace CoAP::Message::Option;
+		if(op.ocode == code::no_response)
+		{
+			unsigned value = parse_unsigned(op);
+			suppress s = static_cast<suppress>(value);
+
+			std::printf("%u", value);
+			if(s & suppress::success)
+				std::printf("/success");
+			if(s & suppress::client_error)
+				std::printf("/client error");
+			if(s & suppress::server_error)
+				std::printf("/server error");
+			return;
+		}
+	}
+#endif /* COAP_TE_OPTION_NO_RESPONSE == 1 */
+
 #if	COAP_TE_BLOCKWISE_TRANSFER == 1
-	if constexpr(std::is_same<OptionCode, CoAP::Message::code>::value)
+	if constexpr(std::is_same<OptionCode, CoAP::Message::Option::code>::value)
 	{
 		if(op.ocode == CoAP::Message::Option::code::block1 ||
 			op.ocode == CoAP::Message::Option::code::block2)

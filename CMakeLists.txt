@@ -63,6 +63,7 @@ set(MAIN_SRC ${SRC_DIR}/error.cpp
 				${SRC_DIR_INTERNAL}/helper.cpp
 				${SRC_DIR_INTERNAL}/decoder.cpp
 				${SRC_DIR_MESSAGE}/options/options.cpp
+				${SRC_DIR_MESSAGE}/options/no_response.cpp
 				${SRC_DIR_MESSAGE}/message_id.cpp
 				${SRC_DIR_MESSAGE}/types.cpp
 				${SRC_DIR_MESSAGE}/codes.cpp

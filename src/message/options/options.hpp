@@ -30,6 +30,9 @@ enum class code {
 	content_format 	= 12,	//Content-Format
 	max_age			= 14,	//Max-Age
 	uri_query		= 15,	//Uri-Query
+#if COAP_TE_OPTION_HOP_LIMIT == 1
+	hop_limit		= 16,	//Hop-Limit
+#endif /* COAP_TE_OPTION_HOP_LIMIT == 1 */
 	accept			= 17,	//Accept
 	location_query	= 20,	//Location-Query
 #if	COAP_TE_BLOCKWISE_TRANSFER == 1
@@ -59,6 +62,9 @@ static constexpr const config<code> options[] = {
 	{code::content_format, 	false, 	type::uint},
 	{code::max_age, 		false, 	type::uint},
 	{code::uri_query, 		true, 	type::string},
+#if COAP_TE_OPTION_HOP_LIMIT == 1
+	{code::hop_limit,		false,	type::uint},
+#endif /* COAP_TE_OPTION_HOP_LIMIT == 1 */
 	{code::accept, 			false, 	type::uint},
 	{code::location_query, 	true, 	type::string},
 #if	COAP_TE_BLOCKWISE_TRANSFER == 1
