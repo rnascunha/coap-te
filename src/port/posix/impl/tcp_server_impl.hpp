@@ -146,51 +146,6 @@ accept(CoAP::Error& ec) noexcept
 
 template<class Endpoint,
 		int Flags>
-template<auto* ReadCb,
-	int BlockTimeMs /* = 0 */,
-	auto* OpenCb /* = (void*)nullptr */,
-	auto* CloseCb /* = (void*)nullptr */,
-	unsigned MaxEvents /* = 32 */>
-bool
-tcp_server<Endpoint, Flags>::
-run(CoAP::Error& ec) noexcept
-{
-	struct epoll_event events[MaxEvents];
-
-	int event_num = epoll_wait(epoll_fd_, events, MaxEvents, BlockTimeMs);
-	for (int i = 0; i < event_num; i++)
-	{
-		if (events[i].data.fd == socket_)
-		{
-			[[maybe_unused]] handler c = accept(ec);
-			if constexpr(!std::is_same<void*, decltype(OpenCb)>::value)
-			{
-				OpenCb(c);
-			}
-		}
-		else if (events[i].events & EPOLLIN)
-		{
-			/* handle EPOLLIN event */
-			handler s = events[i].data.fd;
-			ReadCb(s, *this);
-		}
-		/* check if the connection is closing */
-		if (events[i].events & (EPOLLRDHUP | EPOLLHUP))
-		{
-			if constexpr(!std::is_same<void*, decltype(OpenCb)>::value)
-			{
-				CloseCb(events[i].data.fd);
-			}
-
-			epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, events[i].data.fd, NULL);
-			::close(events[i].data.fd);
-		}
-	}
-	return ec ? false : true;
-}
-
-template<class Endpoint,
-		int Flags>
 template<
 		int BlockTimeMs /* = 0 */,
 		unsigned MaxEvents /* = 32 */,

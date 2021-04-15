@@ -28,13 +28,6 @@ class tcp_server{
 		void open(endpoint&, CoAP::Error&) noexcept;
 		bool is_open() const noexcept;
 
-		template<auto* ReadCb,
-			int BlockTimeMs = 0,
-			auto* OpenCb = (void*)nullptr,
-			auto* CloseCb = (void*)nullptr,
-			unsigned MaxEvents = 32>
-		bool run(CoAP::Error&) noexcept;
-
 		template<
 			int BlockTimeMs = 0,
 			unsigned MaxEvents = 32,

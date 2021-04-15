@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <cstdint>
+#include <functional>
 
 #include "error.hpp"
 #include "port/posix/tcp_server.hpp"
@@ -153,7 +154,7 @@ int main()
 	 * * close connection callback
 	 * * max event permited (ommited, defaulted to 32)
 	 */
-	while(conn.run<read_cb, 1000, open_cb, close_cb>(ec))
+	while(conn.run<1000>(ec, std::bind(read_cb, std::placeholders::_1, conn), open_cb, close_cb))
 	{
 		/**
 		 * Your code

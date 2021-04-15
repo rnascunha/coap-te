@@ -10,7 +10,6 @@
 #include "../serialize.hpp"
 #include "../parser.hpp"
 
-
 namespace CoAP{
 namespace Message{
 
@@ -172,12 +171,12 @@ unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 	last_option = option.ocode;
 
 	unsigned option_size = 1;
-	unsigned offset_delta = static_cast<std::uint8_t>(option.ocode) - delta, delta_opt = 0;
+	unsigned offset_delta = static_cast<unsigned>(option.ocode) - delta, delta_opt = 0;
 	std::uint16_t delta_ext = 0;
 	delta += offset_delta;
 	if(offset_delta > 12)
 	{
-		if(offset_delta <= 255)
+		if(offset_delta <= 269)
 		{
 			delta_opt = static_cast<unsigned>(Option::delta_special::one_byte_extend);
 			delta_ext = static_cast<uint16_t>(offset_delta - 13);

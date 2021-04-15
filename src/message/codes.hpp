@@ -70,7 +70,7 @@ enum class code : std::uint8_t
 	unsupported_content_format = make_code(code_class::client_error, 15),	//4.15 Unsupported Content-Format
 #if	COAP_TE_FETCH_PATCH	== 1
 	//https://tools.ietf.org/html/rfc8132#section-6
-	unprocessable_untity	= make_code(code_class::client_error, 22),	//4.22 Unprocessable Entity
+	unprocessable_entity	= make_code(code_class::client_error, 22),	//4.22 Unprocessable Entity
 #endif /* COAP_TE_FETCH_PATCH == 1 */
 	//Server Error
 	internal_server_error 	= make_code(code_class::server_error, 0),	//5.00 Internal Server Error

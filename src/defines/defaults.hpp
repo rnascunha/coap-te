@@ -44,6 +44,14 @@
 #define COAP_TE_FETCH_PATCH	1
 #endif /* COAP_TE_FETCH_PATCH */
 
+/**
+ * RFC7967 - Constrained Application Protocol (CoAP) Option for No Server Response
+ * https://tools.ietf.org/html/rfc7967
+ */
+#ifndef COAP_TE_OPTION_NO_RESPONSE
+#define COAP_TE_OPTION_NO_RESPONSE	1
+#endif /* COAP_TE_OPTION_NO_RESPONSE */
+
 namespace CoAP{
 
 static constexpr std::uint16_t default_port = 5683;

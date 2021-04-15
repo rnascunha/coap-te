@@ -11,7 +11,7 @@ void create(option& option,
 		bool is_request /* = false */) noexcept
 {
 	option.ocode = is_request ? code::accept : code::content_format;
-	option.length = 1;
+	option.length = value == content_format::text_plain ? 0 : 1;
 	option.value = &value;
 }
 

@@ -1,6 +1,7 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_TEMPLATE_CLASS_HPP__
 #define COAP_TE_MESSAGE_OPTIONS_TEMPLATE_CLASS_HPP__
 
+#include "defines/defaults.hpp"
 #include "types.hpp"
 #include "../types.hpp"
 
@@ -18,6 +19,9 @@ struct option_template
 	option_template(OptionCode, const char*);
 	option_template(OptionCode, unsigned&);
 	option_template(content_format const&, bool is_request = false);
+#if COAP_TE_OPTION_NO_RESPONSE == 1
+	option_template(suppress&);
+#endif /* COAP_TE_OPTION_NO_RESPONSE == 1 */
 	//Opaque
 	option_template(OptionCode, const void*, unsigned);
 

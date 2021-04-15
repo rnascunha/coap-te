@@ -30,6 +30,11 @@ const char* code_string(CoAP::Message::code code) noexcept
 		case code::post: 				return "0.02 POST";
 		case code::put: 				return "0.03 PUT";
 		case code::cdelete: 			return "0.04 DELETE";
+#if COAP_TE_FETCH_PATCH == 1
+		case code::fetch:				return "0.05 FETCH";
+		case code::patch:				return "0.06 PATCH";
+		case code::ipatch:				return "0.07 IPATCH";
+#endif /* COAP_TE_FETCH_PATCH == 1 */
 		//response
 		//success
 		case code::success:				return "2.00 Success";
@@ -52,9 +57,15 @@ const char* code_string(CoAP::Message::code code) noexcept
 #if	COAP_TE_BLOCKWISE_TRANSFER == 1
 		case code::request_entity_incomplete: return "4.08 Request Entity Incomplete";
 #endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
+#if	COAP_TE_FETCH_PATCH	== 1
+		case code::conflict:			return "4.09 Conflict";
+#endif /* COAP_TE_FETCH_PATCH == 1 */
 		case code::precondition_failed: return "4.12 Precondition Failed";
 		case code::request_entity_too_large: return "4.13 Request Entity Too Large";
 		case code::unsupported_content_format: return "4.15 Unsupported Content-Format";
+#if COAP_TE_FETCH_PATCH == 1
+		case code::unprocessable_entity:	return "4.22 Unprocessable Entity";
+#endif /* COAP_TE_FETCH_PATCH == 1 */
 		//Server Error
 		case code::internal_server_error: return "5.00 Internal Server Error";
 		case code::not_implemented: 	return "5.01 Not Implemented";
@@ -103,6 +114,9 @@ const char* option_string(CoAP::Message::Option::code op) noexcept
 		case code::if_match: 		return "If-Match";
 		case code::if_none_match: 	return "If-None-Match";
 		case code::size1: 			return "Size1";
+#if COAP_TE_OPTION_NO_RESPONSE == 1
+		case code::no_response:		return "No response";
+#endif /* COAP_TE_OPTION_NO_RESPONSE == 1 */
 		default:
 			break;
 	}

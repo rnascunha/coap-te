@@ -23,6 +23,10 @@
 #include "message/reliable/factory.hpp"
 #include "message/reliable/parser.hpp"
 #endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#if COAP_TE_OPTION_NO_RESPONSE == 1
+#include "message/options/no_response.hpp"
+#endif /* COAP_TE_OPTION_NO_RESPONSE == 1 */
+
 //Resource
 #include "resource/types.hpp"
 #include "resource/resource.hpp"

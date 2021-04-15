@@ -47,7 +47,7 @@ bool check_code(code mcode) noexcept
 		case code::request_entity_too_large:	//4.13 Request Entity Too Large
 		case code::unsupported_content_format:	//4.15 Unsupported Content-Format
 #if	COAP_TE_FETCH_PATCH	== 1
-		case code::unprocessable_untity:		//4.22 Unprocessable Entity
+		case code::unprocessable_entity:		//4.22 Unprocessable Entity
 #endif /* COAP_TE_FETCH_PATCH == 1 */
 		//Server Error
 		case code::internal_server_error:		//5.00 Internal Server Error

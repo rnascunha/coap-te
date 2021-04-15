@@ -15,6 +15,7 @@ It's implemented:
 * Resource Discovery ([RFC6690](https://tools.ietf.org/html/rfc6690));
 * Observing ([RFC7641](https://tools.ietf.org/html/rfc7641));
 * Fetch, Patch and iPatch methods ([RFC8132](https://tools.ietf.org/html/rfc8132));
+* No response option ([RFC7967](https://tools.ietf.org/html/rfc7967));
 
 It's NOT implemented (yet):
 * Cache strategie;
@@ -73,7 +74,8 @@ If you build **CoAP-te** with the `-DWITH_EXAMPLES=1` flag, all example executab
 * `option`: shows how to manipulate options of different types. How to declare, serialize and parse.
 * `serialze_class`: explain the use of the `Serialize` class. This is a class to modify the information that were already serilized (written to the buffer).
 * `serialize_parse_reliable`: the same of `serialize_parse` example, but for reliable connections (RFC8323).
-* `signaling`: explain how to make/parse a signaling message to reliable connections (RFC8323). 
+* `signaling`: explain how to make/parse a signaling message to reliable connections (RFC8323);
+* `no_response`: use of *no_response* option (RFC7967).
 
 *Transmission* examples:
 * `raw_transaction`: explains the use of transactions. Transactions are not meant to be used directly, but through the *CoAP::engine*.

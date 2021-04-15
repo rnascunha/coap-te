@@ -40,6 +40,9 @@ enum class code {
 	proxy_uri		= 35,	//Proxy-Uri
 	proxy_scheme	= 39,	//Proxy-Scheme
 	size1			= 60,	//Size1
+#if COAP_TE_OPTION_NO_RESPONSE == 1
+	no_response		= 258	//No response
+#endif /* COAP_TE_OPTION_NO_RESPONSE == 1 */
 };
 
 static constexpr const config<code> options[] = {
@@ -66,6 +69,9 @@ static constexpr const config<code> options[] = {
 	{code::proxy_uri, 		false, 	type::string},
 	{code::proxy_scheme, 	false, 	type::string},
 	{code::size1, 			false, 	type::uint},
+#if COAP_TE_OPTION_NO_RESPONSE == 1
+	{code::no_response,		false,	type::uint}
+#endif /* COAP_TE_OPTION_NO_RESPONSE == 1 */
 };
 
 using option = option_template<code>;
