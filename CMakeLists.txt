@@ -1,3 +1,15 @@
+#################################################
+# Checking if is ESP IDF build					#
+#################################################
+
+if(ESP_PLATFORM EQUAL 1)
+	include (${COMPONENT_DIR}/esp_idf.cmake)
+	return()
+endif()
+
+#################################################
+# Linux/Windows build
+#################################################
 cmake_minimum_required (VERSION 3.10)
 project (coap-te)
 
@@ -49,13 +61,13 @@ message(STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " " ${CMAKE_CXX_COMPILER_VE
 
 include (files.cmake)
 
-#if(NOT WIN32)
-#	message(STATUS "Adding linux dependecies...")
-	add_definitions(-DCOAP_TE_PORT_C_STANDARD=1)
-	list(APPEND MAIN_SRC ${SRC_DIR_PORT}/c_standard_port.cpp)
-#else()
-#	message(FATAL_ERROR "No system support")
-#endif()
+add_definitions(-DCOAP_TE_PORT_C_STANDARD=1)
+list(APPEND MAIN_SRC ${SRC_DIR_PORT}/c_standard_port.cpp)
+
+if(WIN32)
+	message("Setting SELECT call implmenetation")
+	add_definitions(-DCOAP_TE_USE_SELECT=1)	
+endif()
 				
 add_library(${PROJECT_NAME} ${MAIN_SRC})
 set_target_properties(${PROJECT_NAME} PROPERTIES

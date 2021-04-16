@@ -149,7 +149,7 @@ class engine_client
 		bool run(CoAP::Error& ec) noexcept;
 		bool operator()(CoAP::Error& ec) noexcept;
 	private:
-		void read_packet(CoAP::Error& ec) noexcept;
+		bool read_packet(CoAP::Error& ec) noexcept;
 
 		void process_response(CoAP::Message::Reliable::message const&) noexcept;
 		void process_request(CoAP::Message::Reliable::message const&,

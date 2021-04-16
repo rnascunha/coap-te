@@ -181,7 +181,7 @@ class engine_server
 		void process_signaling_release(socket, CoAP::Message::Reliable::message const&) noexcept;
 		void process_signaling_abort(socket, CoAP::Message::Reliable::message const&) noexcept;
 
-		void on_read(socket) noexcept;
+		bool on_read(socket) noexcept;
 		void on_open(socket) noexcept;
 		void on_close(socket) noexcept;
 

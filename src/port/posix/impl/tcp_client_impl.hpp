@@ -104,7 +104,7 @@ receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 
 	if(recv < 0)
 	{
-		if constexpr(Flags | MSG_DONTWAIT)
+		if constexpr(Flags & MSG_DONTWAIT)
 		{
 			if(errno == EAGAIN || errno == EWOULDBLOCK)
 				return 0;

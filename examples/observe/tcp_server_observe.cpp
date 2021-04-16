@@ -501,7 +501,7 @@ int main()
 
 	debug(example_mod, "Initiating CoAP engine loop...");
 	//CoAP engine loop.
-	while(coap_engine(ec))
+	while(coap_engine.run<-1>(ec))
 	{
 		/**
 		 * Your code

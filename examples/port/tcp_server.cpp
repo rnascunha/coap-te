@@ -77,7 +77,7 @@ void open_cb(int socket) noexcept
 	if(!ep.copy_peer_address(socket))
 		return;
 	char buf[46];
-	printf("Openned socket [%s]:%u\n", ep.address(buf), ep.port());
+	printf("Opened socket [%s]:%u\n", ep.address(buf), ep.port());
 }
 
 /**
@@ -98,16 +98,16 @@ void close_cb(int socket) noexcept
 /**
  * Receving data callback
  */
-void read_cb(int socket, tcp_server& conn) noexcept
+bool read_cb(int socket, tcp_server& conn) noexcept
 {
 	char buffer[BUFFER_LEN];
 	CoAP::Error ec;
 	std::size_t size = conn.receive(socket, buffer, BUFFER_LEN, ec);
-	if(ec) exit_error(ec, "read");
+	if(ec) return false;
 
 	tcp_server::endpoint ep;
 	if(!ep.copy_peer_address(socket))
-		return;
+		return false;
 
 	char buf[46];
 	printf(">[%s]:%u[%zu]: %.*s\n",
@@ -120,10 +120,20 @@ void read_cb(int socket, tcp_server& conn) noexcept
 	 * Echoing data received back
 	 */
 	conn.send(socket, buffer, size, ec);
+
+	return true;
 }
 
 int main()
 {
+	std::printf("Echo TCP server init...\n");
+
+#if COAP_TE_USE_SELECT == 1
+	std::printf("Using SELECT call...\n");
+#else /* COAP_TE_USE_SELECT == 1 */
+	std::printf("Using EPOLL call...\n");
+#endif /* COAP_TE_USE_SELECT == 1 */
+
 	Error ec;
 
 	/**
@@ -154,7 +164,7 @@ int main()
 	 * * close connection callback
 	 * * max event permited (ommited, defaulted to 32)
 	 */
-	while(conn.run<1000>(ec, std::bind(read_cb, std::placeholders::_1, conn), open_cb, close_cb))
+	while(conn.run<-1>(ec, std::bind(read_cb, std::placeholders::_1, conn), open_cb, close_cb))
 	{
 		/**
 		 * Your code

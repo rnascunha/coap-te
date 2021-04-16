@@ -467,7 +467,7 @@ template<typename Connection,
 	typename TransactionList,
 	typename CallbackDefaultFunctor,
 	typename Resource>
-void
+bool
 engine_server<Connection, Config, ConnectionList, TransactionList, CallbackDefaultFunctor, Resource>::
 on_read(socket sock) noexcept
 {
@@ -483,10 +483,12 @@ on_read(socket sock) noexcept
 			if(ec)
 			{
 				error(engine_mod, ec, "read");
-				break;
+				return false;
+//				break;
 			}
 
-			if(size == 0) break;
+			status(engine_mod, "size[%zu]", size);
+			if(size == 0) return true;
 
 			using namespace CoAP::Message::Reliable;
 			unsigned shift = 0, length_s = 0;
@@ -514,6 +516,7 @@ on_read(socket sock) noexcept
 			if(shift)
 			{
 				size = conn_.receive(sock, buffer_ + 1, shift, ec);
+				if(ec) return false;
 				if(size < shift)
 				{
 					error(engine_mod, "message to small [%zd/u]", size, shift);
@@ -526,6 +529,7 @@ on_read(socket sock) noexcept
 			}
 			length_s += (buffer_[0] & 0x0F) /*token*/ + 1 /*code*/;
 			size = conn_.receive(sock, buffer_ + 1 + shift, length_s, ec);
+			if(ec) return false;
 
 			if(size < length_s)
 			{
@@ -533,9 +537,10 @@ on_read(socket sock) noexcept
 				break;
 			}
 
-			process(sock, buffer_, size + 1 + shift, ec);
+			CoAP::Error ecp;
+			process(sock, buffer_, size + 1 + shift, ecp);
 
-			if(ec)
+			if(ecp)
 			{
 				error(engine_mod, ec, "process");
 //				break;
@@ -554,19 +559,21 @@ on_read(socket sock) noexcept
 			if(ec)
 			{
 				error(engine_mod, ec, "read");
-				break;
+				return false;
 			}
 
 			if(size == 0) break;
 
-			process(sock, buffer_, size, ec);
-			if(ec)
+			CoAP::Error ecp;
+			process(sock, buffer_, size, ecp);
+			if(ecp)
 			{
 				error(engine_mod, ec, "process");
 //				break;
 			}
 		}
 	}
+	return ec ? false : true;
 }
 
 template<typename Connection,

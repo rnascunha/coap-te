@@ -120,5 +120,7 @@ int main()
 
 		break;
 	}
+	conn.close();
+
 	return EXIT_SUCCESS;
 }

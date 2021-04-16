@@ -399,7 +399,7 @@ template<typename Connection,
 	typename TransactionList,
 	typename CallbackDefaultFunctor,
 	typename Resource>
-void
+bool
 engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
 read_packet(CoAP::Error& ec) noexcept
 {
@@ -443,7 +443,7 @@ read_packet(CoAP::Error& ec) noexcept
 			if(shift)
 			{
 				size = conn_.receive(buffer_ + 1, shift, ec);
-				if(size < shift)
+				if(size < shift || ec)
 				{
 					error(engine_mod, "message to small [%zd/u]", size, shift);
 					break;
@@ -456,7 +456,7 @@ read_packet(CoAP::Error& ec) noexcept
 			length_s += (buffer_[0] & 0x0F) /*token*/ + 1 /*code*/;
 			size = conn_.receive(buffer_ + 1 + shift, length_s, ec);
 
-			if(size < length_s)
+			if(size < length_s || ec)
 			{
 				error(engine_mod, "message to small [%zd/u]", size, length_s);
 				break;
@@ -497,6 +497,7 @@ read_packet(CoAP::Error& ec) noexcept
 			}
 		}
 	}
+	return ec ? false : true;
 }
 
 template<typename Connection,

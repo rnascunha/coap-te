@@ -76,13 +76,14 @@ bool
 tcp_server<Endpoint, Flags>::
 open_poll() noexcept
 {
+#if COAP_TE_USE_SELECT != 1
 	epoll_fd_ = epoll_create1(0);
 	if(epoll_fd_ == -1)
 		return false;
 
 	if(!add_socket_poll(socket_, EPOLLIN | EPOLLOUT | EPOLLET))
 		return false;
-
+#endif /* COAP_TE_USE_SELECT = 1 */
 	return true;
 }
 
@@ -90,14 +91,17 @@ template<class Endpoint,
 		int Flags>
 bool
 tcp_server<Endpoint, Flags>::
-add_socket_poll(int socket, std::uint32_t events) noexcept
+add_socket_poll(handler socket, std::uint32_t events [[maybe_unused]]) noexcept
 {
+#if COAP_TE_USE_SELECT != 1
 	struct epoll_event ev;
 	ev.events = events;
 	ev.data.fd = socket;
 	if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, socket, &ev) == -1)
 		return false;
-
+#else /* COAP_TE_USE_SELECT != 1 */
+	epoll_fd_ |= 1 << socket;
+#endif /* COAP_TE_USE_SELECT != 1 */
 	return true;
 }
 
@@ -106,10 +110,13 @@ template<class Endpoint,
 void tcp_server<Endpoint, Flags>::
 close() noexcept
 {
+#if COAP_TE_USE_SELECT != 1
 	epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, socket_, NULL);
-	if(socket_) ::close(socket_);
 	if(epoll_fd_) ::close(epoll_fd_);
+#endif /* COAP_TE_USE_SELECT == 1 */
+	if(socket_) ::close(socket_);
 	socket_ = 0;
+	epoll_fd_ = 0;
 }
 
 template<class Endpoint,
@@ -117,7 +124,12 @@ template<class Endpoint,
 void tcp_server<Endpoint, Flags>::
 close_client(handler socket) noexcept
 {
+#if COAP_TE_USE_SELECT != 1
 	epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, socket, NULL);
+#else /* #if COAP_TE_USE_SELECT != 1 */
+	epoll_fd_ &=  ~(1 << socket);
+#endif /* #if COAP_TE_USE_SELECT != 1 */
+	::shutdown(socket, SHUT_RDWR);
 	::close(socket);
 }
 
@@ -136,13 +148,19 @@ accept(CoAP::Error& ec) noexcept
 	}
 	else
 	{
+#if COAP_TE_USE_SELECT != 1
 		if(!add_socket_poll(s, EPOLLIN | EPOLLET | EPOLLRDHUP | EPOLLHUP))
+#else /* COAP_TE_USE_SELECT != 1 */
+		if(!add_socket_poll(s, 0))
+#endif /* COAP_TE_USE_SELECT != 1 */
 			ec = CoAP::errc::socket_error;
 		if(Flags & MSG_DONTWAIT)
 			nonblock_socket(s);
 	}
 	return s;
 }
+
+#if COAP_TE_USE_SELECT != 1
 
 template<class Endpoint,
 		int Flags>
@@ -192,6 +210,78 @@ run(CoAP::Error& ec,
 	return ec ? false : true;
 }
 
+#else /* COAP_TE_USE_SELECT == 1 */
+
+template<class Endpoint,
+		int Flags>
+template<
+		int BlockTimeMs /* = 0 */,
+		unsigned MaxEvents /* = 32 */,
+		typename ReadCb,
+		typename OpenCb /* = void* */,
+		typename CloseCb /* = void* */>
+bool
+tcp_server<Endpoint, Flags>::
+run(CoAP::Error& ec,
+		ReadCb read_cb,
+		OpenCb open_cb/* = nullptr */ [[maybe_unused]],
+		CloseCb close_cb/* = nullptr */ [[maybe_unused]]) noexcept
+{
+	fd_set rfds;
+
+	struct timeval tv = {
+		.tv_sec = BlockTimeMs / 1000,
+		.tv_usec = (BlockTimeMs % 1000) * 1000
+	};
+
+	FD_ZERO(&rfds);
+	FD_SET(socket_, &rfds);
+
+	int max = 0;
+	for(unsigned i = 1; i < (sizeof(epoll_fd_) * 8); i++)
+	{
+		if(epoll_fd_ & (1 << i))
+		{
+			FD_SET(i, &rfds);
+			max = i;
+		}
+	}
+	max = max > socket_ ? max : socket_;
+
+	int s = select(max + 1, &rfds, NULL, NULL, BlockTimeMs  < 0 ? NULL : &tv);
+	if(s < 0)
+	{
+		ec = CoAP::errc::socket_error;
+		return false;
+	}
+
+	if(FD_ISSET(socket_, &rfds))
+	{
+		[[maybe_unused]] int c = accept(ec);
+		if constexpr(!std::is_same<void*, OpenCb>::value)
+		{
+			open_cb(c);
+		}
+	}
+	for(int i = 1; i <= max; i++)
+	{
+		if((epoll_fd_ & (1 << i)) && FD_ISSET(i, &rfds))
+		{
+			if(!read_cb(i))
+			{
+				if constexpr(!std::is_same<void*, CloseCb>::value)
+				{
+					close_cb(i);
+				}
+				close_client(i);
+			}
+		}
+	}
+
+	return ec ? false : true;
+}
+
+#endif /* COAP_TE_USE_SELECT == 1 */
 
 template<class Endpoint,
 		int Flags>
@@ -199,14 +289,17 @@ std::size_t
 tcp_server<Endpoint, Flags>::
 receive(handler socket, void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 {
-	ssize_t bytes = read(socket, buffer, buffer_len);
-	if (bytes < 0)
+	ssize_t bytes = ::recv(socket, buffer, buffer_len, 0);
+	if(bytes < 1)
 	{
 		if constexpr(Flags & MSG_DONTWAIT)
 		{
-			if(!(errno == EAGAIN || errno == EWOULDBLOCK))
-				ec = CoAP::errc::socket_error;
+			if(bytes == -1 && (errno == EAGAIN || errno == EWOULDBLOCK))
+			{
+				return 0;
+			}
 		}
+		ec = CoAP::errc::socket_error;
 		return 0;
 	}
 	return bytes;
@@ -219,11 +312,16 @@ tcp_server<Endpoint, Flags>::
 send(handler to_socket, const void* buffer, std::size_t buffer_len, CoAP::Error& ec)  noexcept
 {
 	int size = ::send(to_socket, buffer, buffer_len, 0);
-	if(size == -1)
+	if(size < 0)
 	{
 		if constexpr(Flags & MSG_DONTWAIT)
-			if(!(errno == EAGAIN || errno == EWOULDBLOCK))
-				ec = CoAP::errc::socket_error;
+		{
+			if(errno == EAGAIN || errno == EWOULDBLOCK)
+			{
+				return 0;
+			}
+		}
+		ec = CoAP::errc::socket_error;
 		return 0;
 	}
 	return size;
