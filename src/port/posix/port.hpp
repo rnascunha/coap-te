@@ -5,6 +5,8 @@
 #include "windows.hpp"
 #elif defined(__unix__)
 #include "unix.hpp"
+#elif ESP_IDF_PLATAFORM == 1
+#include "esp_idf.hpp"
 #else
 #error "System not supported"
 #endif

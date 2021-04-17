@@ -13,7 +13,15 @@ namespace POSIX{
 template<class Endpoint,
 		int Flags>
 tcp_server<Endpoint, Flags>::tcp_server()
-	: socket_(0), epoll_fd_(0){}
+	: socket_(0)
+#if COAP_TE_USE_SELECT != 1
+	  , epoll_fd_(0)
+#endif /* COAP_TE_USE_SELECT != 1 */
+{
+#if COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1
+	FD_ZERO(&list_);
+#endif /* COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1 */
+}
 
 template<class Endpoint,
 		int Flags>
@@ -99,9 +107,10 @@ add_socket_poll(handler socket, std::uint32_t events [[maybe_unused]]) noexcept
 	ev.data.fd = socket;
 	if (epoll_ctl(epoll_fd_, EPOLL_CTL_ADD, socket, &ev) == -1)
 		return false;
-#else /* COAP_TE_USE_SELECT != 1 */
-	epoll_fd_ |= 1 << socket;
-#endif /* COAP_TE_USE_SELECT != 1 */
+#endif
+#if COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1
+	FD_SET(socket, &list_);
+#endif /* COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1 */
 	return true;
 }
 
@@ -113,10 +122,13 @@ close() noexcept
 #if COAP_TE_USE_SELECT != 1
 	epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, socket_, NULL);
 	if(epoll_fd_) ::close(epoll_fd_);
+	epoll_fd_ = 0;
 #endif /* COAP_TE_USE_SELECT == 1 */
+#if COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1
+	FD_ZERO(&list_);
+#endif /* COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1 */
 	if(socket_) ::close(socket_);
 	socket_ = 0;
-	epoll_fd_ = 0;
 }
 
 template<class Endpoint,
@@ -126,9 +138,10 @@ close_client(handler socket) noexcept
 {
 #if COAP_TE_USE_SELECT != 1
 	epoll_ctl(epoll_fd_, EPOLL_CTL_DEL, socket, NULL);
-#else /* #if COAP_TE_USE_SELECT != 1 */
-	epoll_fd_ &=  ~(1 << socket);
-#endif /* #if COAP_TE_USE_SELECT != 1 */
+#endif /* COAP_TE_USE_SELECT != 1 */
+#if COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1
+	FD_CLR(socket, &list_);
+#endif /* COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1 */
 	::shutdown(socket, SHUT_RDWR);
 	::close(socket);
 }
@@ -234,19 +247,14 @@ run(CoAP::Error& ec,
 		.tv_usec = (BlockTimeMs % 1000) * 1000
 	};
 
-	FD_ZERO(&rfds);
+	std::memcpy(&rfds, &list_, sizeof(fd_set));
 	FD_SET(socket_, &rfds);
 
 	int max = 0;
-	for(unsigned i = 1; i < (sizeof(epoll_fd_) * 8); i++)
+	for(unsigned i = 0; i < FD_SETSIZE; i++)
 	{
-		if(epoll_fd_ & (1 << i))
-		{
-			FD_SET(i, &rfds);
-			max = i;
-		}
+		if(FD_ISSET(i, &rfds)) max = i;
 	}
-	max = max > socket_ ? max : socket_;
 
 	int s = select(max + 1, &rfds, NULL, NULL, BlockTimeMs  < 0 ? NULL : &tv);
 	if(s < 0)
@@ -265,7 +273,7 @@ run(CoAP::Error& ec,
 	}
 	for(int i = 1; i <= max; i++)
 	{
-		if((epoll_fd_ & (1 << i)) && FD_ISSET(i, &rfds))
+		if(i != socket_ && FD_ISSET(i, &rfds))
 		{
 			if(!read_cb(i))
 			{
@@ -326,6 +334,17 @@ send(handler to_socket, const void* buffer, std::size_t buffer_len, CoAP::Error&
 	}
 	return size;
 }
+
+#if COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1
+template<class Endpoint,
+		int Flags>
+fd_set const&
+tcp_server<Endpoint, Flags>::
+client_list() const noexcept
+{
+	return list_;
+}
+#endif /* COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1 */
 
 }//POSIX
 }//Port

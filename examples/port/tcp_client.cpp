@@ -63,6 +63,7 @@ using tcp_client = Port::POSIX::tcp_client<endpoint>;
 
 int main()
 {
+	printf("TCP Client example init...\n");
 	Error ec;
 
 	/**

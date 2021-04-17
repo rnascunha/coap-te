@@ -198,7 +198,7 @@ int main()
 	 * Each resource must provide a path name, and a callback function to
 	 * the method it support. (GET/POST/PUT/DELETE)
 	 */
-	engine::resource_node	res_time{"time", get_time_handler},
+	engine::resource_node	res_time{"time", "title='time of device'", get_time_handler},
 							res_sensors{"sensors"},
 								res_sensor_temp{"temp", get_sensor_handler},
 								res_sensor_light{"light", get_sensor_handler},

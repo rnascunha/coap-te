@@ -42,13 +42,22 @@ class tcp_server{
 
 		void close() noexcept;
 		void close_client(handler) noexcept;
+
+#if COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1
+		fd_set const& client_list() const noexcept;
+#endif /* COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1 */
 	private:
 		int accept(CoAP::Error&) noexcept;
 		bool open_poll() noexcept;
 		bool add_socket_poll(handler socket, std::uint32_t events) noexcept;
 
-		int socket_;
+		handler socket_;
+#if COAP_TE_USE_SELECT != 1
 		int epoll_fd_;
+#endif /* COAP_TE_USE_SELECT != 1 */
+#if COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1
+		fd_set	list_;
+#endif /* COAP_TE_USE_SELECT != 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1*/
 };
 
 }//POSIX
