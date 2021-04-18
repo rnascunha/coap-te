@@ -218,6 +218,11 @@ void request_cb(void const* trans, engine::message const* response, void* eng_pt
 int main()
 {
 	debug(example_mod, "Init engine code...");
+	
+	/**
+	 * At Linux, does nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
 
 	CoAP::Error ec;
 

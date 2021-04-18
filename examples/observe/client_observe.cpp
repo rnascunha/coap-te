@@ -221,6 +221,11 @@ int main()
 {
 	debug(example_mod, "Init Observe Client code...");
 
+	/**
+	 * At Linux, does nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
+
 	CoAP::Error ec;
 
 	/**

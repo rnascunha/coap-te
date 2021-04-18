@@ -177,7 +177,8 @@ engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resou
 process_response(CoAP::Message::Reliable::message const& msg) noexcept
 {
 	if constexpr(has_transaction_list)
-		if(list_.template check_all_response(conn_.native(), msg)) return;
+		if(list_.check_all_response(conn_.native(), msg)) return;
+		// if(list_.template check_all_response(conn_.native(), msg)) return;
 	if constexpr(has_default_callback)
 		if(default_cb_) default_cb_(conn_.native(), &msg, this);
 }

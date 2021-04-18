@@ -83,7 +83,7 @@ using engine = CoAP::Transmission::Reliable::engine_server<
 		csm,									///< CSM paramenter configuration
 		CoAP::disable,							///< Connection list disabled
 		CoAP::disable,							///< Trasaction list disabled
-		CoAP::Transmission::Reliable::default_cb,	///< Default callback signature function
+		CoAP::Transmission::Reliable::default_cb<CoAP::Port::POSIX::tcp_server<endpoint_t>::handler>,	///< Default callback signature function
 		CoAP::Resource::resource<				/// Resource definition
 			CoAP::Resource::callback_reliable<
 				CoAP::Message::Reliable::message,
@@ -264,7 +264,7 @@ static void thread_time(engine& engine)
 					 * Seting a payload
 					 */
 					char buff[20];
-					std::snprintf(buff, 20, "%lu", CoAP::time());
+					std::snprintf(buff, 20, "%llu", CoAP::time());
 
 					req.payload(buff);
 
@@ -350,7 +350,7 @@ static void thread_type(engine& engine)
 			}
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(1));
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		std::cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
 	}
 }
 
@@ -441,6 +441,11 @@ static void default_callback(engine::socket socket, engine::message const* respo
 
 int main()
 {
+	/**
+	 * At Linux, does nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
+	
 	CoAP::Error ec;
 
 	//Initiating the endpoint to bind
@@ -548,7 +553,7 @@ static void get_time_handler(engine::message const& request,
 	 * Setting payload and serilizing
 	 */
 	char buff[20];
-	std::snprintf(buff, 20, "%lu", CoAP::time());
+	std::snprintf(buff, 20, "%llu", CoAP::time());
 
 	response.payload(buff).serialize();
 }

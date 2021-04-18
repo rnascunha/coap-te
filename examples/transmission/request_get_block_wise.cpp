@@ -188,7 +188,7 @@ void request_cb(void const* trans, engine::message const* response, void* eng_pt
 			status(example_mod, "Response doesn't have op Block2\n");
 
 			std::memcpy(buffer, response->payload, response->payload_len);
-			std::printf("Data received[%lu]:\n\n", response->payload_len);
+			std::printf("Data received[%zu]:\n\n", response->payload_len);
 			std::printf("%.*s", static_cast<int>(response->payload_len),
 								static_cast<char const*>(response->payload));
 			std::printf("\nAll data transfered!\n\n");
@@ -210,6 +210,12 @@ void request_cb(void const* trans, engine::message const* response, void* eng_pt
 int main()
 {
 	debug(example_mod, "Init engine code...");
+	
+	/**
+	 * At Linux, does nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
+
 
 	CoAP::Error ec;
 

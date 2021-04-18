@@ -66,9 +66,14 @@ using udp_socket = Port::POSIX::udp<endpoint>;
 
 int main()
 {
+	/**
+	 * At Linux, do nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
+
 	Error ec;
 	std::uint8_t buffer[BUFFER_LEN];
-
+	
 	const char* payload = "Teste";
 	std::size_t payload_len = std::strlen(payload);
 
@@ -102,7 +107,7 @@ int main()
 		}
 
 		char addr_str[46];
-		std::printf("Received [%s]:%u [%lu]: %s\n", from.address(addr_str), from.port(), size, buffer);
+		std::printf("Received [%s]:%u [%zu]: %s\n", from.address(addr_str), from.port(), size, buffer);
 		break;
 	}
 	return EXIT_SUCCESS;

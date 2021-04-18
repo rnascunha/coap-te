@@ -193,7 +193,8 @@ using engine = CoAP::Transmission::Reliable::engine_client<
 			endpoint_t>,
 		csm,									///< (2) CSM paramenter configuration
 		transaction_list_t,						///< (3) Trasaction list as defined above
-		CoAP::Transmission::Reliable::default_cb,	///< (4) Default callback signature function
+		CoAP::Transmission::Reliable::default_cb<CoAP::Port::POSIX::tcp_server<endpoint_t>::handler>,	
+												///< (4) Default callback signature function
 		resource>;								///< (5) Resource definition (disabled)
 
 /**
@@ -218,7 +219,7 @@ static bool pong_flag = false;
 /**
  * This default callback response to signal response
  */
-void default_callback(int socket,
+void default_callback(engine::socket socket,
 		CoAP::Message::Reliable::message const* response,
 		void* engine_ptr) noexcept
 {
@@ -278,6 +279,11 @@ void request_cb(void const* trans, CoAP::Message::Reliable::message const* respo
 int main()
 {
 	debug(example_mod, "Init engine code...");
+
+	/**
+	 * At Linux, does nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
 
 	CoAP::Error ec;
 

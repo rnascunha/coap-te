@@ -124,6 +124,11 @@ void request_cb(void const* trans, CoAP::Message::message const* response, void*
 int main()
 {
 	debug(example_mod, "Init transaction code...");
+	
+	/**
+	 * At Linux, does nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
 
 	CoAP::Error ec;
 
@@ -138,7 +143,7 @@ int main()
 	debug(example_mod, "Socket opened...");
 
 	transaction_t::endpoint_t ep{HOST_ADDR, COAP_PORT, ec};
-	if(ec) exit_error(ec);
+	if(ec) exit_error(ec, "endpoint");
 
 	status(example_mod, "Constructing message...");
 	/**
@@ -234,7 +239,7 @@ int main()
 	std::uint8_t buffer_recv[BUFFER_LEN];	//Receiving buffer;
 	char print_buffer[20];					//auxiliary buffer to print
 
-	transaction_t::endpoint_t ep_recv;			//endpoint that will hold response endpoint
+	transaction_t::endpoint_t ep_recv;		//endpoint that will hold response endpoint
 	CoAP::Message::message response;		//Where the receiving message will be parsed
 	std::size_t size_recv = 0;
 

@@ -13,7 +13,7 @@ namespace Reliable{
 using expiration_time_type = unsigned;
 
 static constexpr const unsigned no_transaction = 0;
-static constexpr const unsigned no_expiration = std::numeric_limits<unsigned>::max();
+static constexpr const unsigned no_expiration = (std::numeric_limits<unsigned>::max)();	//parentesis needed because of windows macro
 static constexpr const unsigned default_expiration = no_expiration;
 
 static constexpr unsigned default_max_message_size = 1152;
@@ -57,7 +57,8 @@ struct separate_response{
 	}
 };
 
-using default_cb = void(*)(int socket,
+template<typename Handler>
+using default_cb = void(*)(Handler socket,
 							CoAP::Message::Reliable::message const*,
 							void*) noexcept;
 

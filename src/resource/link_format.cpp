@@ -94,7 +94,7 @@ Parser_Value::Parser_Value(attribute const* attr)
 Parser_Value::Parser_Value(const char* buffer, std::size_t length)
 	: buffer_(buffer), buffer_len_(length){}
 
-value const* Parser_Value::next() noexcept
+link_value const* Parser_Value::next() noexcept
 {
 	if(offset_ >= buffer_len_) return nullptr;
 	value_.reset();

@@ -5,6 +5,8 @@ namespace CoAP{
 namespace Port{
 namespace POSIX{
 
+bool init() noexcept;
+
 bool nonblock_socket(int socket);
 
 }//POSIX

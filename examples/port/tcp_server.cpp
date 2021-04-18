@@ -71,7 +71,7 @@ using tcp_server = Port::POSIX::tcp_server<endpoint>;
 /**
  * Open connection callback
  */
-void open_cb(int socket) noexcept
+void open_cb(tcp_server::handler socket) noexcept
 {
 	tcp_server::endpoint ep;
 	if(!ep.copy_peer_address(socket))
@@ -83,7 +83,7 @@ void open_cb(int socket) noexcept
 /**
  * Close connection callback
  */
-void close_cb(int socket) noexcept
+void close_cb(tcp_server::handler socket) noexcept
 {
 	tcp_server::endpoint ep;
 	if(!ep.copy_peer_address(socket))
@@ -98,7 +98,7 @@ void close_cb(int socket) noexcept
 /**
  * Receving data callback
  */
-bool read_cb(int socket, tcp_server& conn) noexcept
+bool read_cb(tcp_server::handler socket, tcp_server& conn) noexcept
 {
 	char buffer[BUFFER_LEN];
 	CoAP::Error ec;
@@ -127,6 +127,11 @@ bool read_cb(int socket, tcp_server& conn) noexcept
 int main()
 {
 	std::printf("Echo TCP server init...\n");
+	
+	/**
+	 * At Linux, do nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
 
 #if COAP_TE_USE_SELECT == 1
 	std::printf("Using SELECT call...\n");
@@ -145,6 +150,11 @@ int main()
 	 * Endpoint to bind
 	 */
 	tcp_server::endpoint ep{BIND_ADDR, 8080};
+	// if(ec)
+	// {
+		// printf("Error parsing address\n");
+		// return 1;
+	// }
 	/**
 	 * Open socket and binding enpoint
 	 */

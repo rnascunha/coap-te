@@ -24,6 +24,8 @@ using callback_reliable = void(
 namespace Link_Format{
 
 struct link_format{
+	link_format() = default;
+	
 	const char*		link = nullptr;
 	std::size_t		link_len = 0;
 	const char*		description = nullptr;
@@ -39,6 +41,8 @@ struct link_format{
 };
 
 struct attribute{
+	attribute() = default;
+	
 	const char* 	attr = nullptr;
 	std::size_t		attr_len = 0;
 	const char*		value = nullptr;
@@ -53,7 +57,9 @@ struct attribute{
 	}
 };
 
-struct value{
+struct link_value{	
+	link_value() = default;
+
 	const char*		value = nullptr;
 	std::size_t		value_len = 0;
 	const char*		next_value = nullptr;

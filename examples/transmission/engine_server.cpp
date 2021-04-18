@@ -161,13 +161,18 @@ static void exit_error(CoAP::Error& ec, const char* what = nullptr)
 
 int main()
 {
+	/**
+	 * At Linux, does nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
+	
 	CoAP::Error ec;
 	/**
 	 * Socket
 	 */
 	//Initiating the endpoint to bind
 	engine::endpoint ep{HOST_ADDR, COAP_PORT, ec};
-	if(ec) exit_error(ec);
+	if(ec) exit_error(ec, "endpoint");
 
 	engine::connection socket;
 
@@ -328,7 +333,7 @@ static void get_time_handler(engine::message const& request,
 	CoAP::Message::Option::node content{format};
 
 	char time[15];
-	std::snprintf(time, 15, "%lu", CoAP::time());
+	std::snprintf(time, 15, "%llu", CoAP::time());
 
 	/**
 	 * Making response (always call serialize)

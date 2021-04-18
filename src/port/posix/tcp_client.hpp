@@ -16,9 +16,13 @@ class tcp_client{
 	public:
 		static constexpr bool set_length = true;
 		static constexpr bool is_server = false;
+#if	defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+		using handler = SOCKET;
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 		using handler = int;
-
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 		using endpoint = Endpoint;
+		
 		tcp_client();
 		~tcp_client();
 

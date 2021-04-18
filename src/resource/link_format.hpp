@@ -42,11 +42,11 @@ class Parser_Value{
 	public:
 		Parser_Value(attribute const*);
 		Parser_Value(const char*, std::size_t);
-		value const* next() noexcept;
+		link_value const* next() noexcept;
 
 		void reset() noexcept;
 	private:
-		value				value_;
+		link_value				value_;
 
 		char const*			buffer_;
 		std::size_t 		buffer_len_;

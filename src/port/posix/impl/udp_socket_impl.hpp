@@ -6,6 +6,8 @@
 
 #include <cerrno>
 
+#include <cstdio>
+
 namespace CoAP{
 namespace Port{
 namespace POSIX{
@@ -26,7 +28,7 @@ open(CoAP::Error& ec) noexcept
 		ec = CoAP::errc::socket_error;
 		return;
 	}
-	if constexpr(Flags & MSG_DONTWAIT)
+	if constexpr((Flags & MSG_DONTWAIT) != 0)
 		nonblock_socket(socket_);
 }
 
@@ -48,9 +50,15 @@ std::size_t
 udp<Endpoint, Flags>::
 send(const void* buffer, std::size_t buffer_len, endpoint& ep, CoAP::Error& ec) noexcept
 {
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	int sent = ::sendto(socket_, static_cast<const char*>(buffer), buffer_len, 0,
+				reinterpret_cast<struct sockaddr const*>(ep.native()),
+				sizeof(typename endpoint::native_type));
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	int sent = ::sendto(socket_, buffer, buffer_len, 0,
 				reinterpret_cast<struct sockaddr const*>(ep.native()),
 				sizeof(typename endpoint::native_type));
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	if(sent < 0)
 	{
 		ec = CoAP::errc::socket_error;
@@ -66,16 +74,27 @@ std::size_t
 udp<Endpoint, Flags>::
 receive(void* buffer, std::size_t buffer_len, endpoint& ep, CoAP::Error& ec) noexcept
 {
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	int addr_len = sizeof(struct sockaddr);
+	int recv = ::recvfrom(socket_,
+			static_cast<char*>(buffer), buffer_len, 0,
+			reinterpret_cast<struct sockaddr*>(ep.native()), &addr_len);
+#else /* #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	unsigned addr_len = sizeof(struct sockaddr);
 	int recv = ::recvfrom(socket_,
 			buffer, buffer_len, 0,
 			reinterpret_cast<struct sockaddr*>(ep.native()), &addr_len);
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 
 	if(recv < 0)
 	{
-		if constexpr(Flags | MSG_DONTWAIT)
+		if constexpr((Flags & MSG_DONTWAIT) != 0)
 		{
+#if	defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+			if(WSAGetLastError() == WSAEWOULDBLOCK)
+#else
 			if(errno == EAGAIN || errno == EWOULDBLOCK)
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 				return 0;
 		}
 		ec = CoAP::errc::socket_error;

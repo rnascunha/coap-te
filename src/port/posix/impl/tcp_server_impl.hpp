@@ -30,13 +30,17 @@ void
 tcp_server<Endpoint, Flags>::
 open(endpoint& ep, CoAP::Error& ec) noexcept
 {
-	if((socket_ = ::socket(endpoint::family, SOCK_STREAM, 0)) == -1)
+	if((socket_ = ::socket(endpoint::family, SOCK_STREAM, IPPROTO_TCP)) == -1)
 	{
 		ec = CoAP::errc::socket_error;
 		return;
 	}
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	char opt = 1;
+#else
 	int opt = 1;
+#endif
 	if(::setsockopt(socket_, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)))
 	{
 		close();
@@ -60,7 +64,7 @@ open(endpoint& ep, CoAP::Error& ec) noexcept
 		return;
 	}
 
-	if constexpr(Flags & MSG_DONTWAIT)
+	if constexpr((Flags & MSG_DONTWAIT) != 0)
 		nonblock_socket(socket_);
 
 	if(!open_poll())
@@ -127,7 +131,14 @@ close() noexcept
 #if COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1
 	FD_ZERO(&list_);
 #endif /* COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1 */
-	if(socket_) ::close(socket_);
+	if(socket_)
+	{
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+		::closesocket(socket_);
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+		::close(socket_);
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+	}
 	socket_ = 0;
 }
 
@@ -143,7 +154,12 @@ close_client(handler socket) noexcept
 	FD_CLR(socket, &list_);
 #endif /* COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1 */
 	::shutdown(socket, SHUT_RDWR);
+	
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	::closesocket(socket);
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	::close(socket);
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 }
 
 template<class Endpoint,
@@ -167,7 +183,7 @@ accept(CoAP::Error& ec) noexcept
 		if(!add_socket_poll(s, 0))
 #endif /* COAP_TE_USE_SELECT != 1 */
 			ec = CoAP::errc::socket_error;
-		if(Flags & MSG_DONTWAIT)
+		if constexpr((Flags & MSG_DONTWAIT) != 0)
 			nonblock_socket(s);
 	}
 	return s;
@@ -251,10 +267,15 @@ run(CoAP::Error& ec,
 	FD_SET(socket_, &rfds);
 
 	int max = 0;
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	for(unsigned i = 0; i < FD_SETSIZE; i++)
 	{
 		if(FD_ISSET(i, &rfds)) max = i;
 	}
+	max = max > socket_ ? max : socket_;
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 
 	int s = select(max + 1, &rfds, NULL, NULL, BlockTimeMs  < 0 ? NULL : &tv);
 	if(s < 0)
@@ -262,20 +283,45 @@ run(CoAP::Error& ec,
 		ec = CoAP::errc::socket_error;
 		return false;
 	}
-
-	if(FD_ISSET(socket_, &rfds))
+	
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	for(int i = 0, count = 0; count < rfds.fd_count && i < FD_SETSIZE; i++)
 	{
-		[[maybe_unused]] int c = accept(ec);
-		if constexpr(!std::is_same<void*, OpenCb>::value)
+		if(FD_ISSET(rfds.fd_array[i], &rfds))
 		{
-			open_cb(c);
+			if(rfds.fd_array[i] == socket_)
+			{
+				[[maybe_unused]] int c = accept(ec);
+				if constexpr(!std::is_same<void*, OpenCb>::value)
+				{
+					open_cb(c);
+				}
+			}
+			else if(!read_cb(rfds.fd_array[i]))
+			{
+				if constexpr(!std::is_same<void*, CloseCb>::value)
+				{
+					close_cb(rfds.fd_array[i]);
+				}
+				close_client(rfds.fd_array[i]);
+			}
+			count++;
 		}
 	}
-	for(int i = 1; i <= max; i++)
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+	for(int i = 1, count = 0; i <= max && count < s; i++)
 	{
-		if(i != socket_ && FD_ISSET(i, &rfds))
+		if(FD_ISSET(i, &rfds))
 		{
-			if(!read_cb(i))
+			if(i == socket_)
+			{
+				[[maybe_unused]] int c = accept(ec);
+				if constexpr(!std::is_same<void*, OpenCb>::value)
+				{
+					open_cb(c);
+				}
+			}
+			else if(!read_cb(i))
 			{
 				if constexpr(!std::is_same<void*, CloseCb>::value)
 				{
@@ -283,9 +329,10 @@ run(CoAP::Error& ec,
 				}
 				close_client(i);
 			}
+			count++;
 		}
 	}
-
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	return ec ? false : true;
 }
 
@@ -297,12 +344,20 @@ std::size_t
 tcp_server<Endpoint, Flags>::
 receive(handler socket, void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 {
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	ssize_t bytes = ::recv(socket, static_cast<char*>(buffer), buffer_len, 0);
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	ssize_t bytes = ::recv(socket, buffer, buffer_len, 0);
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	if(bytes < 1)
 	{
-		if constexpr(Flags & MSG_DONTWAIT)
+		if constexpr((Flags & MSG_DONTWAIT) != 0)
 		{
+#if	defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+			if(bytes == -1 && WSAGetLastError() == WSAEWOULDBLOCK)
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 			if(bytes == -1 && (errno == EAGAIN || errno == EWOULDBLOCK))
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 			{
 				return 0;
 			}
@@ -319,12 +374,20 @@ std::size_t
 tcp_server<Endpoint, Flags>::
 send(handler to_socket, const void* buffer, std::size_t buffer_len, CoAP::Error& ec)  noexcept
 {
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	int size = ::send(to_socket, static_cast<const char*>(buffer), buffer_len, 0);
+#else /* #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	int size = ::send(to_socket, buffer, buffer_len, 0);
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	if(size < 0)
 	{
-		if constexpr(Flags & MSG_DONTWAIT)
+		if constexpr((Flags & MSG_DONTWAIT) != 0)
 		{
+#if	defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+			if(WSAGetLastError() == WSAEWOULDBLOCK)
+#else
 			if(errno == EAGAIN || errno == EWOULDBLOCK)
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 			{
 				return 0;
 			}

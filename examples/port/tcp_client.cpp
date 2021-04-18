@@ -64,6 +64,12 @@ using tcp_client = Port::POSIX::tcp_client<endpoint>;
 int main()
 {
 	printf("TCP Client example init...\n");
+
+	/**
+	 * At Linux, do nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
+	
 	Error ec;
 
 	/**
@@ -117,7 +123,7 @@ int main()
 		/**
 		 * Printing response received
 		 */
-		std::printf("Received[%lu]: %s\n", size, buffer);
+		std::printf("Received[%zu]: %.*s\n", size, static_cast<int>(size), buffer);
 
 		break;
 	}

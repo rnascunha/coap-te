@@ -108,6 +108,11 @@ static void exit_error(CoAP::Error& ec, const char* what = nullptr)
 
 int main()
 {
+	/**
+	 * At Linux, does nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
+	
 	CoAP::Error ec;
 	/**
 	 * Socket

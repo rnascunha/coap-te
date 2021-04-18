@@ -20,7 +20,7 @@
 /**
  * Using IPv6. Commenting the following line to use IPv4
  */
-#define USE_IPV6
+//#define USE_IPV6
 
 using namespace CoAP;
 
@@ -67,9 +67,14 @@ using udp_socket = Port::POSIX::udp<endpoint, MSG_DONTWAIT>;
 
 int main()
 {
+	/**
+	 * At Linux, do nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
+	
 	Error ec;
 	std::uint8_t buffer[BUFFER_LEN];
-
+	
 	udp_socket::endpoint ep{BIND_ADDR, 8080};
 
 	udp_socket conn;
@@ -91,7 +96,7 @@ int main()
 		buffer[size] = '\0';
 
 		char addr_str[20];
-		std::printf("Received [%s]:%u [%lu]: %s\n", recv_addr.address(addr_str), recv_addr.port(), size, buffer);
+		std::printf("Received [%s]:%u [%zu]: %s\n", recv_addr.address(addr_str), recv_addr.port(), size, buffer);
 		std::printf("Echoing...\n");
 		conn.send(buffer, size, recv_addr, ec);
 		if(ec) exit_error(ec, "write");

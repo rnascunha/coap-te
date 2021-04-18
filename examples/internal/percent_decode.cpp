@@ -27,7 +27,7 @@ int main(int argv, char** argc)
 	{
 		if((size = CoAP::Helper::percent_decode(argc[i])))
 		{
-			std::printf("Decoded [%lu]: %s\n", size, argc[i]);
+			std::printf("Decoded [%zu]: %s\n", size, argc[i]);
 		}
 		else
 		{
@@ -44,7 +44,7 @@ int main(int argv, char** argc)
 	{
 		if((size = CoAP::Helper::percent_decode(buffer, 512, argc[i], std::strlen(argc[i]))))
 		{
-			std::printf("Decoded [%lu]: %s -> %.*s\n", size, argc[i],
+			std::printf("Decoded [%zu]: %s -> %.*s\n", size, argc[i],
 					static_cast<int>(size), buffer);
 		}
 		else

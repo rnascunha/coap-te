@@ -9,16 +9,19 @@ namespace CoAP{
 namespace Transmission{
 namespace Reliable{
 
-template<typename Callback_Functor,
+template<typename Handler,
+		typename Callback_Functor,
 		CoAP::Message::code Code = CoAP::Message::code::get>
 class Request{
 	public:
+		using handler = Handler;
+	
 		/**
 		 * This constructor is to be used by clients that
 		 * already have socket defined
 		 */
 		Request() : socket_(0){}
-		Request(int socket) : socket_(socket){}
+		Request(handler socket) : socket_(socket){}
 		Request(separate_response const& data, CoAP::Message::code mcode)
 		: socket_(data.socket)
 		{
@@ -28,7 +31,7 @@ class Request{
 
 #if COAP_TE_OBSERVABLE_RESOURCE == 1
 		template<bool SetOrderValue>
-		Request(CoAP::Observe::observe<int, SetOrderValue> const& obs,
+		Request(CoAP::Observe::observe<handler, SetOrderValue> const& obs,
 				CoAP::Message::code mcode = CoAP::Message::code::content)
 		: socket_(obs.endpoint())
 		{
@@ -66,7 +69,7 @@ class Request{
 			return *this;
 		}
 
-		Request& socket(int socket) noexcept
+		Request& socket(handler socket) noexcept
 		{
 			socket_ = socket;
 			return *this;
@@ -114,7 +117,7 @@ class Request{
 
 	private:
 		CoAP::Message::Reliable::Factory<0, Code> fac_;
-		int socket_;
+		handler socket_;
 
 		Callback_Functor cb_ = nullptr;
 		void* data_ = nullptr;

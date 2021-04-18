@@ -53,7 +53,7 @@ class engine_server
 
 		using message = CoAP::Message::Reliable::message;
 		template<CoAP::Message::code Code = CoAP::Message::code::get>
-		using request = Request<transaction_cb, Code>;
+		using request = Request<socket, transaction_cb, Code>;
 		using response = Response;
 		using resource = Resource;
 		using resource_root = typename std::conditional<

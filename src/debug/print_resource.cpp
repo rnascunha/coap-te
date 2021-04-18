@@ -20,7 +20,7 @@ void print_link_format(const char* buffer, std::size_t length) noexcept
 			std::printf("\tattr[%zu]: %.*s\n",
 					la->attr_len, static_cast<int>(la->attr_len), la->attr);
 			Parser_Value parser_value(la);
-			value const* lv;
+			link_value const* lv;
 			while((lv = parser_value.next()))
 			{
 				std::printf("\t\tvalue[%zu]: %.*s\n",

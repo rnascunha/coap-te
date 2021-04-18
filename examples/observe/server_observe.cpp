@@ -268,7 +268,7 @@ static void thread_time(engine& engine)
 					 * Seting a payload
 					 */
 					char buff[20];
-					std::snprintf(buff, 20, "%lu", CoAP::time());
+					std::snprintf(buff, 20, "%llu", CoAP::time());
 
 					req.payload(buff);
 
@@ -382,7 +382,7 @@ static void thread_type(engine& engine)
 			}
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(1));
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		std::cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
 	}
 }
 
@@ -460,6 +460,11 @@ static void thread_sensor(engine& engine)
 
 int main()
 {
+	/**
+	 * At Linux, does nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
+	
 	CoAP::Error ec;
 	/**
 	 * Socket
@@ -566,7 +571,7 @@ static void get_time_handler(engine::message const& request,
 	 * Setting payload and serilizing
 	 */
 	char buff[20];
-	std::snprintf(buff, 20, "%lu", CoAP::time());
+	std::snprintf(buff, 20, "%llu", CoAP::time());
 
 	response.payload(buff).serialize();
 }

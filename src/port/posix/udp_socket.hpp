@@ -14,6 +14,7 @@ template<class Endpoint,
 		int Flags = MSG_DONTWAIT>
 class udp{
 	public:
+		using handler = int;
 		using endpoint = Endpoint;
 		udp();
 
@@ -22,7 +23,7 @@ class udp{
 		std::size_t send(const void*, std::size_t, endpoint&, CoAP::Error&)  noexcept;
 		std::size_t receive(void*, std::size_t, endpoint&, CoAP::Error&) noexcept;
 	private:
-		int socket_;
+		handler socket_;
 };
 
 }//POSIX

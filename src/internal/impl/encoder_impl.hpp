@@ -74,13 +74,14 @@ int percent_encode(char* buffer, std::size_t buffer_used, std::size_t buffer_len
 	return static_cast<int>(size_after_encoded);
 }
 
-std::size_t percent_encoded_size(const char* buffer, std::size_t buffer_used,
-								char const * const encoded_list, std::size_t encoded_list_len,
-								std::size_t* changes /* = nullptr */)
-{
-	encoder_list list(encoded_list, encoded_list_len);
-	return percent_encoded_size(buffer, buffer_used, list.list_, list.size_, changes);
-}
+
+// std::size_t percent_encoded_size(const char* buffer, std::size_t buffer_used,
+								// char const * const encoded_list, std::size_t encoded_list_len,
+								// std::size_t* changes /* = nullptr */)
+// {
+	// encoder_list list(encoded_list, encoded_list_len);
+	// return percent_encoded_size(buffer, buffer_used, list.list_, list.size_, changes);
+// }
 
 int percent_encode(char* buffer, std::size_t buffer_used, std::size_t buffer_len_total,
 					char const* const encode_list, std::size_t encode_list_len)

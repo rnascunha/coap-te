@@ -30,7 +30,11 @@ static constexpr Tree_Trunks::type_config<type> const type_config[] = {
 };
 
 static constexpr const Tree_Trunks::config<type> config = {
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	.use_color				= false,
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	.use_color 				= true,
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	.time 					= true,
 	.module 				= true,
 	.ignore_module_level 	= false,

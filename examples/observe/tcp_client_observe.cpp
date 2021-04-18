@@ -59,7 +59,7 @@ using engine = CoAP::Transmission::Reliable::engine_client<
 				csm.max_message_size,
 				CoAP::Transmission::Reliable::transaction_cb>,
 			4>,											///< transaction list size
-		CoAP::Transmission::Reliable::default_cb,	///< Default callback signature function
+		CoAP::Transmission::Reliable::default_cb<CoAP::Port::POSIX::tcp_client<endpoint>::handler>,	///< Default callback signature function
 		CoAP::disable>;								///< Disable resource
 
 /**
@@ -217,6 +217,11 @@ void request_cb(void const* trans, engine::message const* response, void*) noexc
 int main()
 {
 	debug(example_mod, "Init Observe Client code...");
+	
+	/**
+	 * At Linux, does nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
 
 	CoAP::Error ec;
 

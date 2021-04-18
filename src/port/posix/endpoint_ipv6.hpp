@@ -18,7 +18,7 @@ inline bool operator==(in6_addr const& lhs, in6_addr const& rhs) noexcept
 
 class endpoint_ipv6{
 	public:
-		using native_type = struct sockaddr_in6;
+		using native_type = sockaddr_in6;
 		static constexpr const sa_family_t family = AF_INET6;
 
 		endpoint_ipv6()
@@ -39,6 +39,7 @@ class endpoint_ipv6{
 
 		void set(in6_addr const& addr, std::uint16_t port) noexcept
 		{
+			std::memset(&addr_, 0, sizeof(native_type));
 			addr_.sin6_family = family;
 			addr_.sin6_port = htons(port);
 			addr_.sin6_addr = addr;
@@ -48,10 +49,12 @@ class endpoint_ipv6{
 		bool set(const char* addr_str, std::uint16_t port) noexcept
 		{
 			in6_addr addr;
+			std::memset(&addr_, 0, sizeof(native_type));
+			
 			int ret = inet_pton(family, addr_str, &addr);
 			if(ret <= 0)
 			{
-				std::memset(&addr_, 0, sizeof(native_type));
+
 				return false;
 			}
 

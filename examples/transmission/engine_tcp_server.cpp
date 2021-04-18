@@ -245,7 +245,8 @@ using engine = CoAP::Transmission::Reliable::engine_server<
 		csm,									///< (2) CSM paramenter configuration
 		connection_list_t,						///< (3) Connection list defined above
 		transaction_list_t,						///< (4) Trasaction list as defined above (disabled)
-		CoAP::Transmission::Reliable::default_cb,	///< (4) Default callback signature function
+		CoAP::Transmission::Reliable::default_cb<CoAP::Port::POSIX::tcp_server<endpoint_t>::handler>,	
+												///< (4) Default callback signature function
 		resource>;								///< (5) Resource definition
 
 /**
@@ -281,7 +282,7 @@ static void get_discovery_handler(engine::message const& request,
 /**
  * This default callback response to signal response
  */
-void default_callback(int socket,
+void default_callback(engine::socket socket,
 		engine::message const* response,
 		void* engine_ptr) noexcept
 {
@@ -310,6 +311,11 @@ static void exit_error(CoAP::Error& ec, const char* what = nullptr)
 
 int main()
 {
+	/**
+	 * At Linux, does nothing. At Windows initiate winsock
+	 */
+	CoAP::Port::POSIX::init();
+
 	CoAP::Error ec;
 
 	/**
@@ -469,7 +475,7 @@ static void get_time_handler(engine::message const& request,
 	CoAP::Message::Option::node content{format};
 
 	char time[15];
-	std::snprintf(time, 15, "%lu", CoAP::time());
+	std::snprintf(time, 15, "%llu", CoAP::time());
 
 	/**
 	 * Making response (always call serialize)
