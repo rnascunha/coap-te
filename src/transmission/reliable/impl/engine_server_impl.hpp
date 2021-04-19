@@ -487,7 +487,6 @@ on_read(socket sock) noexcept
 //				break;
 			}
 
-			status(engine_mod, "size[%zu]", size);
 			if(size == 0) return true;
 
 			using namespace CoAP::Message::Reliable;

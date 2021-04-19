@@ -9,9 +9,10 @@ namespace CoAP{
 namespace Port{
 namespace POSIX{
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 bool init() noexcept
 {
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+
 	WSADATA wsa;
 
 	//Initialise winsock
@@ -20,10 +21,8 @@ bool init() noexcept
 		return false;
 	}
 	return true;
-#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
-	return true;
-#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 }
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 
 }//POSIX
 }//Port

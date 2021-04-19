@@ -22,12 +22,15 @@ endif()
 message("Builder type: " ${CMAKE_BUILD_TYPE}) 
 
 if(MSVC)
-#Remove warning
+#####
+#Remove warning (don't understand or agree...)
 #https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4706?view=msvc-160
+#https://docs.microsoft.com/pt-br/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4702?view=msvc-160
+####
 	message(STATUS "MSVC build")
-	set(CMAKE_CXX_FLAGS "/std:c++latest /EHsc /bigobj /wd4706 /wd4702 /W4")	#"/std:c++17 /W4"
+	set(CMAKE_CXX_FLAGS "/std:c++latest /EHsc /bigobj /wd4706 /wd4702 /W4")	#/std:c++17 
 	set(CMAKE_CXX_FLAGS_RELEASE "/O2")
-	add_compile_definitions(BOOST_DATE_TIME_NO_LIB BOOST_REGEX_NO_LIB)
+#	add_compile_definitions(BOOST_DATE_TIME_NO_LIB BOOST_REGEX_NO_LIB)
 else()
 	message(STATUS "NO MSVC build")
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter") 

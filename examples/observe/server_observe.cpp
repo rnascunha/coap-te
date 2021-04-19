@@ -268,7 +268,7 @@ static void thread_time(engine& engine)
 					 * Seting a payload
 					 */
 					char buff[20];
-					std::snprintf(buff, 20, "%llu", CoAP::time());
+					std::snprintf(buff, 20, "%llu", (long long unsigned)CoAP::time());
 
 					req.payload(buff);
 
@@ -571,7 +571,7 @@ static void get_time_handler(engine::message const& request,
 	 * Setting payload and serilizing
 	 */
 	char buff[20];
-	std::snprintf(buff, 20, "%llu", CoAP::time());
+	std::snprintf(buff, 20, "%llu", (long long unsigned)CoAP::time());
 
 	response.payload(buff).serialize();
 }

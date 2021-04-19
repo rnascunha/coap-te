@@ -478,7 +478,7 @@ static void get_time_handler(engine::message const&,
 	CoAP::Message::Option::node content{format};
 
 	char time[15];
-	std::snprintf(time, 15, "%llu", CoAP::time());
+	std::snprintf(time, 15, "%llu", (long long unsigned)CoAP::time());
 
 	/**
 	 * Making response (always call serialize)
