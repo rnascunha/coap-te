@@ -239,7 +239,7 @@ int main()
 	debug(example_mod, "Initating the engine...");
 
 	engine coap_engine(std::move(conn),
-						CoAP::Message::message_id(CoAP::time()));
+						CoAP::Message::message_id((unsigned)CoAP::time()));
 
 	debug(example_mod, "Constructing the request message...");
 

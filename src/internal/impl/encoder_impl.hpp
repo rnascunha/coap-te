@@ -53,7 +53,7 @@ int percent_encode(char* buffer, std::size_t buffer_used, std::size_t buffer_len
 				func, &changes_needed);
 
 	if(size_after_encoded > buffer_len_total) return -1;
-	if(size_after_encoded == buffer_used) return buffer_used;
+	if(size_after_encoded == buffer_used) return static_cast<int>(buffer_used);
 
 	for(std::size_t i = buffer_used - 1;; i--)
 	{

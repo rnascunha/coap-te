@@ -12,7 +12,7 @@ template<typename Observe>
 list_vector<Observe>::list_vector(){}
 
 template<typename Observe>
-unsigned
+std::size_t
 list_vector<Observe>::size() const noexcept
 {
 	return list_.size();

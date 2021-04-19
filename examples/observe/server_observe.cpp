@@ -302,7 +302,7 @@ static void thread_time(engine& engine)
  * This callback will be call at timeout/success transaction
  */
 static void type_callback(const void* transaction,
-		engine::message const* response,
+		engine::message const*,
 		void*) noexcept
 {
 	auto const* t = static_cast<engine::transaction_t const*>(transaction);
@@ -327,7 +327,7 @@ static void thread_type(engine& engine)
 		 * Reading input
 		 */
 		char i;
-		i = std::cin.get();
+		i = static_cast<char>(std::cin.get());
 
 		/**
 		 * Check if state changed (different character)
@@ -336,16 +336,16 @@ static void thread_type(engine& engine)
 		{
 
 			typed = i;
-			for(unsigned i = 0; i < type_list.size(); i++)
+			for(unsigned j = 0; j < type_list.size(); j++)
 			{
-				if(type_list[i]->is_used())
+				if(type_list[j]->is_used())
 				{
 					debug(example_mod, "sending type");
 
 					/**
 					 * Making a confirmable request
 					 */
-					engine::request req{*type_list[i],
+					engine::request req{*type_list[j],
 						CoAP::Message::type::confirmable,
 						CoAP::Message::code::content};
 
@@ -487,7 +487,7 @@ int main()
 	 * Initiating CoAP engine
 	 */
 	engine coap_engine(std::move(socket),
-			CoAP::Message::message_id(CoAP::time()));
+			CoAP::Message::message_id((unsigned)CoAP::time()));
 
 	/**
 	 * Resource instantiation
@@ -656,7 +656,7 @@ static void get_sensor_handler(engine::message const& request,
  *
  * Respond to request with resource information as defined at RFC6690
  */
-static void get_discovery_handler(engine::message const& request,
+static void get_discovery_handler(engine::message const&,
 								engine::response& response, void* eng_ptr) noexcept
 {
 	char buffer[512];

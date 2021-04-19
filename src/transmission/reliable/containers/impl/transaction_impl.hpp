@@ -17,10 +17,11 @@ static constexpr CoAP::Log::module transaction_mod = {
 		.enable = true
 };
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 void
-transaction<MaxPacketSize, Callback_Functor>::
+transaction<Handler, MaxPacketSize, Callback_Functor>::
 clear() noexcept
 {
 	cb_ = nullptr;
@@ -34,10 +35,11 @@ clear() noexcept
 		buffer_ = nullptr;
 }
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 bool
-transaction<MaxPacketSize, Callback_Functor>::
+transaction<Handler, MaxPacketSize, Callback_Functor>::
 check() noexcept
 {
 	if(status_ != status_t::sending)
@@ -56,11 +58,12 @@ check() noexcept
 	return false;
 }
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 bool
-transaction<MaxPacketSize, Callback_Functor>::
-check_response(int socket,
+transaction<Handler, MaxPacketSize, Callback_Functor>::
+check_response(handler socket,
 		CoAP::Message::Reliable::message const& response) noexcept
 {
 	if(status_ != status_t::sending) return false;
@@ -79,47 +82,52 @@ check_response(int socket,
 	return true;
 }
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 CoAP::Message::Reliable::message const&
-transaction<MaxPacketSize, Callback_Functor>::
+transaction<Handler, MaxPacketSize, Callback_Functor>::
 request() const noexcept
 {
 	return request_;
 }
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 std::uint8_t*
-transaction<MaxPacketSize, Callback_Functor>::
+transaction<Handler, MaxPacketSize, Callback_Functor>::
 buffer() noexcept
 {
 	return buffer_;
 }
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 std::size_t
-transaction<MaxPacketSize, Callback_Functor>::
+transaction<Handler, MaxPacketSize, Callback_Functor>::
 buffer_used() const noexcept
 {
 	return buffer_used_;
 }
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
-int
-transaction<MaxPacketSize, Callback_Functor>::
+Handler
+transaction<Handler, MaxPacketSize, Callback_Functor>::
 socket() const noexcept
 {
 	return socket_;
 }
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 bool
-transaction<MaxPacketSize, Callback_Functor>::
-init(int socket,
+transaction<Handler, MaxPacketSize, Callback_Functor>::
+init(handler socket,
 	std::uint8_t* buffer, std::size_t size,
 	Callback_Functor func, void* data,
 	expiration_time_type time,
@@ -130,11 +138,12 @@ init(int socket,
 	return init_impl(socket, buffer, size, func, data, time, ec);
 }
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 bool
-transaction<MaxPacketSize, Callback_Functor>::
-init_impl(int socket,
+transaction<Handler, MaxPacketSize, Callback_Functor>::
+init_impl(handler socket,
 		std::uint8_t* buffer, std::size_t size,
 		Callback_Functor func, void* data,
 		expiration_time_type time,
@@ -166,7 +175,8 @@ init_impl(int socket,
 	return true;
 }
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 template<bool SetLength,
 		bool SortOptions,
@@ -175,7 +185,7 @@ template<bool SetLength,
 		std::size_t BufferSize,
 		CoAP::Message::code Code>
 std::size_t
-transaction<MaxPacketSize, Callback_Functor>::
+transaction<Handler, MaxPacketSize, Callback_Functor>::
 serialize(CoAP::Message::Reliable::Factory<BufferSize, Code> const& factory, CoAP::Error& ec) noexcept
 {
 	static_assert(!is_external_storage, "Must use internal storage");
@@ -186,11 +196,12 @@ serialize(CoAP::Message::Reliable::Factory<BufferSize, Code> const& factory, CoA
 	return size;
 }
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 bool
-transaction<MaxPacketSize, Callback_Functor>::
-init(int socket,
+transaction<Handler, MaxPacketSize, Callback_Functor>::
+init(handler socket,
 	Callback_Functor func, void* data,
 	expiration_time_type time,
 	CoAP::Error& ec) noexcept
@@ -207,37 +218,41 @@ init(int socket,
 /**
  *
  */
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 status_t
-transaction<MaxPacketSize, Callback_Functor>::
+transaction<Handler, MaxPacketSize, Callback_Functor>::
 status() const noexcept
 {
 	return status_;
 }
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 expiration_time_type
-transaction<MaxPacketSize, Callback_Functor>::
+transaction<Handler, MaxPacketSize, Callback_Functor>::
 expiration_time() const noexcept
 {
 	return expiration_time_;
 }
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 bool
-transaction<MaxPacketSize, Callback_Functor>::
+transaction<Handler, MaxPacketSize, Callback_Functor>::
 is_busy() const noexcept
 {
 	return status_ != status_t::none;
 }
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 void
-transaction<MaxPacketSize, Callback_Functor>::
+transaction<Handler, MaxPacketSize, Callback_Functor>::
 cancel() noexcept
 {
 	if(status_ != status_t::sending) return;
@@ -246,10 +261,11 @@ cancel() noexcept
 	call_cb(nullptr);
 }
 
-template<unsigned MaxPacketSize,
+template<typename Handler,
+		unsigned MaxPacketSize,
 		typename Callback_Functor>
 void
-transaction<MaxPacketSize, Callback_Functor>::
+transaction<Handler, MaxPacketSize, Callback_Functor>::
 call_cb(CoAP::Message::Reliable::message const* response) noexcept
 {
 	if(cb_) cb_(this, response, data_);

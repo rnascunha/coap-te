@@ -59,6 +59,15 @@ std::size_t description(Resource const& root,
 	return offset;
 }
 
+/**
+ * MSVC warning... don't understand...
+ */ 
+#if defined(_MSC_VER)
+#pragma warning( push )
+#pragma warning( disable : 4505 )
+#endif /* defined(_MSC_VER) */
+
+[[maybe_unused]]
 static std::size_t make_parents_path(path_list const* parents_path,
 		char* buffer, std::size_t buffer_size,
 		CoAP::Error& ec) noexcept
@@ -86,6 +95,10 @@ static std::size_t make_parents_path(path_list const* parents_path,
 	return offset;
 }
 
+#if defined(_MSC_VER)
+#pragma warning( pop )
+#endif /* defined(_MSC_VER) */
+
 template<typename Resource>
 std::size_t description(Resource const& root,
 		path_list const* parents_path,
@@ -106,7 +119,7 @@ std::size_t description(Resource const& root,
 	offset += make_parents_path(parents_path, buffer + offset, buffer_size - offset, ec);
 	if(ec) return offset;
 
-	unsigned size_path = root.path() ?
+	std::size_t size_path = root.path() ?
 							std::strlen(root.path()) : 0;
 
 	if(buffer_size <  offset + size_path + 2)
@@ -128,7 +141,7 @@ std::size_t description(Resource const& root,
 
 	if constexpr(Resource::has_description)
 	{
-		unsigned size_desc = root.description() ?
+		std::size_t size_desc = root.description() ?
 									std::strlen(root.description()) : 0;
 
 		if(size_desc && buffer_size < offset + size_desc + 1)

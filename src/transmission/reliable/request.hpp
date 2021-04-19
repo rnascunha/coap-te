@@ -22,7 +22,7 @@ class Request{
 		 */
 		Request() : socket_(0){}
 		Request(handler socket) : socket_(socket){}
-		Request(separate_response const& data, CoAP::Message::code mcode)
+		Request(separate_response<Handler> const& data, CoAP::Message::code mcode)
 		: socket_(data.socket)
 		{
 			fac_.code(mcode);
@@ -83,7 +83,7 @@ class Request{
 			return *this;
 		}
 
-		int socket() noexcept
+		handler socket() noexcept
 		{
 			return socket_;
 		}

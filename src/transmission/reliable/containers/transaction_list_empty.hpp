@@ -19,7 +19,7 @@ class transaction_list_empty{
 		transaction_t* find_free_slot() noexcept{ return nullptr; }
 
 		void check_all() noexcept{}
-		transaction_t* check_all_response(int socket, CoAP::Message::Reliable::message const&) noexcept
+		transaction_t* check_all_response(int, CoAP::Message::Reliable::message const&) noexcept
 		{ return nullptr; }
 
 		void cancel_all() noexcept;

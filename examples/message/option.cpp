@@ -148,7 +148,7 @@ int main()
 	 */
 	Option::Parser<Option::code> parser{msg};
 	Option::option const* opt;		//this will hold the option parsed.
-	Option::config<Option::code> const* config;	//this will hold option config.
+	Option::config<Option::code> const* oconfig;	//this will hold option config.
 
 	/**
 	 * Let's iterate through the options and print it values
@@ -156,8 +156,8 @@ int main()
 	status("Parsing and printing options...");
 	while((opt = parser.next()))
 	{
-		config = Option::get_config(opt->ocode);
-		if(!config) //same invalid option
+		oconfig = Option::get_config(opt->ocode);
+		if(!oconfig) //same invalid option
 		{
 			std::printf("Invalid option: %u|len: %u\n", static_cast<unsigned>(opt->ocode), opt->length);
 			continue;
@@ -165,7 +165,7 @@ int main()
 		/**
 		 * Lets print based on type
 		 */
-		switch(config->otype)
+		switch(oconfig->otype)
 		{
 			case Option::type::empty:
 				std::printf("empty: %u|%s|len: %u\n",

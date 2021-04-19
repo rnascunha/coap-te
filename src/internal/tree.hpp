@@ -42,6 +42,14 @@ class branch{
 			return n;
 		}
 
+/**
+ * MSVC warning... don't understand...
+ */ 
+#if defined(_MSC_VER)
+#pragma warning( push )
+#pragma warning( disable : 4702 )
+#endif /* defined(_MSC_VER) */
+
 		template<typename Path, typename ...Paths>
 		branch* find_descendant(Path path, Paths&& ... paths) noexcept
 		{
@@ -79,6 +87,10 @@ class branch{
 			}
 			return valid;
 		}
+
+#if defined(_MSC_VER)
+#pragma warning( pop )
+#endif /* defined(_MSC_VER) */
 
 		template<bool CheckRepeat = true, bool AddSorted = false>
 		bool add_child(branch& new_node) noexcept

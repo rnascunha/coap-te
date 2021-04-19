@@ -43,7 +43,7 @@ unsigned make_header(std::uint8_t* buffer, std::size_t buffer_len,
 
 std::size_t set_message_length(std::uint8_t* buffer,
 							std::size_t buffer_len, std::size_t buffer_used,
-							unsigned size,
+							std::size_t size,
 							CoAP::Error& ec) noexcept
 {
 	unsigned shift = 0;

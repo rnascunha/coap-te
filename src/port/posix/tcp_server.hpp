@@ -51,7 +51,7 @@ class tcp_server{
 		fd_set const& client_list() const noexcept;
 #endif /* COAP_TE_USE_SELECT == 1 || COAP_TE_TCP_SERVER_CLIENT_LIST == 1 */
 	private:
-		int accept(CoAP::Error&) noexcept;
+		handler accept(CoAP::Error&) noexcept;
 		bool open_poll() noexcept;
 		bool add_socket_poll(handler socket, std::uint32_t events) noexcept;
 

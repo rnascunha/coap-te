@@ -55,7 +55,7 @@ int main()
 	std::uint8_t buffer[BUFFER_LEN];	//Buffer where the data will be serialized
 	CoAP::Error ec;						//Use to error report
 
-	message_id mid(CoAP::time());
+	message_id mid((unsigned)CoAP::time());
 
 	Factory<> fac;
 

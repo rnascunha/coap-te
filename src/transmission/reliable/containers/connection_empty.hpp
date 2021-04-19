@@ -7,10 +7,11 @@ namespace CoAP{
 namespace Transmission{
 namespace Reliable{
 
+template<typename Handler>
 class Connection_Empty{
 	public:
-		using handler = int;
-		Connection_Empty();
+		using handler = Handler;
+		Connection_Empty(){}
 
 		void init(handler) noexcept{}
 		void init(handler, csm_configure const&) noexcept{}

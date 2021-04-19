@@ -40,7 +40,7 @@ check_all() noexcept
 template<typename Transaction>
 Transaction*
 transaction_list_vector<Transaction>::
-check_all_response(int socket,
+check_all_response(handler socket,
 		CoAP::Message::Reliable::message const& msg) noexcept
 {
 	for(auto& node : nodes_)

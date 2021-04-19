@@ -14,7 +14,11 @@ template<class Endpoint,
 		int Flags = MSG_DONTWAIT>
 class udp{
 	public:
+#if	defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+		using handler = SOCKET;
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 		using handler = int;
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 		using endpoint = Endpoint;
 		udp();
 

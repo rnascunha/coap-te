@@ -80,7 +80,8 @@ class endpoint_ipv6{
 		in6_addr address() noexcept{ return addr_.sin6_addr; }
 		std::uint16_t port() const noexcept{ return ntohs(addr_.sin6_port); }
 
-		bool copy_sock_address(int socket) noexcept
+		template<typename Handler>
+		bool copy_sock_address(Handler socket) noexcept
 		{
 			socklen_t size = sizeof(native_type);
 			if(::getpeername(socket,
@@ -90,7 +91,8 @@ class endpoint_ipv6{
 			return true;
 		}
 
-		bool copy_peer_address(int socket) noexcept
+		template<typename Handler>
+		bool copy_peer_address(Handler socket) noexcept
 		{
 			socklen_t size = sizeof(native_type);
 			if(::getpeername(socket,

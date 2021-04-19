@@ -7,9 +7,10 @@ namespace CoAP{
 namespace Transmission{
 namespace Reliable{
 
+template<typename Handler>
 class Connection{
 	public:
-		using handler = int;
+		using handler = Handler;
 		Connection();
 
 		void init(handler socket) noexcept;
@@ -25,12 +26,14 @@ class Connection{
 
 		void clear() noexcept;
 	private:
-		handler 			socket_ = 0;
+		handler 		socket_ = 0;
 		csm_configure	csm_;
 };
 
 }//Reliable
 }//Transmission
 }//CoAP
+
+#include "impl/connection_impl.hpp"
 
 #endif /* COAP_TE_TRANSMISSION_RELIABLE_CONNECTION_HPP__ */

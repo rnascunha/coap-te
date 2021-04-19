@@ -55,7 +55,7 @@ int main()
 	CoAP::Error ec;						//Use to error report
 
 	//Message ID generator
-	message_id mid(CoAP::time());
+	message_id mid((unsigned int)CoAP::time());
 
 	/**
 	 * Instantiating options

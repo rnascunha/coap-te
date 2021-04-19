@@ -75,7 +75,7 @@ static bool response_flag = false;
 /**
  * Copy data received to buffer
  */
-static char buffer[BUFFER_LEN];
+static char receive_data[BUFFER_LEN];
 
 /**
  * Request callback (signature defined at transaction)
@@ -123,7 +123,7 @@ void request_cb(void const* trans, engine::message const* response, void* eng_pt
 			/**
 			 * Copying received data to buffer
 			 */
-			std::memcpy(buffer + offset, response->payload, response->payload_len);
+			std::memcpy(receive_data + offset, response->payload, response->payload_len);
 
 			/**
 			 * If no more data to be received, print data and return
@@ -131,7 +131,7 @@ void request_cb(void const* trans, engine::message const* response, void* eng_pt
 			if(!Option::more(value))
 			{
 				std::printf("Data received:\n----------------------\n");
-				std::printf("%s", buffer);
+				std::printf("%s", receive_data);
 				std::printf("---------------------\nAll data transfered!\n\n");
 				response_flag = true;
 				return;
@@ -187,7 +187,7 @@ void request_cb(void const* trans, engine::message const* response, void* eng_pt
 			 */
 			status(example_mod, "Response doesn't have op Block2\n");
 
-			std::memcpy(buffer, response->payload, response->payload_len);
+			std::memcpy(receive_data, response->payload, response->payload_len);
 			std::printf("Data received[%zu]:\n\n", response->payload_len);
 			std::printf("%.*s", static_cast<int>(response->payload_len),
 								static_cast<char const*>(response->payload));
@@ -232,7 +232,7 @@ int main()
 	debug(example_mod, "Initating the engine...");
 
 	engine coap_engine(std::move(conn),
-			CoAP::Message::message_id(CoAP::time()),
+			CoAP::Message::message_id((unsigned)CoAP::time()),
 			tconfigure);
 
 	debug(example_mod, "Constructing the request message...");

@@ -188,7 +188,7 @@ int main()
 	 * Initiating CoAP engine
 	 */
 	engine coap_engine(std::move(socket),
-			CoAP::Message::message_id(CoAP::time()));
+			CoAP::Message::message_id((unsigned)CoAP::time()));
 
 	/**
 	 * Setting the root callback
@@ -321,7 +321,7 @@ static void get_root_handler(engine::message const&,
  *
  * Retrieve local time in epoch format.
  */
-static void get_time_handler(engine::message const& request,
+static void get_time_handler(engine::message const&,
 								engine::response& response, void*) noexcept
 {
 	debug(example_mod, "Called get time handler");
@@ -418,7 +418,7 @@ static bool gpios[3] = {false, false, false};
  * as the sensor callback.
  */
 template<int GPIONum>
-static void get_actuator_handler(engine::message const& request,
+static void get_actuator_handler(engine::message const&,
 								engine::response& response, void*) noexcept
 {
 	debug(example_mod, "Called get actuator handler");
@@ -842,7 +842,7 @@ static void get_separate_handler(engine::message const& request,
  *
  * Respond to request with resource information as defined at RFC6690
  */
-static void get_discovery_handler(engine::message const& request,
+static void get_discovery_handler(engine::message const&,
 								engine::response& response, void* eng_ptr) noexcept
 {
 	char buffer[512];

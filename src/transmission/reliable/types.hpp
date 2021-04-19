@@ -39,18 +39,19 @@ struct csm_configure{
 	}
 };
 
+template<typename Handler>
 struct separate_response{
-	int				 	socket;
+	Handler				socket;
 	std::size_t			token_len;
 	const void*			token[8];
 
-	separate_response(CoAP::Message::Reliable::message const& request, int sockett)
+	separate_response(CoAP::Message::Reliable::message const& request, Handler socket)
 	: socket{socket}, token_len{request.token_len}
 	{
 		std::memcpy(token, request.token, token_len);
 	}
 
-	separate_response(CoAP::Message::Reliable::message const& request, Response const& response)
+	separate_response(CoAP::Message::Reliable::message const& request, Response<Handler> const& response)
 	: socket{response.socket()}, token_len{request.token_len}
 	{
 		std::memcpy(token, request.token, token_len);

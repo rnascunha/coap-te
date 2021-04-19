@@ -14,15 +14,16 @@ template<typename Transaction,
 class transaction_list{
 	public:
 		using transaction_t = Transaction;
+		using handler = typename Transaction::handler;
 
 		transaction_list();
 
 		Transaction* find_free_slot() noexcept;
 
 		void check_all() noexcept;
-		Transaction* check_all_response(int socket, CoAP::Message::Reliable::message const&) noexcept;
+		Transaction* check_all_response(handler socket, CoAP::Message::Reliable::message const&) noexcept;
 		void cancel_all() noexcept;
-		void cancel_all(int socket) noexcept;
+		void cancel_all(handler socket) noexcept;
 
 		Transaction* operator[](unsigned index) noexcept;
 		constexpr unsigned size() const noexcept;

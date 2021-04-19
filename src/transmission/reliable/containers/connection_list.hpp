@@ -9,27 +9,27 @@ namespace Reliable{
 
 #if COAP_TE_RELIABLE_CONNECTION == 1
 
-template<typename Connection,
+template<typename Conn,
 		unsigned Size>
 class connection_list{
 	public:
-		using connection_t = Connection;
-		using handler = typename Connection::handler;
+		using connection_t = Conn;
+		using handler = typename Conn::handler;
 
 		connection_list();
 
-		Connection* find(handler socket) noexcept;
-		Connection* find_free_slot() noexcept;
+		Conn* find(handler socket) noexcept;
+		Conn* find_free_slot() noexcept;
 
 		void close(handler socket) noexcept;
 		void close_all() noexcept;
 
-		Connection* operator[](unsigned index) noexcept;
+		Conn* operator[](unsigned index) noexcept;
 
 		unsigned ocupied() const noexcept;
 		constexpr unsigned size() const noexcept;
 	private:
-		Connection	nodes_[Size];
+		Conn	nodes_[Size];
 };
 
 #endif /* COAP_TE_RELIABLE_CONNECTION == 1 */

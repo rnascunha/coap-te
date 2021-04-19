@@ -88,7 +88,7 @@ tcp_client<Endpoint, Flags>::
 send(const void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-	int sent = ::send(socket_, static_cast<const char*>(buffer), buffer_len, 0);
+	int sent = ::send(socket_, static_cast<const char*>(buffer), static_cast<int>(buffer_len), 0);
 #else /* #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	int sent = ::send(socket_, buffer, buffer_len, 0);
 #endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
@@ -108,7 +108,7 @@ tcp_client<Endpoint, Flags>::
 receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-	int recv = ::recv(socket_, static_cast<char*>(buffer), buffer_len, 0);
+	int recv = ::recv(socket_, static_cast<char*>(buffer), static_cast<int>(buffer_len), 0);
 #else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	int recv = ::recv(socket_, buffer, buffer_len, 0);
 #endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */

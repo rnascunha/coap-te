@@ -37,7 +37,7 @@ class engine_server
 				!std::is_same<ConnectionList, CoAP::disable>::value;
 		using connection_list_type = typename std::conditional<
 				has_connection_list,
-					ConnectionList, connection_list_empty>::type;
+					ConnectionList, connection_list_empty<socket>>::type;
 		using connection_hold_t = typename connection_list_type::connection_t;
 
 		/**
@@ -54,7 +54,7 @@ class engine_server
 		using message = CoAP::Message::Reliable::message;
 		template<CoAP::Message::code Code = CoAP::Message::code::get>
 		using request = Request<socket, transaction_cb, Code>;
-		using response = Response;
+		using response = Response<socket>;
 		using resource = Resource;
 		using resource_root = typename std::conditional<
 				!std::is_same<Resource, CoAP::disable>::value,
@@ -62,7 +62,7 @@ class engine_server
 		using resource_node = typename std::conditional<
 				!std::is_same<Resource, CoAP::disable>::value,
 					typename CoAP::Resource::resource_root<resource>::node_t, empty>::type;
-		using async_response = separate_response;
+		using async_response = separate_response<socket>;
 
 		static constexpr const unsigned packet_size = Config.max_message_size;
 
@@ -190,8 +190,8 @@ class engine_server
 		transaction_list_type 	list_;
 		connection_list_type	conn_list_;
 
-		Connection			conn_;
-		std::uint8_t		buffer_[packet_size];
+		Connection				conn_;
+		std::uint8_t			buffer_[packet_size];
 
 		default_response_cb default_cb_;
 };

@@ -1,6 +1,7 @@
 #ifndef COAP_TE_OBSERVE_LIST_VECTOR_HPP__
 #define COAP_TE_OBSERVE_LIST_VECTOR_HPP__
 
+#include <cstdlib>
 #include "types.hpp"
 #include <vector>
 
@@ -14,7 +15,7 @@ class list_vector{
 
 		list_vector();
 
-		unsigned size() const noexcept;
+		std::size_t size() const noexcept;
 
 		template<typename Message, typename ...Args>
 		bool process(endpoint const&, Message const&, Args&&...) noexcept;

@@ -189,14 +189,14 @@ template<unsigned MaxPacketSize,
 		typename Endpoint>
 bool
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
-init(configure const& config,
+init(configure const& tconfig,
 	endpoint_t const& ep,
 	std::uint8_t* buffer, std::size_t size,
 	Callback_Functor func, void* data, CoAP::Error& ec) noexcept
 {
 	static_assert(is_external_storage, "Must use external storage");
 
-	return init_impl(config, ep, buffer, size, func, data, ec);
+	return init_impl(tconfig, ep, buffer, size, func, data, ec);
 }
 
 template<unsigned MaxPacketSize,
@@ -204,7 +204,7 @@ template<unsigned MaxPacketSize,
 		typename Endpoint>
 bool
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
-init_impl(configure const& config,
+init_impl(configure const& tconfig,
 		endpoint_t const& ep,
 		std::uint8_t* buffer, std::size_t size,
 		Callback_Functor func, void* data, CoAP::Error& ec) noexcept
@@ -223,9 +223,9 @@ init_impl(configure const& config,
 		return true;
 	}
 
-	max_span_timeout_ = static_cast<double>(CoAP::time()) + max_transmit_span(config);
-	retransmission_remaining_ = config.max_restransmission;
-	expiration_time_factor_ = expiration_timeout(config);
+	max_span_timeout_ = static_cast<double>(CoAP::time()) + max_transmit_span(tconfig);
+	retransmission_remaining_ = tconfig.max_restransmission;
+	expiration_time_factor_ = expiration_timeout(tconfig);
 	next_expiration_time_ = static_cast<double>(CoAP::time()) + expiration_time_factor_;
 	CoAP::Log::debug(transaction_mod, "[%04X] Expiration time = %.2f (diff=%.2f/factor=%.2f)",
 								request_.mid,
@@ -292,7 +292,7 @@ template<unsigned MaxPacketSize,
 		typename Endpoint>
 bool
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
-init(configure const& config,
+init(configure const& tconfig,
 		endpoint_t const& ep,
 		Callback_Functor func, void* data,
 		CoAP::Error& ec) noexcept
@@ -303,7 +303,7 @@ init(configure const& config,
 		ec = CoAP::errc::buffer_empty;
 		return false;
 	}
-	return init_impl(config, ep, buffer_, buffer_used_, func, data, ec);
+	return init_impl(tconfig, ep, buffer_, buffer_used_, func, data, ec);
 }
 
 /**

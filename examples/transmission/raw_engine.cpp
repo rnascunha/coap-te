@@ -297,7 +297,7 @@ int main()
 	 * you need.
 	 */
 	engine coap_engine(std::move(conn),
-			CoAP::Message::message_id(CoAP::time()),
+			CoAP::Message::message_id((unsigned)CoAP::time()),
 			tconfigure);
 
 	/**

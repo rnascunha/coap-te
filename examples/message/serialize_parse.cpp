@@ -62,7 +62,7 @@ int main()
 	//Message token
 	std::uint8_t token[] = {0x03, 0x04, 0x05, 0x06, 0x07};
 	//Message ID generator
-	message_id mid(CoAP::time());
+	message_id mid((unsigned int)CoAP::time());
 
 
 	CoAP::Message::accept content = accept::application_json;

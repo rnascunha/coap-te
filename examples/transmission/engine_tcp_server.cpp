@@ -93,6 +93,11 @@ using endpoint_t = CoAP::Port::POSIX::endpoint_ipv6;
 #endif
 
 /**
+ * Connection type we are going to use
+ */
+using connection = CoAP::Port::POSIX::tcp_server<endpoint_t>;			///< TCP server socket definition
+
+/**
  * Reliable connection MUST exchange CSM signaling message when connect.
  * This is our client configuration:
  * * Max message size = 1152 (default)
@@ -136,7 +141,7 @@ static constexpr const CoAP::Transmission::Reliable::csm_configure csm = {
  */
 using connection_list_t =
 		CoAP::Transmission::Reliable::connection_list_vector<
-			CoAP::Transmission::Reliable::Connection		/* (1) Connection type */
+			CoAP::Transmission::Reliable::Connection<connection::handler>		/* (1) Connection type */
 		>;
 #elif defined(USE_CONNECTION_LIST_DEFAULT)
 /**
@@ -150,7 +155,7 @@ using connection_list_t =
  */
 using connection_list_t =
 		CoAP::Transmission::Reliable::connection_list<
-			CoAP::Transmission::Reliable::Connection,	/* (1) transaction type */
+			CoAP::Transmission::Reliable::Connection<connection::handler>,	/* (1) transaction type */
 			4>;				/* (2) number of transaction */
 #else
 /**
@@ -196,7 +201,7 @@ using transaction_list_t = CoAP::disable;
 using resource = CoAP::Resource::resource<
 		CoAP::Resource::callback_reliable<
 			CoAP::Message::Reliable::message,
-			CoAP::Transmission::Reliable::Response
+			CoAP::Transmission::Reliable::Response<connection::handler>
 		>,									///< (1) resource callback
 		true>;								///< (2) enable/disable description
 
@@ -239,9 +244,7 @@ using resource = CoAP::Resource::resource<
  * So that it, that's us... CoAP-te...
  */
 using engine = CoAP::Transmission::Reliable::engine_server<
-		CoAP::Port::POSIX::tcp_server<			///< (1) TCP server socket definition
-			endpoint_t
-		>,
+		connection,			///< (1) TCP server socket definition
 		csm,									///< (2) CSM paramenter configuration
 		connection_list_t,						///< (3) Connection list defined above
 		transaction_list_t,						///< (4) Trasaction list as defined above (disabled)
@@ -282,9 +285,9 @@ static void get_discovery_handler(engine::message const& request,
 /**
  * This default callback response to signal response
  */
-void default_callback(engine::socket socket,
+void default_callback(engine::socket,
 		engine::message const* response,
-		void* engine_ptr) noexcept
+		void*) noexcept
 {
 	debug(example_mod, "default cb called");
 
@@ -463,7 +466,7 @@ static void get_root_handler(engine::message const&,
  *
  * Retrieve local time in epoch format.
  */
-static void get_time_handler(engine::message const& request,
+static void get_time_handler(engine::message const&,
 								engine::response& response, void*) noexcept
 {
 	debug(example_mod, "Called get time handler");
@@ -560,7 +563,7 @@ static bool gpios[3] = {false, false, false};
  * as the sensor callback.
  */
 template<int GPIONum>
-static void get_actuator_handler(engine::message const& request,
+static void get_actuator_handler(engine::message const&,
 								engine::response& response, void*) noexcept
 {
 	debug(example_mod, "Called get actuator handler");
@@ -971,7 +974,7 @@ static void get_separate_handler(engine::message const& request,
  *
  * Respond to request with resource information as defined at RFC6690
  */
-static void get_discovery_handler(engine::message const& request,
+static void get_discovery_handler(engine::message const&,
 								engine::response& response, void* eng_ptr) noexcept
 {
 	char buffer[512];

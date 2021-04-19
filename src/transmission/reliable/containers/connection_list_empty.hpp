@@ -10,16 +10,18 @@ namespace Reliable{
 
 #if COAP_TE_RELIABLE_CONNECTION == 1
 
+template<typename Handler>
 class connection_list_empty{
 	public:
-		using connection_t = Connection_Empty;
+		using connection_t = Connection_Empty<Handler>;
+		using handler = typename Connection_Empty<Handler>::handler;
 
 		connection_list_empty(){}
 
-		connection_t* find(int) noexcept{ return nullptr; }
+		connection_t* find(handler) noexcept{ return nullptr; }
 		connection_t* find_free_slot() noexcept{ return nullptr; }
 
-		void close(int) noexcept{}
+		void close(handler) noexcept{}
 		void close_all() noexcept{}
 
 		connection_t* operator[](unsigned) noexcept{ return nullptr; }

@@ -43,7 +43,7 @@ class engine_client
 		using message = CoAP::Message::Reliable::message;
 		template<CoAP::Message::code Code = CoAP::Message::code::get>
 		using request = Request<socket, transaction_cb, Code>;
-		using response = Response;
+		using response = Response<socket>;
 		using resource = Resource;
 		using resource_root = typename std::conditional<
 				!std::is_same<Resource, CoAP::disable>::value,
@@ -51,7 +51,7 @@ class engine_client
 		using resource_node = typename std::conditional<
 				!std::is_same<Resource, CoAP::disable>::value,
 					typename CoAP::Resource::resource_root<resource>::node_t, empty>::type;
-		using async_response = separate_response;
+		using async_response = separate_response<socket>;
 
 
 		static constexpr const unsigned packet_size = Config.max_message_size;

@@ -87,7 +87,8 @@ using engine = CoAP::Transmission::Reliable::engine_server<
 		CoAP::Resource::resource<				/// Resource definition
 			CoAP::Resource::callback_reliable<
 				CoAP::Message::Reliable::message,
-				CoAP::Transmission::Reliable::Response
+				CoAP::Transmission::Reliable::Response<CoAP::Port::POSIX::tcp_server<endpoint_t>::handler>
+												///< TCP server socket definition
 			>,
 		true>
 	>;
@@ -300,7 +301,7 @@ static void thread_type(engine& engine)
 		 * Reading input
 		 */
 		char i;
-		i = std::cin.get();
+		i = static_cast<char>(std::cin.get());
 
 		/**
 		 * Check if state changed (different character)
@@ -309,16 +310,16 @@ static void thread_type(engine& engine)
 		{
 
 			typed = i;
-			for(unsigned i = 0; i < type_list.size(); i++)
+			for(unsigned j = 0; j < type_list.size(); j++)
 			{
-				if(type_list[i]->is_used())
+				if(type_list[j]->is_used())
 				{
 					debug(example_mod, "sending type");
 
 					/**
 					 * Making request
 					 */
-					engine::request<> req{*type_list[i], CoAP::Message::code::content};
+					engine::request<> req{*type_list[j], CoAP::Message::code::content};
 
 					/**
 					 * At unreliable connection, all observe notification must be
@@ -638,7 +639,7 @@ static void get_sensor_handler(engine::message const& request,
  *
  * Respond to request with resource information as defined at RFC6690
  */
-static void get_discovery_handler(engine::message const& request,
+static void get_discovery_handler(engine::message const&,
 								engine::response& response, void* eng_ptr) noexcept
 {
 	char buffer[512];

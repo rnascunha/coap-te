@@ -70,6 +70,11 @@ static constexpr const CoAP::Transmission::Reliable::csm_configure csm = {
 };
 
 /**
+ * Connection type we are going to use
+ */
+using connection = CoAP::Port::POSIX::tcp_client<endpoint_t>;		///< TCP client socket definition
+
+/**
  * Definiting a transaction.
  *
  * To use with engine, transactions MUST use internal storage, i.e.,
@@ -79,6 +84,7 @@ static constexpr const CoAP::Transmission::Reliable::csm_configure csm = {
  * The second parameter is the transaction callback signature
  */
 using transaction_t = CoAP::Transmission::Reliable::transaction<
+		connection::handler,
 		csm.max_message_size,
 		CoAP::Transmission::Reliable::transaction_cb>;
 
@@ -189,8 +195,7 @@ using resource = CoAP::disable;
  * So that it, that's us... CoAP-te...
  */
 using engine = CoAP::Transmission::Reliable::engine_client<
-		CoAP::Port::POSIX::tcp_client<			///< (1) TCP client socket definition
-			endpoint_t>,
+		connection,			///< (1) TCP client socket definition
 		csm,									///< (2) CSM paramenter configuration
 		transaction_list_t,						///< (3) Trasaction list as defined above
 		CoAP::Transmission::Reliable::default_cb<CoAP::Port::POSIX::tcp_server<endpoint_t>::handler>,	
@@ -219,9 +224,9 @@ static bool pong_flag = false;
 /**
  * This default callback response to signal response
  */
-void default_callback(engine::socket socket,
+void default_callback(engine::socket,
 		CoAP::Message::Reliable::message const* response,
-		void* engine_ptr) noexcept
+		void*) noexcept
 {
 	debug(example_mod, "default cb called");
 	/**

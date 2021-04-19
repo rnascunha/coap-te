@@ -71,7 +71,8 @@ class endpoint_ipv4{
 		in_addr_t address() noexcept{ return addr_.sin_addr.s_addr; }
 		std::uint16_t port() const noexcept{ return ntohs(addr_.sin_port); }
 
-		bool copy_sock_address(int socket) noexcept
+		template<typename Handler>
+		bool copy_sock_address(Handler socket) noexcept
 		{
 			socklen_t size = sizeof(native_type);
 			if(::getpeername(socket,
@@ -81,7 +82,8 @@ class endpoint_ipv4{
 			return true;
 		}
 
-		bool copy_peer_address(int socket) noexcept
+		template<typename Handler>
+		bool copy_peer_address(Handler socket) noexcept
 		{
 			socklen_t size = sizeof(native_type);
 			if(::getpeername(socket,

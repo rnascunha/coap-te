@@ -44,7 +44,7 @@ class transaction_empty
 		std::size_t serialize(CoAP::Message::Reliable::Factory<BufferSize, Code> const&,
 				CoAP::Error&) noexcept{ return 0; }
 
-		bool init(int socket,
+		bool init(int,
 				transaction_cb, void*,
 				expiration_time_type,
 				CoAP::Error&) noexcept{ return true; }

@@ -7,9 +7,10 @@ namespace CoAP{
 namespace Transmission{
 namespace Reliable{
 
+template<typename Handler>
 class Response{
 	public:
-		Response(int socket,
+		Response(Handler socket,
 			const void* token,
 			std::size_t token_len,
 			std::uint8_t* buffer = nullptr,
@@ -44,7 +45,7 @@ class Response{
 			return *this;
 		}
 
-		int const& socket() const noexcept
+		Handler const& socket() const noexcept
 		{
 			return socket_;
 		}
@@ -88,7 +89,7 @@ class Response{
 	private:
 		CoAP::Message::Reliable::Factory<>
 									fac_;
-		int		 					socket_;
+		Handler	 					socket_;
 		std::uint8_t				token_[8];
 		std::size_t					token_len_;
 		std::uint8_t*				buffer_;

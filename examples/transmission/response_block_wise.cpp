@@ -135,7 +135,7 @@ int main()
 	 * Initiating CoAP engine
 	 */
 	engine coap_engine(std::move(socket),
-			CoAP::Message::message_id(CoAP::time()));
+			CoAP::Message::message_id((unsigned)CoAP::time()));
 
 	/**
 	 * Resource instantiation

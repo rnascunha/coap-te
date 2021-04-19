@@ -327,6 +327,14 @@ static bool parse_ipv6(in6_addr& host, char* uri_string, char** new_uri_string) 
 	return false;
 }
 
+/**
+ * MSVC warning... don't understand...
+ */ 
+#if defined(_MSC_VER)
+#pragma warning( push )
+#pragma warning( disable : 4505 )
+#endif /* defined(_MSC_VER) */
+
 static bool parse_ip_v4_v6(ip_type& host,
 		char* uri_string,
 		char** new_uri_string) noexcept
@@ -339,6 +347,10 @@ static bool parse_ip_v4_v6(ip_type& host,
 	host.type = host_type::ipv4;
 	return parse_ipv4(host.host.ip4, uri_string, new_uri_string);
 }
+
+#if defined(_MSC_VER)
+#pragma warning( pop )
+#endif /* defined(_MSC_VER) */
 
 
 }//URI

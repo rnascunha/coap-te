@@ -102,7 +102,7 @@ static CoAP::Observe::observe<endpoint, true> sensor_obs;
  */
 void default_callback(engine::endpoint const& ep,
 		CoAP::Message::message const* response,
-		void* engine_ptr) noexcept
+		void*) noexcept
 {
 	debug(example_mod, "default cb called");
 	CoAP::Debug::print_message_string(*response);
@@ -245,7 +245,7 @@ int main()
 	 * instantiate the engine.
 	 */
 	engine coap_engine(std::move(conn),
-			CoAP::Message::message_id(CoAP::time()));
+			CoAP::Message::message_id((unsigned)CoAP::time()));
 
 	/**
 	 * Setting the default callback function. All notification will

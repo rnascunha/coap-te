@@ -56,6 +56,7 @@ using engine = CoAP::Transmission::Reliable::engine_client<
 		csm,									///< CSM paramenter configuration
 		CoAP::Transmission::Reliable::transaction_list<	///< transaction list type
 			CoAP::Transmission::Reliable::transaction<	///< trasnaction type
+			CoAP::Port::POSIX::tcp_client<endpoint>::handler,
 				csm.max_message_size,
 				CoAP::Transmission::Reliable::transaction_cb>,
 			4>,											///< transaction list size
@@ -106,7 +107,7 @@ static CoAP::Observe::observe<engine::socket, false> sensor_obs;
  */
 void default_callback(engine::socket ep,
 		engine::message const* response,
-		void* engine_ptr) noexcept
+		void*) noexcept
 {
 	debug(example_mod, "default cb called");
 

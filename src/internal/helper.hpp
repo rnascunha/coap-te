@@ -34,7 +34,7 @@ inline void interger_to_big_endian_array(std::uint8_t* dest,
 
     for(unsigned i = 0; i < count; i++)
     {
-        int v = value >> ((count - (i + 1)) * 8);
+        int v = static_cast<int>(value >> ((count - (i + 1)) * 8));
         dest[i] = static_cast<std::uint8_t>(v);
     }
 }

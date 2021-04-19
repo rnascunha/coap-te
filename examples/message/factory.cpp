@@ -63,7 +63,7 @@ int main()
 	 * If we are not going to use a internal message id generator,
 	 * we need to instantiate one
 	 */
-	message_id mid(CoAP::time());
+	message_id mid((unsigned)CoAP::time());
 #endif /* USE_INTERNAL_MESSAGE_ID */
 	CoAP::Error ec;		//message error
 
@@ -93,7 +93,7 @@ int main()
 	 */
 #if defined(USE_INTERNAL_BUFFER) && defined(USE_INTERNAL_MESSAGE_ID)
 	status(example_mod, "Internal buffer / Internal message id");
-	Factory<BUFFER_LEN, message_id> fac{message_id(CoAP::time())};
+	Factory<BUFFER_LEN, message_id> fac{message_id((unsigned)CoAP::time())};
 #elif defined(USE_INTERNAL_BUFFER) && !defined(USE_INTERNAL_MESSAGE_ID)
 	status(example_mod, "Internal buffer / NO internal message id");
 	Factory<BUFFER_LEN> fac;
@@ -102,7 +102,7 @@ int main()
 	 * 0 buffer len means NO internal buffer
 	 */
 	status(example_mod, "NO internal buffer / Internal message id");
-	Factory<0, message_id> fac{message_id(CoAP::time())};
+	Factory<0, message_id> fac{message_id((unsigned)CoAP::time())};
 #else
 	/**
 	 * 0 buffer len means NO internal buffer

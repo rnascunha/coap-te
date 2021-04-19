@@ -95,8 +95,8 @@ int main()
 		if(size == 0) continue;
 		buffer[size] = '\0';
 
-		char addr_str[20];
-		std::printf("Received [%s]:%u [%zu]: %s\n", recv_addr.address(addr_str), recv_addr.port(), size, buffer);
+		char addr_str2[20];
+		std::printf("Received [%s]:%u [%zu]: %s\n", recv_addr.address(addr_str2), recv_addr.port(), size, buffer);
 		std::printf("Echoing...\n");
 		conn.send(buffer, size, recv_addr, ec);
 		if(ec) exit_error(ec, "write");

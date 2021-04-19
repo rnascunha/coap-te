@@ -164,7 +164,7 @@ close_client(handler socket) noexcept
 
 template<class Endpoint,
 		int Flags>
-int
+typename tcp_server<Endpoint, Flags>::handler
 tcp_server<Endpoint, Flags>::
 accept(CoAP::Error& ec) noexcept
 {
@@ -285,13 +285,13 @@ run(CoAP::Error& ec,
 	}
 	
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-	for(int i = 0, count = 0; count < rfds.fd_count && i < FD_SETSIZE; i++)
+	for(unsigned i = 0, count = 0; count < rfds.fd_count && i < FD_SETSIZE; i++)
 	{
 		if(FD_ISSET(rfds.fd_array[i], &rfds))
 		{
 			if(rfds.fd_array[i] == socket_)
 			{
-				[[maybe_unused]] int c = accept(ec);
+				[[maybe_unused]] handler c = accept(ec);
 				if constexpr(!std::is_same<void*, OpenCb>::value)
 				{
 					open_cb(c);
@@ -315,7 +315,7 @@ run(CoAP::Error& ec,
 		{
 			if(i == socket_)
 			{
-				[[maybe_unused]] int c = accept(ec);
+				[[maybe_unused]] handler c = accept(ec);
 				if constexpr(!std::is_same<void*, OpenCb>::value)
 				{
 					open_cb(c);
@@ -345,7 +345,7 @@ tcp_server<Endpoint, Flags>::
 receive(handler socket, void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-	ssize_t bytes = ::recv(socket, static_cast<char*>(buffer), buffer_len, 0);
+	ssize_t bytes = ::recv(socket, static_cast<char*>(buffer), static_cast<int>(buffer_len), 0);
 #else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	ssize_t bytes = ::recv(socket, buffer, buffer_len, 0);
 #endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
@@ -375,7 +375,7 @@ tcp_server<Endpoint, Flags>::
 send(handler to_socket, const void* buffer, std::size_t buffer_len, CoAP::Error& ec)  noexcept
 {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-	int size = ::send(to_socket, static_cast<const char*>(buffer), buffer_len, 0);
+	int size = ::send(to_socket, static_cast<const char*>(buffer), static_cast<int>(buffer_len), 0);
 #else /* #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	int size = ::send(to_socket, buffer, buffer_len, 0);
 #endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */

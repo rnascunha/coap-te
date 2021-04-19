@@ -144,8 +144,8 @@ unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 							CoAP::Error& ec) noexcept
 {
 	unsigned offset = 0;
-	Option::config<OptionCode> const * const config = Option::get_config(option.ocode);
-	if(config == nullptr)
+	Option::config<OptionCode> const * const oconfig = Option::get_config(option.ocode);
+	if(oconfig == nullptr)
 	{
 		ec = CoAP::errc::option_invalid;
 		return offset;
@@ -162,7 +162,7 @@ unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 
 	if constexpr(CheckOpRepeat)
 	{
-		if(!config->repeatable && last_option == option.ocode)
+		if(!oconfig->repeatable && last_option == option.ocode)
 		{
 			ec = CoAP::errc::option_repeated;
 			return offset;
@@ -259,8 +259,8 @@ bool Serialize::add_option(Option::option&& op) noexcept
 {
 	if constexpr(CheckRepeat)
 	{
-		Option::config<Option::code> const * const config = Option::get_config(op.ocode);
-		if(!config->repeatable)
+		Option::config<Option::code> const * const oconfig = Option::get_config(op.ocode);
+		if(!oconfig->repeatable)
 		{
 			Option::Parser<Option::code> parser(msg_);
 			Option::option const* opt;
@@ -315,16 +315,16 @@ bool Serialize::add_option(Option::option&& op) noexcept
 		unsigned n_delta = current ? static_cast<unsigned>(current.ocode) : 0;
 
 		n_buf += opt_size;
-		CoAP::Error ec;
+		//CoAP::Error ec;
 		Option::option opt;
 		std::size_t off = Option::parse<Option::code>(opt, n_buf, msg_.options_len - offset - opt_size, n_delta, ec);
 		if(ec) return false;
 
 		n_delta = static_cast<unsigned>(op.ocode);
-		Option::code c = op.ocode;
+		Option::code co = op.ocode;
 		unsigned after = make_option<Option::code, false, false>(n_buf, off,
 										opt, delta,
-										c, ec);
+										co, ec);
 		if(ec) return false;
 
 		std::size_t diff = off - after;

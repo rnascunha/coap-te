@@ -35,8 +35,8 @@ template<typename Connection,
 	typename Callback_Default_Functor,
 	typename Resource>
 engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
-engine(Connection&& conn, MessageID&& message_id, configure const& config)
-	: conn_(std::move(conn)), mid_(std::move(message_id)), config_(config)
+engine(Connection&& conn, MessageID&& message_id, configure const& tconfig)
+	: conn_(std::move(conn)), mid_(std::move(message_id)), config_(tconfig)
 {
 	if constexpr(has_default_callback)
 		default_cb_ = nullptr;
