@@ -881,4 +881,14 @@ static void get_discovery_handler(engine::message const&,
 		.add_option(content)
 		.payload(buffer, size)
 		.serialize();
+
+	CoAP::Error ecs = response.error();
+	if(ecs)
+	{
+		error(example_mod, ecs, "core serialize");
+		response
+			.code(CoAP::Message::code::internal_server_error)
+			.payload(ecs.message())
+			.serialize();
+	}
 }

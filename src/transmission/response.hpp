@@ -66,6 +66,7 @@ class Response{
 				bool CheckOpRepeat = true>
 		std::size_t serialize() noexcept
 		{
+			ec_.clear();
 			buffer_used_ = fac_.template serialize<SortOptions, CheckOpOrder, CheckOpRepeat>(
 					buffer_, buffer_len_, mid_, ec_);
 			return buffer_used_;
@@ -83,6 +84,7 @@ class Response{
 
 		std::size_t serialize_empty_ack() noexcept
 		{
+			ec_.clear();
 			buffer_used_ = CoAP::Message::empty_message(
 										CoAP::Message::type::acknowledgment,
 										buffer_, buffer_len_,
@@ -100,6 +102,7 @@ class Response{
 			buffer_used_ = 0;
 			buffer_len_ = 0;
 			buffer_ = nullptr;
+			ec_.clear();
 		}
 
 	private:

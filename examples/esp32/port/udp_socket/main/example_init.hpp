@@ -1,0 +1,6 @@
+#ifndef COAP_TE_EXAMPLE_WIFI_STACK_INIT_HPP__
+#define COAP_TE_EXAMPLE_WIFI_STACK_INIT_HPP__
+
+void wifi_stack_init();
+
+#endif /* COAP_TE_EXAMPLE_WIFI_STACK_INIT_HPP__ */

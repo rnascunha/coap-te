@@ -7,7 +7,11 @@
  *
  * This example is implemented using IPv4 and IPv6.
  *
- * \note After running this example, run tcp_client to make the requests
+ * \note Before running this example you must configure your envirioment variables
+ * using 'idf.py menuconfig'. You must set your wifi network parameters, SSID and
+ * password, and choose the endpoint type (IPv4 or IPv6) and the the server port
+ * the device will bind. If you are using linux, you can connect to the device
+ * using 'nc <ip_address> <port>'.
  */
 
 #include <cstdlib>
@@ -15,20 +19,17 @@
 #include <cstdint>
 #include <functional>
 
+#include "example_init.hpp"
+
 #include "error.hpp"
 #include "port/posix/tcp_server.hpp"
-
-/**
- * Using IPv6. Commenting the following line to use IPv4
- */
-#define USE_IPV6
 
 using namespace CoAP;
 
 /**
  * Defining the endpoint type
  */
-#ifdef USE_IPV6
+#if CONFIG_ENDPOINT_TYPE == 1
 /**
  * IPv6 definitions
  */
@@ -44,13 +45,15 @@ using endpoint = Port::POSIX::endpoint_ipv4;
 #define BIND_ADDR		INADDR_ANY
 #endif /* USE_IPV6 */
 
+#define CONN_PORT			CONFIG_SERVER_PORT
+
 /**
  * Auxiliary call
  */
 static void exit_error(Error& ec, const char* what = "")
 {
 	printf("ERROR! [%d] %s [%s]\n", ec.value(), ec.message(), what);
-	exit(EXIT_FAILURE);
+	while(true) vTaskDelay(portMAX_DELAY);
 }
 
 #define BUFFER_LEN		1000
@@ -124,23 +127,18 @@ bool read_cb(tcp_server::handler socket, tcp_server& conn) noexcept
 	return true;
 }
 
-int main()
+extern "C" void app_main(void)
 {
 	std::printf("Echo TCP server init...\n");
-	
-	/**
-	 * At Linux, do nothing. At Windows initiate winsock
-	 */
-	CoAP::Port::POSIX::init();
 
-#if COAP_TE_USE_SELECT == 1
-	std::printf("Using SELECT call...\n");
-#else /* COAP_TE_USE_SELECT == 1 */
-	std::printf("Using EPOLL call...\n");
-#endif /* COAP_TE_USE_SELECT == 1 */
+	/**
+	 * This is a very naive implementation of the WIFI / TCP/IP stack initializaition.
+	 * It will BLOCK until connect, or get stuck if fail... Should not be used in
+	 * production code
+	 */
+	wifi_stack_init();
 
 	Error ec;
-
 	/**
 	 * TCP server instance
 	 */
@@ -149,7 +147,7 @@ int main()
 	/**
 	 * Endpoint to bind
 	 */
-	tcp_server::endpoint ep{BIND_ADDR, 8080};
+	tcp_server::endpoint ep{BIND_ADDR, CONN_PORT};
 
 	/**
 	 * Open socket and binding enpoint
@@ -178,6 +176,6 @@ int main()
 	}
 
 	if(ec) exit_error(ec, "run");
-	return EXIT_SUCCESS;
+	while(true) vTaskDelay(portMAX_DELAY);
 }
 

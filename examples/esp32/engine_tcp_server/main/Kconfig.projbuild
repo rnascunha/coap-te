@@ -1,0 +1,72 @@
+menu "Example WiFi/Server Configuration"
+	config ROUTER_SSID
+        string "Router SSID"
+        default "ROUTER_SSID"
+        help
+            Router SSID.
+
+    config ROUTER_PASSWD
+        string "Router password"
+        default "ROUTER_PASSWD"
+        help
+            Router password.
+
+    choice
+        bool "AP Authentication Mode"
+        default WIFI_AUTH_WPA2_PSK
+        help
+            Authentication mode.
+
+        config WIFI_AUTH_OPEN
+            bool "WIFI_AUTH_OPEN"
+        config WIFI_AUTH_WPA_PSK
+            bool "WIFI_AUTH_WPA_PSK"
+        config WIFI_AUTH_WPA2_PSK
+            bool "WIFI_AUTH_WPA2_PSK"
+        config WIFI_AUTH_WPA_WPA2_PSK
+            bool "WIFI_AUTH_WPA_WPA2_PSK"
+    endchoice
+
+    config AP_AUTHMODE
+        int
+        default 0 if WIFI_AUTH_OPEN
+        default 2 if WIFI_AUTH_WPA_PSK
+        default 3 if WIFI_AUTH_WPA2_PSK
+        default 4 if WIFI_AUTH_WPA_WPA2_PSK
+        help
+            AP authentication mode.
+            
+    choice
+        bool "Endpoint type"
+        default IPv4
+        help
+            Choose endpoint type.
+
+        config ENDPOINT_IPv4
+            bool "IPv4"
+        config ENDPOINT_IPv6
+            bool "IPv6"
+    endchoice
+
+    config ENDPOINT_TYPE
+        int
+        default 0 if ENDPOINT_IPv4
+        default 1 if ENDPOINT_IPv6
+        help
+            Choose endpoint type.
+            
+    config SERVER_PORT
+    	int "TCP Server Port"
+    	range 1 65535
+    	default 5683
+    	help
+            Server port that the device will connect.
+            
+	config BUFFER_TRANSACTION
+    	int "Packet size"
+    	range 64 8048
+    	default 512
+    	help
+    		Max packet size supported by a CoAP transaction
+endmenu
+

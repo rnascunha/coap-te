@@ -37,6 +37,8 @@ struct Error {
 	const char* message() const noexcept;
 	static const char* message(int error);
 
+	void clear() noexcept{ err_ = 0; }
+
 	operator bool() const;
 	inline bool operator==(Error const& rhs)
 	{

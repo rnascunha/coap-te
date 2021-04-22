@@ -75,12 +75,18 @@ udp<Endpoint, Flags>::
 receive(void* buffer, std::size_t buffer_len, endpoint& ep, CoAP::Error& ec) noexcept
 {
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-	int addr_len = sizeof(struct sockaddr);
+	/**
+	 * sockaddr_storage fits both IPv4 and IPv6
+	 */
+	int addr_len = sizeof(struct sockaddr_storage);
 	int recv = ::recvfrom(socket_,
 			static_cast<char*>(buffer), static_cast<int>(buffer_len), 0,
 			reinterpret_cast<struct sockaddr*>(ep.native()), &addr_len);
 #else /* #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
-	unsigned addr_len = sizeof(struct sockaddr);
+	/**
+	 * sockaddr_storage fits both IPv4 and IPv6
+	 */
+	unsigned addr_len = sizeof(struct sockaddr_storage);
 	int recv = ::recvfrom(socket_,
 			buffer, buffer_len, 0,
 			reinterpret_cast<struct sockaddr*>(ep.native()), &addr_len);

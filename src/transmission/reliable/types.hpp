@@ -42,8 +42,10 @@ struct csm_configure{
 template<typename Handler>
 struct separate_response{
 	Handler				socket;
-	std::size_t			token_len;
+	std::size_t			token_len = 0;
 	const void*			token[8];
+
+	separate_response(){}
 
 	separate_response(CoAP::Message::Reliable::message const& request, Handler socket)
 	: socket{socket}, token_len{request.token_len}
@@ -54,6 +56,13 @@ struct separate_response{
 	separate_response(CoAP::Message::Reliable::message const& request, Response<Handler> const& response)
 	: socket{response.socket()}, token_len{request.token_len}
 	{
+		std::memcpy(token, request.token, token_len);
+	}
+
+	void set(CoAP::Message::Reliable::message const& request, Response<Handler> const& response) noexcept
+	{
+		socket = response.socket();
+		token_len = request.token_len;
 		std::memcpy(token, request.token, token_len);
 	}
 };

@@ -1,5 +1,5 @@
 /**
- * This examples shows how to use reliable connection engines in a server mode.
+ * This examples shows how to use engines in a server mode.
  *
  * We are going to create a resource tree as presented below.
  *
@@ -12,8 +12,9 @@
  *	l2:		 temp  light humidity gpio0 gpio1 gpio2
  *
  * We are going to create appropriate response to each of the resources, using
- * different strategies. We are simulating a embedded device connected to
- * some sensors and enabling/disabling some external device with GPIOs.
+ * different strategies. As the focus of the example is the use of the CoAP-te library,
+ * we just simulating the read of sensors and enabling/disabling some external device
+ * with GPIOs.
  *
  * A overview of the resources:
  * -------
@@ -25,7 +26,7 @@
  * a read sensor. We are going to use the same callback function to any of the sensors.
  * -------
  * * actuators[gpio[0/1/2]]: GET and PUT methods defined. GET will retrieve the current
- * port value, and PUT will set its value (must provide query of type ?value=<0|1>).
+ * port value, and PUT will set this value (must provide query of type ?value=<0|1>).
  * -------
  * * dynamic: GET and POST methods. GET method will retrieve than sons list of the resource.
  * POST method will create the resource sons as request (query ?dyn=<1|2|3>). The created
@@ -37,29 +38,57 @@
  * * .well-known/core: provide resource information as defined at RFC6690
  * ------
  * For brevity, all resources return data as strings (content_format::text_plain).
- *
- * ------
- *
- * To configure a reliable CoAP-te server engine you must define:
- * * Connection/Endpoint type: TCP or Websocket (not implemented), IPv4 or IPv6
- * * Transaction list type (if any)
- * * Connection list type: holds all connection and CSM signal configuration.
  */
 
-#include <chrono>
-#include <thread>
+#include <cstdio>
+
+#include "example_init.hpp"
 
 #include "log.hpp"				//Log header
 #include "coap-te.hpp"			//Convenient header
 #include "coap-te-debug.hpp"	//Convenient debug header
 
 /**
- * Logging namespace
+ * There is two methods to add resources: add_child and add_branch. Both
+ * can be used interchangeable, but here a presented separated just to
+ * show each concept.
+ *
+ * Comment the line to use add_branch
  */
+#define USE_RESOURCE_ADD_CHILD
+
 using namespace CoAP::Log;
 
 /**
- * Log module
+ * Defining the endpoint
+ */
+#if CONFIG_ENDPOINT_TYPE == 1
+/**
+ * IPv6 definitions
+ */
+using endpoint = CoAP::Port::POSIX::endpoint_ipv6;
+#define BIND_ADDR			IN6ADDR_ANY_INIT
+#else
+/**
+ * IPv4 definitions
+ */
+using endpoint = CoAP::Port::POSIX::endpoint_ipv4;
+#define BIND_ADDR			INADDR_ANY
+#endif /* USE_IPV6 */
+
+/**
+ *
+ */
+#define BUFFER_LEN			CONFIG_BUFFER_TRANSACTION
+#define CONN_PORT			CONFIG_SERVER_PORT
+
+/**
+ * Default transaction list have limited transaction capacity
+ */
+#define TRANSACT_NUM		CONFIG_TRANSACTION_NUM
+
+/**
+ * Example log module
  */
 static constexpr module example_mod = {
 		.name = "EXAMPLE",
@@ -67,190 +96,28 @@ static constexpr module example_mod = {
 };
 
 /**
- * Connection port
+ * Engine definition. Check 'raw_engine' example for a full
+ * description os the options.
+ *
+ * Here we are using server profile, and defining a resource callback
+ * function. Server profile allow to add resources. We are also disabling
+ * the default callback.
  */
-#define COAP_PORT		CoAP::default_port		//5683
-
-/**
- * Choosing the endpoint type
- *
- * Uncomment the following line to use IPv4 configuration
- */
-//#define USE_ENDPOINT_IPV4
-
-#ifdef USE_ENDPOINT_IPV4
-/**
- * Endpoint IPv4 defined and connect address
- */
-using endpoint_t = CoAP::Port::POSIX::endpoint_ipv4;
-#define HOST_ADDR		"127.0.0.1"				//localhost
-#else
-/**
- * Endpoint IPv6 defined and connect address
- */
-using endpoint_t = CoAP::Port::POSIX::endpoint_ipv6;
-#define HOST_ADDR		"::1"					//localhost
-#endif
-
-/**
- * Connection type we are going to use
- */
-using connection = CoAP::Port::POSIX::tcp_server<endpoint_t>;			///< TCP server socket definition
-
-/**
- * Reliable connection MUST exchange CSM signaling message when connect.
- * This is our client configuration:
- * * Max message size = 1152 (default)
- * * Accept block wise transfer
- */
-static constexpr const CoAP::Transmission::Reliable::csm_configure csm = {
-		.max_message_size = CoAP::Transmission::Reliable::default_max_message_size,
-		.block_wise_transfer = true
-};
-
-/**
- * Choosing a connection list type
- *
- * As specified above, a connection holds the socket and its CSM
- * signaling information. If you don't need this information, i.e.,
- * just respond incoming request and ignore any CSM information you
- * can disable the use of connection list using CoAP::disable.
- */
-/**
- * (Un)comment the define statements above to change the connection list
- * implementation.
- */
-#define USE_CONNECTION_LIST_DEFAULT
-//#define USE_CONNECTION_LIST_VECTOR
-
-#ifdef USE_CONNECTION_LIST_VECTOR
-/**
- * As connection_list_vector uses std::vector (i.e., dynamic allocation) as
- * internal container. As dynamic allocation is a feature not used in all CoAP-te
- * we choose to keep it apart from the default implementation. So, you must
- * explicitly included it
- */
-#include "transmission/reliable/containers/connection_list_vector.hpp"
-
-/**
- * This connection list implementation can hold a unlimited number
- * of connections. It's more suitable to devices where memory usage
- * is not limited (servers).
- *
- * As template parameter, just the (1) connection type.
- */
-using connection_list_t =
-		CoAP::Transmission::Reliable::connection_list_vector<
-			CoAP::Transmission::Reliable::Connection<connection::handler>		/* (1) Connection type */
-		>;
-#elif defined(USE_CONNECTION_LIST_DEFAULT)
-/**
- * This is the default implementation, and recommended to constrained devices.
- * It uses a simple array to hold the connections. The template parameters are:
- * (1) The connection type it will hold, defined above;
- * (2) The number of connections to hold simultaneously.
- *
- * If it receives a incoming connection and no free slots available, it will
- * send a abort signal message with a payload "max connection reached"
- */
-using connection_list_t =
-		CoAP::Transmission::Reliable::connection_list<
-			CoAP::Transmission::Reliable::Connection<connection::handler>,	/* (1) transaction type */
-			4>;				/* (2) number of transaction */
-#else
-/**
- * This will disable connection list
- */
-using connection_list_t = CoAP::disable;
-#endif /* USE_CONNECTION_LIST_DEFAULT */
-
-/**
- * To a server, a transaction MAY not be need. As the retransmission is
- * handled by the underlying layer (TCP), and if you will only respond
- * incoming request, you can disable it (as we are going to do here).
- *
- * But if you expect to make request, is advisable to enable it. Check
- * 'engine_tcp_example' to examine transaction and transaction list options.
- */
-using transaction_list_t = CoAP::disable;
-
-/**
- * Any request received must be associated to a specific resource.
- *
- * If you are not intended to receive any request (like a client), you can
- * use CoAP::disable and any income request will generate a
- * response error. As we are implementing a server, we must define it.
- *----------
- * (1) the callback function type that it will be called to any successful request.
- * The function signature must be:
- *
- * void(*)(Message const&, Response& , void*) =
- * 		CoAP::Resource::callback_reliable<CoAP::Message::Reliable::message,
- * 										CoAP::Transmission::Reliable::Response>;
- * Where the parameters are: request, response and engine.
- *
- * You could also use:
- *
- * std::function<void(Message::Relaible::message const&, engine::response& , void*)>
- *
- * And bind values, uses lambdas... and so on.
- * --------
- * (2) enable/disable resource description, as defined at RFC6690 (you can save some
- * bytes (set to false) if this is not necessary).
- */
-using resource = CoAP::Resource::resource<
-		CoAP::Resource::callback_reliable<
-			CoAP::Message::Reliable::message,
-			CoAP::Transmission::Reliable::Response<connection::handler>
-		>,									///< (1) resource callback
-		true>;								///< (2) enable/disable description
-
-/**
- * Engine: the pale blue dot
- *
- * Here we are going to show how to define a engine, and how each
- * parameters impacts:
- *-------
- * (1) Connection type: RFC 8323 defines CoAP to reliable connections. Here you can
- * use any type of connection that satisfy the CoAP-te Reliable connection
- * requirements.  More about CoAP-te reliable connection port at 'tcp_client/tcp_server'
- * example. At this example we are using TCP Server sockets.
- *--------
- * (2) CSM signal configuration. This configuration will be exchanged at connection
- *--------
- * (3) Connection List type: a connection list, as defined above.
- *--------
- * (4) Transaction List type: a transaction list, as defined above. (disabled)
- *--------
- * (5) Default callback type: the callback function type to call. When this is called?
- * * When receiving a signal code response;
- * * When receiving a response from a transaction that timeout or just wasn't expected;
- * * When you disable transactions. Any response will call this functions;
- *
- * The callback signature is:
- *
- * void(*)(socket, CoAP::Message::Reliable::message const&,void*) =
- * 												CoAP::Transmission::Reliable::default_cb;
- * Where the parameters are: socket, response, engine.
- *
- * You could use:
- *
- * std::function<void(socket, CoAP::Message::Reliable::message const&,void*)>;
- *
- * And bind values, uses lambdas... and so on.
- * ------
- * (6) resource type, as defined above;
- *------
- * So that it, that's us... CoAP-te...
- */
-using engine = CoAP::Transmission::Reliable::engine_server<
-		connection,			///< (1) TCP server socket definition
-		csm,									///< (2) CSM paramenter configuration
-		connection_list_t,						///< (3) Connection list defined above
-		transaction_list_t,						///< (4) Trasaction list as defined above (disabled)
-		CoAP::Transmission::Reliable::default_cb<CoAP::Port::POSIX::tcp_server<endpoint_t>::handler>,
-												///< (4) Default callback signature function
-		resource>;								///< (5) Resource definition
+using engine = CoAP::Transmission::engine<
+		CoAP::Port::POSIX::udp<endpoint>,
+		CoAP::Message::message_id,
+		CoAP::Transmission::transaction_list<
+			CoAP::Transmission::transaction<
+				BUFFER_LEN,
+				CoAP::Transmission::transaction_cb,
+				endpoint>,
+			TRANSACT_NUM>,
+		CoAP::disable,		//default callback disabled
+		CoAP::Resource::resource<
+			CoAP::Resource::callback<endpoint>,
+			true
+		>
+	>;
 
 /**
  * Response callback declaration
@@ -283,60 +150,52 @@ static void get_discovery_handler(engine::message const& request,
 								engine::response& response, void*) noexcept;
 
 /**
- * This default callback response to signal response
- */
-void default_callback(engine::socket,
-		engine::message const* response,
-		void*) noexcept
-{
-	debug(example_mod, "default cb called");
-
-	/**
-	 * Checking response. If null means that the socket was closed
-	 */
-	if(!response)
-	{
-		error(example_mod, "Socket closed");
-		return;
-	}
-
-	CoAP::Debug::print_message(*response);
-}
-
-/**
  * Auxiliary function
  */
 static void exit_error(CoAP::Error& ec, const char* what = nullptr)
 {
 	error(example_mod, ec, what);
-	exit(EXIT_FAILURE);
+	while(true) vTaskDelay(portMAX_DELAY);
 }
 
-int main()
+/**
+ * CoAP-te engine instantiation
+ *
+ * We prefer to instantiate the engine globally to not be limited by the
+ * app_main stack size.
+ *
+ * If you prefer to instantiate locally at the main task (or any other task), depending
+ * on the packet size/transaction number you choose, it can overflow the task memory.
+ * Keep a eye on it.
+ *
+ * The main task memory size can be changed at:
+ * > 'idf.py menuconfig' > 'Component config' > 'Common ESP-related' > 'Main task size'
+ */
+engine coap_engine{CoAP::Port::POSIX::udp<endpoint>{},
+					CoAP::Message::message_id{(unsigned)CoAP::time()}};
+
+extern "C" void app_main(void)
 {
 	/**
-	 * At Linux, does nothing. At Windows initiate winsock
+	 * This is a very naive implementation of the WIFI / TCP/IP stack initializaition.
+	 * It will BLOCK until connect, or get stuck if fail... Should not be used in
+	 * production code
 	 */
-	CoAP::Port::POSIX::init();
+	wifi_stack_init();
 
 	CoAP::Error ec;
-
 	/**
-	 * Instantiating a CoAP engine
+	 * Socket
 	 */
-	engine coap_engine;
+	//Initiating the endpoint to bind
+	engine::endpoint ep{BIND_ADDR, CONN_PORT};
 
-	/**
-	 * Instantiating a endpoint that we are going to bind
-	 */
-	engine::endpoint ep{HOST_ADDR, COAP_PORT, ec};
-	if(ec) exit_error(ec);
+	coap_engine.get_connection().open(ec);
+	if(ec) exit_error(ec, "Error trying to open socket...");
+	coap_engine.get_connection().bind(ep, ec);
+	if(ec) exit_error(ec, "Error trying to bind socket...");
 
-	/**
-	 * Setting the default callback function the untracked
-	 * responses or signal response.
-	 */
-	coap_engine.default_cb(default_callback);
+	debug(example_mod, "Socket opened and binded...");
 
 	/**
 	 * Setting the root callback
@@ -351,7 +210,7 @@ int main()
 	 * Each resource must provide a path name, and a callback function to
 	 * the method it support. (GET/POST/PUT/DELETE)
 	 */
-	engine::resource_node	res_time{"time", get_time_handler},
+	engine::resource_node	res_time{"time", "title='time of device'", get_time_handler},
 							res_sensors{"sensors"},
 								res_sensor_temp{"temp", get_sensor_handler},
 								res_sensor_light{"light", get_sensor_handler},
@@ -373,6 +232,7 @@ int main()
 	 *
 	 * There is no checking if a resource is added cyclicly.
 	 */
+#ifdef USE_RESOURCE_ADD_CHILD
 	/**
 	 * Using add_child
 	 *
@@ -392,12 +252,27 @@ int main()
 			res_dynamic,
 			res_separate,
 			res_well_known);
-
-	/**
-	 * Open a socket and binding endpoint.
+	coap_engine.root_node().add_child(res_time);
+#else
+	/*
+	 * Using add_branch
+	 *
+	 * Make a path from the calling resource to the last resource, adding
+	 * every resource as children of the precedent
 	 */
-	coap_engine.open(ep, ec);
-	if(ec) exit_error(ec, "open");
+	coap_engine.root_node().add_branch(res_time);
+
+	coap_engine.root_node().add_branch(res_sensors, res_sensor_temp);
+	coap_engine.root_node().add_branch(res_sensors, res_sensor_light);
+	coap_engine.root_node().add_branch(res_sensors, res_sensor_humidity);
+
+	coap_engine.root_node().add_branch(res_actuators, res_gpio0);
+	coap_engine.root_node().add_branch(res_actuators, res_gpio1);
+	coap_engine.root_node().add_branch(res_actuators, res_gpio2);
+	coap_engine.root_node().add_branch(res_dynamic);
+	coap_engine.root_node().add_branch(res_separate);
+	coap_engine.root_node().add_branch(res_well_known, res_core);
+#endif
 
 	/**
 	 * "Printing" resource tree
@@ -407,22 +282,15 @@ int main()
 	CoAP::Debug::print_resource_branch(coap_engine.root_node().node());
 
 	debug(example_mod, "Initiating CoAP engine loop...");
-
-	/**
-	 * This code will run indefinitely
-	 *
-	 * The template parameter is the block time in milliseconds:
-	 * 0 - No block (default);
-	 * -1 - block indefinitely (this could be used here)
-	 */
-	while(coap_engine.run<1000>(ec))
+	//CoAP engine loop.
+	while(coap_engine(ec))
 	{
-		/**
-		 * Your code
-		 */
+		vTaskDelay(pdMS_TO_TICKS(50));
 	}
 
-	return EXIT_SUCCESS;
+	if(ec) exit_error(ec, "run");
+
+	while(true) vTaskDelay(portMAX_DELAY);
 }
 
 /**
@@ -507,7 +375,7 @@ static void get_sensor_handler(engine::message const& request,
 	 * inspecting the last path
 	 * (we could archive this searching the path at the resource list)
 	 */
-	CoAP::Message::Option::Parser parser(request);
+	CoAP::Message::Option::Parser<CoAP::Message::Option::code> parser(request);
 	CoAP::Message::Option::option const *opt, *path_opt = nullptr;
 	while((opt = parser.next()))
 	{
@@ -549,7 +417,7 @@ static void get_sensor_handler(engine::message const& request,
 }
 
 /**
- * Simulate the GPIO ports of a uC
+ * Simulate the gpio ports of a uC
  */
 static bool gpios[3] = {false, false, false};
 
@@ -862,37 +730,82 @@ static void delete_dynamic_handler(engine::message const& request,
 }
 
 /**
- * Function "calculating" the separated response
+ * Callback function of the separeted resquest
  *
- * This function will be called in a new thread. As separated response
- * should not block the response, a new thread (or task depending of your
- * environment) must be open (you must not block the response).
+ * This function just report if the request was arrived to the client.
+ */
+void cb(void const* trans, engine::message const* r, void*) noexcept
+{
+	auto const* t = static_cast<engine::transaction_t const*>(trans);
+	status(example_mod, "Status: %s", CoAP::Debug::transaction_status_string(t->status()));
+	if(r)
+	{
+		status(example_mod, "Response received!");
+		CoAP::Debug::print_message(*r);
+	}
+	else
+	{
+		status(example_mod, "Response NOT received");
+	}
+}
+
+/**
+ * Type that will hold the values necessary to send the async
+ * response
+ */
+struct async_data{
+	engine* engine_ptr;
+	engine::async_response data;
+
+	void set(engine* eng,
+			engine::message const& request,
+		engine::response& response) noexcept
+	{
+		engine_ptr = eng;
+		data.set(request, response);
+	}
+};
+
+/**
+ * Instantiating the async_data that will hold the
+ * separated values.
+ *
+ * We are making a very naive implementation, as in real environment with
+ * concurrent requests, this global instance would be corrupted
+ */
+static async_data a_data;
+
+/**
+ * Function "calculating" the separeted response
+ *
+ * This function will be called in a new task. As separated response
+ * should not block the response, a new task must be started (you must
+ * not block the response).
  *
  * Here we are going to wait for a random period of seconds and then send
  * the response.
- *
- * As the aync_response was created inside the response callback, we are
- * passing by value.
  */
-static void separated_response(engine* eng, engine::async_response data)
+static void separated_response(void* ptr)
 {
-	status(example_mod, "Separate response...");
-	char print_buf[20];
-//	status(example_mod, "ep=%s:%u, type=%s, token[%lu]=%.*s",
-//						data.ep.address(print_buf),
-//						data.ep.port(),
-//						CoAP::Debug::type_string(data.type),
-//						data.token_len, data.token_len, data.token);
+	debug(example_mod, "Async response");
+	async_data* data = static_cast<async_data*>(ptr);
+
+	char print_buf[46];
+	status(example_mod, "ep=%s:%u, type=%s, token[%lu]=%.*s",
+						data->data.ep.address(print_buf),
+						data->data.ep.port(),
+						CoAP::Debug::type_string(data->data.type),
+						data->data.token_len, data->data.token_len, data->data.token);
 
 	/**
-	 * Wainting time simulating sleep
+	 * Waiting time simulating sleep
 	 */
 	CoAP::time_t wait = 5 + (CoAP::random_generator() % 6);
-	debug(example_mod, "Wainting for: %lu", wait);
+	debug(example_mod, "Waiting for: %lu", wait);
 	/**
 	 * Sleeping beauty
 	 */
-	std::this_thread::sleep_for(std::chrono::seconds(wait));
+	vTaskDelay(pdMS_TO_TICKS(wait * 1000));
 
 	/**
 	 * Option
@@ -910,13 +823,14 @@ static void separated_response(engine* eng, engine::async_response data)
 	 * with all the correct values, passing the async_response data, just set
 	 * the desirable response code.
 	 */
-	engine::request<> req{data, CoAP::Message::code::content};
+	engine::request req{data->data, CoAP::Message::code::content};
 
 	/**
 	 * Constructing the request.
 	 */
 	req
 		.add_option(content)
+		.callback(cb)
 		.payload(print_buf);
 
 	status(example_mod, "Sending payload=[%s]...", print_buf);
@@ -924,19 +838,14 @@ static void separated_response(engine* eng, engine::async_response data)
 
 	/**
 	 * Sending the message
-	 *
-	 * As this is a response from a previously request, we MUST NOT
-	 * use a transaction! There will be no response from the client or
-	 * ack (at the CoAP layer level), so a transaction would be stucked
-	 * forever!
 	 */
-	eng->send(req,
-			CoAP::Transmission::Reliable::no_transaction,
-			ec);
+	data->engine_ptr->send(req, ec);
 	if(ec)
 	{
 		error(example_mod, ec, "send");
 	}
+
+	vTaskDelete(NULL);
 }
 
 /**
@@ -950,23 +859,22 @@ static void get_separate_handler(engine::message const& request,
 	debug(example_mod, "Called get separate handler");
 
 	/**
-	 * If we were using a unreliable connection (UDP), we should
-	 * send a empty ack. As TCP takes care of any acknowledgment,
-	 * this is not necessary (and... a invalid call).
+	 * To make a separated response we must first respond with a
+	 * empty ack.
 	 */
-//	response.serialize_empty_ack();		//Error INVALID call!
+	response.serialize_empty_ack();
 
 	/**
 	 * This call will save all the need values to make
 	 * send the separated response
 	 */
-	engine::async_response adata{request, response};
+	a_data.set(static_cast<engine*>(engine_void), request, response);
 
 	/**
 	 * Open a new thread to simulate a long read. Never block this function
 	 * because is called synchronously with engine processing
 	 */
-	std::thread{separated_response, static_cast<engine*>(engine_void), adata}.detach();
+	xTaskCreate(separated_response, "separated_response", 2048, &a_data, 5, NULL);
 }
 
 /**
@@ -984,7 +892,8 @@ static void get_discovery_handler(engine::message const&,
 	/**
 	 * Constructing link format resource information
 	 */
-	std::size_t size = CoAP::Resource::discovery(eng->root_node().node(), buffer, 512, ec);
+	std::size_t size = CoAP::Resource::discovery(eng->root_node().node(),
+			buffer, 512, ec);
 
 	/**
 	 * Checking error
@@ -1012,4 +921,14 @@ static void get_discovery_handler(engine::message const&,
 		.add_option(content)
 		.payload(buffer, size)
 		.serialize();
+
+	CoAP::Error ecs = response.error();
+	if(ecs)
+	{
+		error(example_mod, ecs, "core serialize");
+		response
+			.code(CoAP::Message::code::internal_server_error)
+			.payload(ecs.message())
+			.serialize();
+	}
 }

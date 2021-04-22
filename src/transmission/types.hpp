@@ -29,9 +29,11 @@ struct transaction_param{
 template<typename Endpoint>
 struct separate_response{
 	Endpoint		 	ep;
-	Message::type		type;
-	std::size_t			token_len;
+	Message::type		type = CoAP::Message::type::nonconfirmable;;
+	std::size_t			token_len = 0;
 	const void*			token[8];
+
+	separate_response(){}
 
 	separate_response(Message::message const& request, Endpoint const& endp)
 	: ep{endp}, type{request.mtype}, token_len{request.token_len}
@@ -42,6 +44,14 @@ struct separate_response{
 	separate_response(Message::message const& request, Response<Endpoint> const& response)
 	: ep{response.endpoint()}, type{request.mtype}, token_len{request.token_len}
 	{
+		std::memcpy(token, request.token, token_len);
+	}
+
+	void set(Message::message const& request, Response<Endpoint> const& response) noexcept
+	{
+		ep = response.endpoint();
+		type  = request.mtype;
+		token_len = request.token_len;
 		std::memcpy(token, request.token, token_len);
 	}
 };
