@@ -126,9 +126,10 @@ int main()
 	debug(example_mod, "Init transaction code...");
 	
 	/**
-	 * At Linux, does nothing. At Windows initiate winsock
+	 * Window/Linux: Initialize random number generator
+	 * Windows: initialize winsock library
 	 */
-	CoAP::Port::POSIX::init();
+	CoAP::init();
 
 	CoAP::Error ec;
 

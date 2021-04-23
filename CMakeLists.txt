@@ -66,7 +66,8 @@ message(STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " " ${CMAKE_CXX_COMPILER_VE
 
 include (files.cmake)
 
-add_definitions(-DCOAP_TE_PORT_C_STANDARD=1)
+add_definitions(-DCOAP_TE_PORT_C_STANDARD=1
+				-DCOAP_TE_PORT_POSIX=1)
 
 list(APPEND MAIN_SRC ${SRC_DIR_PORT}/c_standard_port.cpp)
 

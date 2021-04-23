@@ -315,9 +315,10 @@ static void exit_error(CoAP::Error& ec, const char* what = nullptr)
 int main()
 {
 	/**
-	 * At Linux, does nothing. At Windows initiate winsock
-	 */
-	CoAP::Port::POSIX::init();
+	* Window/Linux: Initialize random number generator
+	* Windows: initialize winsock library
+	*/
+	CoAP::init();
 
 	CoAP::Error ec;
 
