@@ -34,13 +34,15 @@ Check the [Portability](#portability) section to see how to port **CoAP-te** to 
 As external library dependency, **CoAP-te** uses [Tree Trunks](https://github.com/rnascunha/tree_trunks) as log system (same author).
 
 It also needs the following applications to build/compile:
-* C++17 compiler (at Windows, use [Visual Studio](https://visualstudio.microsoft.com/));
+* C++17 compiler;
 * [git](https://git-scm.com/) to download;
 * [CMake](https://cmake.org/) to build and compile;
 
-At Windows system, download and install the above software.
+### Windows
 
-###Linux
+Download and install the above software (use [Visual Studio](https://visualstudio.microsoft.com/) compiler).
+
+### Linux
 
 Debian-like systems:
 
@@ -121,12 +123,11 @@ idf_component_register(SRCS /* project source files */
 
 # Compile flags need by CoAP-te
 target_compile_options(${COMPONENT_LIB} 
-			PRIVATE -std=gnu++17 
-			-DESP_IDF_PLATAFORM=1 
-			-DCOAP_TE_PORT_C_STANDARD=1
-			-DCOAP_TE_USE_SELECT=1)
+						PRIVATE -std=gnu++17 
+						-DCOAP_TE_ESP_IDF_PLATAFORM=1 
+						-DCOAP_TE_PORT_C_STANDARD=1
+						-DCOAP_TE_USE_SELECT=1)
 ```
-
 Check the [ESP32 examples](#esp32). 
 
 ## Using
@@ -191,12 +192,9 @@ $ idf.py build flash monitor
 ```
 
 Some important advise:
-
-> Before use any examples, you MUST configure it using the 'idf.py menuconfig' command. Go to the 'Example WiFi/Server Configuration' and set all the options accordingly. Some examples have specific options, but in all you must set your WiFi parameters, as SSID and password.
-
-> All examples use the function 'wifi_stack_init'. This function will block until connect to the WiFi, or get stuck there after fail. This is a very naive implementaion, and should NOT be used at production.
-
-> At the ESP32 examples, we prefered to instantiate the CoAP-te engine globally, to not be limited by the task memory size. If you prefer to use inside a task, depending on the max packet size/transaction number, it can overflow the memory stack. Be aware of this. If you want to do this at the main task (`app_main`), if you need you can increase the memory stack going to 'idf.py menuconfig' > 'Component config' > 'Common ESP-related' > 'Main task size'.
+* Before use any examples, you MUST configure it using the `idf.py menuconfig` command. Go to the `Example WiFi/Server Configuration` and set all the options accordingly. Some examples have specific options, but at all you must set your WiFi parameters, as *SSID* and *password*.
+* All examples use the function `wifi_stack_init`. This function will block until connect to the WiFi, or get stuck there if fail. This is a very naive implementaion, and should NOT be used at production.
+* At the ESP32 examples, we prefered to instantiate the **CoAP-te** engine globally, to not be limited by the task memory size. If you prefer to use inside a task, depending on the *max packet size*/*transaction number*, it can overflow the task memory stack. Be aware of this. If you want to do this at the main task (`app_main`), you can increase the task memory stack if you need going to `idf.py menuconfig` > `Component config` > `Common ESP-related` > `Main task size`.
 
 It follows a brief overview of the ESP32 examples.
 

@@ -286,9 +286,10 @@ int main()
 	debug(example_mod, "Init engine code...");
 
 	/**
-	 * At Linux, does nothing. At Windows initiate winsock
-	 */
-	CoAP::Port::POSIX::init();
+	* Window/Linux: Initialize random number generator
+	* Windows: initialize winsock library
+	*/
+	CoAP::init();
 
 	CoAP::Error ec;
 

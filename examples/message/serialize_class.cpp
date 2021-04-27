@@ -147,7 +147,7 @@ int main()
 	 * Remove some options
 	 */
 	status(example_mod, "Removing options...");
-	if(!serial.remove_option({Option::code::size1}))
+	if(!serial.remove_option(Option::code::size1))
 		exit_error("option size1");
 
 	/**

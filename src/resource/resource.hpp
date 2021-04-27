@@ -146,6 +146,8 @@ class resource
 								return patch_ ? patch_(request, response, engine), true : false;
 							case code::ipatch:
 								return ipatch_ ? ipatch_(request, response, engine), true : false;
+							default:
+								break;
 						}
 					}
 #endif /* COAP_TE_FETCH_PATCH == 1 */

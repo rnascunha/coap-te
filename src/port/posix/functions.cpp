@@ -12,7 +12,6 @@ namespace POSIX{
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 bool init() noexcept
 {
-
 	WSADATA wsa;
 
 	//Initialise winsock

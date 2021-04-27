@@ -13,6 +13,7 @@ template<typename OptionCode>
 struct option_template
 {
 	option_template();
+	option_template(const option_template&) = default;
 	//Copy
 	option_template(OptionCode, unsigned, const void*);
 	option_template(OptionCode);

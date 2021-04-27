@@ -33,6 +33,9 @@ enum class errc : int{
 struct Error {
 	int err_ = 0;
 
+	Error(){}
+	Error(const Error&) = default;
+
 	int value() const noexcept;
 	const char* message() const noexcept;
 	static const char* message(int error);

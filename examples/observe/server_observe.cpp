@@ -417,7 +417,7 @@ static void thread_sensor(engine& engine)
 				/**
 				 * Checking if is the frequency defined by the user
 				 */
-				if(t >= (sensor_list[i]->init_time() + sensor_list[i]->frequency())
+				if(t >= static_cast<CoAP::time_t>(sensor_list[i]->init_time() + sensor_list[i]->frequency())
 					&& ((t - sensor_list[i]->init_time()) % sensor_list[i]->frequency()) == 0)
 				{
 					debug(example_mod, "sending sensor");
