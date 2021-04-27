@@ -38,9 +38,7 @@ It also needs the following applications to build/compile:
 * [git](https://git-scm.com/) to download;
 * [CMake](https://cmake.org/) to build and compile;
 
-### Windows
-
-Download and install the above software. Use [Visual Studio](https://visualstudio.microsoft.com/) compiler.
+At Windows system, download and install the above software (use [Visual Studio](https://visualstudio.microsoft.com/) compiler).
 
 ### Linux
 
