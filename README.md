@@ -38,7 +38,7 @@ It also needs the following applications to build/compile:
 * [git](https://git-scm.com/) to download;
 * [CMake](https://cmake.org/) to build and compile;
 
-# Windows
+### Windows
 
 Download and install the above software (use [Visual Studio](https://visualstudio.microsoft.com/) compiler).
 
@@ -128,7 +128,6 @@ target_compile_options(${COMPONENT_LIB}
 						-DCOAP_TE_PORT_C_STANDARD=1
 						-DCOAP_TE_USE_SELECT=1)
 ```
-
 Check the [ESP32 examples](#esp32). 
 
 ## Using
