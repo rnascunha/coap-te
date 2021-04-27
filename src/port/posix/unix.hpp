@@ -4,6 +4,10 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/epoll.h>

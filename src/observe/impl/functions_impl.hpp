@@ -37,7 +37,7 @@ bool freshness(order& fresher_value, Message const& msg, bool update /* = true *
 	unsigned value = Option::parse_unsigned(opt);
 
 	CoAP::time_t t = CoAP::time();
-	if(t > fresher_value.time + MaxLantency)
+	if(t > static_cast<CoAP::time_t>(fresher_value.time + MaxLantency))
 	{
 		if(update)
 		{

@@ -32,6 +32,8 @@ class endpoint_ipv4{
 				ec = CoAP::errc::endpoint_error;
 		}
 
+		endpoint_ipv4(const endpoint_ipv4&) = default;
+
 		void set(in_addr_t addr, std::uint16_t port) noexcept
 		{
 			addr_.sin_family = endpoint_ipv4::family;

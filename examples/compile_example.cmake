@@ -45,12 +45,17 @@ foreach(example ${EXAMPLES_LIST})
 	    CXX_STANDARD_REQUIRED ON
 	    CXX_EXTENSIONS ON
 	)
-	
+		
 	if(MSVC)
 		target_compile_features(${EXAMPLE_OUT} PUBLIC cxx_std_20)
 	endif()
 	
+	if(${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+		target_link_libraries(${EXAMPLE_OUT} "-lwebsocket.js -s PROXY_POSIX_SOCKETS=1 -s USE_PTHREADS=1 -s PROXY_TO_PTHREAD=1")
+	endif()
+	
 	target_link_libraries(${EXAMPLE_OUT} ${PROJECT_NAME})
+	
 	
 	if(WIN32)
 		target_link_libraries(${EXAMPLE_OUT} wsock32 ws2_32)

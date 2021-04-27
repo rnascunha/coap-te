@@ -335,7 +335,7 @@ static bool parse_ipv6(in6_addr& host, char* uri_string, char** new_uri_string) 
 #pragma warning( disable : 4505 )
 #endif /* defined(_MSC_VER) */
 
-static bool parse_ip_v4_v6(ip_type& host,
+static inline bool parse_ip_v4_v6(ip_type& host,
 		char* uri_string,
 		char** new_uri_string) noexcept
 {

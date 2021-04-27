@@ -19,9 +19,9 @@ auto pow(Base base, Power power) noexcept -> decltype(base * power)
 	return result;
 }
 
-inline constexpr bool is_little_endian() noexcept
+inline bool is_little_endian() noexcept
 {
-    int n = 1;
+    constexpr int n = 1;
     return (*(char *)&n == 1);
 }
 

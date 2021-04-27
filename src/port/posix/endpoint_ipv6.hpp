@@ -37,6 +37,8 @@ class endpoint_ipv6{
 				ec = CoAP::errc::endpoint_error;
 		}
 
+		endpoint_ipv6(const endpoint_ipv6&) = default;
+
 		void set(in6_addr const& addr, std::uint16_t port) noexcept
 		{
 			std::memset(&addr_, 0, sizeof(native_type));

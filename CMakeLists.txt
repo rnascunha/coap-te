@@ -71,7 +71,8 @@ add_definitions(-DCOAP_TE_PORT_C_STANDARD=1
 
 list(APPEND MAIN_SRC ${SRC_DIR_PORT}/c_standard_port.cpp)
 
-if(WIN32)
+#If Windows or WebAssembly (emscripten) use SELECT implementation
+if(WIN32 OR ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
 	message("Setting SELECT call implmenetation")
 	add_definitions(-DCOAP_TE_USE_SELECT=1)	
 endif()

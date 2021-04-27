@@ -11,7 +11,7 @@
 #include <cstdlib>
 #include <cstdio>
 
-using branch = typename CoAP::branch<int>::branch;
+using branch = CoAP::branch<int>;
 
 void print_branch(branch& br, int level = 0) noexcept
 {

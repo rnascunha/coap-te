@@ -15,7 +15,7 @@ time_t time() noexcept
 unsigned random_generator() noexcept
 {
 #if COAP_TE_ESP_IDF_PLATAFORM == 1
-	return esp_ramdom();
+	return esp_random();
 #else /* COAP_TE_ESP_IDF_PLATAFORM == 1 */
 	return std::rand();
 #endif /* COAP_TE_ESP_IDF_PLATAFORM == 1 */
