@@ -9,6 +9,26 @@
 
 #include <utility>
 
+#if COAP_TE_LOG_COLOR == 0
+#define COAP_TE_CONFIG_LOG_COLOR 	false
+#else /* COAP_TE_LOG_COLOR == 0 */
+#define COAP_TE_CONFIG_LOG_COLOR 	true
+#endif /* COAP_TE_LOG_COLOR == 0 */
+
+#if COAP_TE_LOG_LEVEL == 0
+#define COAP_TE_CONFIG_LOG_LEVEL	type::none
+#elif COAP_TE_LOG_LEVEL == 1
+#define COAP_TE_CONFIG_LOG_LEVEL	type::error
+#elif COAP_TE_LOG_LEVEL == 2
+#define COAP_TE_CONFIG_LOG_LEVEL	type::warning
+#elif COAP_TE_LOG_LEVEL == 3
+#define COAP_TE_CONFIG_LOG_LEVEL	type::deprecated
+#elif COAP_TE_LOG_LEVEL == 4
+#define COAP_TE_CONFIG_LOG_LEVEL	type::status
+#else
+#define COAP_TE_CONFIG_LOG_LEVEL	type::debug
+#endif
+
 namespace CoAP{
 namespace Log{
 
@@ -30,18 +50,19 @@ static constexpr Tree_Trunks::type_config<type> const type_config[] = {
 };
 
 static constexpr const Tree_Trunks::config<type> config = {
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-	.use_color				= false,
-#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
-	.use_color 				= true,
-#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+//#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+//	.use_color				= false,
+//#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+//	.use_color 				= true,
+//#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+	.use_color				= COAP_TE_CONFIG_LOG_COLOR,
 	.time 					= true,
 	.module 				= true,
 	.ignore_module_level 	= false,
 	.log_name 				= false,
 	.log_sname 				= true,
 	.name 					= nullptr,
-	.max_level 				= type::debug,
+	.max_level 				= COAP_TE_CONFIG_LOG_LEVEL,
 	.tp_config 				= type_config
 };
 

@@ -1,7 +1,7 @@
 #ifndef COAP_TE_DEBUG_PRINT_OPTIONS_IMPL_HPP__
 #define COAP_TE_DEBUG_PRINT_OPTIONS_IMPL_HPP__
 
-#include <iostream>
+#include <cstdio>
 #include <type_traits>
 
 #include "defines/defaults.hpp"
@@ -26,12 +26,13 @@ static void print_payload(CoAP::Message::Option::option_template<OptionCode> con
 			if(op.length == 0)
 			{
 				std::uint8_t b = 0;
-				std::cout << 0 << " " << content_format_string(static_cast<CoAP::Message::content_format>(b));
+				std::printf("0 %s", content_format_string(static_cast<CoAP::Message::content_format>(b)));
 				return;
 			}
 			auto const* buffer_u8 = static_cast<std::uint8_t const*>(op.value);
-			std::cout << static_cast<unsigned>(buffer_u8[0]) << " "
-					<< content_format_string(static_cast<CoAP::Message::content_format>(buffer_u8[0]));
+			std::printf("%u %s",
+					buffer_u8[0],
+					content_format_string(static_cast<CoAP::Message::content_format>(buffer_u8[0])));
 			return;
 		}
 	}
@@ -82,7 +83,7 @@ static void print_payload(CoAP::Message::Option::option_template<OptionCode> con
 	{
 		using namespace CoAP::Message;
 		case Option::type::empty:
-			std::cout << "<empty>";
+			std::printf("<empty>");
 			break;
 		case Option::type::string:
 			print_string(op.value, op.length);
@@ -90,7 +91,7 @@ static void print_payload(CoAP::Message::Option::option_template<OptionCode> con
 		case Option::type::uint:
 			unsigned value;
 			CoAP::Helper::array_to_unsigned(static_cast<std::uint8_t const*>(op.value), op.length, value);
-			std::cout << value;
+			std::printf("%u", value);
 			break;
 		default:
 			print_array(op.value, op.length);
@@ -101,8 +102,10 @@ static void print_payload(CoAP::Message::Option::option_template<OptionCode> con
 template<typename OptionCode>
 void print_option(CoAP::Message::Option::option_template<OptionCode> const& op, bool payload /* = true */)
 {
-	std::cout << static_cast<int>(op.ocode) << "|"
-			<< CoAP::Debug::option_string(op.ocode) << "[" << op.length << "]: ";
+	std::printf("%d|%s[%u]",
+			static_cast<int>(op.ocode),
+			CoAP::Debug::option_string(op.ocode),
+			op.length);
 
 	if(payload)
 		print_payload(op);
@@ -113,9 +116,9 @@ void print_options(CoAP::Message::Option::option_template<OptionCode> const* op,
 {
 	for(std::size_t i = 0; i < option_num; i++)
 	{
-		std::cout << i << ": ";
+		std::printf("%zu:", i);
 		print_option(op[i]);
-		std::cout << "\n";
+		std::printf("\n");
 	}
 }
 
@@ -126,10 +129,8 @@ void print_options(CoAP::Message::Option::node_option<OptionCode> const* list,
 	int c = 0;
 	for(CoAP::Message::Option::node const* i = list; i != nullptr; i = i->next)
 	{
-		std::cout << prefix;
-		std::cout << c++ << ": ";
-		print_option(i->value);
-		std::cout << "\n";
+		std::printf("%s%d: ", prefix, c++);
+		std::printf("\n");
 	}
 }
 

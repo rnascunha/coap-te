@@ -34,6 +34,35 @@ set(EXAMPLES_LIST
 				${EXAMPLES_DIR}/port/tcp_server.cpp
 			)
 
+#List of examples that must link to network at emscripten
+list(APPEND emscripten_net_list raw_transaction
+								raw_engine
+								engine_server
+								request_get_block_wise
+								request_put_block_wise
+								response_block_wise
+								engine_tcp_client
+								engine_tcp_server
+								client_observe
+								server_observe
+								endpoint_ipv6
+								udp_server
+								udp_client
+								tcp_client
+								tcp_server)
+								
+#List of examples that must link to pthreads at linux
+list(APPEND unix_pthread_list engine_server
+								engine_tcp_server
+								server_observe
+								tcp_server_observe)
+								
+if(EMSCRIPTEN)
+	if(NOT DEFINED WASM_OUTPUT_HTML OR WASM_OUTPUT_HTML EQUAL 1)
+		set(CMAKE_EXECUTABLE_SUFFIX ".html")
+	endif()
+endif()
+					
 foreach(example ${EXAMPLES_LIST})
 	string(REGEX REPLACE "./.*/" "" EXAMPLE_OUT ${example})
 	string(REGEX REPLACE "\.cpp$" "" EXAMPLE_OUT ${EXAMPLE_OUT})
@@ -45,27 +74,28 @@ foreach(example ${EXAMPLES_LIST})
 	    CXX_STANDARD_REQUIRED ON
 	    CXX_EXTENSIONS ON
 	)
-		
-	if(MSVC)
-		target_compile_features(${EXAMPLE_OUT} PUBLIC cxx_std_20)
-	endif()
 	
-	if(${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
-		target_link_libraries(${EXAMPLE_OUT} "-lwebsocket.js -s PROXY_POSIX_SOCKETS=1 -s USE_PTHREADS=1 -s PROXY_TO_PTHREAD=1")
-	endif()
-	
-	target_link_libraries(${EXAMPLE_OUT} ${PROJECT_NAME})
-	
-	
-	if(WIN32)
+	#Particular system dependencies
+	if(EMSCRIPTEN)
+		if(${EXAMPLE_OUT} IN_LIST emscripten_net_list)
+			target_link_libraries(${EXAMPLE_OUT} "-lwebsocket.js -s PROXY_POSIX_SOCKETS=1 -s USE_PTHREADS=1 -s PROXY_TO_PTHREAD=1")
+			target_link_libraries(${EXAMPLE_OUT} pthread)
+		endif()
+		if(NOT DEFINED WASM_EMRUN_ENABLE OR WASM_EMRUN_ENABLE EQUAL 1)
+			target_link_libraries(${EXAMPLE_OUT} "--emrun")
+		endif()
+	elseif(WIN32)
+		if(MSVC)
+			target_compile_features(${EXAMPLE_OUT} PUBLIC cxx_std_20)
+		endif()
 		target_link_libraries(${EXAMPLE_OUT} wsock32 ws2_32)
 	else()
-		if(${EXAMPLE_OUT} STREQUAL engine_server OR 
-		${EXAMPLE_OUT} STREQUAL engine_tcp_server OR
-		${EXAMPLE_OUT} STREQUAL server_observe OR
-		${EXAMPLE_OUT} STREQUAL tcp_server_observe)
+		if(${EXAMPLE_OUT} IN_LIST unix_pthread_list)
 			target_link_libraries(${EXAMPLE_OUT} pthread)
 		endif()
 	endif()
+	
+	#Linking example to CoAP-te library
+	target_link_libraries(${EXAMPLE_OUT} ${PROJECT_NAME})
 
 endforeach()

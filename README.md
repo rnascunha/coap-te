@@ -40,7 +40,7 @@ It also needs the following applications to build/compile:
 
 ### Windows
 
-Download and install the above software (use [Visual Studio](https://visualstudio.microsoft.com/) compiler).
+Download and install the above software (tested with [Visual Studio](https://visualstudio.microsoft.com/) compiler).
 
 ### Linux
 
@@ -129,6 +129,25 @@ target_compile_options(${COMPONENT_LIB}
 						-DCOAP_TE_USE_SELECT=1)
 ```
 Check the [ESP32 examples](#esp32). 
+
+## Bulding Options
+
+The following options can be passed to the `cmake` command to change compilation of **CoAP-te**.
+
+```
+$ cmake <options> ..
+```
+*General* options:
+* `-DWITH_EXAMPLES=<0|1>`: enable (`1`) / disable (`0`, default) build examples;
+* `-DLOG_COLOR=<0|1>`: enable (`1`, default) / disable (`0`) output log color (to posix-like terminal coloring);
+* `-DLOG_LEVEL=<0-5>`: define log level output, where `0` disable log, and `5` log everything;
+* `-DERROR_MESSAGE=<0|1>`: enable (`1`, default) / disable(`0`) human readable error messages (`Error.message()` call). Can disabled to save some bytes.
+
+<!--
+*WebAssembly (Emscripten)* specific:
+* `-DWASM_OUTPUT_HTML=<0|1>`: defines WebAssembly examples output. `1`: HTML (*.html*, default), `0`: JavaScript (*.js*). All examples create also the compiled *.wasm* output.
+* `-DWASM_EMRUN_ENABLE=<0|1>`: defines `--emrun` link flag to examples. `1`: enable flag (default), `0`: disable flag. More about [here](https://emscripten.org/docs/compiling/Running-html-files-with-emrun.html).
+-->
 
 ## Using
 

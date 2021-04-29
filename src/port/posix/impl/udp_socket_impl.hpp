@@ -6,8 +6,6 @@
 
 #include <cerrno>
 
-#include <cstdio>
-
 namespace CoAP{
 namespace Port{
 namespace POSIX{
@@ -23,7 +21,7 @@ void
 udp<Endpoint, Flags>::
 open(CoAP::Error& ec) noexcept
 {
-	if((socket_ = ::socket(endpoint::family, SOCK_DGRAM, 0)) == -1)
+	if((socket_ = ::socket(endpoint::family, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 	{
 		ec = CoAP::errc::socket_error;
 		return;
@@ -41,7 +39,9 @@ bind(endpoint& ep, CoAP::Error& ec) noexcept
 	if (::bind(socket_,
 		reinterpret_cast<struct sockaddr const*>(ep.native()),
 		sizeof(typename endpoint::native_type)) == -1)
+	{
 		ec = CoAP::errc::socket_error;
+	}
 }
 
 template<class Endpoint,

@@ -1,4 +1,27 @@
 #################################################
+# Checking log variables						#
+#################################################
+
+set(USE_LOG_COLOR 	1)
+if(DEFINED LOG_COLOR)
+set(USE_LOG_COLOR	${LOG_COLOR})
+endif()
+
+set(USE_LOG_LEVEL	5)
+if(DEFINED LOG_LEVEL)
+set(USE_LOG_LEVEL	${LOG_LEVEL})
+endif()
+
+set(USE_ERROR_MESSAGE	1)
+if(DEFINED ERROR_MESSAGE)
+set(USE_ERROR_MESSAGE ${ERROR_MESSAGE})
+endif()
+
+add_definitions(-DCOAP_TE_LOG_COLOR=${USE_LOG_COLOR}
+				-DCOAP_TE_LOG_LEVEL=${USE_LOG_LEVEL}
+				-DCOAP_TE_USE_ERROR_MESSAGES=${USE_ERROR_MESSAGE})
+
+#################################################
 # Checking if is ESP IDF build					#
 #################################################
 
@@ -27,13 +50,14 @@ if(MSVC)
 #https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4706?view=msvc-160
 #https://docs.microsoft.com/pt-br/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4702?view=msvc-160
 ####
+#to test: /GR- /std:c++17 (remove EHsh/bigobj/std:c++lastest)
 	message(STATUS "MSVC build")
-	set(CMAKE_CXX_FLAGS "/std:c++latest /EHsc /bigobj /wd4706 /wd4702 /W4")	#/std:c++17 
+	set(CMAKE_CXX_FLAGS "/std:c++latest /EHsc /bigobj /wd4706 /wd4702 /W4") 
 	set(CMAKE_CXX_FLAGS_RELEASE "/O2")
 #	add_compile_definitions(BOOST_DATE_TIME_NO_LIB BOOST_REGEX_NO_LIB)
 else()
 	message(STATUS "NO MSVC build")
-	set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter") 
+	set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter -fno-exceptions -fno-rtti") 
 	set(CMAKE_CXX_FLAGS_DEBUG "-g")
 	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
@@ -72,7 +96,7 @@ add_definitions(-DCOAP_TE_PORT_C_STANDARD=1
 list(APPEND MAIN_SRC ${SRC_DIR_PORT}/c_standard_port.cpp)
 
 #If Windows or WebAssembly (emscripten) use SELECT implementation
-if(WIN32 OR ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+if(WIN32 OR EMSCRIPTEN)
 	message("Setting SELECT call implmenetation")
 	add_definitions(-DCOAP_TE_USE_SELECT=1)	
 endif()

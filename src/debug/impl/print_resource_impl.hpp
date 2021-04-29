@@ -1,7 +1,6 @@
 #ifndef COAP_TE_DEBUG_PRINT_RESOURCE_IMPL_HPP__
 #define COAP_TE_DEBUG_PRINT_RESOURCE_IMPL_HPP__
 
-
 #include "../print_resource.hpp"
 #include <cstdio>
 

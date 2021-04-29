@@ -14,7 +14,7 @@ const char* Error::message() const noexcept
 
 const char* Error::message(int error)
 {
-#ifndef COAP_TE_REMOVE_ERROR_MESSAGES
+#if COAP_TE_USE_ERROR_MESSAGES != 0
 	switch(static_cast<errc>(error))
 	{
 		case errc::insufficient_buffer:	return "insufficient_buffer";
@@ -39,9 +39,9 @@ const char* Error::message(int error)
 			break;
 	}
 	return "(unrecognized error)";
-#else
+#else /* COAP_TE_USE_ERROR_MESSAGES != 0 */
 	return "";
-#endif
+#endif /* COAP_TE_USE_ERROR_MESSAGES != 0 */
 }
 
 Error::operator bool() const

@@ -53,6 +53,10 @@
 #include "coap-te.hpp"			//Convenient header
 #include "coap-te-debug.hpp"	//Convenient debug header
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif /* __EMSCRIPTEN__ */
+
 /**
  * Logging namespace
  */
@@ -312,12 +316,22 @@ static void exit_error(CoAP::Error& ec, const char* what = nullptr)
 	exit(EXIT_FAILURE);
 }
 
+#ifdef __EMSCRIPTEN__
+void loop(void* engine_ptr)
+{
+	engine* eng = static_cast<engine*>(engine_ptr);
+	CoAP::Error ec;
+	eng->run(ec);
+	if(ec) exit_error(ec);
+}
+#endif /* __EMSCRIPTEN__ */
+
 int main()
 {
 	/**
-	* Window/Linux: Initialize random number generator
-	* Windows: initialize winsock library
-	*/
+	 * Window/Linux: Initialize random number generator
+	 * Windows: initialize winsock library
+	 */
 	CoAP::init();
 
 	CoAP::Error ec;
@@ -409,6 +423,7 @@ int main()
 
 	debug(example_mod, "Initiating CoAP engine loop...");
 
+#ifndef __EMSCRIPTEN__
 	/**
 	 * This code will run indefinitely
 	 *
@@ -422,6 +437,10 @@ int main()
 		 * Your code
 		 */
 	}
+	if(ec) exit_error(ec);
+#else /* __EMSCRIPTEN__ */
+	emscripten_set_main_loop_arg(loop, &coap_engine, 1, 0);
+#endif /* __EMSCRIPTEN__ */
 
 	return EXIT_SUCCESS;
 }

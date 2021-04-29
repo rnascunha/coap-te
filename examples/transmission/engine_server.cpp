@@ -47,6 +47,10 @@
 #include "coap-te.hpp"			//Convenient header
 #include "coap-te-debug.hpp"	//Convenient debug header
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif /* __EMSCRIPTEN__ */
+
 /**
  * Uncomment to use transaction_list_vector (see raw_engine example)
  */
@@ -156,11 +160,23 @@ static void get_discovery_handler(engine::message const& request,
 static void exit_error(CoAP::Error& ec, const char* what = nullptr)
 {
 	error(example_mod, ec, what);
-	exit(EXIT_FAILURE);
+	sleep(1);
+//	exit(EXIT_FAILURE);
 }
+
+#ifdef __EMSCRIPTEN__
+void loop(void* engine_ptr)
+{
+	engine* eng = static_cast<engine*>(engine_ptr);
+	CoAP::Error ec;
+	eng->run(ec);
+	if(ec) exit_error(ec);
+}
+#endif /* __EMSCRIPTEN__ */
 
 int main()
 {
+	debug(example_mod, "Engine Server init example...");
 	/**
 	* Window/Linux: Initialize random number generator
 	* Windows: initialize winsock library
@@ -276,8 +292,13 @@ int main()
 
 	debug(example_mod, "Initiating CoAP engine loop...");
 	//CoAP engine loop.
-	while(coap_engine(ec));
 
+#ifndef __EMSCRIPTEN__
+	while(coap_engine(ec));
+	if(ec) exit_error(ec);
+#else /* __EMSCRIPTEN__ */
+	emscripten_set_main_loop_arg(loop, &coap_engine, 1, 1);
+#endif /* __EMSCRIPTEN__ */
 	return EXIT_SUCCESS;
 }
 
