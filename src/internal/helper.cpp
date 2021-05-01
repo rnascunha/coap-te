@@ -1,6 +1,5 @@
 #include "helper.hpp"
 #include <cstring>
-#include <cstdio>
 
 namespace CoAP{
 namespace Helper{

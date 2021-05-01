@@ -2,7 +2,6 @@
 #define COAP_TE_INTERNAL_TREE_HPP__
 
 #include <utility>
-#include <cstdio>
 
 namespace CoAP{
 
