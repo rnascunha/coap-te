@@ -30,6 +30,7 @@ set(EXAMPLES_LIST
 				${EXAMPLES_DIR}/port/endpoint_ipv6.cpp
 				${EXAMPLES_DIR}/port/udp_server.cpp
 				${EXAMPLES_DIR}/port/udp_client.cpp
+				${EXAMPLES_DIR}/port/async_tcp_client.cpp
 				${EXAMPLES_DIR}/port/tcp_client.cpp
 				${EXAMPLES_DIR}/port/tcp_server.cpp
 			)

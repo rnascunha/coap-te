@@ -102,7 +102,7 @@ static void print_payload(CoAP::Message::Option::option_template<OptionCode> con
 template<typename OptionCode>
 void print_option(CoAP::Message::Option::option_template<OptionCode> const& op, bool payload /* = true */)
 {
-	std::printf("%d|%s[%u]",
+	std::printf("%d|%s[%u]: ",
 			static_cast<int>(op.ocode),
 			CoAP::Debug::option_string(op.ocode),
 			op.length);

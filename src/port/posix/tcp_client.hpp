@@ -29,11 +29,17 @@ class tcp_client{
 		handler native() const noexcept;
 
 		void open(endpoint&, CoAP::Error&) noexcept;
+		bool async_open(endpoint&, CoAP::Error&) noexcept;
+		template<int BlockTimeMs = -1>
+		bool wait_connect(CoAP::Error&) const noexcept;
 
+		bool is_connected() const noexcept;
 		bool is_open() const noexcept;
 		void close() noexcept;
 
 		std::size_t send(const void*, std::size_t, CoAP::Error&)  noexcept;
+		std::size_t receive(void*, std::size_t, CoAP::Error&) noexcept;
+		template<int BlockTimeMs>
 		std::size_t receive(void*, std::size_t, CoAP::Error&) noexcept;
 	private:
 		handler socket_;

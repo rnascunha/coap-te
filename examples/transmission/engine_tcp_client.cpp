@@ -283,7 +283,7 @@ void request_cb(void const* trans, CoAP::Message::Reliable::message const* respo
  */
 int main()
 {
-	debug(example_mod, "Init engine code...");
+	debug(example_mod, "TCP client engine example...");
 
 	/**
 	* Window/Linux: Initialize random number generator
@@ -338,8 +338,8 @@ int main()
 	 * Waiting for the pong response
 	 */
 	status(example_mod, "Waiting pong signal...");
-	while(!pong_flag && coap_engine(ec));
 
+	while(!pong_flag && coap_engine(ec));
 	if(ec) exit_error(ec, "pong");
 
 	debug(example_mod, "Constructing the request message...");
@@ -372,6 +372,7 @@ int main()
 	debug(example_mod, "Message sended");
 
 	debug(example_mod, "Initiating engine loop");
+
 	/**
 	 * This loop will run until receive a successful response.
 	 *

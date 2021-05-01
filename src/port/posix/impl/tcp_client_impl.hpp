@@ -37,7 +37,7 @@ open(endpoint& ep, CoAP::Error& ec) noexcept
 
 	if(::connect(socket_,
 		reinterpret_cast<struct sockaddr const*>(ep.native()),
-		sizeof(typename endpoint::native_type)) == -1)
+		sizeof(typename endpoint::native_type)) < 0)
 	{
 		ec = CoAP::errc::socket_error;
 		close();
@@ -46,6 +46,91 @@ open(endpoint& ep, CoAP::Error& ec) noexcept
 
 	if constexpr((Flags & MSG_DONTWAIT) != 0)
 		nonblock_socket(socket_);
+}
+
+template<class Endpoint,
+		int Flags>
+bool
+tcp_client<Endpoint, Flags>::
+async_open(endpoint& ep, CoAP::Error& ec) noexcept
+{
+	if((socket_ = ::socket(endpoint::family, SOCK_STREAM, IPPROTO_TCP)) == -1)
+	{
+		ec = CoAP::errc::socket_error;
+		return false;
+	}
+
+	if constexpr((Flags & MSG_DONTWAIT) != 0)
+		nonblock_socket(socket_);
+
+	int res = ::connect(socket_,
+			reinterpret_cast<struct sockaddr const*>(ep.native()),
+			sizeof(typename endpoint::native_type));
+	if(res == -1 && errno != EINPROGRESS)
+	{
+
+		ec = CoAP::errc::socket_error;
+		close();
+		return false;
+	}
+
+	return errno == EINPROGRESS ? false : true;
+}
+
+template<class Endpoint,
+		int Flags>
+template<int BlockTimeMs /* = -1 */>
+bool
+tcp_client<Endpoint, Flags>::
+wait_connect(CoAP::Error& ec) const noexcept
+{
+	struct timeval tv = {
+		.tv_sec = BlockTimeMs / 1000,
+		.tv_usec = (BlockTimeMs % 1000) * 1000
+	};
+
+	fd_set wfds;
+	FD_ZERO(&wfds);
+	FD_SET(socket_, &wfds);
+
+	int s = select(socket_ + 1, NULL, &wfds, NULL, BlockTimeMs  < 0 ? NULL : &tv);
+	if(s < 0)
+	{
+		ec = CoAP::errc::socket_error;
+		return false;
+	}
+	if(FD_ISSET(socket_, &wfds))
+	{
+		typename endpoint::native_type addr;
+		socklen_t size = sizeof(typename endpoint::native_type);
+		if(::getpeername(socket_,
+			reinterpret_cast<sockaddr*>(&addr),
+			&size) == -1)
+		{
+			if(errno == ENOTCONN)
+			{
+				ec = CoAP::errc::socket_error;
+				return false;
+			}
+			if(errno == EINPROGRESS)
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	return false;
+}
+
+template<class Endpoint,
+		int Flags>
+bool
+tcp_client<Endpoint, Flags>::
+is_connected() const noexcept
+{
+	CoAP::Error ec;
+	return wait_connect<0>(ec);
 }
 
 template<class Endpoint,
@@ -127,6 +212,35 @@ receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 		return 0;
 	}
 	return recv;
+}
+
+template<class Endpoint,
+		int Flags>
+template<int BlockTimeMs>
+std::size_t
+tcp_client<Endpoint, Flags>::
+receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
+{
+	struct timeval tv = {
+		.tv_sec = BlockTimeMs / 1000,
+		.tv_usec = (BlockTimeMs % 1000) * 1000
+	};
+
+	fd_set rfds;
+	FD_ZERO(&rfds);
+	FD_SET(socket_, &rfds);
+
+	int s = select(socket_ + 1, &rfds, NULL, NULL, BlockTimeMs  < 0 ? NULL : &tv);
+	if(s < 0)
+	{
+		ec = CoAP::errc::socket_error;
+		return 0;
+	}
+	if(FD_ISSET(socket_, &rfds))
+	{
+		return receive(buffer, buffer_len, ec);
+	}
+	return 0;
 }
 
 }//POSIX

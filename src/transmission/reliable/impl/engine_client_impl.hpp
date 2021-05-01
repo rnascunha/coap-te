@@ -66,6 +66,31 @@ template<typename Connection,
 	typename TransactionList,
 	typename CallbackDefaultFunctor,
 	typename Resource>
+bool
+engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
+async_open(endpoint& ep, CoAP::Error& ec) noexcept
+{
+	if(!conn_.async_open(ep, ec))
+	{
+		if(ec) return false;
+		while(!conn_.template wait_connect<-1>(ec))
+		{
+			if(ec) return false;
+		}
+	}
+
+	std::size_t size = make_csm_message<Connection::set_length>(Config, buffer_, Config.max_message_size, ec);
+	if(ec) return false;
+
+	send(buffer_, size, ec);
+	return ec ? false : true;
+}
+
+template<typename Connection,
+	csm_configure const& Config,
+	typename TransactionList,
+	typename CallbackDefaultFunctor,
+	typename Resource>
 template<bool SendAbortMessage>
 void
 engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::

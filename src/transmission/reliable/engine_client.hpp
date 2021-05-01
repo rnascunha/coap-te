@@ -69,6 +69,12 @@ class engine_client
 		~engine_client();
 
 		bool open(endpoint& ep, CoAP::Error&) noexcept;
+		/**
+		 * This is not really async. The emscripten sockets must be used
+		 * async, so we are going to use async connection but block until
+		 * it connect... Just for test purpose...
+		 */
+		bool async_open(endpoint& ep, CoAP::Error&) noexcept;
 
 		template<bool SendAbortMessage = false>
 		void close(const char* payload = nullptr) noexcept;
