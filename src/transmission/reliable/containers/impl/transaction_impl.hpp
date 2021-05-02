@@ -12,9 +12,9 @@ namespace Transmission{
 namespace Reliable{
 
 static constexpr CoAP::Log::module transaction_mod = {
-		.name = "TRANS",
-		.max_level = CoAP::Log::type::debug,
-		.enable = true
+		/*.name = */"TRANS",
+		/*.max_level = */CoAP::Log::type::debug,
+		/*.enable = */true
 };
 
 template<typename Handler,

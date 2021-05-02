@@ -32,7 +32,6 @@
 #include <cstdio>
 #include <chrono>
 #include <thread>
-//#include <iostream>
 
 #include "log.hpp"				//Log header
 #include "coap-te.hpp"			//Convenient header
@@ -44,8 +43,8 @@ using namespace CoAP::Log;
  * Example log module
  */
 static constexpr module example_mod = {
-		.name = "EXAMPLE",
-		.max_level = CoAP::Log::type::debug
+		/*.name = */"EXAMPLE",
+		/*.max_level = */CoAP::Log::type::debug
 };
 
 /**
@@ -66,8 +65,8 @@ using endpoint_t = CoAP::Port::POSIX::endpoint_ipv4;
 //#define USE_OBSERVER_VECTOR
 
 static constexpr const CoAP::Transmission::Reliable::csm_configure csm = {
-		.max_message_size = CoAP::Transmission::Reliable::default_max_message_size,
-		.block_wise_transfer = true
+		/*.max_message_size = */CoAP::Transmission::Reliable::default_max_message_size,
+		/*.block_wise_transfer = */true
 };
 
 /**

@@ -89,8 +89,8 @@ tcp_client<Endpoint, Flags>::
 wait_connect(CoAP::Error& ec) const noexcept
 {
 	struct timeval tv = {
-		.tv_sec = BlockTimeMs / 1000,
-		.tv_usec = (BlockTimeMs % 1000) * 1000
+		/*.tv_sec = */BlockTimeMs / 1000,
+		/*.tv_usec = */(BlockTimeMs % 1000) * 1000
 	};
 
 	fd_set wfds;
@@ -239,8 +239,8 @@ tcp_client<Endpoint, Flags>::
 receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 {
 	struct timeval tv = {
-		.tv_sec = BlockTimeMs / 1000,
-		.tv_usec = (BlockTimeMs % 1000) * 1000
+		/*.tv_sec = */BlockTimeMs / 1000,
+		/*.tv_usec = */(BlockTimeMs % 1000) * 1000
 	};
 
 	fd_set rfds;

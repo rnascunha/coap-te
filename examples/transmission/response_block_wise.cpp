@@ -59,8 +59,8 @@ static char recv_buffer[RECEIVE_PUT_BUFFER];
  * Example log module
  */
 static constexpr module example_mod = {
-		.name = "EXAMPLE",
-		.max_level = CoAP::Log::type::debug
+		/*.name = */"EXAMPLE",
+		/*.max_level = */CoAP::Log::type::debug
 };
 
 /**

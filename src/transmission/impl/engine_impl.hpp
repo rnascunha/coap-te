@@ -11,9 +11,9 @@ namespace CoAP{
 namespace Transmission{
 
 static constexpr CoAP::Log::module engine_mod = {
-		.name = "ENGINE",
-		.max_level = CoAP::Log::type::debug,
-		.enable = true
+		/*.name = */"ENGINE",
+		/*.max_level = */CoAP::Log::type::debug,
+		/*.enable = */true
 };
 
 template<typename Connection,

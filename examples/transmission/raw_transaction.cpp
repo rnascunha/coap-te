@@ -34,9 +34,9 @@ using namespace CoAP::Transmission;
  * https://tools.ietf.org/html/rfc7252#section-4.8
  */
 static constexpr const configure tconfigure = {
-	.ack_timeout_seconds 			= 2.0,	//ACK_TIMEOUT
-	.ack_ramdom_factor 				= 1.5,	//ACK_RANDOM_FACTOR
-	.max_restransmission 			= 4,	//MAX_RETRANSMIT
+	/*.ack_timeout_seconds 			= */2.0,	//ACK_TIMEOUT
+	/*.ack_ramdom_factor 				= */1.5,	//ACK_RANDOM_FACTOR
+	/*.max_restransmission 			= */4,	//MAX_RETRANSMIT
 };
 
 /**
@@ -46,8 +46,8 @@ static bool response_flag = false;
 
 //Log module definition
 static constexpr module example_mod = {
-		.name = "EXAMPLE",
-		.max_level = CoAP::Log::type::debug
+		/*.name = */"EXAMPLE",
+		/*.max_level = */CoAP::Log::type::debug
 };
 
 /**

@@ -11,9 +11,9 @@ namespace CoAP{
 namespace Transmission{
 
 static constexpr CoAP::Log::module transaction_mod = {
-		.name = "TRANS",
-		.max_level = CoAP::Log::type::debug,
-		.enable = true
+		/*.name = */"TRANS",
+		/*.max_level = */CoAP::Log::type::debug,
+		/*.enable = */true
 };
 
 template<unsigned MaxPacketSize,

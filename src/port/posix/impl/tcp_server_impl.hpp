@@ -259,8 +259,8 @@ run(CoAP::Error& ec,
 	fd_set rfds;
 
 	struct timeval tv = {
-		.tv_sec = BlockTimeMs / 1000,
-		.tv_usec = (BlockTimeMs % 1000) * 1000
+		/*.tv_sec = */BlockTimeMs / 1000,
+		/*.tv_usec = */(BlockTimeMs % 1000) * 1000
 	};
 
 	std::memcpy(&rfds, &list_, sizeof(fd_set));

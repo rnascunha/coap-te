@@ -49,12 +49,20 @@ static constexpr Tree_Trunks::type_config<type> const type_config[] = {
 	{type::debug, 		"DEBUG", 		"DEBG",	FG_BLUE}
 };
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 static constexpr const Tree_Trunks::config<type> config = {
-//#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-//	.use_color				= false,
-//#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
-//	.use_color 				= true,
-//#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+	/*.use_color				= */COAP_TE_CONFIG_LOG_COLOR,
+	/*.time 					= */true,
+	/*.module 				= */true,
+	/*.ignore_module_level 	= */false,
+	/*.log_name 				= */false,
+	/*.log_sname 				= */true,
+	/*.name 					= */nullptr,
+	/*.max_level 				= */COAP_TE_CONFIG_LOG_LEVEL,
+	/*.tp_config 				= */type_config
+};
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+static constexpr const Tree_Trunks::config<type> config = {
 	.use_color				= COAP_TE_CONFIG_LOG_COLOR,
 	.time 					= true,
 	.module 				= true,
@@ -65,6 +73,7 @@ static constexpr const Tree_Trunks::config<type> config = {
 	.max_level 				= COAP_TE_CONFIG_LOG_LEVEL,
 	.tp_config 				= type_config
 };
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 
 #include "tt/functions_conv.hpp"
 

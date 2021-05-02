@@ -19,7 +19,7 @@
  *
  * More about Transaction List below
  */
-//#define USE_TRANSACTION_LIST_VECTOR
+#define USE_TRANSACTION_LIST_VECTOR
 
 using namespace CoAP::Log;
 
@@ -30,8 +30,8 @@ using namespace CoAP::Log;
  * Log module
  */
 static constexpr module example_mod = {
-		.name = "EXAMPLE",
-		.max_level = CoAP::Log::type::debug
+		/*.name = */"EXAMPLE",
+		/*.max_level = */CoAP::Log::type::debug
 };
 
 /**
@@ -39,9 +39,9 @@ static constexpr module example_mod = {
  * https://tools.ietf.org/html/rfc7252#section-4.8
  */
 static constexpr const CoAP::Transmission::configure tconfigure = {
-	.ack_timeout_seconds 			= 2.0,	//ACK_TIMEOUT
-	.ack_ramdom_factor 				= 1.5,	//ACK_RANDOM_FACTOR
-	.max_restransmission 			= 4,	//MAX_RETRANSMIT
+	/*.ack_timeout_seconds 			= */2.0,	//ACK_TIMEOUT
+	/*.ack_ramdom_factor 				= */1.5,	//ACK_RANDOM_FACTOR
+	/*.max_restransmission 			= */4,	//MAX_RETRANSMIT
 };
 
 /**
