@@ -66,7 +66,11 @@ async_open(endpoint& ep, CoAP::Error& ec) noexcept
 	int res = ::connect(socket_,
 			reinterpret_cast<struct sockaddr const*>(ep.native()),
 			sizeof(typename endpoint::native_type));
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	if(res == -1 && WSAGetLastError() == WSAEINPROGRESS)
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	if(res == -1 && errno != EINPROGRESS)
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	{
 
 		ec = CoAP::errc::socket_error;
@@ -85,15 +89,20 @@ tcp_client<Endpoint, Flags>::
 wait_connect(CoAP::Error& ec) const noexcept
 {
 	struct timeval tv = {
-		.tv_sec = BlockTimeMs / 1000,
-		.tv_usec = (BlockTimeMs % 1000) * 1000
+		/*.tv_sec = */BlockTimeMs / 1000,
+		/*.tv_usec = */(BlockTimeMs % 1000) * 1000
 	};
 
 	fd_set wfds;
 	FD_ZERO(&wfds);
 	FD_SET(socket_, &wfds);
 
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	//Using socket_ + 1, gives warning... (but why)... this value is not used at Windows
+	int s = select(0, NULL, &wfds, NULL, BlockTimeMs  < 0 ? NULL : &tv);
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	int s = select(socket_ + 1, NULL, &wfds, NULL, BlockTimeMs  < 0 ? NULL : &tv);
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	if(s < 0)
 	{
 		ec = CoAP::errc::socket_error;
@@ -107,12 +116,20 @@ wait_connect(CoAP::Error& ec) const noexcept
 			reinterpret_cast<sockaddr*>(&addr),
 			&size) == -1)
 		{
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+			
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 			if(errno == ENOTCONN)
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 			{
 				ec = CoAP::errc::socket_error;
 				return false;
 			}
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+			if(WSAGetLastError() == WSAEINPROGRESS)
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */ 
 			if(errno == EINPROGRESS)
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 			{
 				return false;
 			}
@@ -222,15 +239,20 @@ tcp_client<Endpoint, Flags>::
 receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 {
 	struct timeval tv = {
-		.tv_sec = BlockTimeMs / 1000,
-		.tv_usec = (BlockTimeMs % 1000) * 1000
+		/*.tv_sec = */BlockTimeMs / 1000,
+		/*.tv_usec = */(BlockTimeMs % 1000) * 1000
 	};
 
 	fd_set rfds;
 	FD_ZERO(&rfds);
 	FD_SET(socket_, &rfds);
-
+	
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	//Using socket_ + 1, gives warning... (but why)... this value is not used at Windows
+	int s = select(0, &rfds, NULL, NULL, BlockTimeMs  < 0 ? NULL : &tv);
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	int s = select(socket_ + 1, &rfds, NULL, NULL, BlockTimeMs  < 0 ? NULL : &tv);
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	if(s < 0)
 	{
 		ec = CoAP::errc::socket_error;

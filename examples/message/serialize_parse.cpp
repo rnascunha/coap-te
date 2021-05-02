@@ -39,8 +39,8 @@ using namespace CoAP::Log;
  * Log module
  */
 static constexpr module example_mod = {
-		.name = "EXAMPLE",
-		.max_level = CoAP::Log::type::debug
+		/*.name = */"EXAMPLE",
+		/*.max_level = */CoAP::Log::type::debug
 };
 
 /**

@@ -22,8 +22,8 @@ using namespace CoAP::Log;
  * Log module
  */
 static constexpr module example_mod = {
-		.name = "EXAMPLE",
-		.max_level = CoAP::Log::type::debug
+		/*.name = */"EXAMPLE",
+		/*.max_level = */CoAP::Log::type::debug
 };
 
 /**
@@ -40,8 +40,8 @@ using endpoint = CoAP::Port::POSIX::endpoint_ipv4;
  * CSM signal configuration
  */
 static constexpr const CoAP::Transmission::Reliable::csm_configure csm = {
-		.max_message_size = CoAP::Transmission::Reliable::default_max_message_size,
-		.block_wise_transfer = true
+		/*.max_message_size = */CoAP::Transmission::Reliable::default_max_message_size,
+		/*.block_wise_transfer = */true
 };
 
 /**

@@ -36,8 +36,8 @@ Non turpis sem sagittis, lacinia auctor. Conubia molestie inceptos. Sapien erat 
  * Log module
  */
 static constexpr module example_mod = {
-		.name = "EXAMPLE",
-		.max_level = CoAP::Log::type::debug
+		/*.name = */"EXAMPLE",
+		/*.max_level = */CoAP::Log::type::debug
 };
 
 /**

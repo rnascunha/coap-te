@@ -26,7 +26,7 @@
 /**
  * Using IPv6. Commenting the following line to use IPv4
  */
-//#define USE_IPV6
+#define USE_IPV6
 
 using namespace CoAP;
 
@@ -154,11 +154,6 @@ int main()
 		 */
 		std::size_t size = conn.receive<-1>(buffer, BUFFER_LEN, ec);
 		if(ec) exit_error(ec, "read");
-		if(size == 0)
-		{
-			continue;
-		}
-
 		/**
 		 * Printing response received
 		 */

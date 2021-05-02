@@ -87,7 +87,10 @@ foreach(example ${EXAMPLES_LIST})
 		endif()
 	elseif(WIN32)
 		if(MSVC)
-			target_compile_features(${EXAMPLE_OUT} PUBLIC cxx_std_20)
+			#Some examples use std::vector, so exception must be enabled at MSVC.
+			#But exception are not a requiriment of CoAP-te (except some special 
+			#features that must be explicity included)
+			set_target_properties(${EXAMPLE_OUT} PROPERTIES COMPILE_FLAGS "/EHsc")
 		endif()
 		target_link_libraries(${EXAMPLE_OUT} wsock32 ws2_32)
 	else()
