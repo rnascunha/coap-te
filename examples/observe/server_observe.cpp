@@ -41,7 +41,7 @@
 #include <cstdio>
 #include <chrono>
 #include <thread>
-#include <iostream>
+//#include <iostream>
 
 #include "log.hpp"				//Log header
 #include "coap-te.hpp"			//Convenient header
@@ -327,7 +327,7 @@ static void thread_type(engine& engine)
 		 * Reading input
 		 */
 		char i;
-		i = static_cast<char>(std::cin.get());
+		i = static_cast<char>(getchar());//static_cast<char>(std::cin.get());
 
 		/**
 		 * Check if state changed (different character)
@@ -382,7 +382,8 @@ static void thread_type(engine& engine)
 			}
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(1));
-		std::cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
+		//Clearing buffer
+		fseek(stdin,0,SEEK_END);
 	}
 }
 

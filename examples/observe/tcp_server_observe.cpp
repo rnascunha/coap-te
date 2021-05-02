@@ -32,7 +32,7 @@
 #include <cstdio>
 #include <chrono>
 #include <thread>
-#include <iostream>
+//#include <iostream>
 
 #include "log.hpp"				//Log header
 #include "coap-te.hpp"			//Convenient header
@@ -63,7 +63,7 @@ using endpoint_t = CoAP::Port::POSIX::endpoint_ipv4;
  * Observers must be held in a container. To use the vector implementation,
  * uncomment the following line.
  */
-#define USE_OBSERVER_VECTOR
+//#define USE_OBSERVER_VECTOR
 
 static constexpr const CoAP::Transmission::Reliable::csm_configure csm = {
 		.max_message_size = CoAP::Transmission::Reliable::default_max_message_size,
@@ -301,7 +301,7 @@ static void thread_type(engine& engine)
 		 * Reading input
 		 */
 		char i;
-		i = static_cast<char>(std::cin.get());
+		i = static_cast<char>(getchar());//static_cast<char>(std::cin.get());
 
 		/**
 		 * Check if state changed (different character)
@@ -351,7 +351,7 @@ static void thread_type(engine& engine)
 			}
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(1));
-		std::cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
+		fseek(stdin,0,SEEK_END);
 	}
 }
 

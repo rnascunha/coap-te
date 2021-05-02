@@ -50,9 +50,8 @@ if(MSVC)
 #https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4706?view=msvc-160
 #https://docs.microsoft.com/pt-br/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4702?view=msvc-160
 ####
-#to test: /GR- /std:c++17 (remove EHsh/bigobj/std:c++lastest)
 	message(STATUS "MSVC build")
-	set(CMAKE_CXX_FLAGS "/std:c++latest /EHsc /bigobj /wd4706 /wd4702 /W4") 
+	set(CMAKE_CXX_FLAGS "/std:c++17 /GR- /wd4706 /wd4702 /W4") 
 	set(CMAKE_CXX_FLAGS_RELEASE "/O2")
 #	add_compile_definitions(BOOST_DATE_TIME_NO_LIB BOOST_REGEX_NO_LIB)
 else()

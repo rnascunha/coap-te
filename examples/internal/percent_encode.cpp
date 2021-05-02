@@ -3,7 +3,7 @@
  *
  * All encode is done locally
  */
-#include <iostream>
+#include <cstdio>
 #include <cstdint>
 #include <cstring>
 
@@ -25,8 +25,8 @@ int main()
 	char buffer[1000] = "AbCdEfGh";
 #endif
 
-	std::cout << "Initial: " << buffer << ", size: " << std::strlen(buffer) <<"\n";
-
+	//std::cout << "Initial: " << buffer << ", size: " << std::strlen(buffer) <<"\n";
+	std::printf("Initial: %s, size %zu\n", buffer, std::strlen(buffer));
 #ifndef USE_FUNCTION
 	/**
 	 * This call will percent-encode any character present at the encoded_list
@@ -40,7 +40,8 @@ int main()
 #endif /* USE_FUNCTION */
 	if(size < 0)
 	{
-		std::cout << "ERROR! " << size << "\n";
+		// std::cout << "ERROR! " << size << "\n";
+		std::printf("ERROR! %d\n", size);
 		return EXIT_FAILURE;
 	}
 

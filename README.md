@@ -80,7 +80,7 @@ $ cd build
 $ cmake ..
 $ cmake -build .
 ```
-This will generate a library file (`libcoap-te.a` at linux). Link this file to your project, and include `./src/` directory. There are two convenient headers:
+This will generate a library file (`libcoap-te.a` at Linux, `coap-te.lib` at Windows). Link this file to your project, and include `./src/` directory. There are two convenient headers:
 * `coap-te.hpp`: this has all necessary headers to use **CoAP-te**;
 * `coap-te-debug.hpp`: this includes some print functions to help debug messages.
 
