@@ -32,7 +32,7 @@ unsigned parse(option_template<OptionCode>& opt,
 					return offset;
 				}
 			}
-			opt.ocode = static_cast<OptionCode>(delta + buffer[1] + code);
+			opt.ocode = static_cast<OptionCode>(delta + buffer[1] + 13);
 			offset += 1;
 			break;
 		case delta_special::two_byte_extend:
@@ -44,7 +44,7 @@ unsigned parse(option_template<OptionCode>& opt,
 					return offset;
 				}
 			}
-			opt.ocode = static_cast<OptionCode>(delta + (buffer[1] << 8 | buffer[2]) + code);
+			opt.ocode = static_cast<OptionCode>(delta + (buffer[1] << 8 | buffer[2]) + 269);
 			offset += 2;
 			break;
 		case delta_special::error:

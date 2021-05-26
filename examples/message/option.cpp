@@ -192,7 +192,7 @@ int main()
 				std::printf("uint: %u|%s|len: %u|payload: %u\n",
 						static_cast<unsigned>(opt->ocode),
 						CoAP::Debug::option_string(opt->ocode),
-						opt->length, Option::parse_unsigned<Option::code>(opt->ocode));
+						opt->length, Option::parse_unsigned<Option::code>(*opt));
 				break;
 			default:
 				break;

@@ -84,8 +84,8 @@ void print_message_encoded_string(CoAP::Message::message const& msg) noexcept
 				msg.option_init + offset, msg.options_len - offset, delta, ec);
 		if(ec)
 		{
-			printf("\n\nERROR PARSING[%d] %s\n\n", ec.value(), ec.message());
-			printf("opt: %d/%u\n", static_cast<int>(opt.ocode), opt.length);
+			std::printf("\n\nERROR PARSING[%d] %s\n\n", ec.value(), ec.message());
+			std::printf("opt: %d/%u\n", static_cast<int>(opt.ocode), opt.length);
 			exit(1);
 		}
 		delta = static_cast<unsigned>(opt.ocode);
@@ -113,8 +113,8 @@ void print_message_string(CoAP::Message::message const& msg) noexcept
 				msg.option_init + offset, msg.options_len - offset, delta, ec);
 		if(ec)
 		{
-			printf("\n\nERROR PARSING[%d] %s\n\n", ec.value(), ec.message());
-			printf("opt: %d/%u\n", static_cast<int>(opt.ocode), opt.length);
+			std::printf("\n\nERROR PARSING[%d] %s\n\n", ec.value(), ec.message());
+			std::printf("opt: %d/%u\n", static_cast<int>(opt.ocode), opt.length);
 			exit(1);
 		}
 		delta = static_cast<unsigned>(opt.ocode);
@@ -139,10 +139,10 @@ static void print_make_space(const char* header, int size_data) noexcept
 		diff_b = diff / 2 + ((diff % 2) ? 1 : 0);
 	}
 
-	printf("|");
-	while(diff_a--) printf(" ");
-	printf("%.*s", size_data, header);
-	while(diff_b--) printf(" ");
+	std::printf("|");
+	while(diff_a--) std::printf(" ");
+	std::printf("%.*s", size_data, header);
+	while(diff_b--) std::printf(" ");
 }
 
 bool print_byte_message(std::uint8_t const* arr, std::size_t size) noexcept
@@ -153,27 +153,27 @@ bool print_byte_message(std::uint8_t const* arr, std::size_t size) noexcept
 	if(ec) return false;
 
 	//Print data;
-	printf("%02X|%02X|%04X", arr[0], arr[1], msg.mid);
+	std::printf("%02X|%02X|%04X", arr[0], arr[1], msg.mid);
 	int s_token = 0, s_options = 0, s_payload = 0;
 	if(msg.token_len)
 	{
-		printf("|");
+		std::printf("|");
 		s_token = print_array(msg.token, msg.token_len, 2);
 	}
 	if(msg.options_len)
 	{
-		printf("|");
+		std::printf("|");
 		s_options = print_array(msg.option_init, msg.options_len, 2);
 	}
 	if(msg.payload_len)
 	{
-		printf("|");
+		std::printf("|FF|");
 		s_payload = print_array(msg.payload, msg.payload_len, 2);
 	}
-	printf("\n");
+	std::printf("\n");
 
 	//Making header
-	printf("He|Co|MeID");
+	std::printf("He|Co|MeID");
 	char temp[15];
 	if(msg.token_len)
 	{
@@ -187,10 +187,11 @@ bool print_byte_message(std::uint8_t const* arr, std::size_t size) noexcept
 	}
 	if(msg.payload_len)
 	{
+		printf("|MP");
 		std::snprintf(temp, 15, "Payload[%zu]", msg.payload_len);
 		print_make_space(temp, s_payload);
 	}
-	printf("\n");
+	std::printf("\n");
 
 	return true;
 }
@@ -296,13 +297,13 @@ bool print_byte_reliable_message(std::uint8_t const* arr, std::size_t size) noex
 	}
 	if(msg.payload_len)
 	{
-		printf("|");
+		std::printf("|FF|");
 		s_payload = print_array(msg.payload, msg.payload_len, 2);
 	}
-	printf("\n");
+	std::printf("\n");
 
 	//Making header
-	printf("He");
+	std::printf("He");
 	char temp[15];
 	if(index)
 	{
@@ -310,7 +311,7 @@ bool print_byte_reliable_message(std::uint8_t const* arr, std::size_t size) noex
 		print_make_space(temp, 2 * index);
 	}
 	//Code
-	printf("|Co");
+	std::printf("|Co");
 
 	if(msg.token_len)
 	{
@@ -324,10 +325,11 @@ bool print_byte_reliable_message(std::uint8_t const* arr, std::size_t size) noex
 	}
 	if(msg.payload_len)
 	{
+		std::printf("|MP");
 		std::snprintf(temp, 15, "Payload[%zu]", msg.payload_len);
 		print_make_space(temp, s_payload);
 	}
-	printf("\n");
+	std::printf("\n");
 
 	return true;
 }

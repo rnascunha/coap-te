@@ -196,7 +196,7 @@ unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 	std::uint16_t length_ext = 0;
 	if(option.length > 12)
 	{
-		if(option.length <= 255)
+		if(option.length < 269)
 		{
 			length_opt = static_cast<unsigned>(Option::length_special::one_byte_extend);
 			length_ext = static_cast<uint16_t>(option.length - 13);
@@ -224,11 +224,12 @@ unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 	switch(delta_opt)
 	{
 		case 13:
-			byte[1] = static_cast<std::uint8_t>(delta_ext);
+			byte[next_byte] = static_cast<std::uint8_t>(delta_ext);
 			next_byte = 2;
 			break;
 		case 14:
-			CoAP::Helper::interger_to_big_endian_array(&byte[2], delta_ext);
+			CoAP::Helper::interger_to_big_endian_array(&byte[next_byte], delta_ext);
+//			CoAP::Helper::interger_to_big_endian_array(&byte[2], delta_ext);
 			next_byte = 3;
 			break;
 		default:

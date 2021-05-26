@@ -21,7 +21,8 @@ static void print_payload(CoAP::Message::Option::option_template<OptionCode> con
 {
 	if constexpr(std::is_same<OptionCode, CoAP::Message::Option::code>::value)
 	{
-		if(op.ocode == CoAP::Message::Option::code::content_format)
+		if(op.ocode == CoAP::Message::Option::code::content_format
+			|| op.ocode == CoAP::Message::Option::code::accept)
 		{
 			if(op.length == 0)
 			{
