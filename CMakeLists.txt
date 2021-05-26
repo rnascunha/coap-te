@@ -17,10 +17,6 @@ if(DEFINED ERROR_MESSAGE)
 set(USE_ERROR_MESSAGE ${ERROR_MESSAGE})
 endif()
 
-add_definitions(-DCOAP_TE_LOG_COLOR=${USE_LOG_COLOR}
-				-DCOAP_TE_LOG_LEVEL=${USE_LOG_LEVEL}
-				-DCOAP_TE_USE_ERROR_MESSAGES=${USE_ERROR_MESSAGE})
-
 #################################################
 # Checking if is ESP IDF build					#
 #################################################
@@ -89,8 +85,14 @@ message(STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " " ${CMAKE_CXX_COMPILER_VE
 
 include (files.cmake)
 
+#Required definitions
 add_definitions(-DCOAP_TE_PORT_C_STANDARD=1
 				-DCOAP_TE_PORT_POSIX=1)
+
+#Command line definitions
+add_definitions(-DCOAP_TE_LOG_COLOR=${USE_LOG_COLOR}
+				-DCOAP_TE_LOG_LEVEL=${USE_LOG_LEVEL}
+				-DCOAP_TE_USE_ERROR_MESSAGES=${USE_ERROR_MESSAGE})
 
 list(APPEND MAIN_SRC ${SRC_DIR_PORT}/c_standard_port.cpp)
 
