@@ -76,7 +76,7 @@ static constexpr module example_mod = {
  *
  * Uncomment the following line to use IPv4 configuration
  */
-#define USE_ENDPOINT_IPV4
+//#define USE_ENDPOINT_IPV4
 
 #ifdef USE_ENDPOINT_IPV4
 /**

@@ -10,17 +10,18 @@
 #endif
 
 #ifdef COAP_TE_PORT_C_STANDARD
-#include <ctime>
+//#include <ctime>
 #endif /* COAP_TE_PORT_C_STANDART */
 
 namespace CoAP{
 
 #ifdef COAP_TE_PORT_C_STANDARD
-using time_t = std::time_t;
+//using time_t = std::time_t;
+using time_t = unsigned long;
 #endif /* COAP_TE_PORT_C_STANDART */
 
 /**
- * \brief Return time in epoch format (seconds)
+ * \brief Return time in epoch format (milliseconds)
  */
 time_t time() noexcept;
 

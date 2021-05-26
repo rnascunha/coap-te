@@ -45,8 +45,7 @@ check() noexcept
 	if(status_ != status_t::sending)
 		return false;
 
-	double ftime = static_cast<double>(CoAP::time());
-	if(ftime > expiration_time_)
+	if(CoAP::time() > expiration_time_)
 	{
 		CoAP::Log::debug(transaction_mod, "Transaciton expired");
 		status_ = status_t::timeout;
@@ -163,7 +162,8 @@ init_impl(handler socket,
 
 	status_ = status_t::sending;
 
-	expiration_time_ = time;
+	if(time != no_expiration)
+		expiration_time_ = CoAP::time() + time;
 
 	socket_ = socket;
 	cb_ = func;

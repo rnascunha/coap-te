@@ -2,6 +2,7 @@
 #define COAP_TE_TRANSMISSION_RELIABLE_TYPES_HPP__
 
 #include <cstdlib>
+#include "port/port.hpp"
 #include "message/reliable/types.hpp"
 #include "response.hpp"
 #include <limits>
@@ -10,11 +11,11 @@ namespace CoAP{
 namespace Transmission{
 namespace Reliable{
 
-using expiration_time_type = unsigned;
+using expiration_time_type = CoAP::time_t;
 
-static constexpr const unsigned no_transaction = 0;
-static constexpr const unsigned no_expiration = (std::numeric_limits<unsigned>::max)();	//parentesis needed because of windows macro
-static constexpr const unsigned default_expiration = no_expiration;
+static constexpr const expiration_time_type no_transaction = 0;
+static constexpr const expiration_time_type no_expiration = (std::numeric_limits<CoAP::time_t>::max)();	//parentesis needed because of windows macro
+static constexpr const expiration_time_type default_expiration = no_expiration;
 
 static constexpr unsigned default_max_message_size = 1152;
 

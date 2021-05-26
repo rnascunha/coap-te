@@ -1,5 +1,6 @@
 #include "port.hpp"
-#include <ctime>
+//#include <ctime>
+#include <chrono>
 #include <cstdlib>
 #if COAP_TE_ESP_IDF_PLATAFORM == 1
 #include <esp_system.h>
@@ -9,7 +10,9 @@ namespace CoAP{
 
 time_t time() noexcept
 {
-	return std::time(NULL);
+//	return std::time(NULL);
+	return std::chrono::duration_cast<std::chrono::milliseconds>
+    		(std::chrono::system_clock::now().time_since_epoch()).count();
 }
 
 unsigned random_generator() noexcept

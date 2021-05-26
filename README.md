@@ -200,7 +200,7 @@ If you build **CoAP-te** with the `-DWITH_EXAMPLES=1` flag, all example executab
 
 All the examples shown for Linux/Windows system can also be used to understand how to use **CoAP-te** at ESP32. You just need to deal with the specificities of the microcontroller envirioment.
 
-The ESP32 examples can be found at the `examples/esp32` directory. To use then, copy the directory and initialize the ESP-IDF envirioment as exaplained [here](#esp32-idf). After that, configure the examples, compile and flash it:
+The ESP32 examples can be found at the `examples/esp32` directory. To use then, copy the directory and initialize the ESP-IDF envirioment as explained [here](#esp32-idf). After that, configure the examples, compile and flash it:
 
 ```
 #Configure
@@ -229,10 +229,10 @@ To port **CoAP-te** to your system, you must define:
 
 ```c++
 namespace CoAP{
-using time_t = <some_interger_type> 
+using time_t = <some_interger_type>;
 
 /**
- * \brief Return time in epoch format (seconds)
+ * \brief Return time in epoch format (milliseconds)
  */
 time_t time() noexcept;
 
@@ -243,7 +243,6 @@ unsigned random_generator() noexcept;
 
 }//CoAP
 ```
-> The default implementation uses `std::time` and `std::rand` as the functions above, respectivily, and uses `time_t` as `std::time_t`. If your system support this functions, just use then.   
 
 * *Endpoint*: endpoints must be *default constructable*, *copiable* and *comparable*;
 * *Connection*: connection can be of type unreliable (*UDP*) or reliable (*TCP*/*Websocket*). A connection must define a *endpoint* (as shown above), and MUST not block. Each type of connection is discussed. 

@@ -68,6 +68,7 @@ class transaction
 		/**
 		 *
 		 */
+		template<unsigned BackoffTimeFactor = 2>
 		void retransmit() noexcept;
 
 		status_t status() const noexcept;

@@ -162,7 +162,7 @@ class Sensor_Observe{
 		{
 			obs_.set(ep, msg);
 			freq_ = freq;
-			init_time_ = CoAP::time();
+			init_time_ = CoAP::time() / 1000;
 		}
 
 		/**
@@ -231,7 +231,7 @@ static void thread_time(engine& engine)
 {
 	while(true)
 	{
-		CoAP::time_t t = CoAP::time();
+		CoAP::time_t t = CoAP::time() / 1000;
 		if((t % 30) == 0)
 		{
 			/**
@@ -350,7 +350,8 @@ static void thread_type(engine& engine)
 			}
 		}
 		std::this_thread::sleep_for(std::chrono::seconds(1));
-		fseek(stdin,0,SEEK_END);
+		int c;
+		while((c = getchar()) != '\n' && c != EOF){}
 	}
 }
 

@@ -79,6 +79,7 @@ check() noexcept
 template<unsigned MaxPacketSize,
 		typename Callback_Functor,
 		typename Endpoint>
+template<unsigned BackoffTimeFactor /* = 2 */>
 void
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
 retransmit() noexcept
@@ -86,8 +87,8 @@ retransmit() noexcept
 	retransmission_remaining_--;
 	CoAP::Log::status(transaction_mod, "[%04X] Retransmit remaining = %u",
 						request_.mid, retransmission_remaining_);
-	expiration_time_factor_ *= 2;
-	next_expiration_time_ = static_cast<double>(CoAP::time()) + expiration_time_factor_;
+	expiration_time_factor_ *= BackoffTimeFactor;
+	next_expiration_time_ = static_cast<double>(CoAP::time()) + expiration_time_factor_ * 1000;
 	CoAP::Log::debug(transaction_mod, "[%04X] New expiration time = %.2f (diff=%.2f)",
 											request_.mid,
 											next_expiration_time_,
@@ -223,10 +224,10 @@ init_impl(configure const& tconfig,
 		return true;
 	}
 
-	max_span_timeout_ = static_cast<double>(CoAP::time()) + max_transmit_span(tconfig);
+	max_span_timeout_ = static_cast<double>(CoAP::time()) + (max_transmit_span(tconfig) * 1000);
 	retransmission_remaining_ = tconfig.max_restransmission;
 	expiration_time_factor_ = expiration_timeout(tconfig);
-	next_expiration_time_ = static_cast<double>(CoAP::time()) + expiration_time_factor_;
+	next_expiration_time_ = static_cast<double>(CoAP::time()) + expiration_time_factor_ * 1000;
 	CoAP::Log::debug(transaction_mod, "[%04X] Expiration time = %.2f (diff=%.2f/factor=%.2f)",
 								request_.mid,
 								next_expiration_time_,
