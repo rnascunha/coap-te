@@ -1,0 +1,45 @@
+menu "CoAP-te Configuration"
+	config COAP_TE_MESSAGE_ERROR
+		bool "Enable error messages"
+		default y
+		help
+			CoAP::Error type will hold string error. Set no to save some bytes.
+			
+	config COAP_TE_USE_COLOR
+		bool "Colored log"
+		default y
+		help
+			This option will enable colored output to terminal that support ANSI Escape sequence.
+			
+	choice COAP_TE_LOG_LEVEL_CHOICE
+        bool "Output log level"
+        default COAP_TE_LOG_DEBUG
+        help
+            Defines CoAP-te log level. All level above that will be showed. Select
+            'none' to disable log.
+            
+        config COAP_TE_LOG_NONE
+            bool "None"
+		config COAP_TE_LOG_ERROR
+            bool "Error"
+		config COAP_TE_LOG_WARNING
+            bool "Warning"
+		config COAP_TE_LOG_DEPRECATED
+            bool "Deprecated"
+        config COAP_TE_LOG_STATUS
+            bool "Status"
+        config COAP_TE_LOG_DEBUG
+            bool "Debug"
+            
+	endchoice #	COAP_TE_LOG_LEVEL_CHOICE
+	
+	config COAP_TE_LOG_LEVEL
+        int
+        default 0 if COAP_TE_LOG_NONE
+        default 1 if COAP_TE_LOG_ERROR
+        default 2 if COAP_TE_LOG_WARNING
+        default 3 if COAP_TE_LOG_DEPRECATED
+        default 4 if COAP_TE_LOG_STATUS
+        default 5 if COAP_TE_LOG_DEBUG
+	
+endmenu # "CoAP-te Configuration"

@@ -5,7 +5,6 @@
 #include "../functions.hpp"
 
 #include "log.hpp"
-//#include "debug/print_message.hpp"
 
 namespace CoAP{
 namespace Transmission{
@@ -172,12 +171,13 @@ process_request(endpoint& ep,
 	resource const* res = resource_root_.search(request);
 	if(!res)
 	{
+		status(engine_mod, "Not resource");
 		std::size_t bu = make_response_code_error(request, buffer_, packet_size, CoAP::Message::code::not_found);
 		conn_.send(buffer_, bu, ep, ec);
 	}
 	else
 	{
-		debug(engine_mod, "Found resource %s", res->path());
+		debug(engine_mod, "Found resource %s", res->path() ? res->path() : "/");
 		response response(ep,
 				request.mtype,
 				request.mtype == CoAP::Message::type::confirmable ?

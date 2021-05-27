@@ -113,7 +113,7 @@ Now we are going download **CoAP-te**:
 ```
 $ git clone --recursive https://github.com/rnascunha/coap-te
 ```
-If everything was done right, the ESP-IDF will see **CoAP-te** as a component. But as **CoAP-te** is a highly templated library, most of the build will be done when you compile the main project (the one at the `main` directory). So you must set some compile flags. At the *CMakeList.txt* at the `main` directory, after you register your project, you must write:
+If everything was done right, the ESP-IDF will see **CoAP-te** as a component. Now, at the main project, you must enable C++17 to compile your code. After register your project, set the `std=gnu++17` flag as shown below:
 
 ```
 # Registering project
@@ -123,11 +123,7 @@ idf_component_register(SRCS /* project source files */
 
 # Compile flags need by CoAP-te
 target_compile_options(${COMPONENT_LIB} 
-						PRIVATE -std=gnu++17 
-						-DCOAP_TE_ESP_IDF_PLATAFORM=1 
-						-DCOAP_TE_PORT_C_STANDARD=1
-						-DCOAP_TE_PORT_POSIX=1
-						-DCOAP_TE_USE_SELECT=1)
+						PRIVATE -std=gnu++17)
 ```
 Check the [ESP32 examples](#esp32). 
 
@@ -149,6 +145,8 @@ $ cmake <options> ..
 * `-DWASM_OUTPUT_HTML=<0|1>`: defines WebAssembly examples output. `1`: HTML (*.html*, default), `0`: JavaScript (*.js*). All examples create also the compiled *.wasm* output.
 * `-DWASM_EMRUN_ENABLE=<0|1>`: defines `--emrun` link flag to examples. `1`: enable flag (default), `0`: disable flag. More about [here](https://emscripten.org/docs/compiling/Running-html-files-with-emrun.html).
 -->
+
+> At **ESP32 plataform**, you can configure this parameters by at `menuconfig`, going to: `$ idf.py menuconfig` > `Component config` > `CoAP-te Configuration`. 
 
 ## Using
 
