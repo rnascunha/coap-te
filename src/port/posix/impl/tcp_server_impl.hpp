@@ -30,7 +30,7 @@ void
 tcp_server<Endpoint, Flags>::
 open(endpoint& ep, CoAP::Error& ec) noexcept
 {
-	if((socket_ = ::socket(endpoint::family, SOCK_STREAM, IPPROTO_TCP)) == -1)
+	if((socket_ = ::socket(ep.family(), SOCK_STREAM, IPPROTO_TCP)) == -1)
 	{
 		ec = CoAP::errc::socket_error;
 		return;

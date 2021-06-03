@@ -2,6 +2,7 @@
 #define COAP_TE_URI_DECOMPOSE_IMPL_HPP__
 
 #include <cstdlib>
+
 #include "defines/defaults.hpp"
 #include "../types.hpp"
 #include "../decompose.hpp"

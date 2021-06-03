@@ -4,17 +4,17 @@
 
 set(USE_LOG_COLOR 	1)
 if(DEFINED LOG_COLOR)
-set(USE_LOG_COLOR	${LOG_COLOR})
+	set(USE_LOG_COLOR	${LOG_COLOR})
 endif()
 
 set(USE_LOG_LEVEL	5)
 if(DEFINED LOG_LEVEL)
-set(USE_LOG_LEVEL	${LOG_LEVEL})
+	set(USE_LOG_LEVEL	${LOG_LEVEL})
 endif()
 
 set(USE_ERROR_MESSAGE	1)
 if(DEFINED ERROR_MESSAGE)
-set(USE_ERROR_MESSAGE ${ERROR_MESSAGE})
+	set(USE_ERROR_MESSAGE ${ERROR_MESSAGE})
 endif()
 
 #################################################

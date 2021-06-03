@@ -259,6 +259,32 @@ template<typename Connection,
 	typename TransactionList,
 	typename Callback_Default_Functor,
 	typename Resource>
+template<int BlockTimeMs>
+bool
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
+run(CoAP::Error& ec)
+{
+	endpoint ep;
+	std::size_t size = conn_.template receive<BlockTimeMs>(buffer_, packet_size, ep, ec);
+	if(ec) return false;
+	if(size)
+	{
+		char buf_print[20];
+		debug(engine_mod, "From: %s:%u", ep.address(buf_print), ep.port());
+		CoAP::Log::debug(engine_mod, "Received %d bytes", size);
+		process(ep, buffer_, size, ec);
+	}
+
+	check_transactions();
+
+	return true;
+}
+
+template<typename Connection,
+	typename MessageID,
+	typename TransactionList,
+	typename Callback_Default_Functor,
+	typename Resource>
 bool
 engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
 operator()(CoAP::Error& ec) noexcept

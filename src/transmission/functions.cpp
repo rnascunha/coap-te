@@ -25,7 +25,7 @@ double expiration_timeout(configure const& config) noexcept
 {
 	return config.ack_timeout_seconds +
 			(static_cast<double>(CoAP::random_generator()) /
-					(RAND_MAX/(config.ack_timeout_seconds * config.ack_ramdom_factor)));
+					(RAND_MAX/(config.ack_timeout_seconds * config.ack_random_factor)));
 }
 
 double expiration_timeout_retransmit(
@@ -40,7 +40,7 @@ max_transmit_span(configure const& config) noexcept
 {
 	return config.ack_timeout_seconds *
 			static_cast<double>(CoAP::Helper::pow(2, config.max_restransmission)) *
-			config.ack_ramdom_factor;
+			config.ack_random_factor;
 }
 
 double
@@ -48,7 +48,7 @@ max_transmist_wait(configure const& config) noexcept
 {
 	return config.ack_timeout_seconds *
 				(static_cast<double>(CoAP::Helper::pow(2, config.max_restransmission + 1)) - 1) *
-				config.ack_ramdom_factor;
+				config.ack_random_factor;
 }
 
 unsigned int

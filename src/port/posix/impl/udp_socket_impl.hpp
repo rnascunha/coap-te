@@ -21,13 +21,46 @@ void
 udp<Endpoint, Flags>::
 open(CoAP::Error& ec) noexcept
 {
-	if((socket_ = ::socket(endpoint::family, SOCK_DGRAM, IPPROTO_UDP)) == -1)
+	if((socket_ = ::socket(endpoint::ep_family, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 	{
 		ec = CoAP::errc::socket_error;
 		return;
 	}
 	if constexpr((Flags & MSG_DONTWAIT) != 0)
 		nonblock_socket(socket_);
+}
+
+template<class Endpoint,
+		int Flags>
+void
+udp<Endpoint, Flags>::
+open(sa_family_t family, CoAP::Error& ec) noexcept
+{
+	if((socket_ = ::socket(family, SOCK_DGRAM, IPPROTO_UDP)) == -1)
+	{
+		ec = CoAP::errc::socket_error;
+		return;
+	}
+	if constexpr((Flags & MSG_DONTWAIT) != 0)
+		nonblock_socket(socket_);
+
+}
+
+template<class Endpoint,
+		int Flags>
+void
+udp<Endpoint, Flags>::
+open(endpoint& ep, CoAP::Error& ec) noexcept
+{
+	if((socket_ = ::socket(ep.family(), SOCK_DGRAM, IPPROTO_UDP)) == -1)
+	{
+		ec = CoAP::errc::socket_error;
+		return;
+	}
+	if constexpr((Flags & MSG_DONTWAIT) != 0)
+		nonblock_socket(socket_);
+
+	bind(ep, ec);
 }
 
 template<class Endpoint,
@@ -42,6 +75,21 @@ bind(endpoint& ep, CoAP::Error& ec) noexcept
 	{
 		ec = CoAP::errc::socket_error;
 	}
+}
+
+template<class Endpoint,
+		int Flags>
+void
+udp<Endpoint, Flags>::
+close() noexcept
+{
+	::shutdown(socket_, SHUT_RDWR);
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	::closesocket(socket_);
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+	::close(socket_);
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+	socket_ = 0;
 }
 
 template<class Endpoint,
@@ -108,6 +156,43 @@ receive(void* buffer, std::size_t buffer_len, endpoint& ep, CoAP::Error& ec) noe
 	}
 
 	return recv;
+}
+
+template<class Endpoint,
+		int Flags>
+template<int BlockTimeMs>
+std::size_t
+udp<Endpoint, Flags>::
+receive(void* buffer, std::size_t buffer_len, endpoint& ep, CoAP::Error& ec) noexcept
+{
+	struct timeval tv = {
+		/*.tv_sec = */BlockTimeMs / 1000,
+		/*.tv_usec = */(BlockTimeMs % 1000) * 1000
+	};
+
+	fd_set rfds;
+	FD_ZERO(&rfds);
+	FD_SET(socket_, &rfds);
+
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+	//Using socket_ + 1, gives warning... (but why)... this value is not used at Windows
+	int s = select(0, &rfds, NULL, NULL, BlockTimeMs  < 0 ? NULL : &tv);
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+	int s = select(socket_ + 1, &rfds, NULL, NULL, BlockTimeMs  < 0 ? NULL : &tv);
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+	if(s < 0)
+	{
+		ec = CoAP::errc::socket_error;
+		return 0;
+	}
+	if(FD_ISSET(socket_, &rfds))
+	{
+		unsigned addr_len = sizeof(struct sockaddr_storage);
+		return ::recvfrom(socket_,
+				static_cast<char*>(buffer), static_cast<int>(buffer_len), 0,
+				reinterpret_cast<struct sockaddr*>(ep.native()), &addr_len);
+	}
+	return 0;
 }
 
 }//POSIX

@@ -32,20 +32,20 @@
  */
 #define USE_DECOMPOSE_TO_LIST
 
-int main(int argv, char** argc)
+int main(int argc, char** argv)
 {
-	if(argv != 2)
+	if(argc != 2)
 	{
 		std::printf("ERROR! Must provide a URL.\n");
-		std::printf("How to use:\n\t%s '<coap|coaps>://<host>:<port>/<path>?query'\n", argc[0]);
+		std::printf("How to use:\n\t%s '<coap|coaps>://<host>:<port>/<path>?query'\n", argv[0]);
 		std::printf("Examples:\n");
-		std::printf("\t%s coap://[::1]:5683/path/to/resource?query=key\n", argc[0]);
-		std::printf("\t%s 'coaps://127.0.0.1:5683?value1=key&value2'\n", argc[0]);
+		std::printf("\t%s coap://[::1]:5683/path/to/resource?query=key\n", argv[0]);
+		std::printf("\t%s 'coaps://127.0.0.1:5683?value1=key&value2'\n", argv[0]);
 #if COAP_TE_RELIABLE_CONNECTION == 1
-		std::printf("\t%s 'coap+tcp://127.0.0.1:5683?value1=key&value2'\n", argc[0]);
-		std::printf("\t%s 'coaps+tcp://127.0.0.1:5683?value1=key&value2'\n", argc[0]);
-		std::printf("\t%s 'coap+ws://127.0.0.1:5683?value1=key&value2'\n", argc[0]);
-		std::printf("\t%s 'coaps+ws://127.0.0.1:5683?value1=key&value2'\n", argc[0]);
+		std::printf("\t%s 'coap+tcp://127.0.0.1:5683?value1=key&value2'\n", argv[0]);
+		std::printf("\t%s 'coaps+tcp://127.0.0.1:5683?value1=key&value2'\n", argv[0]);
+		std::printf("\t%s 'coap+ws://127.0.0.1:5683?value1=key&value2'\n", argv[0]);
+		std::printf("\t%s 'coaps+ws://127.0.0.1:5683?value1=key&value2'\n", argv[0]);
 #endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
 		return EXIT_FAILURE;
 	}
@@ -64,7 +64,7 @@ int main(int argv, char** argc)
 	 * also be == 1, the default)
 	 */
 	CoAP::URI::uri<CoAP::URI::ip_type> uri;
-	if(!CoAP::URI::decompose<true>(uri, argc[1]))
+	if(!CoAP::URI::decompose<true>(uri, argv[1]))
 	{
 		printf("Error decomposing...\n");
 		return EXIT_FAILURE;

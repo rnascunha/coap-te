@@ -41,8 +41,8 @@ class tcp_server{
 		bool run(CoAP::Error&,
 				ReadCb, OpenCb = nullptr, CloseCb = nullptr) noexcept;
 
-		std::size_t receive(handler socket, void* buffer, std::size_t, CoAP::Error&) noexcept;
 		std::size_t send(handler to_socket, const void*, std::size_t, CoAP::Error&)  noexcept;
+		std::size_t receive(handler socket, void* buffer, std::size_t, CoAP::Error&) noexcept;
 
 		void close() noexcept;
 		void close_client(handler) noexcept;

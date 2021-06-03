@@ -12,7 +12,7 @@ namespace Transmission{
 //https://tools.ietf.org/html/rfc7252#section-4.8
 struct configure{
 	double			ack_timeout_seconds 			= 2.0;	//ACK_TIMEOUT
-	double			ack_ramdom_factor 				= 1.5;	//ACK_RANDOM_FACTOR
+	double			ack_random_factor 				= 1.5;	//ACK_RANDOM_FACTOR
 	unsigned int	max_restransmission 			= 4;	//MAX_RETRANSMIT
 //	unsigned int	max_interaction 				= 1;	//NSTART
 //	unsigned int	default_leisure_seconds 		= 5;	//DEFAULT_LEISURE
