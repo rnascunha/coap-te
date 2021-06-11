@@ -1,6 +1,7 @@
 #include <cstdio>
 #include <cstdlib>	//std::strtod
 #include <cstring>	//std::strcmp
+#include <csignal>
 #include <type_traits>
 
 #include "arguments.hpp"
@@ -26,20 +27,13 @@ void exit_error(const char* message)
 	exit(EXIT_FAILURE);
 }
 
-enum class args{
-	nonconfirmable,
-	token,
-	method,
-	ack_timeout,
-	retransmit_count,
-	ack_factor,
-	payload
-};
-
 void print_usage(const char* name)
 {
 	std::printf(R"(How to use:
-	%s [-N] [-T=<token>] [-c=<get|post|put|delete|fetch|patch|ipatch>] [-a=<ack_timeout>] [-R=<retransmist_count>] [-r=<ack_random_factor>] [-f=<payload>] '<coap|coaps|coap+tcp|coaps+tcp>://<host>:<port>/<path>?query'
+	%s [-N] [-T=<token>] [-c=<get|post|put|delete|fetch|patch|ipatch>] 
+		[-a=<ack_timeout>] [-R=<retransmist_count>] [-r=<ack_random_factor>] 
+		[-f=<payload>] 
+		'<coap|coap+tcp>://<host>:<port>/<path>?<query>'
 	-N send non-confirmable message
 	-T=<token> set token
 	-c=<method> request method. Can be: get|post|put|delete|fetch|patch|ipatch
@@ -96,13 +90,55 @@ using engine_tcp = CoAP::Transmission::Reliable::engine_client<
 		CoAP::disable						///< (5) Resource definition (disabled)
 	>;
 
-static bool response_flag = false;
+static volatile bool response_flag = false;
+
+/**
+ * Signal handling
+ */
+void signal_handler(int signum)
+{
+	error_message("Aborted");
+	response_flag = true;
+}
+
+/**
+ * This default callback response to non-confirmable messages,
+ * async responses or timed
+ */
+void default_callback(engine_udp::endpoint const& ep,
+		CoAP::Message::message const* response,
+		void* engine_ptr) noexcept
+{
+	debug("default cb called");
+	CoAP::Debug::print_message_string(*response);
+
+	/**
+	 * If we are receiving a response in a confirmable message (probably from a
+	 * separate response), we MUST sent a empty ack response.
+	 *
+	 * This function will make all necessary checks and sent the appropriate response.
+	 * It returns 'true' if it was a confirmable response, and false otherwise. The
+	 * last parameter you can check if the sent call was successful.
+	 *
+	 * Highly recommended to always call this function if you expect a separated response
+	 */
+	CoAP::Error ec;
+	if(CoAP::Transmission::send_async_ack(*static_cast<engine_udp*>(engine_ptr), ep, *response, ec))
+	{
+		debug("Confirmable response received");
+		if(ec) exit_error("send async");
+	}
+
+	/**
+	 * Setting flag that response was received
+	 */
+	response_flag = true;
+}
 
 /**
  * Request callback (signature defined at transaction)
  */
-template<typename Message>
-void request_cb(void const* trans, Message const* response, void*) noexcept
+void request_udp_cb(void const* trans, CoAP::Message::message const* response, void*) noexcept
 {
 	debug("Request callback called...");
 
@@ -118,8 +154,45 @@ void request_cb(void const* trans, Message const* response, void*) noexcept
 		 * are going to receive our response in a separated message, so we can
 		 * not go out of the check loop at main.
 		 */
-//		if(response->mtype == CoAP::Message::type::acknowledgment &&
-//			response->mcode == CoAP::Message::code::empty)
+		if(response->mtype == CoAP::Message::type::acknowledgment &&
+			response->mcode == CoAP::Message::code::empty)
+		{
+			return;
+		}
+	}
+	else
+	{
+		/**
+		 * Function timeout or transaction was cancelled
+		 */
+		status("Response NOT received");
+	}
+	/**
+	 * Setting flag that response was received
+	 */
+	response_flag = true;
+}
+
+/**
+ * Request callback (signature defined at transaction)
+ */
+void request_tcp_cb(void const* trans, CoAP::Message::Reliable::message const* response, void*) noexcept
+{
+	debug("Request callback called...");
+
+	auto const* t = static_cast<engine_tcp::transaction_t const*>(trans);
+	status("Status: %s", CoAP::Debug::transaction_status_string(t->status()));
+	if(response)
+	{
+		status("Response received!");
+		CoAP::Debug::print_message_string(*response);
+
+		/**
+		 * Checking if we received a empty acknowledgment. This means that we
+		 * are going to receive our response in a separated message, so we can
+		 * not go out of the check loop at main.
+		 */
+//		if(response->mcode == CoAP::Message::code::empty)
 //		{
 //			return;
 //		}
@@ -157,17 +230,19 @@ void run_udp(endpoint const& ep, CoAP::Transmission::configure tconfig,
 
 	engine_udp eng(std::move(conn), CoAP::Message::message_id{});
 
+	eng.default_cb(default_callback);
+
 	engine_udp::request req(ep);
 	req.header(mtype, mcode, token, token_len)
 			.add_option(*list_op.head())
 			.payload(payload, payload_len)
-			.callback(request_cb<CoAP::Message::message>);
+			.callback(request_udp_cb);
 
 	auto size = eng.send(req, tconfig, ec);
 	if(ec)
 	{
-		error(ec, "serialize");
-		exit_error("serialize");
+		error(ec, "send");
+		exit_error("send");
 	}
 
 	std::printf("Sended %zu\n", size);
@@ -207,7 +282,7 @@ void run_tcp(endpoint& ep,
 		.token(token, token_len)
 		.add_option(*list_op.head())
 		.payload(payload, payload_len)
-		.callback(request_cb<CoAP::Message::Reliable::message>);
+		.callback(request_tcp_cb);
 
 	auto size = eng.send(req, ec);
 	if(ec)
@@ -237,6 +312,8 @@ int main(int argc, char** argv)
 		print_usage(argv[0]);
 		return EXIT_FAILURE;
 	}
+
+	std::signal(SIGINT, signal_handler);
 
 	char* uri_str = nullptr,
 		*token = nullptr,

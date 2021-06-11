@@ -14,8 +14,8 @@ time_t time() noexcept
 #if COAP_TE_ESP_IDF_PLATAFORM == 1
 	return esp_timer_get_time() / 1000;	//esp_timer_get_time returns us.
 #else /* COAP_TE_ESP_IDF_PLATAFORM == 1 */
-	return std::chrono::duration_cast<std::chrono::milliseconds>
-    		(std::chrono::system_clock::now().time_since_epoch()).count();
+	return static_cast<time_t>(std::chrono::duration_cast<std::chrono::milliseconds>
+    		(std::chrono::system_clock::now().time_since_epoch()).count());
 #endif /* COAP_TE_ESP_IDF_PLATAFORM == 1 */
 }
 

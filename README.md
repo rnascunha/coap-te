@@ -78,7 +78,7 @@ $ cd build
 
 # build
 $ cmake ..
-$ cmake -build .
+$ cmake --build .
 ```
 This will generate a library file (`libcoap-te.a` at Linux, `coap-te.lib` at Windows). Link this file to your project, and include `./src/` directory. There are two convenient headers:
 * `coap-te.hpp`: this has all necessary headers to use **CoAP-te**;
@@ -88,7 +88,7 @@ If you also want to compile the examples (at `examples` directory), run at the b
 
 ```
 $ cmake -DWITH_EXAMPLES=1 ..
-$ cmake -build .
+$ cmake --build .
 ```
 
 This will generate one excutable to each example.
