@@ -187,7 +187,11 @@ receive(void* buffer, std::size_t buffer_len, endpoint& ep, CoAP::Error& ec) noe
 	}
 	if(FD_ISSET(socket_, &rfds))
 	{
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+		int addr_len = sizeof(struct sockaddr_storage);
+#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 		unsigned addr_len = sizeof(struct sockaddr_storage);
+#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 		return ::recvfrom(socket_,
 				static_cast<char*>(buffer), static_cast<int>(buffer_len), 0,
 				reinterpret_cast<struct sockaddr*>(ep.native()), &addr_len);

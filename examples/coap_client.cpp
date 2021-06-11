@@ -95,7 +95,7 @@ static volatile bool response_flag = false;
 /**
  * Signal handling
  */
-void signal_handler(int signum)
+void signal_handler(int)
 {
 	error_message("Aborted");
 	response_flag = true;
@@ -322,6 +322,7 @@ int main(int argc, char** argv)
 		*ack_timeout_str = nullptr,
 		*retransmit_str = nullptr,
 		*ack_factor_str = nullptr;
+	std::size_t token_len = 0;
 	CoAP::Message::type mtype = CoAP::Message::type::confirmable;
 	CoAP::Message::code mcode = CoAP::Message::code::get;
 	CoAP::Transmission::configure tconfig = {
@@ -344,6 +345,7 @@ int main(int argc, char** argv)
 
 	//Set token
 	cmd("T", token);
+	if(token) token_len = std::strlen(token);
 
 	if(cmd("c", method_str))
 	{
@@ -493,10 +495,10 @@ int main(int argc, char** argv)
 	{
 		using namespace CoAP::URI;
 		case scheme::coap:
-			run_udp(ep, tconfig, mtype, mcode, token, std::strlen(token), list, payload_str, 0);
+			run_udp(ep, tconfig, mtype, mcode, token, token_len, list, payload_str, 0);
 			break;
 		case scheme::coap_tcp:
-			run_tcp(ep, mcode, token, std::strlen(token), list, payload_str, 0);
+			run_tcp(ep, mcode, token, token_len, list, payload_str, 0);
 			break;
 		case scheme::coaps:
 		case scheme::coaps_tcp:
