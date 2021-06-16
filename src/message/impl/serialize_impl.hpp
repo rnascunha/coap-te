@@ -256,13 +256,6 @@ unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 }
 
 template<bool CheckRepeat /* = true */>
-bool Serialize::add_option(Option::option&& op) noexcept
-{
-	CoAP::Error ec;
-	return add_option<CheckRepeat>(op, ec);
-}
-
-template<bool CheckRepeat /* = true */>
 bool Serialize::add_option(Option::option&& op, CoAP::Error& ec) noexcept
 {
 	if constexpr(CheckRepeat)
@@ -353,6 +346,13 @@ bool Serialize::add_option(Option::option&& op, CoAP::Error& ec) noexcept
 	}
 
 	return true;
+}
+
+template<bool CheckRepeat /* = true */>
+bool Serialize::add_option(Option::option&& op) noexcept
+{
+	CoAP::Error ec;
+	return add_option<CheckRepeat>(std::forward<Option::option>(op), ec);
 }
 
 }//Message

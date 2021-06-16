@@ -35,7 +35,7 @@ class Response{
 
 		Response& code(CoAP::Message::code rcode) noexcept
 		{
-			fac_.header(CoAP::Message::type::acknowledgment,
+			fac_.header(fac_.type(),
 					rcode,
 					token_,
 					token_len_);
