@@ -33,6 +33,8 @@ class tcp_client{
 		template<int BlockTimeMs = -1>
 		bool wait_connect(CoAP::Error&) const noexcept;
 
+		void bind(endpoint&, CoAP::Error&) noexcept;
+
 		bool is_connected() const noexcept;
 		bool is_open() const noexcept;
 		void close() noexcept;

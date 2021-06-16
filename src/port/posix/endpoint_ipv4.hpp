@@ -14,11 +14,21 @@ namespace POSIX{
 class endpoint_ipv4{
 	public:
 		using native_type = sockaddr_in;
-		static constexpr const sa_family_t family = AF_INET;
+		static constexpr const sa_family_t ep_family = AF_INET;
+
+		constexpr sa_family_t family() const noexcept
+		{
+			return ep_family;
+		}
 
 		endpoint_ipv4()
 		{
 			std::memset(&addr_, 0, sizeof(native_type));
+		}
+
+		endpoint_ipv4(uint16_t port)
+		{
+			set(port);
 		}
 
 		endpoint_ipv4(in_addr_t addr, std::uint16_t port)
@@ -36,7 +46,7 @@ class endpoint_ipv4{
 
 		void set(in_addr_t addr, std::uint16_t port) noexcept
 		{
-			addr_.sin_family = endpoint_ipv4::family;
+			addr_.sin_family = endpoint_ipv4::ep_family;
 			addr_.sin_port = htons(port);
 			addr_.sin_addr.s_addr = addr;
 		}
@@ -44,25 +54,32 @@ class endpoint_ipv4{
 		bool set(const char* addr_str, std::uint16_t port) noexcept
 		{
 			in_addr_t addr;
-			int ret = inet_pton(endpoint_ipv4::family, addr_str, &addr);
+			int ret = inet_pton(endpoint_ipv4::ep_family, addr_str, &addr);
 			if(ret <= 0)
 			{
 				std::memset(&addr_, 0, sizeof(native_type));
 				return false;
 			}
 
-			addr_.sin_family = endpoint_ipv4::family;
+			addr_.sin_family = endpoint_ipv4::ep_family;
 			addr_.sin_port = htons(port);
 			addr_.sin_addr.s_addr = addr;
 
 			return true;
 		}
 
+		void set(uint16_t port) noexcept
+		{
+			addr_.sin_family = AF_INET;
+			addr_.sin_addr.s_addr = 0;
+			addr_.sin_port = htons(port);
+		}
+
 		native_type* native() noexcept{ return &addr_; }
 
 		const char* address(char* addr_str, std::size_t len = INET_ADDRSTRLEN) noexcept
 		{
-			return inet_ntop(family, &addr_.sin_addr, addr_str, len);
+			return inet_ntop(ep_family, &addr_.sin_addr, addr_str, len);
 		}
 
 		const char* host(char* host_addr, std::size_t len = INET_ADDRSTRLEN) noexcept

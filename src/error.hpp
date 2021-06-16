@@ -6,23 +6,28 @@ namespace CoAP{
 enum class errc : int{
 	//General
 	insufficient_buffer		= 10,
+	invalid_data,
+	//message
+	code_invalid 			= 20,
 	invalid_token_length,
 	message_too_small,
 	version_invalid,
 	type_invalid,
 	empty_format_error,
-	//Code
-	code_invalid 			= 20,
 	//Options
 	option_invalid 			= 30,
 	option_out_of_order,
 	option_repeated,
 	option_parse_error,
+	option_not_found,
 	//payload
 	payload_no_marker		= 40,
 	//socket
 	socket_error			= 50,
 	endpoint_error,
+	socket_receive,
+	socket_send,
+	socket_bind,
 	//transmission
 	transaction_ocupied		= 60,
 	no_free_slots,

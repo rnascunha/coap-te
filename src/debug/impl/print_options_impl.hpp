@@ -131,6 +131,7 @@ void print_options(CoAP::Message::Option::node_option<OptionCode> const* list,
 	for(CoAP::Message::Option::node const* i = list; i != nullptr; i = i->next)
 	{
 		std::printf("%s%d: ", prefix, c++);
+		print_option(i->value);
 		std::printf("\n");
 	}
 }

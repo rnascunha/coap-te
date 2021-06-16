@@ -5,7 +5,6 @@
 #include "../functions.hpp"
 
 #include "log.hpp"
-//#include "debug/print_message.hpp"
 
 namespace CoAP{
 namespace Transmission{
@@ -172,12 +171,13 @@ process_request(endpoint& ep,
 	resource const* res = resource_root_.search(request);
 	if(!res)
 	{
+		status(engine_mod, "Not resource");
 		std::size_t bu = make_response_code_error(request, buffer_, packet_size, CoAP::Message::code::not_found);
 		conn_.send(buffer_, bu, ep, ec);
 	}
 	else
 	{
-		debug(engine_mod, "Found resource %s", res->path());
+		debug(engine_mod, "Found resource %s", res->path() ? res->path() : "/");
 		response response(ep,
 				request.mtype,
 				request.mtype == CoAP::Message::type::confirmable ?
@@ -236,10 +236,36 @@ template<typename Connection,
 	typename Resource>
 bool
 engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
-run(CoAP::Error& ec)
+run(CoAP::Error& ec) noexcept
 {
 	endpoint ep;
 	std::size_t size = conn_.receive(buffer_, packet_size, ep, ec);
+	if(ec) return false;
+	if(size)
+	{
+		char buf_print[20];
+		debug(engine_mod, "From: %s:%u", ep.address(buf_print), ep.port());
+		CoAP::Log::debug(engine_mod, "Received %d bytes", size);
+		process(ep, buffer_, size, ec);
+	}
+
+	check_transactions();
+
+	return true;
+}
+
+template<typename Connection,
+	typename MessageID,
+	typename TransactionList,
+	typename Callback_Default_Functor,
+	typename Resource>
+template<int BlockTimeMs>
+bool
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
+run(CoAP::Error& ec) noexcept
+{
+	endpoint ep;
+	std::size_t size = conn_.template receive<BlockTimeMs>(buffer_, packet_size, ep, ec);
 	if(ec) return false;
 	if(size)
 	{
@@ -264,6 +290,60 @@ engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resourc
 operator()(CoAP::Error& ec) noexcept
 {
 	return run(ec);
+}
+
+template<typename Connection,
+	typename MessageID,
+	typename TransactionList,
+	typename Callback_Default_Functor,
+	typename Resource>
+std::size_t
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
+make_response(message const& received_message,
+				void* buffer, size_t buffer_len,
+				CoAP::Message::code mcode,
+				CoAP::Message::Option::node* options,
+				void const* const payload, std::size_t payload_len,
+				CoAP::Error& ec) noexcept
+{
+	return engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
+			make_response(received_message,
+					buffer, buffer_len,
+					mcode,
+					received_message.mtype == CoAP::Message::type::confirmable ?
+							received_message.mid : mid_(),
+					options,
+					payload, payload_len,
+					ec);
+}
+
+template<typename Connection,
+	typename MessageID,
+	typename TransactionList,
+	typename Callback_Default_Functor,
+	typename Resource>
+std::size_t
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
+make_response(message const& received_message,
+				void* buffer, size_t buffer_len,
+				CoAP::Message::code mcode, std::uint16_t message_id,
+				CoAP::Message::Option::node* options,
+				void const* const payload, std::size_t payload_len,
+				CoAP::Error& ec) noexcept
+{
+	std::uint8_t token[8];
+	std::memcpy(token, received_message.token, received_message.token_len);
+
+	return CoAP::Message::serialize(static_cast<uint8_t*>(buffer), buffer_len,
+			received_message.mtype == CoAP::Message::type::confirmable ?
+										CoAP::Message::type::acknowledgment :
+										CoAP::Message::type::nonconfirmable,
+			mcode,
+			message_id,
+			token, received_message.token_len,
+			options,
+			payload, payload_len,
+			ec);
 }
 
 }//Transmission

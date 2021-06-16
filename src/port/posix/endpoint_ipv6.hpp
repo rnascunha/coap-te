@@ -19,11 +19,21 @@ inline bool operator==(in6_addr const& lhs, in6_addr const& rhs) noexcept
 class endpoint_ipv6{
 	public:
 		using native_type = sockaddr_in6;
-		static constexpr const sa_family_t family = AF_INET6;
+		static constexpr const sa_family_t ep_family = AF_INET6;
+
+		constexpr sa_family_t family() const noexcept
+		{
+			return ep_family;
+		}
 
 		endpoint_ipv6()
 		{
 			std::memset(&addr_, 0, sizeof(native_type));
+		}
+
+		endpoint_ipv6(std::uint16_t port)
+		{
+			set(port);
 		}
 
 		endpoint_ipv6(in6_addr addr, std::uint16_t port)
@@ -42,7 +52,7 @@ class endpoint_ipv6{
 		void set(in6_addr const& addr, std::uint16_t port) noexcept
 		{
 			std::memset(&addr_, 0, sizeof(native_type));
-			addr_.sin6_family = family;
+			addr_.sin6_family = ep_family;
 			addr_.sin6_port = htons(port);
 			addr_.sin6_addr = addr;
 			std::memcpy(&addr_.sin6_addr, &addr, sizeof(in6_addr));
@@ -53,25 +63,31 @@ class endpoint_ipv6{
 			in6_addr addr;
 			std::memset(&addr_, 0, sizeof(native_type));
 			
-			int ret = inet_pton(family, addr_str, &addr);
+			int ret = inet_pton(ep_family, addr_str, &addr);
 			if(ret <= 0)
 			{
-
 				return false;
 			}
 
-			addr_.sin6_family = family;
+			addr_.sin6_family = ep_family;
 			addr_.sin6_port = htons(port);
 			std::memcpy(&addr_.sin6_addr, &addr, sizeof(in6_addr));
 
 			return true;
 		}
 
+		void set(uint16_t port) noexcept
+		{
+			addr_.sin6_family = AF_INET6;
+			std::memset(&addr_.sin6_addr, 0, sizeof(addr_.sin6_addr));
+			addr_.sin6_port = htons(port);
+		}
+
 		native_type* native() noexcept{ return &addr_; }
 
 		const char* address(char* addr_str, std::size_t len = INET6_ADDRSTRLEN) noexcept
 		{
-			return inet_ntop(family, &addr_.sin6_addr, addr_str, len);
+			return inet_ntop(ep_family, &addr_.sin6_addr, addr_str, len);
 		}
 		
 		const char* host(char* host_addr, std::size_t len = INET6_ADDRSTRLEN) noexcept

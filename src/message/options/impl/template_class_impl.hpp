@@ -40,25 +40,6 @@ option_template<OptionCode>::option_template(OptionCode code, unsigned& value)
 }
 
 template<typename OptionCode>
-option_template<OptionCode>::option_template(content_format const& value, bool is_request /* = false */)
-{
-	static_assert(std::is_same<OptionCode, code>::value, "Must be of type 'Option::code'");
-
-	create(*this, value, is_request);
-}
-
-#if COAP_TE_OPTION_NO_RESPONSE == 1
-template<typename OptionCode>
-option_template<OptionCode>::option_template(suppress& value)
-{
-	static_assert(std::is_same<OptionCode, code>::value, "Must be of type 'Option::code'");
-
-	create(*this, value);
-}
-#endif /* COAP_TE_OPTION_NO_RESPONSE == 1 */
-
-
-template<typename OptionCode>
 option_template<OptionCode>::option_template(OptionCode code, const void* value, unsigned length)
 {
 	create<OptionCode, false>(*this, code, value, length);

@@ -29,7 +29,7 @@ void
 tcp_client<Endpoint, Flags>::
 open(endpoint& ep, CoAP::Error& ec) noexcept
 {
-	if((socket_ = ::socket(endpoint::family, SOCK_STREAM, IPPROTO_TCP)) == -1)
+	if((socket_ = ::socket(ep.family(), SOCK_STREAM, IPPROTO_TCP)) == -1)
 	{
 		ec = CoAP::errc::socket_error;
 		return;
@@ -54,7 +54,7 @@ bool
 tcp_client<Endpoint, Flags>::
 async_open(endpoint& ep, CoAP::Error& ec) noexcept
 {
-	if((socket_ = ::socket(endpoint::family, SOCK_STREAM, IPPROTO_TCP)) == -1)
+	if((socket_ = ::socket(ep.family(), SOCK_STREAM, IPPROTO_TCP)) == -1)
 	{
 		ec = CoAP::errc::socket_error;
 		return false;
@@ -138,6 +138,20 @@ wait_connect(CoAP::Error& ec) const noexcept
 	}
 
 	return false;
+}
+
+template<class Endpoint,
+		int Flags>
+void
+tcp_client<Endpoint, Flags>::
+bind(endpoint& ep, CoAP::Error& ec) noexcept
+{
+	if (::bind(socket_,
+		reinterpret_cast<struct sockaddr const*>(ep.native()),
+		sizeof(typename endpoint::native_type)) == -1)
+	{
+		ec = CoAP::errc::socket_error;
+	}
 }
 
 template<class Endpoint,

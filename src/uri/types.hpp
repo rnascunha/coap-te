@@ -1,9 +1,10 @@
 #ifndef COAP_TE_URI_TYPES_HPP__
 #define COAP_TE_URI_TYPES_HPP__
 
-#include "defines/defaults.hpp"
 #include <cstdlib>
 #include <cstdint>
+
+#include "defines/defaults.hpp"
 #include "message/options/options.hpp"
 #include "port/port.hpp"
 

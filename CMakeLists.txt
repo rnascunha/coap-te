@@ -4,22 +4,18 @@
 
 set(USE_LOG_COLOR 	1)
 if(DEFINED LOG_COLOR)
-set(USE_LOG_COLOR	${LOG_COLOR})
+	set(USE_LOG_COLOR	${LOG_COLOR})
 endif()
 
 set(USE_LOG_LEVEL	5)
 if(DEFINED LOG_LEVEL)
-set(USE_LOG_LEVEL	${LOG_LEVEL})
+	set(USE_LOG_LEVEL	${LOG_LEVEL})
 endif()
 
 set(USE_ERROR_MESSAGE	1)
 if(DEFINED ERROR_MESSAGE)
-set(USE_ERROR_MESSAGE ${ERROR_MESSAGE})
+	set(USE_ERROR_MESSAGE ${ERROR_MESSAGE})
 endif()
-
-add_definitions(-DCOAP_TE_LOG_COLOR=${USE_LOG_COLOR}
-				-DCOAP_TE_LOG_LEVEL=${USE_LOG_LEVEL}
-				-DCOAP_TE_USE_ERROR_MESSAGES=${USE_ERROR_MESSAGE})
 
 #################################################
 # Checking if is ESP IDF build					#
@@ -89,8 +85,14 @@ message(STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " " ${CMAKE_CXX_COMPILER_VE
 
 include (files.cmake)
 
+#Required definitions
 add_definitions(-DCOAP_TE_PORT_C_STANDARD=1
 				-DCOAP_TE_PORT_POSIX=1)
+
+#Command line definitions
+add_definitions(-DCOAP_TE_LOG_COLOR=${USE_LOG_COLOR}
+				-DCOAP_TE_LOG_LEVEL=${USE_LOG_LEVEL}
+				-DCOAP_TE_USE_ERROR_MESSAGES=${USE_ERROR_MESSAGE})
 
 list(APPEND MAIN_SRC ${SRC_DIR_PORT}/c_standard_port.cpp)
 
@@ -100,7 +102,7 @@ if(WIN32 OR EMSCRIPTEN)
 	add_definitions(-DCOAP_TE_USE_SELECT=1)	
 endif()
 				
-add_library(${PROJECT_NAME} ${MAIN_SRC})
+add_library(${PROJECT_NAME} ${MAIN_SRC} ${SRC_PORT_POSIX})
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON

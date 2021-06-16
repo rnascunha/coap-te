@@ -25,40 +25,13 @@ class list{
 		template<bool AddSorted = true>
 		void add(list::node& node) noexcept
 		{
-			if(head_ == nullptr)
+			list::node *curr = &node, *next = node.next;
+			while(true)
 			{
-				head_ = &node;
-				head_->next = nullptr;
-				return;
-			}
-
-			if constexpr(AddSorted)
-			{
-				list::node *n = head_, *prev = nullptr;
-				for(; n != nullptr; n = n->next)
-				{
-					if(node.value < n->value)
-					{
-						node.next = n;
-						if(prev) prev->next = &node;
-						else head_ = &node;
-						break;
-					}
-					if(n->next == nullptr)
-					{
-						n->next = &node;
-						node.next = nullptr;
-						break;
-					}
-					prev = n;
-				}
-			}
-			else
-			{
-				list::node* n = head_;
-				for(; n->next != nullptr; n = n->next);
-				n->next = &node;
-				node.next = nullptr;
+				_add<AddSorted>(*curr);
+				if(next == nullptr) break;
+				curr = next;
+				next = curr->next;
 			}
 		}
 
@@ -132,6 +105,46 @@ class list{
 			return nullptr;
 		}
 	private:
+		template<bool AddSorted = true>
+		void _add(list::node& node) noexcept
+		{
+			if(head_ == nullptr)
+			{
+				head_ = &node;
+				head_->next = nullptr;
+				return;
+			}
+
+			if constexpr(AddSorted)
+			{
+				list::node *n = head_, *prev = nullptr;
+				for(; n != nullptr; n = n->next)
+				{
+					if(node.value < n->value)
+					{
+						node.next = n;
+						if(prev) prev->next = &node;
+						else head_ = &node;
+						break;
+					}
+					if(n->next == nullptr)
+					{
+						n->next = &node;
+						node.next = nullptr;
+						break;
+					}
+					prev = n;
+				}
+			}
+			else
+			{
+				list::node* n = head_;
+				for(; n->next != nullptr; n = n->next);
+				n->next = &node;
+				node.next = nullptr;
+			}
+		}
+
 		node* head_ = nullptr;
 };
 

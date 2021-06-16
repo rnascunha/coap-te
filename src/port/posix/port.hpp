@@ -13,6 +13,7 @@
 
 #include "endpoint_ipv4.hpp"
 #include "endpoint_ipv6.hpp"
+#include "endpoint_ip.hpp"
 #include "udp_socket.hpp"
 #include "tcp_client.hpp"
 #include "tcp_server.hpp"

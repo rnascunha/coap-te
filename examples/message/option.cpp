@@ -21,7 +21,7 @@
  * * empty: no payload;
  * * string;
  * * unsigned interger;
- * * opaque: ramdom bytes;
+ * * opaque: random bytes;
  *
  * To parse the option value, you must know before hand which type it
  * is. The 'config' array at 'message/options.hpp' shows this.

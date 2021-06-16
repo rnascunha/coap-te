@@ -166,8 +166,24 @@ class engine
 				CoAP::Error& ec) noexcept;
 
 		void check_transactions() noexcept;
-		bool run(CoAP::Error& ec);
+		bool run(CoAP::Error& ec) noexcept;
+		template<int BlockTimeMs>
+		bool run(CoAP::Error& ec) noexcept;
 		bool operator()(CoAP::Error& ec) noexcept;
+
+		std::size_t make_response(message const& received_message,
+						void* buffer, size_t buffer_len,
+						CoAP::Message::code,
+						CoAP::Message::Option::node*,
+						void const* const payload, std::size_t payload_len,
+						CoAP::Error& ec) noexcept;
+
+		static std::size_t make_response(message const& received_message,
+						void* buffer, size_t buffer_len,
+						CoAP::Message::code, std::uint16_t message_id,
+						CoAP::Message::Option::node*,
+						void const* const payload, std::size_t payload_len,
+						CoAP::Error& ec) noexcept;
 	private:
 		template<bool CheckEndpoint = true, bool CheckToken = false>
 		void process_response(endpoint& ep,

@@ -91,19 +91,22 @@ class Serialize{
 
 		message const& get_message() const noexcept;
 
-		bool header(type mtype, code mcode, std::uint16_t message_id) noexcept;
+		bool header(type, code, std::uint16_t message_id) noexcept;
 
 		bool token(const char*) noexcept;
 		bool token(const void*, std::size_t) noexcept;
 
 		template<bool CheckRepeat = true>
-		bool add_option(Option::option&& op) noexcept;
+		bool add_option(Option::option&&) noexcept;
+		template<bool CheckRepeat = true>
+		bool add_option(Option::option&&, CoAP::Error&) noexcept;
 
 		bool payload(const char*) noexcept;
 		bool payload(const void*, std::size_t) noexcept;
 
 		bool remove_token() noexcept;
-		bool remove_option(Option::code op) noexcept;
+		bool remove_option(Option::code) noexcept;
+		bool remove_option(Option::code, CoAP::Error&) noexcept;
 		bool remove_payload() noexcept;
 	private:
 		std::uint8_t* 		buffer_;

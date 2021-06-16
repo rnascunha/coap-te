@@ -33,6 +33,7 @@ set(EXAMPLES_LIST
 				${EXAMPLES_DIR}/port/async_tcp_client.cpp
 				${EXAMPLES_DIR}/port/tcp_client.cpp
 				${EXAMPLES_DIR}/port/tcp_server.cpp
+				${EXAMPLES_DIR}/coap_client.cpp
 			)
 
 #List of examples that must link to network at emscripten
@@ -69,6 +70,10 @@ foreach(example ${EXAMPLES_LIST})
 	string(REGEX REPLACE "\.cpp$" "" EXAMPLE_OUT ${EXAMPLE_OUT})
 	message("Compiling: ${EXAMPLE_OUT}")
 
+	if(${EXAMPLE_OUT} STREQUAL coap_client)
+		list(APPEND example ${EXAMPLES_DIR}/arguments.cpp)
+	endif()
+	
 	add_executable(${EXAMPLE_OUT} ${example})
 	set_target_properties(${EXAMPLE_OUT} PROPERTIES
 	    CXX_STANDARD 17

@@ -404,7 +404,7 @@ bool
 engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
 run(CoAP::Error& ec) noexcept
 {
-	read_packet(ec);
+	read_packet<0>(ec);
 
 	if(ec)
 	{
@@ -425,6 +425,33 @@ template<typename Connection,
 	typename TransactionList,
 	typename CallbackDefaultFunctor,
 	typename Resource>
+template<int BlockTimeMs>
+bool
+engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
+run(CoAP::Error& ec) noexcept
+{
+	read_packet<BlockTimeMs>(ec);
+
+	if(ec)
+	{
+		error(engine_mod, ec, "read");
+		if constexpr(has_default_callback)
+			if(default_cb_) default_cb_(conn_.native(), nullptr, this);
+		close<false>();
+		return false;
+	}
+
+	check_transactions();
+
+	return true;
+}
+
+template<typename Connection,
+	csm_configure const& Config,
+	typename TransactionList,
+	typename CallbackDefaultFunctor,
+	typename Resource>
+template<int BlockTimeMs>
 bool
 engine_client<Connection, Config, TransactionList, CallbackDefaultFunctor, Resource>::
 read_packet(CoAP::Error& ec) noexcept
@@ -433,7 +460,7 @@ read_packet(CoAP::Error& ec) noexcept
 	{
 		while(true)
 		{
-			std::size_t size = conn_.receive(buffer_, 1, ec);
+			std::size_t size = conn_.template receive<BlockTimeMs>(buffer_, 1, ec);
 
 			if(ec)
 			{

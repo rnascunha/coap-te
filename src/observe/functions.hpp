@@ -11,7 +11,7 @@ message_status process_message(Message const&) noexcept;
 
 unsigned generate_option_value_from_clock() noexcept;
 
-template<typename Message, unsigned MaxLantency = 128>
+template<typename Message, unsigned MaxLantency = 128000 /* miliseconds */>
 bool freshness(order& fresher_value, Message const& msg, bool update = true) noexcept;
 
 }//CoAP

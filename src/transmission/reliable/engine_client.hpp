@@ -153,8 +153,11 @@ class engine_client
 		void check_transactions() noexcept;
 
 		bool run(CoAP::Error& ec) noexcept;
+		template<int BlockTimeMs>
+		bool run(CoAP::Error& ec) noexcept;
 		bool operator()(CoAP::Error& ec) noexcept;
 	private:
+		template<int BlockTimeMs>
 		bool read_packet(CoAP::Error& ec) noexcept;
 
 		void process_response(CoAP::Message::Reliable::message const&) noexcept;
