@@ -26,7 +26,7 @@ std::size_t remove_host(CoAP::Message::message&,
 			mesh_addr_t&,
 			CoAP::Error& ec) noexcept;
 
-#if COAP_TE_PORT_POSIX == 1;
+#if COAP_TE_PORT_POSIX == 1
 template<int BlockTimeMs,
 		typename Endpoint,
 		typename CoAPEngine,
@@ -37,7 +37,7 @@ void proxy_forward_udp_mesh(CoAP::Port::POSIX::udp<Endpoint>& socket,
 		CoAPEngine& engine,
 		void* buffer,
 		std::size_t buffer_size,
-		CoAP::Error& ec) noexcept
+		CoAP::Error& ec) noexcept;
 #endif /* COAP_TE_PORT_POSIX == 1 */
 
 }//ESP_Mesh
