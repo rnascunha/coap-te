@@ -31,8 +31,9 @@ set(MAIN_SRC ${SRC_DIR}/error.cpp
 				${SRC_DIR_DEBUG}/print_uri.cpp
 				${SRC_DIR_RESOURCE}/link_format.cpp
 				${SRC_DIR_OBSERVE}/functions.cpp
-				${SRC_DIR_PORT}/posix/functions.cpp
 				)
 
+set(SRC_PORT_POSIX ${SRC_DIR_PORT}/posix/functions.cpp)
+set(SRC_PORT_ESP_MESH ${SRC_DIR_PORT}/esp_mesh/function.cpp)
+
 set(MAIN_INCLUDE_DIRS ./src ./third/tree_trunks/src/include)
-				
