@@ -25,7 +25,8 @@ It's NOT implemented (yet):
 **CoAP-te** is ported to:
 * Linux (GCC);
 * Windows (MSVC);
-* ESP32 (tested with [ESP-IDF 4.3](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/index.html)).
+* ESP32 POSIX interface (tested with [ESP-IDF 4.3](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/get-started/index.html));
+* ESP32 Mesh (adapted to work on top of the [ESP-MESH Stack](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-reference/network/esp_mesh.html). See `coap-mesh` example).
 
 Check the [Portability](#portability) section to see how to port **CoAP-te** to your device/environment.
 
@@ -99,7 +100,7 @@ First, you need to set your envirioment as explained [here](https://docs.espress
 
 The following instructions must be done to each project you intend to use **CoAP-te** with ESP32.
 
-We are going to use **CoAP-te** as a component to your project. The [IDF build system](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/build-system.html) search for components at the `components` directory. If your project doesn't have one, create one at the root of the directory.
+We are going to use **CoAP-te** as a component to your project. The [IDF build system](https://docs.espressif.com/projects/esp-idf/en/latest/esp32/api-guides/build-system.html) search for components at the `components` directory. If your project doesn't have it, create one at the root of the directory.
 
 ```
 #enter project directory
@@ -113,7 +114,7 @@ Now we are going download **CoAP-te**:
 ```
 $ git clone --recursive https://github.com/rnascunha/coap-te
 ```
-If everything was done right, the ESP-IDF will see **CoAP-te** as a component. Now, at the main project, you must enable C++17 to compile your code. After register your project, set the `std=gnu++17` flag as shown below:
+If everything was done right, the ESP-IDF will see **CoAP-te** as a component. Now, at the main project, you must enable C++17 to compile your code and some other flags. This flags are needed because CoAP-te is a highly template library. After register your project, set all the following flags:
 
 ```
 # Registering project
@@ -123,8 +124,16 @@ idf_component_register(SRCS /* project source files */
 
 # Compile flags need by CoAP-te
 target_compile_options(${COMPONENT_LIB} 
-						PRIVATE -std=gnu++17)
+						PRIVATE -std=gnu++17 
+						-DCOAP_TE_ESP_IDF_PLATAFORM=1
+						-DCOAP_TE_PORT_ESP_MESH=1
+						-DCOAP_TE_PORT_POSIX=1
+						-DCOAP_TE_PORT_C_STANDARD=1
+						-DCOAP_TE_LOG_LEVEL=5
+						-DCOAP_TE_USE_SELECT=1)
 ```
+This will enable **CoAP-te** with the *POSIX interface* and *ESP-MESH stack*. 
+
 Check the [ESP32 examples](#esp32). 
 
 ## Bulding Options
@@ -146,7 +155,7 @@ $ cmake <options> ..
 * `-DWASM_EMRUN_ENABLE=<0|1>`: defines `--emrun` link flag to examples. `1`: enable flag (default), `0`: disable flag. More about [here](https://emscripten.org/docs/compiling/Running-html-files-with-emrun.html).
 -->
 
-> At **ESP32 plataform**, you can configure this parameters by at `menuconfig`, going to: `$ idf.py menuconfig` > `Component config` > `CoAP-te Configuration`. 
+> At **ESP32 plataform**, you can configure this parameters at `menuconfig`, going to: `$ idf.py menuconfig` > `Component config` > `CoAP-te Configuration`. 
 
 ## Using
 
@@ -155,6 +164,8 @@ It follows a description of all the examples that explains how to use **CoAP-te*
 ### Linux / Windows
 
 If you build **CoAP-te** with the `-DWITH_EXAMPLES=1` flag, all example executables are at your build directory. The directory `examples` contains the source code of the examples with detailed exaplanations on how to use **CoAP-te**. A brief overview is show here:
+
+* `coap_client`: make a *CoAP* request at command line. Run this command with no arguments to see all options.
 
 *Messages* examples:
 * `serialize_parse`: shows how to serialize message using 3 strategies (factory and manually using option list/array). Then parse this information (as it was received by network) and iterate through options.
@@ -209,15 +220,16 @@ $ idf.py menuconfig
 $ idf.py build flash monitor
 ```
 
-Some important advise:
-* Before use any examples, you MUST configure it using the `idf.py menuconfig` command. Go to the `Example WiFi/Server Configuration` and set all the options accordingly. Some examples have specific options, but at all you must set your WiFi parameters, as *SSID* and *password*.
-* All examples use the function `wifi_stack_init`. This function will block until connect to the WiFi, or get stuck there if fail. This is a very naive implementaion, and should NOT be used at production.
-* At the ESP32 examples, we prefered to instantiate the **CoAP-te** engine globally, to not be limited by the task memory size. If you prefer to use inside a task, depending on the *max packet size*/*transaction number*, it can overflow the task memory stack. Be aware of this. If you want to do this at the main task (`app_main`), you can increase the task memory stack if you need going to `idf.py menuconfig` > `Component config` > `Common ESP-related` > `Main task size`.
+> Some important advise:
+> * Before use any example, you MUST configure it using the `idf.py menuconfig` command. Go to the `Example WiFi/Server Configuration` or `Example Mesh/CoAP Configuration` and set all the options accordingly. Some examples have specific options, but at all you must set your WiFi parameters, as *SSID* and *password*.
+> * Some examples use the function `wifi_stack_init`. This function will block until connect to the WiFi, or get stuck there if fail. This is a very naive implementaion, and should NOT be used at production.
+> * At the ESP32 examples, we prefered to instantiate the **CoAP-te** engine globally, to not be limited by the task memory size. If you prefer to use inside a task, depending on the *max packet size*/*transaction number*, it can overflow the task memory stack. Be aware of this. If you want to do this at the main task (`app_main`), you can increase the task memory stack if you need going to `idf.py menuconfig` > `Component config` > `Common ESP-related` > `Main task size`.
 
 It follows a brief overview of the ESP32 examples.
 
-* `engine_server`: demonstrate how to use a **CoAP-te** engine, using a UDP connection.
-* `engine_tcp_server`: demonstrate how to use a **CoAP-te** engine, using a TCP connection.
+* `engine_server`: demonstrate how to use a **CoAP-te** engine, using a UDP connection;
+* `engine_tcp_server`: demonstrate how to use a **CoAP-te** engine, using a TCP connection;
+* `coap_mesh`: use of **CoAP-te** on top of *ESP-MESH stack*.
 
 *Port* examples: `tcp_client`, `tcp_server` and `udp_socket` are just some basic use of the socket ported to the ESP32. Not intended for the end user.
 
