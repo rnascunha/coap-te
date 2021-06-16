@@ -26,17 +26,12 @@ std::size_t add_host(void* buffer,
 {
 	CoAP::Message::message msg;
 	CoAP::Message::parse(msg, static_cast<const uint8_t*>(buffer), used, ec);
-	if(ec) return 0;
+	if(ec) return used;
 
 	char buffer_addr[20];
 	std::snprintf(buffer_addr, 20, MACSTR, MAC2STR(addr.addr));
 	CoAP::Message::Serialize serial(static_cast<uint8_t*>(buffer), buffer_size, msg);
-	bool t = serial.add_option({CoAP::Message::Option::code::uri_host, buffer_addr});
-	if(!t)
-	{
-		ec = CoAP::errc::option_repeated;
-		return 0;
-	}
+	serial.add_option({CoAP::Message::Option::code::uri_host, buffer_addr}, ec);
 
 	return serial.used();
 }
@@ -51,23 +46,18 @@ std::size_t remove_host(
 	CoAP::Message::Option::option op;
 	if(!CoAP::Message::Option::get_option(msg, op, CoAP::Message::Option::code::uri_host, 0))
 	{
-		ec = CoAP::errc::option_invalid;
+		ec = CoAP::errc::option_not_found;
 		return 0;
 	}
 
 	if(endpoint_mesh::string_to_native(static_cast<const char*>(op.value), op.length, host) != 6)
 	{
-		ec = CoAP::errc::option_parse_error;
+		ec = CoAP::errc::invalid_data;
 		return 0;
 	}
 
 	CoAP::Message::Serialize serial(static_cast<uint8_t*>(buffer), used, msg);
-	bool t = serial.remove_option(CoAP::Message::Option::code::uri_host);
-	if(!t)
-	{
-		ec = CoAP::errc::option_repeated;
-		return 0;
-	}
+	serial.remove_option(CoAP::Message::Option::code::uri_host, ec);
 
 	return serial.used();
 }

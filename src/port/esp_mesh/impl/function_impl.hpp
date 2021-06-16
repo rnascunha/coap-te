@@ -20,7 +20,8 @@ namespace ESP_Mesh{
 template<int BlockTimeMs,
 		typename Endpoint,
 		typename CoAPEngine,
-		bool AddHost = true>
+		bool AddHost /* = true */,
+		bool RemoveHost /* = true */>
 void proxy_forward_udp_mesh(CoAP::Port::POSIX::udp<Endpoint>& socket,
 		Endpoint& ep_server,
 		CoAPEngine& engine,
@@ -45,98 +46,55 @@ void proxy_forward_udp_mesh(CoAP::Port::POSIX::udp<Endpoint>& socket,
 
 	if(err == ESP_OK)
 	{
-		ESP_LOGI(PROXY_TAG, "Recv[" MACSTR " -> %s:%u][f:%d][%d]", MAC2STR(from.addr),
-												ip4addr_ntoa(&to.mip.ip4),
-												htons(to.mip.port),
-												flag,
-												data.size);
+//		if constexpr (AddHost)
+//		{
+//			data.size = CoAP::Port::ESP_Mesh::add_host(data.data,
+//																data.size,
+//																buffer_size,
+//																from,
+//																ec);
+//			if(ec) return;
+//		}
 
-		CoAP::Error ec;
-		std::size_t nsize = CoAP::Port::ESP_Mesh::add_host(data.data, data.size, buffer_size, from, ec);
-		if(ec)
-		{
-			ESP_LOGE(PROXY_TAG, "Error adding host [%d/%s]", ec.value(), ec.message());
-		}
-		else
-		{
-			ESP_LOGI(PROXY_TAG, "Host added, new size: %zu", nsize);
-			socket.send(data.data, nsize, ep_server, ec);
-			if(ec)
-			{
-				ESP_LOGE(PROXY_TAG, "Error fowarding to server [%d/%s]", ec.value(), ec.message());
-			}
-			else
-			{
-				ESP_LOGI(PROXY_TAG, "Forward message to server %zu from " MACSTR "", data.size, MAC2STR(from.addr));
-			}
-		}
+		socket.send(data.data, data.size, ep_server, ec);
+		if(ec) return;
 	}
 	else if(err != ESP_ERR_MESH_TIMEOUT)
 	{
-		ESP_LOGE(PROXY_TAG, "Error received MESH socket data: %X (%s)", err, esp_err_to_name(err));
+		ec = CoAP::errc::socket_receive;
+		return;
 	}
 
 	Endpoint ep;
 	size_t size = socket.template receive<BlockTimeMs>(buffer, buffer_size, ep, ec);
-	if(ec)
-	{
-		ESP_LOGE(PROXY_TAG, "Error received UDP socket data: %d/%s", ec.value(), ec.message());
-	}
-	else if(size > 0)
-	{
-		ESP_LOGI(PROXY_TAG, "Received[%zu]", size);
+	if(ec) return;
 
+	if(size > 0)
+	{
 		CoAP::Message::message msg;
 		CoAP::Message::parse(msg, static_cast<const uint8_t*>(buffer), size, ec);
-		if(ec)
-		{
-			/**
-			 * Error parsing message
-			 */
-			ESP_LOGE(PROXY_TAG, "Error parsing message");
-			return;
-		}
+		if(ec) return;
 
 		typename CoAPEngine::endpoint to;
 		std::size_t msize = CoAP::Port::ESP_Mesh::remove_host(msg, buffer, size, *to.native(), ec);
 		if(ec)
 		{
-			/**
-			 * Host option not found
-			 */
-			ESP_LOGE(PROXY_TAG, "Error removing host [%d/%s]", ec.value(), ec.message());
-
-			ec.clear();
-			static const char error_message[] = "Host op error/missing";
+			CoAP::Error ecp;
 			std::size_t size_resp = engine.make_response(msg,
 								buffer, buffer_size,
 								CoAP::Message::code::precondition_failed,
 								nullptr,
-								error_message, std::strlen(error_message),
-								ec);
-			if(!ec)
-			{
-				socket.send(buffer, size_resp, ep, ec);
-			}
-			else
-			{
-				ESP_LOGE(PROXY_TAG, "Error creating response remove host [%d/%s]", ec.value(), ec.message());
-			}
+								ec.message(), std::strlen(ec.message()),
+								ecp);
+			if(ecp) return;
+			socket.send(buffer, size_resp, ep, ec);
 		}
 		else
 		{
-			ESP_LOGI(PROXY_TAG, "Host remove[" MACSTR "], new size: %zu", MAC2STR(to.address().addr), msize);
-
 			to.type(CoAP::Port::ESP_Mesh::endpoint_type::from_external);
 			engine.get_connection().send(buffer, msize, to, ec);
-			if(ec)
-			{
-				ESP_LOGE(PROXY_TAG, "Error sending message to host [%d/%s]", ec.value(), ec.message());
-			}
-			else
-			{
-				ESP_LOGI(PROXY_TAG, "Message send[" MACSTR "]: %zu", MAC2STR(to.address().addr), msize);
-			}
+//			if(ec) return;
+			//already last thing
 		}
 	}
 }

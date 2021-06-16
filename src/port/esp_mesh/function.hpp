@@ -30,7 +30,8 @@ std::size_t remove_host(CoAP::Message::message&,
 template<int BlockTimeMs,
 		typename Endpoint,
 		typename CoAPEngine,
-		bool AddHost = true>
+		bool AddHost = true,
+		bool RemoveHost = true>
 void proxy_forward_udp_mesh(CoAP::Port::POSIX::udp<Endpoint>&,
 		void* buffer,
 		CoAPEngine& engine,

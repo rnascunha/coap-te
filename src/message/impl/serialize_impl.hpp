@@ -255,8 +255,15 @@ unsigned make_option(std::uint8_t* buffer, std::size_t buffer_len,
 	return offset;
 }
 
-template<bool CheckRepeat>
+template<bool CheckRepeat /* = true */>
 bool Serialize::add_option(Option::option&& op) noexcept
+{
+	CoAP::Error ec;
+	return add_option<CheckRepeat>(op, ec);
+}
+
+template<bool CheckRepeat /* = true */>
+bool Serialize::add_option(Option::option&& op, CoAP::Error& ec) noexcept
 {
 	if constexpr(CheckRepeat)
 	{
@@ -267,7 +274,11 @@ bool Serialize::add_option(Option::option&& op) noexcept
 			Option::option const* opt;
 			while((opt = parser.next()))
 			{
-				if(opt->ocode == op.ocode) return false;
+				if(opt->ocode == op.ocode)
+				{
+					ec = CoAP::errc::option_repeated;
+					return false;
+				}
 				if(opt->ocode > op.ocode) break;
 			}
 		}
@@ -287,14 +298,18 @@ bool Serialize::add_option(Option::option&& op) noexcept
 	}
 
 	std::size_t opt_size = Option::serialized_size(op, current);
-	if((msg_.size() + opt_size) > size_) return false;
+	if((msg_.size() + opt_size) > size_)
+	{
+		ec = CoAP::errc::insufficient_buffer;
+		return false;
+	}
 
 	std::uint8_t* n_buf = buffer_ + 4 + msg_.token_len + offset;
 	CoAP::Helper::shift_right(n_buf,
 							msg_.size() - msg_.token_len - offset - 4,
 							opt_size);
 
-	CoAP::Error ec;
+//	CoAP::Error ec;
 	unsigned delta = current ? static_cast<unsigned>(current.ocode) : 0;
 	Option::code c = current.ocode;
 	make_option<Option::code, false, false>(n_buf, opt_size,
