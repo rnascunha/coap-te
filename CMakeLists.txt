@@ -102,7 +102,7 @@ if(WIN32 OR EMSCRIPTEN)
 	add_definitions(-DCOAP_TE_USE_SELECT=1)	
 endif()
 				
-add_library(${PROJECT_NAME} ${MAIN_SRC})
+add_library(${PROJECT_NAME} ${MAIN_SRC} ${SRC_PORT_POSIX})
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON

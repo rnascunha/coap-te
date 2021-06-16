@@ -292,6 +292,60 @@ operator()(CoAP::Error& ec) noexcept
 	return run(ec);
 }
 
+template<typename Connection,
+	typename MessageID,
+	typename TransactionList,
+	typename Callback_Default_Functor,
+	typename Resource>
+std::size_t
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
+make_response(message const& received_message,
+				void* buffer, size_t buffer_len,
+				CoAP::Message::code mcode,
+				CoAP::Message::Option::node* options,
+				void const* const payload, std::size_t payload_len,
+				CoAP::Error& ec) noexcept
+{
+	return engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
+			make_response(received_message,
+					buffer, buffer_len,
+					mcode,
+					received_message.mtype == CoAP::Message::type::confirmable ?
+							received_message.mid : mid_(),
+					options,
+					payload, payload_len,
+					ec);
+}
+
+template<typename Connection,
+	typename MessageID,
+	typename TransactionList,
+	typename Callback_Default_Functor,
+	typename Resource>
+std::size_t
+engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
+make_response(message const& received_message,
+				void* buffer, size_t buffer_len,
+				CoAP::Message::code mcode, std::uint16_t message_id,
+				CoAP::Message::Option::node* options,
+				void const* const payload, std::size_t payload_len,
+				CoAP::Error& ec) noexcept
+{
+	std::uint8_t token[8];
+	std::memcpy(token, received_message.token, received_message.token_len);
+
+	return CoAP::Message::serialize(static_cast<uint8_t*>(buffer), buffer_len,
+			received_message.mtype == CoAP::Message::type::confirmable ?
+										CoAP::Message::type::acknowledgment :
+										CoAP::Message::type::nonconfirmable,
+			mcode,
+			message_id,
+			token, received_message.token_len,
+			options,
+			payload, payload_len,
+			ec);
+}
+
 }//Transmission
 }//CoAP
 

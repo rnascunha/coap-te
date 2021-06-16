@@ -3,20 +3,17 @@
 
 #if COAP_TE_PORT_POSIX == 1
 #include "posix/port.hpp"
-#elif COAP_TE_PORT_ESP_MESH == 1
+#endif /* COAP_TE_PORT_POSIX == 1 */
+#if COAP_TE_PORT_ESP_MESH == 1
 #include "esp_mesh/port.hpp"
-#else
+#endif /* COAP_TE_PORT_POSIX == 1 */
+#if COAP_TE_PORT_ESP_MESH != 1 && COAP_TE_PORT_POSIX != 1
 #error "System not defined"
 #endif
-
-#ifdef COAP_TE_PORT_C_STANDARD
-//#include <ctime>
-#endif /* COAP_TE_PORT_C_STANDART */
 
 namespace CoAP{
 
 #ifdef COAP_TE_PORT_C_STANDARD
-//using time_t = std::time_t;
 using time_t = unsigned long;
 #endif /* COAP_TE_PORT_C_STANDART */
 
