@@ -142,6 +142,20 @@ wait_connect(CoAP::Error& ec) const noexcept
 
 template<class Endpoint,
 		int Flags>
+void
+tcp_client<Endpoint, Flags>::
+bind(endpoint& ep, CoAP::Error& ec) noexcept
+{
+	if (::bind(socket_,
+		reinterpret_cast<struct sockaddr const*>(ep.native()),
+		sizeof(typename endpoint::native_type)) == -1)
+	{
+		ec = CoAP::errc::socket_error;
+	}
+}
+
+template<class Endpoint,
+		int Flags>
 bool
 tcp_client<Endpoint, Flags>::
 is_connected() const noexcept

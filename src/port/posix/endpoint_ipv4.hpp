@@ -26,6 +26,11 @@ class endpoint_ipv4{
 			std::memset(&addr_, 0, sizeof(native_type));
 		}
 
+		endpoint_ipv4(uint16_t port)
+		{
+			set(port);
+		}
+
 		endpoint_ipv4(in_addr_t addr, std::uint16_t port)
 		{
 			set(addr, port);
@@ -61,6 +66,13 @@ class endpoint_ipv4{
 			addr_.sin_addr.s_addr = addr;
 
 			return true;
+		}
+
+		void set(uint16_t port) noexcept
+		{
+			addr_.sin_family = AF_INET;
+			addr_.sin_addr.s_addr = 0;
+			addr_.sin_port = htons(port);
 		}
 
 		native_type* native() noexcept{ return &addr_; }

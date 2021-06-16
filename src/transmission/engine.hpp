@@ -166,9 +166,9 @@ class engine
 				CoAP::Error& ec) noexcept;
 
 		void check_transactions() noexcept;
-		bool run(CoAP::Error& ec);
+		bool run(CoAP::Error& ec) noexcept;
 		template<int BlockTimeMs>
-		bool run(CoAP::Error& ec);
+		bool run(CoAP::Error& ec) noexcept;
 		bool operator()(CoAP::Error& ec) noexcept;
 	private:
 		template<bool CheckEndpoint = true, bool CheckToken = false>

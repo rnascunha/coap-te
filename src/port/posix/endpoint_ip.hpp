@@ -25,6 +25,11 @@ class endpoint_ip{
 			std::memset(&addr_, 0, sizeof(native_type));
 		}
 
+		endpoint_ip(sa_family_t family, uint16_t port)
+		{
+			set(family, port);
+		}
+
 		endpoint_ip(in_addr_t addr, std::uint16_t port)
 		{
 			set(addr, port);
@@ -89,8 +94,27 @@ class endpoint_ip{
 				return true;
 			}
 
-			std::memset(&addr, 0, sizeof(native_type));
+			std::memset(&addr_, 0, sizeof(native_type));
 			return false;
+		}
+
+		void set(sa_family_t family, uint16_t port) noexcept
+		{
+			family_ = family;
+			if(family == AF_INET)
+			{
+				struct sockaddr_in* addr = reinterpret_cast<struct sockaddr_in*>(&addr_);
+				addr->sin_family = AF_INET;
+				addr->sin_addr.s_addr = 0;
+				addr->sin_port = htons(port);
+			}
+			else
+			{
+				struct sockaddr_in6* addr = reinterpret_cast<struct sockaddr_in6*>(&addr_);
+				addr->sin6_family = AF_INET6;
+				std::memset(&addr->sin6_addr, 0, sizeof(addr->sin6_addr));
+				addr->sin6_port = htons(port);
+			}
 		}
 
 		native_type* native() noexcept{ return &addr_; }

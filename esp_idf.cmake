@@ -18,6 +18,10 @@ else()
 	set(CONFIG_COAP_TE_USE_COLOR 0)
 endif()
 
+if(NOT CONFIG_COAP_TE_USE_COLOR)
+	set(CONFIG_COAP_TE_USE_COLOR 5)
+endif()
+
 target_compile_options(${COMPONENT_LIB} 
 						PRIVATE -std=gnu++17
 						PUBLIC 

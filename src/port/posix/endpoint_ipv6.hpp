@@ -31,6 +31,11 @@ class endpoint_ipv6{
 			std::memset(&addr_, 0, sizeof(native_type));
 		}
 
+		endpoint_ipv6(std::uint16_t port)
+		{
+			set(port);
+		}
+
 		endpoint_ipv6(in6_addr addr, std::uint16_t port)
 		{
 			set(addr, port);
@@ -69,6 +74,13 @@ class endpoint_ipv6{
 			std::memcpy(&addr_.sin6_addr, &addr, sizeof(in6_addr));
 
 			return true;
+		}
+
+		void set(uint16_t port) noexcept
+		{
+			addr_.sin6_family = AF_INET6;
+			std::memset(&addr_.sin6_addr, 0, sizeof(addr_.sin6_addr));
+			addr_.sin6_port = htons(port);
 		}
 
 		native_type* native() noexcept{ return &addr_; }

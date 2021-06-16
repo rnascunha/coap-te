@@ -236,7 +236,7 @@ template<typename Connection,
 	typename Resource>
 bool
 engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
-run(CoAP::Error& ec)
+run(CoAP::Error& ec) noexcept
 {
 	endpoint ep;
 	std::size_t size = conn_.receive(buffer_, packet_size, ep, ec);
@@ -262,7 +262,7 @@ template<typename Connection,
 template<int BlockTimeMs>
 bool
 engine<Connection, MessageID, TransactionList, Callback_Default_Functor, Resource>::
-run(CoAP::Error& ec)
+run(CoAP::Error& ec) noexcept
 {
 	endpoint ep;
 	std::size_t size = conn_.template receive<BlockTimeMs>(buffer_, packet_size, ep, ec);

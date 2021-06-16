@@ -31,15 +31,17 @@ void print_usage(const char* name)
 {
 	std::printf(R"(How to use:
 	%s [-N] [-T=<token>] [-c=<get|post|put|delete|fetch|patch|ipatch>] 
-		[-a=<ack_timeout>] [-R=<retransmist_count>] [-r=<ack_random_factor>] 
-		[-f=<payload>] 
+		[-a=<ack_timeout>] [-R=<retransmist_count>] [-r=<ack_random_factor>]
+		[-h=<host>] [-f=<payload>] 
 		'<coap|coap+tcp>://<host>:<port>/<path>?<query>'
 	-N send non-confirmable message
 	-T=<token> set token
-	-c=<method> request method. Can be: get|post|put|delete|fetch|patch|ipatch
-	-a=<ack_timeout> time to wait for first ack, before retransmit (float value)
-	-R=<retransmit_count> how many retransmit attempt will be made (interger value)
-	-r=<ack_random_factor> factor to calculate retransmit time (float value)
+	-c=<method> request method. Can be: get|post|put|delete|fetch|patch|ipatch. Default: get
+	-a=<ack_timeout> time to wait for first ack, before retransmit (float value). Default: 2.0s
+	-R=<retransmit_count> how many retransmit attempt will be made (interger value). Default 4
+	-r=<ack_random_factor> factor to calculate retransmit time (float value). Default: 1.5
+	-h=<host> adds option 'uri-host' with value <host>
+	-p=<bind_port> bind local address to port
 	-f=<payload> payload of request
 )", name);
 	std::printf("Examples:\n");
@@ -210,7 +212,9 @@ void request_tcp_cb(void const* trans, CoAP::Message::Reliable::message const* r
 	response_flag = true;
 }
 
-void run_udp(endpoint const& ep, CoAP::Transmission::configure tconfig,
+void run_udp(endpoint const& ep,
+		uint16_t port,
+		CoAP::Transmission::configure tconfig,
 		CoAP::Message::type mtype, CoAP::Message::code mcode,
 		const void* token, std::size_t token_len,
 		CoAP::Message::Option::List& list_op,
@@ -226,6 +230,17 @@ void run_udp(endpoint const& ep, CoAP::Transmission::configure tconfig,
 	{
 		error(ec, "open");
 		exit_error("Open error");
+	}
+
+	if(port)
+	{
+		endpoint bind_ep{ep.family(), port};
+		conn.bind(bind_ep, ec);
+		if(ec)
+		{
+			error(ec, "bind");
+			exit_error("Bind error");
+		}
 	}
 
 	engine_udp eng(std::move(conn), CoAP::Message::message_id{});
@@ -259,6 +274,7 @@ void run_udp(endpoint const& ep, CoAP::Transmission::configure tconfig,
 }
 
 void run_tcp(endpoint& ep,
+		uint16_t port,
 		CoAP::Message::code mcode,
 		const void* token, std::size_t token_len,
 		CoAP::Message::Option::List& list_op,
@@ -275,6 +291,17 @@ void run_tcp(endpoint& ep,
 	{
 		error(ec, "open");
 		exit_error("Open error");
+	}
+
+	if(port)
+	{
+		endpoint bind_ep{ep.family(), port};
+		eng.get_connection().bind(bind_ep, ec);
+		if(ec)
+		{
+			error(ec, "bind");
+			exit_error("Bind error");
+		}
 	}
 
 	engine_tcp::request<> req;
@@ -321,10 +348,14 @@ int main(int argc, char** argv)
 		*payload_str = nullptr,
 		*ack_timeout_str = nullptr,
 		*retransmit_str = nullptr,
-		*ack_factor_str = nullptr;
+		*ack_factor_str = nullptr,
+		*local_port_str = nullptr,
+		*host_str = nullptr;
 	std::size_t token_len = 0;
+	std::uint16_t port = 0;
 	CoAP::Message::type mtype = CoAP::Message::type::confirmable;
 	CoAP::Message::code mcode = CoAP::Message::code::get;
+	CoAP::Message::Option::node	host_op;
 	CoAP::Transmission::configure tconfig = {
 			/*.ack_timeout_seconds 			= */2.0,	//ACK_TIMEOUT
 			/*.ack_random_factor 			= */1.5,	//ACK_RANDOM_FACTOR
@@ -404,6 +435,23 @@ int main(int argc, char** argv)
 		std::printf("Ack factor: %f\n", tconfig.ack_random_factor);
 	}
 
+	if(cmd("h", host_str))
+	{
+		CoAP::Message::Option::create(host_op.value, CoAP::Message::Option::code::uri_host, host_str);
+	}
+
+	if(cmd("p", local_port_str))
+	{
+		char* tail = nullptr;
+		long portv = std::strtol(local_port_str, &tail, 10);
+		if((*tail != '\0' || portv < 0) ||
+			(portv < 1024 || portv > 65535))
+		{
+			exit_error("Bind port must be a interger > 1024 and < 65535");
+		}
+		port = static_cast<uint16_t>(portv);
+	}
+
 	//Uri
 	uri_str = cmd[0];
 	if(!uri_str)
@@ -411,12 +459,13 @@ int main(int argc, char** argv)
 		exit_error("URI not set");
 	}
 
-	std::printf("Args: type: %s/token: %s/ack_timeout: %s/retransmit: %s/factor: %s/URI: %s\n",
+	std::printf("Args: type: %s/token: %s/ack_timeout: %s/retransmit: %s/factor: %s/URI: %s/uri-host: %s/bind port: %u\n",
 			mtype == CoAP::Message::type::confirmable ? "CON" : "NON",
 			token ? token : "null", ack_timeout_str ? ack_timeout_str : "null",
 			retransmit_str ? retransmit_str : "null", ack_factor_str ? ack_factor_str : "null",
-			uri_str);
-
+			uri_str,
+			host_op.value ? static_cast<const char*>(host_op.value.value) : "<no-host>",
+			port);
 	/**
 	 * End arguments read
 	 */
@@ -471,6 +520,8 @@ int main(int argc, char** argv)
 		exit_error("Invalid URI");
 	}
 
+	if(host_op.value) list.add(host_op);
+
 	printf("\nPrinting options...\n");
 	CoAP::Debug::print_options(list.head());
 
@@ -495,10 +546,10 @@ int main(int argc, char** argv)
 	{
 		using namespace CoAP::URI;
 		case scheme::coap:
-			run_udp(ep, tconfig, mtype, mcode, token, token_len, list, payload_str, 0);
+			run_udp(ep, port, tconfig, mtype, mcode, token, token_len, list, payload_str, 0);
 			break;
 		case scheme::coap_tcp:
-			run_tcp(ep, mcode, token, token_len, list, payload_str, 0);
+			run_tcp(ep, port, mcode, token, token_len, list, payload_str, 0);
 			break;
 		case scheme::coaps:
 		case scheme::coaps_tcp:
