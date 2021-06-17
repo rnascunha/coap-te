@@ -44,7 +44,7 @@ std::size_t discovery(ResourceNode const& node,
  * Resource Discovery criteria
  */
 using no_criteria_type = void(*)() noexcept;
-void no_criteria() noexcept{}
+inline void no_criteria() noexcept{}
 template<typename ResourceNode>
 bool default_criteria(ResourceNode const&, path_list const&) noexcept;
 

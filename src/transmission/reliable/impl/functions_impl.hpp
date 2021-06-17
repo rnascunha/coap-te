@@ -70,7 +70,10 @@ std::size_t make_abort_message(CoAP::Message::Option::option_abort& op,
 	return fac.serialize<SetLength, false, false, false>(static_cast<std::uint8_t*>(buffer), buffer_len, ec);
 }
 
-void process_signaling_csm(csm_configure& csm,
+/**
+ * REMOVE THIS FUNCTION AS INLINE
+ */
+inline void process_signaling_csm(csm_configure& csm,
 		CoAP::Message::Reliable::message const& msg) noexcept
 {
 	using namespace CoAP::Message;
