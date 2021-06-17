@@ -42,7 +42,7 @@ void print_usage(const char* name)
 	-r=<ack_random_factor> factor to calculate retransmit time (float value). Default: 1.5
 	-h=<host> adds option 'uri-host' with value <host>
 	-p=<bind_port> bind local address to port
-	-f=<payload> payload of request
+	-f=<payload> payload of request (just string for now)
 )", name);
 	std::printf("Examples:\n");
 	std::printf("\t%s coap://[::1]:5683/path/to/resource?query=key\n", name);
@@ -351,7 +351,7 @@ int main(int argc, char** argv)
 		*ack_factor_str = nullptr,
 		*local_port_str = nullptr,
 		*host_str = nullptr;
-	std::size_t token_len = 0;
+	std::size_t token_len = 0, payload_len = 0;
 	std::uint16_t port = 0;
 	CoAP::Message::type mtype = CoAP::Message::type::confirmable;
 	CoAP::Message::code mcode = CoAP::Message::code::get;
@@ -452,6 +452,11 @@ int main(int argc, char** argv)
 		port = static_cast<uint16_t>(portv);
 	}
 
+	if(cmd("f", payload_str))
+	{
+		payload_len = std::strlen(payload_str);
+	}
+
 	//Uri
 	uri_str = cmd[0];
 	if(!uri_str)
@@ -459,13 +464,14 @@ int main(int argc, char** argv)
 		exit_error("URI not set");
 	}
 
-	std::printf("Args: type: %s/token: %s/ack_timeout: %s/retransmit: %s/factor: %s/URI: %s/uri-host: %s/bind port: %u\n",
+	std::printf("Args: type: %s/token: %s\nack_timeout: %s/retransmit: %s/factor: %s\nURI: %s/uri-host: %s/bind port: %u\npayload: %s\n",
 			mtype == CoAP::Message::type::confirmable ? "CON" : "NON",
 			token ? token : "null", ack_timeout_str ? ack_timeout_str : "null",
 			retransmit_str ? retransmit_str : "null", ack_factor_str ? ack_factor_str : "null",
 			uri_str,
 			host_op.value ? static_cast<const char*>(host_op.value.value) : "<no-host>",
-			port);
+			port,
+			payload_str ? payload_str : "<none>");
 	/**
 	 * End arguments read
 	 */
@@ -546,10 +552,10 @@ int main(int argc, char** argv)
 	{
 		using namespace CoAP::URI;
 		case scheme::coap:
-			run_udp(ep, port, tconfig, mtype, mcode, token, token_len, list, payload_str, 0);
+			run_udp(ep, port, tconfig, mtype, mcode, token, token_len, list, payload_str, payload_len);
 			break;
 		case scheme::coap_tcp:
-			run_tcp(ep, port, mcode, token, token_len, list, payload_str, 0);
+			run_tcp(ep, port, mcode, token, token_len, list, payload_str, payload_len);
 			break;
 		case scheme::coaps:
 		case scheme::coaps_tcp:

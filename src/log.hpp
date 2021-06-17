@@ -102,12 +102,12 @@ constexpr std::size_t none(Args&& ... args) noexcept
 	return log<type::none, EOL>(std::forward<Args>(args)...);
 }
 
-std::size_t error(CoAP::Error& ec, const char* what = nullptr) noexcept
+inline std::size_t error(CoAP::Error& ec, const char* what = nullptr) noexcept
 {
 	return log<type::error>("[%d] %s (%s)", ec.value(), ec.message(), what ? what : "");
 }
 
-std::size_t error(module const& mod, CoAP::Error& ec, const char* what = nullptr) noexcept
+inline std::size_t error(module const& mod, CoAP::Error& ec, const char* what = nullptr) noexcept
 {
 	return log<type::error>(mod, "[%d] %s (%s)", ec.value(), ec.message(), what ? what : "");
 }
