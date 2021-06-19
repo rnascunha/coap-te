@@ -464,14 +464,17 @@ int main(int argc, char** argv)
 		exit_error("URI not set");
 	}
 
-	std::printf("Args: type: %s/token: %s\nack_timeout: %s/retransmit: %s/factor: %s\nURI: %s/uri-host: %s/bind port: %u\npayload: %s\n",
+	std::printf("Args: type: %s/token: %s\n"
+			"ack_timeout: %s/retransmit: %s/factor: %s\n"
+			"URI: %s/uri-host: %s|bind port: %u\n"
+			"payload[%zu]: %s\n",
 			mtype == CoAP::Message::type::confirmable ? "CON" : "NON",
 			token ? token : "null", ack_timeout_str ? ack_timeout_str : "null",
 			retransmit_str ? retransmit_str : "null", ack_factor_str ? ack_factor_str : "null",
 			uri_str,
 			host_op.value ? static_cast<const char*>(host_op.value.value) : "<no-host>",
 			port,
-			payload_str ? payload_str : "<none>");
+			payload_len, payload_str ? payload_str : "<none>");
 	/**
 	 * End arguments read
 	 */

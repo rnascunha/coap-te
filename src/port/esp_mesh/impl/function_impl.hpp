@@ -9,8 +9,6 @@
 
 #include "esp_log.h"
 
-#define PROXY_TAG	"PROXY_MESH"
-
 namespace CoAP{
 namespace Port{
 namespace ESP_Mesh{
@@ -46,15 +44,15 @@ void proxy_forward_udp_mesh(CoAP::Port::POSIX::udp<Endpoint>& socket,
 
 	if(err == ESP_OK)
 	{
-//		if constexpr (AddHost)
-//		{
-//			data.size = CoAP::Port::ESP_Mesh::add_host(data.data,
-//																data.size,
-//																buffer_size,
-//																from,
-//																ec);
-//			if(ec) return;
-//		}
+		if constexpr (AddHost)
+		{
+			data.size = CoAP::Port::ESP_Mesh::add_host(data.data,
+																data.size,
+																buffer_size,
+																from,
+																ec);
+			if(ec) return;
+		}
 
 		socket.send(data.data, data.size, ep_server, ec);
 		if(ec) return;
