@@ -53,7 +53,7 @@ open(endpoint& ep, CoAP::Error& ec) noexcept
 		sizeof(typename endpoint::native_type)) == -1)
 	{
 		close();
-		ec = CoAP::errc::socket_error;
+		ec = CoAP::errc::socket_bind;
 		return;
 	}
 
@@ -362,7 +362,7 @@ receive(handler socket, void* buffer, std::size_t buffer_len, CoAP::Error& ec) n
 				return 0;
 			}
 		}
-		ec = CoAP::errc::socket_error;
+		ec = CoAP::errc::socket_receive;
 		return 0;
 	}
 	return bytes;
@@ -392,7 +392,7 @@ send(handler to_socket, const void* buffer, std::size_t buffer_len, CoAP::Error&
 				return 0;
 			}
 		}
-		ec = CoAP::errc::socket_error;
+		ec = CoAP::errc::socket_send;
 		return 0;
 	}
 	return size;

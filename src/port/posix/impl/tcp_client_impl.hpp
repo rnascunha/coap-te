@@ -150,7 +150,7 @@ bind(endpoint& ep, CoAP::Error& ec) noexcept
 		reinterpret_cast<struct sockaddr const*>(ep.native()),
 		sizeof(typename endpoint::native_type)) == -1)
 	{
-		ec = CoAP::errc::socket_error;
+		ec = CoAP::errc::socket_bind;
 	}
 }
 
@@ -210,7 +210,7 @@ send(const void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 #endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	if(sent < 0)
 	{
-		ec = CoAP::errc::socket_error;
+		ec = CoAP::errc::socket_send;
 		return 0;
 	}
 
@@ -239,7 +239,7 @@ receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 #endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 				return 0;
 		}
-		ec = CoAP::errc::socket_error;
+		ec = CoAP::errc::socket_receive;
 		return 0;
 	}
 	return recv;
@@ -269,7 +269,7 @@ receive(void* buffer, std::size_t buffer_len, CoAP::Error& ec) noexcept
 #endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 	if(s < 0)
 	{
-		ec = CoAP::errc::socket_error;
+		ec = CoAP::errc::socket_receive;
 		return 0;
 	}
 	if(FD_ISSET(socket_, &rfds))
