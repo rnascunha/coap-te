@@ -38,3 +38,8 @@ set(SRC_PORT_POSIX ${SRC_DIR_PORT}/posix/functions.cpp)
 set(SRC_PORT_ESP_MESH ${SRC_DIR_PORT}/esp_mesh/function.cpp)
 
 set(MAIN_INCLUDE_DIRS ./src ./third/tree_trunks/src/include)
+
+set(JSON_SUPPORT_DIR	${SRC_DIR}/helper/json)
+set(SRC_JSON_SUPPORT	${JSON_SUPPORT_DIR}/convert.cpp
+						${JSON_SUPPORT_DIR}/util.cpp
+						)

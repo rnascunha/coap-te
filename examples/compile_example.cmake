@@ -35,6 +35,8 @@ set(EXAMPLES_LIST
 				${EXAMPLES_DIR}/port/tcp_server.cpp
 				${EXAMPLES_DIR}/coap_client.cpp
 			)
+			
+set(EXAMPLES_LIST_JSON ${EXAMPLES_DIR}/json/convert_to_json.cpp)
 
 #List of examples that must link to network at emscripten
 list(APPEND emscripten_net_list raw_transaction
@@ -106,5 +108,22 @@ foreach(example ${EXAMPLES_LIST})
 	
 	#Linking example to CoAP-te library
 	target_link_libraries(${EXAMPLE_OUT} ${PROJECT_NAME})
-
 endforeach()
+
+if(JSON_SUPPORT)
+	foreach(example ${EXAMPLES_LIST_JSON})
+		string(REGEX REPLACE "./.*/" "" EXAMPLE_OUT ${example})
+		string(REGEX REPLACE "\.cpp$" "" EXAMPLE_OUT ${EXAMPLE_OUT})
+		message("Compiling: ${EXAMPLE_OUT}")
+	
+		add_executable(${EXAMPLE_OUT} ${example})
+		set_target_properties(${EXAMPLE_OUT} PROPERTIES
+		    CXX_STANDARD 17
+		    CXX_STANDARD_REQUIRED ON
+		    CXX_EXTENSIONS ON
+		    COMPILE_FLAGS -DCOAP_TE_JSON_HELPER=1
+		)
+		
+		target_link_libraries(${EXAMPLE_OUT} ${PROJECT_NAME})
+	endforeach()
+endif()

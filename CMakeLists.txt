@@ -17,6 +17,12 @@ if(DEFINED ERROR_MESSAGE)
 	set(USE_ERROR_MESSAGE ${ERROR_MESSAGE})
 endif()
 
+set(JSON_SUPPORT		FALSE)
+if(DEFINED 	RAPIDJSON_PATH)
+	set(RAPIDJSON_ROOT	${RAPIDJSON_PATH})
+	set(JSON_SUPPORT	TRUE)
+endif()
+
 #################################################
 # Checking if is ESP IDF build					#
 #################################################
@@ -100,6 +106,13 @@ list(APPEND MAIN_SRC ${SRC_DIR_PORT}/c_standard_port.cpp)
 if(WIN32 OR EMSCRIPTEN)
 	message("Setting SELECT call implmenetation")
 	add_definitions(-DCOAP_TE_USE_SELECT=1)	
+endif()
+
+if(JSON_SUPPORT)
+	message("Added JSON support")
+	include_directories(${RAPIDJSON_ROOT})
+	list(APPEND MAIN_SRC ${SRC_JSON_SUPPORT})
+	add_definitions(-DCOAP_TE_JSON_HELPER=1)
 endif()
 				
 add_library(${PROJECT_NAME} ${MAIN_SRC} ${SRC_PORT_POSIX})

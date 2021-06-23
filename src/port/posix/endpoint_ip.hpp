@@ -119,7 +119,7 @@ class endpoint_ip{
 
 		native_type* native() noexcept{ return &addr_; }
 
-		const char* address(char* addr_str, std::size_t len = INET6_ADDRSTRLEN) noexcept
+		const char* address(char* addr_str, std::size_t len = INET6_ADDRSTRLEN) const noexcept
 		{
 			if(family_ == AF_INET)
 			{
@@ -133,7 +133,7 @@ class endpoint_ip{
 			}
 		}
 
-		const char* host(char* host_addr, std::size_t len = INET6_ADDRSTRLEN) noexcept
+		const char* host(char* host_addr, std::size_t len = INET6_ADDRSTRLEN) const noexcept
 		{
 			return address(host_addr, len);
 		}
@@ -168,7 +168,7 @@ class endpoint_ip{
 		bool copy_sock_address(Handler socket) noexcept
 		{
 			socklen_t size = sizeof(native_type);
-			if(::getpeername(socket,
+			if(::getsockname(socket,
 					reinterpret_cast<sockaddr*>(&addr_),
 					&size) == -1)
 				return false;
