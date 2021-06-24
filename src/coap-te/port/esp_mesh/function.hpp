@@ -3,11 +3,12 @@
 
 #include <cstdlib>
 #include "../../error.hpp"
-#include <esp_mesh.h>
 #include "../../message/types.hpp"
 
+#include <esp_mesh.h>
+
 #if COAP_TE_PORT_POSIX == 1
-#include "port/posix/udp_socket.hpp"
+#include "../posix/udp_socket.hpp"
 #endif /* COAP_TE_PORT_POSIX == 1 */
 
 namespace CoAP{
