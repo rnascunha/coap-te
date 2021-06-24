@@ -2,9 +2,9 @@
 #define COAP_TE_PORT_ESP_MESH_FUNCTION_HPP__
 
 #include <cstdlib>
-#include "error.hpp"
-#include "esp_mesh.h"
-#include "message/types.hpp"
+#include "../../error.hpp"
+#include <esp_mesh.h>
+#include "../../message/types.hpp"
 
 #if COAP_TE_PORT_POSIX == 1
 #include "port/posix/udp_socket.hpp"

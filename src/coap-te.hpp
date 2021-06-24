@@ -7,6 +7,9 @@
 //Defines
 #include "coap-te/defines/defaults.hpp"
 
+//Error
+#include "coap-te/error.hpp"
+
 //Message
 #include "coap-te/message/types.hpp"
 #include "coap-te/message/codes.hpp"

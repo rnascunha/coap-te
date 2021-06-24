@@ -3,9 +3,8 @@
 
 #include "../function.hpp"
 
-#include "message/types.hpp"
-#include "message/parser.hpp"
-#include "debug/print_message.hpp"
+#include "../../../message/types.hpp"
+#include "../../../message/parser.hpp"
 
 #include "esp_log.h"
 

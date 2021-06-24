@@ -3,7 +3,7 @@
 
 #include <cstdlib>
 #include <cstdint>
-#include "error.hpp"
+#include "../../error.hpp"
 
 #include "endpoint_mesh.hpp"
 

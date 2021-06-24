@@ -1,11 +1,11 @@
 #include <cstdio>
 
 #include "function.hpp"
-#include "error.hpp"
-#include "message/types.hpp"
-#include "message/parser.hpp"
-#include "message/serialize.hpp"
-#include "message/options/options.hpp"
+#include "../../error.hpp"
+#include "../../message/types.hpp"
+#include "../../message/parser.hpp"
+#include "../../message/serialize.hpp"
+#include "../../message/options/options.hpp"
 
 #ifndef MACSTR
 #define MACSTR "%02x:%02x:%02x:%02x:%02x:%02x"
