@@ -32,7 +32,7 @@
 #include <cstdint>
 #include <cstdio>				//printf
 
-#include "log.hpp"				//Log header
+#include "coap-te/log.hpp"				//Log header
 #include "coap-te.hpp"			//Convenient header
 #include "coap-te-debug.hpp"	//Convenient debug header
 

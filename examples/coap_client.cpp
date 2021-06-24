@@ -6,7 +6,7 @@
 
 #include "arguments.hpp"
 
-#include "log.hpp"
+#include "coap-te/log.hpp"
 #include "coap-te.hpp"
 #include "coap-te-debug.hpp"
 

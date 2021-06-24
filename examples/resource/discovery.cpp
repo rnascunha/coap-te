@@ -3,15 +3,15 @@
  * information, based on RFC6690.
  */
 
-#include "error.hpp"
-#include "log.hpp"
-#include "internal/tree.hpp"
-#include "resource/types.hpp"
-#include "resource/resource.hpp"
-#include "resource/discovery.hpp"
-#include "resource/link_format.hpp"
+#include "coap-te/error.hpp"
+#include "coap-te/log.hpp"
+#include "coap-te/internal/tree.hpp"
+#include "coap-te/resource/types.hpp"
+#include "coap-te/resource/resource.hpp"
+#include "coap-te/resource/discovery.hpp"
+#include "coap-te/resource/link_format.hpp"
 
-#include "debug/print_resource.hpp"
+#include "coap-te/debug/print_resource.hpp"
 
 #define BUFFER_LEN		512
 

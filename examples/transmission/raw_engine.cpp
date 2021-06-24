@@ -10,7 +10,7 @@
  * simple request, and print the response (if any).
  */
 
-#include "log.hpp"				//Log header
+#include "coap-te/log.hpp"				//Log header
 #include "coap-te.hpp"			//Convenient header
 #include "coap-te-debug.hpp"	//Convenient debug header
 
@@ -71,7 +71,7 @@ using transaction_t = CoAP::Transmission::transaction<
  * As trasaction_list_vector uses std::vector (i.e., dynamic allocation) as
  * internal container, you must explicitly included it
  */
-#include "transmission/transaction_list_vector.hpp"
+#include "coap-te/transmission/transaction_list_vector.hpp"
 
 /**
  * This transaction list implementation can hold a unlimited number

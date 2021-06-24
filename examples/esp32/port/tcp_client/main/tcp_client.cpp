@@ -19,8 +19,8 @@
 
 #include "example_init.hpp" //helper initialization functions
 
-#include "error.hpp"
-#include "port/posix/tcp_client.hpp"
+#include "coap-te/error.hpp"
+#include "coap-te/port/posix/tcp_client.hpp"
 
 using namespace CoAP;
 
@@ -31,13 +31,13 @@ using namespace CoAP;
 /**
  * IPv6 definitions
  */
-#include "port/posix/endpoint_ipv6.hpp"
+#include "coap-te/port/posix/endpoint_ipv6.hpp"
 using endpoint = Port::POSIX::endpoint_ipv6;
 #else
 /**
  * IPv4 definitions
  */
-#include "port/posix/endpoint_ipv4.hpp"
+#include "coap-te/port/posix/endpoint_ipv4.hpp"
 using endpoint = Port::POSIX::endpoint_ipv4;
 #endif /* USE_IPV6 */
 

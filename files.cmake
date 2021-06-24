@@ -1,5 +1,5 @@
 
-set(SRC_DIR ./src)
+set(SRC_DIR ./src/coap-te)
 set(SRC_DIR_MESSAGE ${SRC_DIR}/message)
 set(SRC_DIR_TRANSMISSION ${SRC_DIR}/transmission)
 set(SRC_DIR_DEBUG ${SRC_DIR}/debug)

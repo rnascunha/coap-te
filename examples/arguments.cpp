@@ -18,7 +18,7 @@ bool Command_Line::get(const char* arg, char*& value) const noexcept
 				{
 					if(*comp == '\0')
 					{
-						value = "";//nullptr;
+						value = comp;
 						return true;
 					}
 					else if(*comp == '=')

@@ -23,6 +23,10 @@ if(DEFINED 	RAPIDJSON_PATH)
 	set(JSON_SUPPORT	TRUE)
 endif()
 
+if(DEFINED COAP_TE_JSON_SUPPORT AND COAP_TE_JSON_SUPPORT)
+	set(JSON_SUPPORT	TRUE)
+endif()
+
 #################################################
 # Checking if is ESP IDF build					#
 #################################################
@@ -113,6 +117,10 @@ if(JSON_SUPPORT)
 	include_directories(${RAPIDJSON_ROOT})
 	list(APPEND MAIN_SRC ${SRC_JSON_SUPPORT})
 	add_definitions(-DCOAP_TE_JSON_HELPER=1)
+endif()
+
+if(DEFINED COAP_TE_JSON_HELPER)
+	message("TESTE")
 endif()
 				
 add_library(${PROJECT_NAME} ${MAIN_SRC} ${SRC_PORT_POSIX})

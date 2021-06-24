@@ -15,15 +15,15 @@
 #include <cstdio>
 #include <cstdlib>
 
-#include "defines/defaults.hpp"
+#include "coap-te/defines/defaults.hpp"
 
-#include "uri/types.hpp"
-#include "uri/decompose.hpp"
+#include "coap-te/uri/types.hpp"
+#include "coap-te/uri/decompose.hpp"
 
-#include "debug/print_options.hpp"
-#include "debug/print_uri.hpp"
+#include "coap-te/debug/print_options.hpp"
+#include "coap-te/debug/print_uri.hpp"
 
-#include "message/options/options.hpp"
+#include "coap-te/message/options/options.hpp"
 
 #define BUFFER_LEN		512
 

@@ -6,7 +6,7 @@
 #include <cstring>
 #include <cstdlib>
 
-#include "internal/decoder.hpp"
+#include "coap-te/internal/decoder.hpp"
 
 //#define USE_SAME_BUFFER
 

@@ -20,8 +20,8 @@
 
 #include "example_init.hpp"
 
-#include "error.hpp"
-#include "port/posix/udp_socket.hpp"
+#include "coap-te/error.hpp"
+#include "coap-te/port/posix/udp_socket.hpp"
 
 using namespace CoAP;
 
@@ -32,14 +32,14 @@ using namespace CoAP;
 /**
  * IPv6 definitions
  */
-#include "port/posix/endpoint_ipv6.hpp"
+#include "coap-te/port/posix/endpoint_ipv6.hpp"
 using endpoint = Port::POSIX::endpoint_ipv6;
 #define BIND_ADDR		IN6ADDR_ANY_INIT
 #else
 /**
  * IPv4 definitions
  */
-#include "port/posix/endpoint_ipv4.hpp"
+#include "coap-te/port/posix/endpoint_ipv4.hpp"
 using endpoint = Port::POSIX::endpoint_ipv4;
 #define BIND_ADDR		INADDR_ANY
 #endif /* USE_IPV6 */

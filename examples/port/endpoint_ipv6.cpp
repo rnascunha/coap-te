@@ -1,8 +1,8 @@
-#include "port/posix/endpoint_ipv6.hpp"
+#include "coap-te/port/posix/endpoint_ipv6.hpp"
 #include <cstdint>
 #include <cstdio>
 
-#include "error.hpp"
+#include "coap-te/error.hpp"
 
 using namespace CoAP::Port::POSIX;
 

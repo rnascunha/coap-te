@@ -9,9 +9,9 @@
 
 #define USE_FUNCTION
 
-#include "internal/encoder.hpp"
+#include "coap-te/internal/encoder.hpp"
 #ifdef USE_FUNCTION
-#include "internal/ascii.hpp"
+#include "coap-te/internal/ascii.hpp"
 #endif
 
 int main()

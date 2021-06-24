@@ -7,7 +7,7 @@
  * branchs! Be careful!
  */
 
-#include "internal/tree.hpp"
+#include "coap-te/internal/tree.hpp"
 #include <cstdlib>
 #include <cstdio>
 

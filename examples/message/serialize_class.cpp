@@ -15,7 +15,7 @@
 
 #include <cstdint>
 
-#include "log.hpp"			//Log
+#include "coap-te/log.hpp"			//Log
 #include "coap-te.hpp"		//Convenient header
 #include "coap-te-debug.hpp" //Convenient debug header
 

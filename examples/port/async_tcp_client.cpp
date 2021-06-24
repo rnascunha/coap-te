@@ -20,8 +20,8 @@
 #include <cstdio>
 #include <cstdint>
 
-#include "error.hpp"
-#include "port/posix/tcp_client.hpp"
+#include "coap-te/error.hpp"
+#include "coap-te/port/posix/tcp_client.hpp"
 
 /**
  * Using IPv6. Commenting the following line to use IPv4
@@ -37,14 +37,14 @@ using namespace CoAP;
 /**
  * IPv6 definitions
  */
-#include "port/posix/endpoint_ipv6.hpp"
+#include "coap-te/port/posix/endpoint_ipv6.hpp"
 using endpoint = Port::POSIX::endpoint_ipv6;
 #define LOCALHOST_ADDR		"::1"
 #else
 /**
  * IPv4 definitions
  */
-#include "port/posix/endpoint_ipv4.hpp"
+#include "coap-te/port/posix/endpoint_ipv4.hpp"
 using endpoint = Port::POSIX::endpoint_ipv4;
 #define LOCALHOST_ADDR		"127.0.0.1"
 #endif /* USE_IPV6 */

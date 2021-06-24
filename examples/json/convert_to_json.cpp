@@ -12,15 +12,11 @@
 
 #include <cstdint>
 
-#include "log.hpp"				//Log header
+#include "coap-te/log.hpp"				//Log header
 #include "coap-te.hpp"			//Convenient header
 #include "coap-te-debug.hpp"	//Convenient debug header
 
 #include <string>
-/**
- * Header to use the convert to JSON functions
- */
-#include "helper/json/convert.hpp"
 
 #define BUFFER_LEN		512		//Size of buffer
 
