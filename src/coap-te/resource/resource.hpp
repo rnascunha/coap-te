@@ -1,6 +1,7 @@
 #ifndef COAP_TE_RESOURCE_HPP__
 #define COAP_TE_RESOURCE_HPP__
 
+#include <type_traits>
 #include "../defines/defaults.hpp"
 #include <cstring>
 #include "../message/codes.hpp"
@@ -19,9 +20,12 @@ class resource
 		static constexpr const bool has_description = HasDescription;
 		using description_type = typename std::conditional<HasDescription, const char*, empty>::type;
 		using callback_t = Callback_Functor;
+		using callback_ptr_t = typename std::conditional<std::is_function<callback_t>::value,
+									callback_t*,
+									callback_t>::type;
 
 		using callback_ex_t = typename std::conditional<UseExtraMethods, callback_t, empty>::type;
-		using callback_ex_ptr_t = typename std::conditional<UseExtraMethods, callback_t*, empty>::type;
+		using callback_ex_ptr_t = typename std::conditional<UseExtraMethods, callback_ptr_t, empty>::type;
 
 		resource(const char* path,
 				callback_t get = nullptr, callback_t post = nullptr,
@@ -184,10 +188,10 @@ class resource
 	private:
 		const char*			path_;
 
-		callback_t*			get_;
-		callback_t*			post_;
-		callback_t*			put_;
-		callback_t*			del_;
+		callback_ptr_t		get_;
+		callback_ptr_t		post_;
+		callback_ptr_t		put_;
+		callback_ptr_t		del_;
 
 #if COAP_TE_FETCH_PATCH == 1
 		callback_ex_ptr_t	fetch_;

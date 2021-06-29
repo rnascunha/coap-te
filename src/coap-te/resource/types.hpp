@@ -4,6 +4,7 @@
 #include "../transmission/response.hpp"
 #include "../message/types.hpp"
 #include "../internal/tree.hpp"
+#include <functional>
 
 namespace CoAP{
 namespace Resource{
@@ -14,12 +15,25 @@ using callback = void(
 		CoAP::Transmission::Response<Endpoint>&,
 		void*) noexcept;
 
+template<typename Endpoint>
+using callback_functional = std::function<void(
+		CoAP::Message::message const&,
+		CoAP::Transmission::Response<Endpoint>&,
+		void*)>;
+
 template<typename Message,
 		typename Response>
 using callback_reliable = void(
 		Message const&,
 		Response&,
 		void*) noexcept;
+
+template<typename Message,
+		typename Response>
+using callback_reliable_function = std::function<void(
+		Message const&,
+		Response&,
+		void*)>;
 
 namespace Link_Format{
 
