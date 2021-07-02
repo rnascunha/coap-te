@@ -6,6 +6,8 @@
 #include "../message/types.hpp"
 #include "response.hpp"
 
+#include <functional>
+
 namespace CoAP{
 namespace Transmission{
 
@@ -64,6 +66,10 @@ using default_cb = void(*)(Endpoint const&,
 using transaction_cb = void(*)(void const*,
 							CoAP::Message::message const*,
 							void*) noexcept;
+
+using transaction_cb_functional = std::function<void(void const*,
+							CoAP::Message::message const*,
+							void*)>;
 
 enum class status_t{
 	none = 0,	///< not been used
