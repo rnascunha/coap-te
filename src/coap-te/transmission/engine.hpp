@@ -160,14 +160,17 @@ class engine
 
 		std::uint16_t mid() noexcept;
 
-		template<bool UseEndpointTransMatch = false>
+		template<bool UseEndpointTransMatch = false,
+				bool UseTokenTransMatch = false>
 		void process(endpoint& ep,
 				std::uint8_t const* buffer, std::size_t buffer_len,
 				CoAP::Error& ec) noexcept;
 
 		void check_transactions() noexcept;
-		bool run(CoAP::Error& ec) noexcept;
-		template<int BlockTimeMs>
+
+		template<int BlockTimeMs = 0,
+				bool UseEndpointTransMatch = false,
+				bool UseTokenTransMatch = false>
 		bool run(CoAP::Error& ec) noexcept;
 		bool operator()(CoAP::Error& ec) noexcept;
 
@@ -185,7 +188,8 @@ class engine
 						void const* const payload, std::size_t payload_len,
 						CoAP::Error& ec) noexcept;
 	private:
-		template<bool CheckEndpoint = true, bool CheckToken = false>
+		template<bool CheckEndpoint = true,
+				bool CheckToken = false>
 		void process_response(endpoint& ep,
 				CoAP::Message::message const&,
 				CoAP::Error& ec) noexcept;
