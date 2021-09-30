@@ -44,12 +44,21 @@ send(endpoint& ep,
 		ec = CoAP::errc::no_free_slots;
 		return size;
 	}
+	ts->lock();
 
 	size = ts->template serialize<SortOptions, CheckOpOrder, CheckOpRepeat, BufferSize, Message_ID>(fac, mid, ec);
-	if(ec) return size;
+	if(ec)
+	{
+		ts->release();
+		return size;
+	}
 
 	conn_.send(ts->buffer(), ts->buffer_used(), ep, ec);
-	if(ec) return size;
+	if(ec)
+	{
+		ts->release();
+		return size;
+	}
 	ts->init(config, ep, func, data, ec);
 
 	return size;

@@ -76,6 +76,9 @@ class transaction
 
 		void cancel() noexcept;
 
+		void lock() noexcept;
+		void release() noexcept;
+
 		template<bool CheckMaxSpan = false>
 		bool check() noexcept;
 

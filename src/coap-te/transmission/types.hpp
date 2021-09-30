@@ -73,6 +73,7 @@ using transaction_cb_functional = std::function<void(void const*,
 
 enum class status_t{
 	none = 0,	///< not been used
+	to_send,	///< transaction to be send (lock before send)
 	sending,	///< in used
 	canceled,	///< canceled
 	success,	///< received a response

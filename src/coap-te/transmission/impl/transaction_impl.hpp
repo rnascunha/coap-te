@@ -30,10 +30,11 @@ clear() noexcept
 	next_expiration_time_ = 0;
 	retransmission_remaining_ = 0;
 	buffer_used_ = 0;
-	status_ = status_t::none;
 
 	if constexpr(is_external_storage)
 		buffer_ = nullptr;
+
+	status_ = status_t::none;
 }
 
 template<unsigned MaxPacketSize,
@@ -210,17 +211,24 @@ init_impl(configure const& tconfig,
 		std::uint8_t* buffer, std::size_t size,
 		Callback_Functor func, void* data, CoAP::Error& ec) noexcept
 {
-	if(status_ != status_t::none)
+	if(status_ != status_t::to_send)
 	{
 		CoAP::Log::error(transaction_mod, "Transaction been used");
 		ec = CoAP::errc::no_free_slots;
 		return false;
 	}
 
+	status_ = status_t::sending;
+
 	CoAP::Message::parse(request_, buffer, size, ec);
-	if(ec) return false;
+	if(ec)
+	{
+		release();
+		return false;
+	}
 	if(request_.mtype != CoAP::Message::type::confirmable)
 	{
+		release();
 		return true;
 	}
 
@@ -233,8 +241,6 @@ init_impl(configure const& tconfig,
 								next_expiration_time_,
 								next_expiration_time_ - static_cast<double>(CoAP::time()),
 								expiration_time_factor_);
-
-	status_ = status_t::sending;
 
 	ep_ = ep;
 	cb_ = func;
@@ -368,6 +374,27 @@ call_cb(CoAP::Message::message const* response) noexcept
 	if(cb_) cb_(this, response, data_);
 	clear();
 }
+
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
+void
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+lock() noexcept
+{
+	status_ = status_t::to_send;
+}
+
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
+void
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+release() noexcept
+{
+	status_ = status_t::none;
+}
+
 
 }//Transmission
 }//CoAP
