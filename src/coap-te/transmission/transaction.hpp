@@ -30,7 +30,14 @@ class transaction
 			return MaxPacketSize;
 		}
 
-		transaction(){}
+		transaction() = default;
+
+		/**
+		 * Copy constructable and copy assigable is a requirement to use
+		 * std::vector as a container
+		 */
+		transaction(transaction const&);
+		transaction& operator=(transaction const&) noexcept;
 
 		/**
 		 * To be used with external buffer

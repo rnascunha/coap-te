@@ -17,8 +17,8 @@ transaction_list_vector<Transaction>::
 find(std::uint16_t mid) noexcept
 {
 	for(auto& node : nodes_)
-		if(nodes_.is_busy() && nodes_.transaction.mid() == mid)
-			return &nodes_.transaction;
+		if(node.is_busy() && node.transaction.mid() == mid)
+			return &node.transaction;
 
 	return nullptr;
 }

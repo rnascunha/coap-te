@@ -24,5 +24,17 @@ message::size() const noexcept
 	return 4 + token_len + options_len + payload_len + (payload_len ? 1 : 0);
 }
 
+void
+message::clear() noexcept
+{
+	token = nullptr;
+	token_len = 0;
+	option_init = nullptr;
+	options_len = 0;
+	option_num = 0;
+	payload = nullptr;
+	payload_len = 0;
+}
+
 }//Message
 }//CoAP

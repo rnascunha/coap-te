@@ -38,9 +38,12 @@ using accept = content_format;
 static constexpr const std::uint8_t payload_marker = 0xff;
 
 struct message{
-	type			mtype;				///< Message type (check enum class type)
-	code			mcode;				///< Message code (check enum class code)
-	uint16_t		mid;				///< Message ID
+	message() = default;
+	message(message const&) = default;
+
+	type			mtype = type::confirmable;	///< Message type (check enum class type)
+	code			mcode = code::empty;		///< Message code (check enum class code)
+	uint16_t		mid = 0;					///< Message ID
 	void const*		token = nullptr;	///< Pointer to token
 	std::size_t		token_len = 0;		///< Token length
 	std::uint8_t const* option_init = nullptr;	///< Pointer to init of options
@@ -50,6 +53,7 @@ struct message{
 	std::size_t		payload_len = 0;	///< Size of payload
 
 	std::size_t size() const noexcept;
+	void clear() noexcept;
 };
 
 bool check_type(type);

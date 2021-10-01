@@ -19,6 +19,76 @@ static constexpr CoAP::Log::module transaction_mod = {
 template<unsigned MaxPacketSize,
 		typename Callback_Functor,
 		typename Endpoint>
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+transaction(transaction const& t)
+	: request_(t.request_),
+	  ep_(t.ep_),
+	  cb_(t.cb_),
+	  data_(t.data_),
+	  max_span_timeout_(t.max_span_timeout_),
+	  next_expiration_time_(t.next_expiration_time_),
+	  expiration_time_factor_(t.expiration_time_factor_),
+	  retransmission_remaining_(t.retransmission_remaining_),
+	  buffer_used_(t.buffer_used_),
+	  status_(t.status_)
+{
+	if constexpr(is_external_storage)
+	{
+		buffer_ = t.buffer_;
+	}
+	else
+	{
+		std::memcpy(buffer_, t.buffer_, t.buffer_used_);
+		request_.clear();
+
+		CoAP::Error ec;
+		if(buffer_used_)
+		{
+			CoAP::Message::parse(request_, buffer_, buffer_used_, ec);
+		}
+	}
+}
+
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
+typename transaction<MaxPacketSize, Callback_Functor, Endpoint>::transaction&
+transaction<MaxPacketSize, Callback_Functor, Endpoint>::
+operator=(transaction const& t) noexcept
+{
+	request_ = t.request_;
+	ep_ = t.ep_;
+	cb_ = t.cb_;
+	data_ = t.data_;
+	max_span_timeout_ = t.max_span_timeout_;
+	next_expiration_time_ = t.next_expiration_time_;
+	expiration_time_factor_ = t.expiration_time_factor_;
+	retransmission_remaining_ = t.retransmission_remaining_;
+	buffer_used_ = t.buffer_used_;
+	status_ = t.status_;
+
+	if constexpr(is_external_storage)
+	{
+		buffer_ = t.buffer_;
+	}
+	else
+	{
+		std::memcpy(buffer_, t.buffer_, t.buffer_used_);
+		request_.clear();
+
+		CoAP::Error ec;
+		if(buffer_used_)
+		{
+			CoAP::Message::parse(request_, buffer_, buffer_used_, ec);
+		}
+	}
+
+	return *this;
+}
+
+template<unsigned MaxPacketSize,
+		typename Callback_Functor,
+		typename Endpoint>
 void
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
 clear() noexcept
@@ -30,6 +100,7 @@ clear() noexcept
 	next_expiration_time_ = 0;
 	retransmission_remaining_ = 0;
 	buffer_used_ = 0;
+	request_.clear();
 
 	if constexpr(is_external_storage)
 		buffer_ = nullptr;
