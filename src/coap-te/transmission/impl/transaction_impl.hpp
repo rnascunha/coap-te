@@ -52,7 +52,7 @@ transaction(transaction const& t)
 template<unsigned MaxPacketSize,
 		typename Callback_Functor,
 		typename Endpoint>
-typename transaction<MaxPacketSize, Callback_Functor, Endpoint>::transaction&
+transaction<MaxPacketSize, Callback_Functor, Endpoint>&
 transaction<MaxPacketSize, Callback_Functor, Endpoint>::
 operator=(transaction const& t) noexcept
 {
