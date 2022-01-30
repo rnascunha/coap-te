@@ -40,7 +40,7 @@ endif()
 # Linux/Windows build
 #################################################
 cmake_minimum_required (VERSION 3.10)
-project (coap-te)
+project (coap-te VERSION 0.1)
 
 message(STATUS "Building OS: " ${CMAKE_SYSTEM_NAME})
 
@@ -59,7 +59,6 @@ if(MSVC)
 	message(STATUS "MSVC build")
 	set(CMAKE_CXX_FLAGS "/std:c++17 /GR- /wd4706 /wd4702 /W4") 
 	set(CMAKE_CXX_FLAGS_RELEASE "/O2")
-#	add_compile_definitions(BOOST_DATE_TIME_NO_LIB BOOST_REGEX_NO_LIB)
 else()
 	message(STATUS "NO MSVC build")
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter -fno-exceptions -fno-rtti") 
@@ -92,6 +91,11 @@ if(WIN32)
 endif()
 
 message(STATUS "Compiler: " ${CMAKE_CXX_COMPILER_ID} " " ${CMAKE_CXX_COMPILER_VERSION})
+
+################################
+# Including tree trunks
+################################
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third/tree_trunks/src/include)
 
 include (files.cmake)
 
@@ -130,11 +134,43 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_EXTENSIONS ON
 )
 
-include_directories(${MAIN_INCLUDE_DIRS})
-
+target_include_directories(${PROJECT_NAME} 
+							INTERFACE 	src)
+							
 #Checking if must compile examples
 if(DEFINED WITH_EXAMPLES)
 	if(${WITH_EXAMPLES} EQUAL 1)
 		include (examples/compile_example.cmake)
 	endif()
 endif()
+
+########################################
+# Installing
+########################################
+install(TARGETS ${PROJECT_NAME} DESTINATION lib)
+install(DIRECTORY "src/"
+        		DESTINATION "include"
+        		FILES_MATCHING 
+        		PATTERN "*.hpp"
+        		PATTERN "*.h")
+if(DEFINED WITH_EXAMPLES)
+	if(${WITH_EXAMPLES} EQUAL 1)
+		install(TARGETS coap_client DESTINATION bin)
+	endif()
+endif()
+install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/README.md" 
+				"${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
+				"${CMAKE_CURRENT_SOURCE_DIR}/URL.txt"
+			DESTINATION doc)
+
+#########################################
+# Packing // https://cmake.org/cmake/help/latest/module/CPack.html
+#########################################
+include(InstallRequiredSystemLibraries)
+set(CPACK_PACKAGE_VENDOR		"xeds corp")
+set(CPACK_PACKAGE_DESCRIPTION	"C/C++ CoAP RFC7252 implementation")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "C/C++ CoAP RFC7252 implementation")
+set(CPACK_PACKAGE_HOMEPAGE_URL 	"https://github.com/rnascunha/coap-te")
+set(CPACK_RESOURCE_FILE_README 	"${CMAKE_CURRENT_SOURCE_DIR}/README.md")
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+include(CPack)
