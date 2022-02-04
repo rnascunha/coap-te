@@ -28,6 +28,18 @@ if(DEFINED COAP_TE_JSON_SUPPORT AND COAP_TE_JSON_SUPPORT)
 endif()
 
 #################################################
+# Function helper								#
+#################################################
+function(define_if_not target ddefines ddefine dvalue)
+	foreach(mydefines ${ddefines})
+		if(${mydefines} MATCHES "^${ddefine}=")
+			return()
+		endif()
+	endforeach()
+	target_compile_definitions(${target} PUBLIC "${ddefine}=${dvalue}") 
+endfunction()
+
+#################################################
 # Checking if is ESP IDF build					#
 #################################################
 
@@ -99,15 +111,6 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third/tree_trunks/src/include)
 
 include (files.cmake)
 
-#Required definitions
-add_definitions(-DCOAP_TE_PORT_C_STANDARD=1
-				-DCOAP_TE_PORT_POSIX=1)
-
-#Command line definitions
-add_definitions(-DCOAP_TE_LOG_COLOR=${USE_LOG_COLOR}
-				-DCOAP_TE_LOG_LEVEL=${USE_LOG_LEVEL}
-				-DCOAP_TE_USE_ERROR_MESSAGES=${USE_ERROR_MESSAGE})
-
 list(APPEND MAIN_SRC ${SRC_DIR_PORT}/c_standard_port.cpp)
 
 #If Windows or WebAssembly (emscripten) use SELECT implementation
@@ -122,10 +125,6 @@ if(JSON_SUPPORT)
 	list(APPEND MAIN_SRC ${SRC_JSON_SUPPORT})
 	add_definitions(-DCOAP_TE_JSON_HELPER=1)
 endif()
-
-if(DEFINED COAP_TE_JSON_HELPER)
-	message("TESTE")
-endif()
 				
 add_library(${PROJECT_NAME} ${MAIN_SRC} ${SRC_PORT_POSIX})
 set_target_properties(${PROJECT_NAME} PROPERTIES
@@ -134,8 +133,19 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_EXTENSIONS ON
 )
 
+#Includes
 target_include_directories(${PROJECT_NAME} 
 							INTERFACE 	src)
+
+#Definitions
+target_compile_definitions(${PROJECT_NAME} 
+							PUBLIC COAP_TE_PORT_C_STANDARD=1
+							PUBLIC COAP_TE_PORT_POSIX=1)
+#Define only if not defined previosly
+get_directory_property(COAP_DEFINES COMPILE_DEFINITIONS)
+define_if_not(${PROJECT_NAME} "${COAP_DEFINES}" "COAP_TE_LOG_COLOR" ${USE_LOG_COLOR})
+define_if_not(${PROJECT_NAME} "${COAP_DEFINES}" "COAP_TE_LOG_LEVEL" ${USE_LOG_LEVEL})
+define_if_not(${PROJECT_NAME} "${COAP_DEFINES}" "COAP_TE_USE_ERROR_MESSAGES" ${USE_ERROR_MESSAGE})
 							
 #Checking if must compile examples
 if(DEFINED WITH_EXAMPLES)
