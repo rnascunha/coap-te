@@ -72,7 +72,7 @@ int main()
 	 * Declaring a array of options
 	 */
 	Option::option options[] = {
-			{content, false},
+			{content},
 			{Option::code::uri_path, "sensor"},
 			{Option::code::uri_path, "temp"}
 	};
@@ -119,7 +119,7 @@ int main()
 	 * all options to be include. Until serialize function be called,
 	 * is of the user responsibility the objects lifetime
 	 */
-	Option::node content_op{content, true};
+	Option::node content_op{content};
 	Option::node path1_op{Option::code::uri_path, "sensor"};
 	Option::node path2_op{Option::code::uri_path, "temp"};
 
@@ -169,7 +169,7 @@ int main()
 	 * Until serialize function be called, is of the user responsibility
 	 * the objects lifetime
 	 */
-	Option::node content_op{content, true};
+	Option::node content_op{content};
 	Option::node path1_op{Option::code::uri_path, "sensor"};
 	Option::node path2_op{Option::code::uri_path, "temp"};
 

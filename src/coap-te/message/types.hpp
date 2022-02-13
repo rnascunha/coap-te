@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <cstdint>
 #include "codes.hpp"
+#include "detail.hpp"
 
 namespace CoAP{
 namespace Message{
@@ -18,22 +19,8 @@ enum class type : std::uint8_t
 	reset 					= 3
 };
 
-enum class content_format : unsigned
-{
-	text_plain				= 0,	//text/plain;charset=utf-8
-	application_link_format = 40,	//application/link-format
-	application_xml			= 41, 	//application/xml
-	application_octet_stream = 42, 	//application/octet-stream
-	application_exi			= 47, 	//application/exi
-	application_json		= 50,	//application/json
-#if COAP_TE_FETCH_PATCH == 1
-	//https://tools.ietf.org/html/rfc8132#section-6
-	 application_json_patch_json = 51,	//application/json-patch+json
-	 application_merge_patch_json = 52	//application/merge-patch+json
-#endif /* COAP_TE_FETCH_PATCH == 1 */
-};
-
-using accept = content_format;
+using content_format = detail::content_format;
+using accept = detail::accept;
 
 static constexpr const std::uint8_t payload_marker = 0xff;
 

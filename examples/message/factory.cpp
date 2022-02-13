@@ -81,7 +81,7 @@ int main()
 	 * need to instantiate options node
 	 */
 	CoAP::Message::accept format{accept::application_json};
-	Option::node content_op{format, true};
+	Option::node content_op{format};
 	Option::node path_op1{Option::code::uri_path, "path1"};
 	Option::node path_op2{Option::code::uri_query, "value=1"};
 

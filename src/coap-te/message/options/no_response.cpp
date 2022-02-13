@@ -34,7 +34,7 @@ bool no_response_suppress(suppress value, CoAP::Message::code mcode) noexcept
 }
 
 void create(option_template<Option::code>& option,
-		suppress& value) noexcept
+		suppress const& value) noexcept
 {
 	option.ocode = code::no_response;
 	option.length = value == suppress::none ? 0 : 1;

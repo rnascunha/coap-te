@@ -4,6 +4,7 @@
 #include "../codes.hpp"
 #include "types.hpp"
 #include "template_class.hpp"
+#include "../../defines/defaults.hpp"
 
 namespace CoAP{
 namespace Message{
@@ -21,7 +22,7 @@ bool no_response_suppress(suppress, CoAP::Message::code) noexcept;
 template<typename Message>
 bool no_response_suppress(Message const&, CoAP::Message::code) noexcept;
 
-void create(option_template<Option::code>& option, suppress& value) noexcept;
+void create(option_template<Option::code>& option, suppress const& value) noexcept;
 
 #endif /* COAP_TE_OPTION_NO_RESPONSE == 1 */
 

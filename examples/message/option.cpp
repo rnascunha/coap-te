@@ -65,9 +65,8 @@ int main()
 
 	/**
 	 * option 'accept' or 'content_format' have a special constructor.
-	 * The second argument must be true for accept and false for content_format.
 	 */
-	Option::node accept_op{CoAP::Message::accept::application_json, true};
+	Option::node accept_op{CoAP::Message::accept::application_json};
 
 	/**
 	 * Uri_Path and Uri_Query are options of type 'string', and can be repeated.

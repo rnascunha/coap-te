@@ -84,7 +84,8 @@ using option = option_template<code>;
 using List = List_Option<code>;
 using node = node_option<code>;
 
-void create(option&, content_format const&, bool is_request = false) noexcept;
+void create(option&, content_format const&) noexcept;
+void create(option&, accept const&) noexcept;
 
 #if COAP_TE_RELIABLE_CONNECTION == 1
 

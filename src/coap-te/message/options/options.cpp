@@ -7,11 +7,18 @@ namespace Message{
 namespace Option{
 
 void create(option& option,
-		content_format const& value,
-		bool is_request /* = false */) noexcept
+		content_format const& value) noexcept
 {
-	option.ocode = is_request ? code::accept : code::content_format;
+	option.ocode = code::content_format;
 	option.length = value == content_format::text_plain ? 0 : 1;
+	option.value = &value;
+}
+
+void create(option& option,
+		accept const& value) noexcept
+{
+	option.ocode = code::accept;
+	option.length = value == accept::text_plain ? 0 : 1;
 	option.value = &value;
 }
 

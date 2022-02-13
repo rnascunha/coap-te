@@ -19,9 +19,10 @@ struct option_template
 	option_template(OptionCode);
 	option_template(OptionCode, const char*);
 	option_template(OptionCode, unsigned&);
-	option_template(content_format const&, bool is_request = false);
+	option_template(content_format const&);
+	option_template(accept const&);
 #if COAP_TE_OPTION_NO_RESPONSE == 1
-	option_template(suppress&);
+	option_template(suppress const&);
 #endif /* COAP_TE_OPTION_NO_RESPONSE == 1 */
 	//Opaque
 	option_template(OptionCode, const void*, unsigned);
