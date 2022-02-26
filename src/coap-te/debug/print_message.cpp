@@ -174,15 +174,15 @@ bool print_byte_message(std::uint8_t const* arr, std::size_t size) noexcept
 
 	//Making header
 	std::printf("He|Co|MeID");
-	char temp[15];
+	char temp[50];
 	if(msg.token_len)
 	{
-		std::snprintf(temp, 15, "Token[%zu]", msg.token_len);
+		std::snprintf(temp, 50, "Token[%zu]", msg.token_len);
 		print_make_space(temp, s_token);
 	}
 	if(msg.options_len)
 	{
-		std::snprintf(temp, 15, "Options[%zu][%zu]", msg.options_len, msg.option_num);
+		std::snprintf(temp, 50, "Options[%zu][%zu]", msg.options_len, msg.option_num);
 		print_make_space(temp, s_options);
 	}
 	if(msg.payload_len)
@@ -304,7 +304,7 @@ bool print_byte_reliable_message(std::uint8_t const* arr, std::size_t size) noex
 
 	//Making header
 	std::printf("He");
-	char temp[15];
+	char temp[50];
 	if(index)
 	{
 		std::snprintf(temp, 15, "Ext[%u]", index);
@@ -315,12 +315,12 @@ bool print_byte_reliable_message(std::uint8_t const* arr, std::size_t size) noex
 
 	if(msg.token_len)
 	{
-		std::snprintf(temp, 15, "Token[%zu]", msg.token_len);
+		std::snprintf(temp, 50, "Token[%zu]", msg.token_len);
 		print_make_space(temp, s_token);
 	}
 	if(msg.options_len)
 	{
-		std::snprintf(temp, 15, "Options[%zu][%zu]", msg.options_len, msg.option_num);
+		std::snprintf(temp, 50, "Options[%zu][%zu]", msg.options_len, msg.option_num);
 		print_make_space(temp, s_options);
 	}
 	if(msg.payload_len)

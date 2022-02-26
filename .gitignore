@@ -3,3 +3,6 @@ build/
 .settings/
 .cproject
 Release/
+Debug/
+out/
+.vs/
