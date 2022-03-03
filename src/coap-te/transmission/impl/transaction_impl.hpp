@@ -405,10 +405,10 @@ transaction<MaxPacketSize, Callback_Functor, Endpoint>::
 transaction_parameters() const noexcept
 {
 	return transaction_param{
-		.max_span = max_span_timeout_,
-		.next_expiration = next_expiration_time_,
-		.expiration_factor = expiration_time_factor_,
-		.retransmission_remaining = retransmission_remaining_
+		/*.max_span 				= */max_span_timeout_,
+		/*.next_expiration 			= */next_expiration_time_,
+		/*.expiration_factor 		= */expiration_time_factor_,
+		/*.retransmission_remaining	= */retransmission_remaining_
 	};
 }
 

@@ -31,7 +31,7 @@ struct transaction_param{
 template<typename Endpoint>
 struct separate_response{
 	Endpoint		 	ep;
-	Message::type		type = CoAP::Message::type::nonconfirmable;;
+	Message::type		type = CoAP::Message::type::nonconfirmable;
 	std::size_t			token_len = 0;
 	const void*			token[8];
 

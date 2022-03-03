@@ -6,6 +6,7 @@
 #include "../types.hpp"
 #include "../options/options.hpp"
 #include "../../error.hpp"
+#include "../../internal/meta.hpp"
 
 namespace CoAP{
 namespace Message{
@@ -16,7 +17,7 @@ template<std::size_t BufferSize = 0,
 class Factory{
 	private:
 		using empty = struct{};
-		using buffer_type = typename std::conditional<BufferSize == 0, empty, std::uint8_t[BufferSize]>::type;
+		using buffer_type = typename buffer_type<BufferSize>::type;
 	public:
 		using OptionCode = typename option_type<Code>::type;
 

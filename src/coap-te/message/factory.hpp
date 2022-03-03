@@ -5,6 +5,7 @@
 #include "types.hpp"
 #include "options/options.hpp"
 #include "../error.hpp"
+#include "../internal/meta.hpp"
 
 namespace CoAP{
 namespace Message{
@@ -13,7 +14,7 @@ template<std::size_t BufferSize = 0, typename MessageID = void*>
 class Factory{
 	private:
 		using empty = struct{};
-		using buffer_type = typename std::conditional<BufferSize == 0, empty, std::uint8_t[BufferSize]>::type;
+		using buffer_type = typename buffer_type<BufferSize>::type;
 		using message_id_type = typename std::conditional<std::is_same<MessageID, void*>::value, empty, MessageID>::type;
 	public:
 		Factory();
@@ -47,16 +48,16 @@ class Factory{
 		//buffer_type 
 		std::uint8_t const* buffer() const noexcept;
 		template<bool SortOptions = true,
-						bool CheckOpOrder = !SortOptions,
-						bool CheckOpRepeat = true>
+				bool CheckOpOrder = !SortOptions,
+				bool CheckOpRepeat = true>
 		std::size_t serialize(std::uint16_t mid, CoAP::Error&) noexcept;
 
 		/**
 		 * To be used when internal message id is provided
 		 */
 		template<bool SortOptions = true,
-						bool CheckOpOrder = !SortOptions,
-						bool CheckOpRepeat = true>
+				bool CheckOpOrder = !SortOptions,
+				bool CheckOpRepeat = true>
 		std::size_t serialize(
 				std::uint8_t* buffer, std::size_t buffer_len,
 				CoAP::Error&) noexcept;
@@ -65,8 +66,8 @@ class Factory{
 		 * To be used with internal buffer and internal message id;
 		 */
 		template<bool SortOptions = true,
-						bool CheckOpOrder = !SortOptions,
-						bool CheckOpRepeat = true>
+				bool CheckOpOrder = !SortOptions,
+				bool CheckOpRepeat = true>
 		std::size_t serialize(CoAP::Error&) noexcept;
 
 	private:

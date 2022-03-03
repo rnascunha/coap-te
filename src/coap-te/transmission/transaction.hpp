@@ -8,6 +8,7 @@
 #include "types.hpp"
 #include "../message/factory.hpp"
 #include "../message/types.hpp"
+#include "../internal/meta.hpp"
 
 namespace CoAP{
 namespace Transmission{
@@ -17,9 +18,7 @@ template<unsigned MaxPacketSize,
 		typename Endpoint>
 class transaction
 {
-	using buffer_type = typename std::conditional<MaxPacketSize == 0,
-									std::uint8_t*,
-									std::uint8_t[MaxPacketSize]>::type;
+	using buffer_type = typename buffer_or_pointer_type<MaxPacketSize>::type;
 	public:
 		static bool constexpr const is_external_storage = MaxPacketSize == 0;
 		using endpoint_t = Endpoint;

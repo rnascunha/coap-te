@@ -66,6 +66,8 @@ if(EMSCRIPTEN)
 		set(CMAKE_EXECUTABLE_SUFFIX ".html")
 	endif()
 endif()
+
+set(OUTPUT_DIR "examples")
 					
 foreach(example ${EXAMPLES_LIST})
 	string(REGEX REPLACE "./.*/" "" EXAMPLE_OUT ${example})
@@ -81,7 +83,7 @@ foreach(example ${EXAMPLES_LIST})
 	    CXX_STANDARD 17
 	    CXX_STANDARD_REQUIRED ON
 	    CXX_EXTENSIONS ON
-	)
+	    RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR})
 	
 	#Particular system dependencies
 	if(EMSCRIPTEN)
@@ -122,6 +124,7 @@ if(JSON_SUPPORT)
 		    CXX_STANDARD_REQUIRED ON
 		    CXX_EXTENSIONS ON
 		    COMPILE_FLAGS -DCOAP_TE_JSON_HELPER=1
+		    RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIR}
 		)
 		
 		target_link_libraries(${EXAMPLE_OUT} ${PROJECT_NAME})
