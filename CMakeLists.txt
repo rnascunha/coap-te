@@ -52,11 +52,10 @@ endif()
 # Linux/Windows build
 #################################################
 cmake_minimum_required (VERSION 3.10)
-project (coap-te VERSION 0.1)
+project (coap-te LANGUAGES CXX VERSION 0.1)
 
-if(NOT CMAKE_BUILD_TYPE)
-	set(CMAKE_BUILD_TYPE Release)
-endif()
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
+list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 
 if(MSVC)
 #####
@@ -75,8 +74,7 @@ endif()
 ################################
 # Including tree trunks
 ################################
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/third/tree_trunks/src/include)
-add_subdirectory(third/tree_trunks)
+find_package(tree_trunks REQUIRED)
 
 include (files.cmake)
 
@@ -96,13 +94,15 @@ if(JSON_SUPPORT)
 endif()
 				
 add_library(${PROJECT_NAME} ${MAIN_SRC} ${SRC_PORT_POSIX})
+add_library(${PRJECT_NAME}::${PROJECT_NAME} ALIAS ${PROJECT_NAME})
 set_target_properties(${PROJECT_NAME} PROPERTIES
     CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS OFF
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC tree_trunks)
+target_link_libraries(${PROJECT_NAME} 
+							PUBLIC tree_trunks::tree_trunks)
 
 #Includes
 target_include_directories(${PROJECT_NAME} 
