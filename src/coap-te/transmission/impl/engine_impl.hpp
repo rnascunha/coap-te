@@ -213,7 +213,7 @@ check_transactions() noexcept
 	int i = 0;
 	transaction_t* trans;
 	CoAP::Error ec;
-	while((trans = list_[i++]))
+	while((trans = list_[i++]) != nullptr)
 	{
 		if(trans->check())
 		{

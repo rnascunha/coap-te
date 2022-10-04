@@ -1,4 +1,5 @@
-from conans import ConanFile, CMake, tools
+from conans import ConanFile, CMake
+from conans.model.version import Version
 
 class CoapTeConan(ConanFile):
     name = "coap-te"
@@ -12,9 +13,13 @@ class CoapTeConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake_find_package"
-    requires = "tree_trunks/0.1@base/stable"
+    requires = "tree_trunks/[>=0.1]@base/stable"
     exports = "LICENSE", "README.md", "URL.txt"
     exports_sources = "*.hpp", "*.cpp", "CMakeLists.txt", "files.cmake", "Kconfig"
+
+    def build_requirements(self):
+        if CMake.get_version() < Version("3.10"):
+            self.tool_requires("cmake/[>= 3.10]")
 
     def config_options(self):
         if self.settings.os == "Windows":
@@ -33,6 +38,7 @@ class CoapTeConan(ConanFile):
         self.copy("*.so", dst="lib", keep_path=False)
         self.copy("*.dylib", dst="lib", keep_path=False)
         self.copy("*.a", dst="lib", keep_path=False)
+        self.copy("*.lib", dst="lib", keep_path=False)
 
     def package_info(self):
         self.cpp_info.libs = ["coap-te"]
