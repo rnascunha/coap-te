@@ -13,7 +13,7 @@ class CoapTeConan(ConanFile):
     options = {"shared": [True, False], "fPIC": [True, False]}
     default_options = {"shared": False, "fPIC": True}
     generators = "cmake_find_package"
-    requires = "tree_trunks/[>=0.1]@base/stable"
+    requires = "tree_trunks/0.1@base/stable"
     exports = "LICENSE", "README.md", "URL.txt"
     exports_sources = "*.hpp", "*.cpp", "CMakeLists.txt", "files.cmake", "Kconfig"
 
