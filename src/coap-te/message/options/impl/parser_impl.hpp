@@ -209,7 +209,7 @@ bool get_option(Message const& msg,
 	Parser<OptionCode> parser(msg);
 	option_template<OptionCode> const* op;
 	unsigned c = 0;
-	while((op = parser.next()))
+	while((op = parser.next()) != nullptr)
 	{
 		if(op->ocode == ocode)
 		{
