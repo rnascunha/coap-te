@@ -2,7 +2,7 @@
 #include "output_string.hpp"
 #include <cstdio>
 
-#if WIN32
+#ifdef WIN32
 #define inet_ntop(family, addr, addr_str, len)	InetNtop(family, addr, addr_str, len)
 #endif /* WIN32 */
 

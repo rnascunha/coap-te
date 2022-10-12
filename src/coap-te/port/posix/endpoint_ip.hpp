@@ -7,7 +7,7 @@
 
 #include "port.hpp"
 
-#if WIN32
+#ifdef WIN32
 #define inet_ntop(family, addr, addr_str, len)	InetNtop(family, addr, addr_str, len)
 #endif /* WIN32 */
 
@@ -240,7 +240,7 @@ class endpoint_ip{
 }//Port
 }//CoAP
 
-#if WIN32
+#ifdef WIN32
 #undef inet_ntop
 #endif /* WIN32 */
 
