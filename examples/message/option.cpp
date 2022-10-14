@@ -153,7 +153,7 @@ int main()
 	 * Let's iterate through the options and print it values
 	 */
 	status("Parsing and printing options...");
-	while((opt = parser.next()))
+	while((opt = parser.next()) != nullptr)
 	{
 		oconfig = Option::get_config(opt->ocode);
 		if(!oconfig) //same invalid option

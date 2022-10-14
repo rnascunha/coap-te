@@ -93,7 +93,7 @@ class resource_root{
 			Option::Parser op(msg);
 			option const* opt;
 			node_t* n = &root_, *parent = nullptr;
-			while((opt = op.next()))
+			while((opt = op.next()) != nullptr)
 			{
 				if(opt->ocode == Option::code::uri_path)
 				{

@@ -12,7 +12,7 @@ void print_resource_branch(CoAP::branch<Resource>& br, int level /* = 0 */) noex
 {
 	std::printf("%d: %s:[", level, br.value().path() ? br.value().path() : "/");
 	CoAP::branch<Resource>* n;
-	for(unsigned i = 0; (n = br[i]); i++)
+	for(unsigned i = 0; (n = br[i]) != nullptr; i++)
 	{
 		if(i != 0) std::printf(" ");
 		std::printf("%s", n->value().path() ? n->value().path() : "/");
@@ -20,7 +20,7 @@ void print_resource_branch(CoAP::branch<Resource>& br, int level /* = 0 */) noex
 	std::printf("]\n");
 
 	++level;
-	for(unsigned i = 0; (n = br[i]); i++)
+	for(unsigned i = 0; (n = br[i]) != nullptr; i++)
 	{
 		print_resource_branch<Resource>(*n, level);
 	}

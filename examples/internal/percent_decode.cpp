@@ -42,7 +42,7 @@ int main(int argv, char** argc)
 	int i = 1;
 	while(argv > 1)
 	{
-		if((size = CoAP::Helper::percent_decode(buffer, 512, argc[i], std::strlen(argc[i]))))
+		if((size = CoAP::Helper::percent_decode(buffer, 512, argc[i], std::strlen(argc[i]))) != 0)
 		{
 			std::printf("Decoded [%zu]: %s -> %.*s\n", size, argc[i],
 					static_cast<int>(size), buffer);

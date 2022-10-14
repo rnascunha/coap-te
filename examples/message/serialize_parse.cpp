@@ -264,7 +264,7 @@ int main()
 	 */
 	Option::Parser<Option::code> op{msg};	//The parser will iterate through the options
 	Option::option const* opt;				//This will hold a pointer to the option
-	while((opt = op.next()))
+	while((opt = op.next()) != nullptr)
 	{
 		CoAP::Debug::print_option(*opt);
 		std::printf("\n");

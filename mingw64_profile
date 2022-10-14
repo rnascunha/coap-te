@@ -1,0 +1,22 @@
+toolchain=x86_64-w64-mingw32
+target_host=x86_64-w64-mingw32
+cc_compiler=gcc
+cxx_compiler=g++
+bin_path=C:/msys64/mingw64/bin
+
+[settings]
+os_build=Windows
+os=Windows
+arch=x86_64
+arch_build=x86_64
+compiler=gcc
+compiler.version=12
+compiler.libcxx=libstdc++11
+compiler.threads=posix
+build_type=Release
+
+[env]
+# CONAN_BASH_PATH=C:/msys64/usr/bin/bash.exe
+# CONAN_CMAKE_FIND_ROOT_PATH=$toolchain
+CC=$bin_path/$target_host-$cc_compiler
+CXX=$bin_path/$target_host-$cxx_compiler

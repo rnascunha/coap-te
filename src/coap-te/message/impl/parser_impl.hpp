@@ -60,7 +60,7 @@ bool query_by_key(Message const& msg,
 	Option::Parser<Option::code> parser(msg);
 	Option::option const *opt;
 
-	while((opt = parser.next()))
+	while((opt = parser.next()) != nullptr)
 	{
 		if(opt->ocode == Option::code::uri_query)
 		{

@@ -3,7 +3,11 @@
 
 #include <cstdint>
 
+#ifndef NOMINMAX
+#define COAP_TE_DEFINED_TO_UNDEF    1
 #define NOMINMAX
+#endif /* NOMINMAX */
+
 #include <winsock2.h>
 #include <ws2tcpip.h>
 
@@ -17,7 +21,11 @@
 #include <BaseTsd.h>
 typedef SSIZE_T ssize_t;
 #endif
+
+#ifdef COAP_TE_DEFINED_TO_UNDEF
 #undef NOMINMAX
+#undef COAP_TE_DEFINED_TO_UNDEF
+#endif /* COAP_TE_DEFINED_TO_UNDEF */
 
 using sa_family_t = unsigned short int;
 using in_addr_t = std::uint32_t;

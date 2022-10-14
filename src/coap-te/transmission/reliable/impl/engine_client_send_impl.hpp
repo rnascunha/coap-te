@@ -72,8 +72,8 @@ send(CoAP::Message::Reliable::Factory<BufferSize, Code> const& fac,
 		trans->init(conn_.native(), func, data, time_ex, ec);
 
 		return size;
-	}
-	return send<false, SortOptions, CheckOpOrder, CheckOpRepeat>(fac, ec);
+	} else
+		return send<false, SortOptions, CheckOpOrder, CheckOpRepeat>(fac, ec);
 }
 
 template<typename Connection,
@@ -95,10 +95,9 @@ send(request<Code>& req,
 	{
 		return send<SortOptions, CheckOpOrder, CheckOpRepeat>(
 				req.factory(), default_expiration, req.callback(), req.data(), ec);
-	}
-
-	return send<false, SortOptions, CheckOpOrder, CheckOpRepeat>(
-				req.factory(), ec);
+	} else
+		return send<false, SortOptions, CheckOpOrder, CheckOpRepeat>(
+					req.factory(), ec);
 }
 
 template<typename Connection,

@@ -111,7 +111,7 @@ std::size_t compose(char* buffer, std::size_t buffer_len,
 	Option::option const* opt;
 	bool is_first_query = true;
 
-	while((opt = list.next()))
+	while((opt = list.next()) != nullptr)
 	{
 		switch(opt->ocode)
 		{

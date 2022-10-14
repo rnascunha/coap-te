@@ -143,7 +143,7 @@ class branch{
 			T* f = find_descendant(u, depth);
 			if(!f) return false;
 
-			return f->add_child<CheckRepeat>(n);
+			return f->template add_child<CheckRepeat>(n);
 		}
 
 		template<bool AddSorted = false, typename Path, typename ...Paths>

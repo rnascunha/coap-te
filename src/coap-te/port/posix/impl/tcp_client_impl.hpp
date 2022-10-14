@@ -117,7 +117,7 @@ wait_connect(CoAP::Error& ec) const noexcept
 			&size) == -1)
 		{
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-			
+			if (WSAGetLastError() == WSAENOTCONN)
 #else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
 			if(errno == ENOTCONN)
 #endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */

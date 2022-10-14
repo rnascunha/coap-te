@@ -284,7 +284,7 @@ run(CoAP::Error& ec,
 		return false;
 	}
 	
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#ifdef _MSC_VER
 	for(unsigned i = 0, count = 0; count < rfds.fd_count && i < FD_SETSIZE; i++)
 	{
 		if(FD_ISSET(rfds.fd_array[i], &rfds))
@@ -308,7 +308,7 @@ run(CoAP::Error& ec,
 			count++;
 		}
 	}
-#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+#else /* _MSC_VER */
 	for(int i = 1, count = 0; i <= max && count < s; i++)
 	{
 		if(FD_ISSET(i, &rfds))
@@ -332,7 +332,7 @@ run(CoAP::Error& ec,
 			count++;
 		}
 	}
-#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+#endif /* _MSC_VER */
 	return ec ? false : true;
 }
 

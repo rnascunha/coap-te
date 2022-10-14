@@ -265,7 +265,7 @@ bool Serialize::add_option(Option::option&& op, CoAP::Error& ec) noexcept
 		{
 			Option::Parser<Option::code> parser(msg_);
 			Option::option const* opt;
-			while((opt = parser.next()))
+			while((opt = parser.next()) != nullptr)
 			{
 				if(opt->ocode == op.ocode)
 				{
@@ -282,7 +282,7 @@ bool Serialize::add_option(Option::option&& op, CoAP::Error& ec) noexcept
 	Option::option current;
 
 	unsigned offset = 0;
-	while((next = parser.next()))
+	while((next = parser.next()) != nullptr)
 	{
 		if(next->ocode > op.ocode)
 			break;

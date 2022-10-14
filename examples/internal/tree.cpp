@@ -19,7 +19,7 @@ void print_branch(branch& br, int level = 0) noexcept
 
 	branch* n;
 
-	for(unsigned i = 0; (n = br[i]); i++)
+	for(unsigned i = 0; (n = br[i]) != nullptr; i++)
 	{
 		if(i != 0) std::printf(" ");
 		std::printf("%d", n->value());
@@ -27,7 +27,7 @@ void print_branch(branch& br, int level = 0) noexcept
 	std::printf("]\n");
 
 	++level;
-	for(unsigned i = 0; (n = br[i]); i++)
+	for(unsigned i = 0; (n = br[i]) != nullptr; i++)
 	{
 		print_branch(*n, level);
 	}

@@ -513,7 +513,7 @@ static void get_sensor_handler(engine::message const& request,
 	 */
 	CoAP::Message::Option::Parser parser(request);
 	CoAP::Message::Option::option const *opt, *path_opt = nullptr;
-	while((opt = parser.next()))
+	while((opt = parser.next()) != nullptr)
 	{
 		if(opt->ocode == CoAP::Message::Option::code::uri_path)
 			path_opt = opt;
@@ -681,7 +681,7 @@ static void get_dynamic_list_handler(engine::message const& request,
 	/**
 	 * Payload. Creating the sons resource list
 	 */
-	while((child = (*node)[i++]))
+	while((child = (*node)[i++]) != nullptr)
 	{
 		len += snprintf(buffer + len, engine::packet_size - len, "%s ", child->value().path());
 	}

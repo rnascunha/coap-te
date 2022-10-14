@@ -19,11 +19,12 @@ class tcp_server{
 	public:
 		static constexpr bool set_length = true;
 		static constexpr bool is_server = true;
-#if	defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+
+#ifdef _MSC_VER
 		using handler = SOCKET;
-#else /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+#else /* _MSC_VER */
 		using handler = int;
-#endif /* defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__) */
+#endif /* _MSC_VER */
 		using endpoint = Endpoint;
 
 		tcp_server();
