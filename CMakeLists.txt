@@ -58,15 +58,10 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_BINARY_DIR})
 
 if(MSVC)
-#####
-#Remove warning (don't understand or agree...)
-#https://docs.microsoft.com/en-us/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4706?view=msvc-160
-#https://docs.microsoft.com/pt-br/cpp/error-messages/compiler-warnings/compiler-warning-level-4-c4702?view=msvc-160
-####
-	set(CMAKE_CXX_FLAGS " /GR- /wd4706 /wd4702 /W4") 
+	set(CMAKE_CXX_FLAGS " /GR- /W4")
 	set(CMAKE_CXX_FLAGS_RELEASE "/O2")
 else()
-	set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wno-unused-parameter  -pedantic -fno-exceptions -fno-rtti") 
+	set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -fno-exceptions -fno-rtti") 
 	set(CMAKE_CXX_FLAGS_DEBUG "-g")
 	set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
@@ -81,7 +76,7 @@ include (files.cmake)
 list(APPEND MAIN_SRC ${SRC_DIR_PORT}/c_standard_port.cpp)
 
 #If Windows or WebAssembly (emscripten) use SELECT implementation
-if(WIN32 OR EMSCRIPTEN)
+if(WIN32 OR MINGW OR EMSCRIPTEN)
 	message("Setting SELECT call implmenetation")
 	add_definitions(-DCOAP_TE_USE_SELECT=1)	
 endif()
@@ -103,6 +98,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_link_libraries(${PROJECT_NAME} 
 							PUBLIC tree_trunks::tree_trunks)
+
+if (MINGW)
+	target_link_libraries(${PROJECT_NAME} PUBLIC wsock32 ws2_32)
+endif()
 
 #Includes
 target_include_directories(${PROJECT_NAME} 
