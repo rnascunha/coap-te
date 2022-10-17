@@ -53,9 +53,9 @@ jobs:
         run:  |
             conan install . \
                   -s build_type=${{env.BUILD_TYPE}} \
-                  --install-folder=${{github.workspace}}/build \
+                  -if ${{github.workspace}}/build \
                   -pr default \
-                  --build=missing
+                  -b missing
             
       - name: CMake configure
         run: |
