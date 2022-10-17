@@ -53,7 +53,7 @@ jobs:
             conan config set general.revisions_enabled=1
             
       - name: Conan install dependencies
-        run: >
+        run: >-
             conan install . 
               -s build_type=${{env.BUILD_TYPE}} 
               -if ${{github.workspace}}/build 
@@ -61,7 +61,7 @@ jobs:
               -b missing
             
       - name: CMake configure
-        run: >
+        run: >-
           cmake -G "${{matrix.config.generator}}" 
                 -DCMAKE_C_COMPILER=${{ matrix.config.cc }} 
                 -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx}} 
@@ -70,7 +70,7 @@ jobs:
                 -B ${{github.workspace}}/build
                 
       - name: Build library
-        run: >
+        run: >-
           cmake 
             --build ${{github.workspace}}/build 
             --config ${{env.BUILD_TYPE}}
