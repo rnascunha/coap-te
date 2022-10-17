@@ -22,7 +22,7 @@ jobs:
           - name: Ubuntu GCC
             os: ubuntu-latest
             compiler: gcc
-            #version: 9
+            version: 9
             cc: gcc
             cxx: g++
             generator: Unix Makefiles
@@ -30,7 +30,7 @@ jobs:
           - name: Ubuntu Clang
             os: ubuntu-latest
             compiler: clang
-            #version: 11
+            version: 11
             cc: clang
             cxx: clang++
             generator: Unix Makefiles
@@ -38,7 +38,7 @@ jobs:
           - name: Windows MSVC
             os: windows-latest
             compiler: Visual Studio
-            #version: 17
+            version: 17
             cc: cl
             cxx: cl
             generator: Visual Studio 17 2022
@@ -61,13 +61,12 @@ jobs:
       - name: Create default Conan profile
         run: |
           conan profile new default --detect
-          conan profile update settings.compiler=${{matrix.config.compiler}} default
+          conan profile update settings.compiler='${{matrix.config.compiler}}' default
+          conan profile update settings.compiler.version=${{matrix.config.version}} default
 
       - name: Config MinGW
         if: ${{matrix.config.name == 'Windows MinGW'}}
-        run: |
-          conan profile update settings.compiler.version=${{matrix.config.version}} default
-          conan profile update settings.compiler.libcxx=libstdc++ default
+        run: conan profile update settings.compiler.libcxx=libstdc++ default
         
       - name: Conan configure remotes
         run:  |
