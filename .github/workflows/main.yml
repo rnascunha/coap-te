@@ -23,16 +23,19 @@ jobs:
             os: ubuntu-latest
             cc: gcc
             cxx: g++
+            generator: 'Unix Makefiles'
             
           - name: Ubuntu Clang
             os: ubuntu-latest
             cc: clang
             cxx: clang++
+            generator: 'Unix Makefiles'
           
           - name: Windows MSVC
             os: windows-latest
-            cc: cl,
+            cc: cl
             cxx: cl
+            generator: 'Visual Studio 17 2022'
     steps:
       - name: Checking out repostitory
         uses: actions/checkout@v2
@@ -55,7 +58,7 @@ jobs:
             
       - name: CMake configure
         run: |
-          cmake -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DWITH_EXAMPLES=$WITH_EXAMPLES -B ${{github.workspace}}/build
+          cmake -G ${{matrix.config.generator}} -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx}} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DWITH_EXAMPLES=$WITH_EXAMPLES -B ${{github.workspace}}/build
                 
       - name: Build library
         run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
