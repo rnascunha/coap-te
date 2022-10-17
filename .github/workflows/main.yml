@@ -28,6 +28,11 @@ jobs:
             os: ubuntu-latest
             cc: clang
             cxx: clang++
+          
+          - name: Windows MSVC
+            os: windows-latest
+            cc: cl,
+            cxx: cl
     steps:
       - name: Checking out repostitory
         uses: actions/checkout@v2
@@ -35,9 +40,6 @@ jobs:
       - name: Install Conan
         id: install-conan
         uses: turtlebrowser/get-conan@main
-        
-      - name: Conan version
-        run: echo "${{ steps.conan.outputs.version }}"
         
       - name: Create default Conan profile
         run: conan profile new default --detect
@@ -59,6 +61,7 @@ jobs:
         run: |
           cmake -DCMAKE_C_COMPILER=${{ matrix.config.cc }} \
                 -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx}} \
+                -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
                 -DWITH_EXAMPLES=$WITH_EXAMPLES \
                 -B ${{github.workspace}}/build
                 
