@@ -3,6 +3,10 @@
 
 #include <cstdint>
 
+#ifndef COAP_TE_USE_SELECT
+#define COAP_TE_USE_SELECT 1
+#endif /* COAP_TE_USE_SELECT */
+
 #ifndef NOMINMAX
 #define COAP_TE_DEFINED_TO_UNDEF    1
 #define NOMINMAX
