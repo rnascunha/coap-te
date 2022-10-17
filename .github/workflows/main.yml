@@ -21,24 +21,28 @@ jobs:
         config:
           - name: Ubuntu GCC
             os: ubuntu-latest
+            compiler: gcc
             cc: gcc
             cxx: g++
             generator: Unix Makefiles
             
           - name: Ubuntu Clang
             os: ubuntu-latest
+            compiler: clang
             cc: clang
             cxx: clang++
             generator: Unix Makefiles
           
           - name: Windows MSVC
             os: windows-latest
+            compiler: msvc
             cc: cl
             cxx: cl
             generator: Visual Studio 17 2022
 
           - name: Windows MinGW
             os: windows-latest
+            compiler: gcc
             cc: gcc
             cxx: g++
             generator: MinGW Makefiles
@@ -51,7 +55,9 @@ jobs:
         uses: turtlebrowser/get-conan@main
         
       - name: Create default Conan profile
-        run: conan profile new default --detect
+        run: |
+          conan profile new default --detect
+          conan profile update settings.compiler=${{matrix.config.compiler}} default
         
       - name: Conan configure remotes
         run:  |
