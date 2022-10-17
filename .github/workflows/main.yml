@@ -10,18 +10,20 @@ on:
         default: '1'
 env:
   WITH_EXAMPLES: ${{ github.event.inputs.WITH_EXAMPLES || '1' }}
+  BUILD_TYPE: Release
 jobs:
   build:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         config:
           - name: Ubuntu GCC
             os: ubuntu-latest
             cc: gcc
             cxx: g++
+            
           - name: Ubuntu Clang
             os: ubuntu-latest
             cc: clang
@@ -29,12 +31,36 @@ jobs:
     steps:
       - name: Checking out repostitory
         uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - name: Build library
-        id: build-library
+
+      - name: Install Conan
+        id: install-conan
+        uses: turtlebrowser/get-conan@main
+        
+      - name: Conan version
+        run: echo "${{ steps.conan.outputs.version }}"
+        
+      - name: Create default Conan profile
+        run: conan profile new default --detect
+        
+      - name: Conan configure remotes
+        run:  |
+            conan remote add owner https://rnascunha.jfrog.io/artifactory/api/conan/owner-conan
+            conan config set general.revisions_enabled=1
+            
+      - name: Conan install dependencies
+        run:  |
+            conan install . \
+                  -s build_type=${{env.BUILD_TYPE}} \
+                  --install-folder=${{github.workspace}}/build \
+                  -pr default \
+                  --build=missing
+            
+      - name: CMake configure
         run: |
-          mkdir build
-          cd build
-          cmake -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx}} -DWITH_EXAMPLES=$WITH_EXAMPLES ..
-          cmake --build .
+          cmake -DCMAKE_C_COMPILER=${{ matrix.config.cc }} \
+                -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx}} \
+                -DWITH_EXAMPLES=$WITH_EXAMPLES \
+                -B ${{github.workspace}}/build
+                
+      - name: Build library
+        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
