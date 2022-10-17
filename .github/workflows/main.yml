@@ -16,7 +16,7 @@ jobs:
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         config:
           - name: Ubuntu GCC
@@ -61,9 +61,11 @@ jobs:
         run: |
           cmake -DCMAKE_C_COMPILER=${{ matrix.config.cc }} \
                 -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx}} \
-                -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+                -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
                 -DWITH_EXAMPLES=$WITH_EXAMPLES \
                 -B ${{github.workspace}}/build
                 
       - name: Build library
-        run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        run: cmake \
+              --build ${{github.workspace}}/build \
+              --config ${{env.BUILD_TYPE}}
