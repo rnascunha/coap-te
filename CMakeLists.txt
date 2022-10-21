@@ -69,7 +69,10 @@ endif()
 ################################
 # Including tree trunks
 ################################
-find_package(tree_trunks REQUIRED)
+find_package(tree_trunks QUIET)
+if (NOT tree_trunks_FOUND)
+	add_subdirectory("${PROJECT_SOURCE_DIR}/third/tree_trunks")
+endif()
 
 include (files.cmake)
 
@@ -105,7 +108,8 @@ endif()
 
 #Includes
 target_include_directories(${PROJECT_NAME} 
-							INTERFACE 	src)
+							INTERFACE 	$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/src>
+										$<INSTALL_INTERFACE:src>)
 
 #Definitions
 target_compile_definitions(${PROJECT_NAME} 
@@ -118,30 +122,49 @@ define_if_not(${PROJECT_NAME} "${COAP_DEFINES}" "COAP_TE_LOG_LEVEL" ${USE_LOG_LE
 define_if_not(${PROJECT_NAME} "${COAP_DEFINES}" "COAP_TE_USE_ERROR_MESSAGES" ${USE_ERROR_MESSAGE})
 							
 #Checking if must compile examples
-if(DEFINED WITH_EXAMPLES)
-	if(${WITH_EXAMPLES} EQUAL 1)
-		include (examples/compile_example.cmake)
-	endif()
+option(WITH_EXAMPLES "compile coap-te examples" OFF)
+if(WITH_EXAMPLES)
+	include (examples/compile_example.cmake)
 endif()
 
 ########################################
 # Installing
 ########################################
-install(TARGETS ${PROJECT_NAME} DESTINATION lib)
-install(DIRECTORY "src/"
-        		DESTINATION "include"
-        		FILES_MATCHING 
-        		PATTERN "*.hpp"
-        		PATTERN "*.h")
-if(DEFINED WITH_EXAMPLES)
-	if(${WITH_EXAMPLES} EQUAL 1)
-		install(TARGETS coap_client DESTINATION bin)
-	endif()
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+	"${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+	VERSION ${PROJECT_VERSION}
+	COMPATIBILITY AnyNewerVersion)
+
+install(TARGETS ${PROJECT_NAME}
+		EXPORT "${PROJECT_NAME}Targets"
+		LIBRARY DESTINATION lib
+		PUBLIC_HEADER DESTINATION include
+		)
+
+set(INSTALL_DIR "lib/cmake/${PROJECT_NAME}")
+
+configure_package_config_file(
+	"${PROJECT_SOURCE_DIR}/cmake/${PROJECT_NAME}Config.cmake.in"
+	"${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+	INSTALL_DESTINATION ${INSTALL_DIR})
+
+install(EXPORT "${PROJECT_NAME}Targets" DESTINATION ${INSTALL_DIR})
+install(FILES	"${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+				"${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+		DESTINATION ${INSTALL_DIR})
+install(DIRECTORY "${PROJECT_SOURCE_DIR}/src/"
+		DESTINATION include
+		FILES_MATCHING 
+		PATTERN "*.h" PATTERN "*.hpp")
+if (WITH_EXAMPLES) 
+	install(FILES "${PROJECT_BINARY_DIR}/examples/coap_client" 
+			DESTINATION bin
+			PERMISSIONS OWNER_EXECUTE GROUP_EXECUTE WORLD_EXECUTE)
 endif()
-install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/README.md" 
-				"${CMAKE_CURRENT_SOURCE_DIR}/LICENSE"
-				"${CMAKE_CURRENT_SOURCE_DIR}/URL.txt"
-			DESTINATION doc)
+install(FILES "${PROJECT_SOURCE_DIR}/README.md"
+				"${PROJECT_SOURCE_DIR}/LICENSE"
+			DESTINATION "doc/${PROJECT_NAME}")
 
 #########################################
 # Packing // https://cmake.org/cmake/help/latest/module/CPack.html

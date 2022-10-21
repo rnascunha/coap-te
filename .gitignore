@@ -6,4 +6,4 @@ Release/
 Debug/
 out/
 .vs/
-third/
+.vscode/
