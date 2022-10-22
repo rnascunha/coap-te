@@ -2,7 +2,8 @@
 //#include <ctime>
 #include <cstdlib>
 #if COAP_TE_ESP_IDF_PLATAFORM == 1
-#include <esp_system.h>
+#include "esp_timer.h"
+#include "esp_random.h"
 #else
 #include <chrono>
 #endif /* COAP_TE_ESP_IDF_PLATAFORM == 1 */

@@ -114,7 +114,7 @@ int main()
 	Parser parser(buffer, size);
 	link_format const* lf;	//Holds resource description struct
 	//Runs until the last resource
-	while((lf = parser.next()))
+	while((lf = parser.next()) != nullptr)
 	{
 		std::printf("[%zu] %.*s\n",
 				lf->link_len, static_cast<int>(lf->link_len), lf->link);
@@ -126,7 +126,7 @@ int main()
 		Parser_Attr parser_attr(lf->description, lf->desc_len);
 		attribute const* la;	//Holds attritube struct
 		//Runs until the last attribute
-		while((la = parser_attr.next()))
+		while((la = parser_attr.next()) != nullptr)
 		{
 			std::printf("\tattr[%zu]: %.*s\n",
 					la->attr_len, static_cast<int>(la->attr_len), la->attr);
@@ -138,7 +138,7 @@ int main()
 			Parser_Value parser_value(la);
 			link_value const* lv;	//Holds value struct
 			//Runs until the last value
-			while((lv = parser_value.next()))
+			while((lv = parser_value.next()) != nullptr)
 			{
 				std::printf("\t\tvalue[%zu]: %.*s\n",
 						lv->value_len, static_cast<int>(lv->value_len), lv->value);

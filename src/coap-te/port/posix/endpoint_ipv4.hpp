@@ -7,6 +7,10 @@
 
 #include "port.hpp"
 
+#ifdef WIN32
+#define inet_ntop(family, addr, addr_str, len)	InetNtop(family, addr, addr_str, len)
+#endif /* WIN32 */
+
 namespace CoAP{
 namespace Port{
 namespace POSIX{
@@ -137,5 +141,9 @@ class endpoint_ipv4{
 }//POSIX
 }//Port
 }//CoAP
+
+#ifdef WIN32
+#undef inet_ntop
+#endif /* WIN32 */
 
 #endif /* COAP_TE_PORT_POSIX_ENDPOINT_IPV4_HPP__ */

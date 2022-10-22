@@ -10,6 +10,7 @@ on:
         default: '1'
 env:
   WITH_EXAMPLES: ${{ github.event.inputs.WITH_EXAMPLES || '1' }}
+  BUILD_TYPE: Release
 jobs:
   build:
     name: ${{ matrix.config.name }}
@@ -20,21 +21,77 @@ jobs:
         config:
           - name: Ubuntu GCC
             os: ubuntu-latest
+            compiler: gcc
+            version: 9
             cc: gcc
             cxx: g++
+            generator: Unix Makefiles
+            
           - name: Ubuntu Clang
             os: ubuntu-latest
+            compiler: clang
+            version: 11
             cc: clang
             cxx: clang++
+            generator: Unix Makefiles
+          
+          - name: Windows MSVC
+            os: windows-latest
+            compiler: Visual Studio
+            version: 17
+            cc: cl
+            cxx: cl
+            generator: Visual Studio 17 2022
+
+          - name: Windows MinGW
+            os: windows-latest
+            version: 11.2
+            compiler: gcc
+            cc: gcc
+            cxx: g++
+            generator: MinGW Makefiles
     steps:
       - name: Checking out repostitory
         uses: actions/checkout@v2
-        with:
-          submodules: recursive
-      - name: Build library
-        id: build-library
+
+      - name: Install Conan
+        id: install-conan
+        uses: turtlebrowser/get-conan@main
+        
+      - name: Create default Conan profile
         run: |
-          mkdir build
-          cd build
-          cmake -DCMAKE_C_COMPILER=${{ matrix.config.cc }} -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx}} -DWITH_EXAMPLES=$WITH_EXAMPLES ..
-          cmake --build .
+          conan profile new default --detect
+          conan profile update settings.compiler='${{matrix.config.compiler}}' default
+          conan profile update settings.compiler.version=${{matrix.config.version}} default
+
+      - name: Config MinGW
+        if: ${{matrix.config.name == 'Windows MinGW'}}
+        run: conan profile update settings.compiler.libcxx=libstdc++ default
+        
+      - name: Conan configure remotes
+        run:  |
+            conan remote add owner https://rnascunha.jfrog.io/artifactory/api/conan/owner-conan
+            conan config set general.revisions_enabled=1
+            
+      - name: Conan install dependencies
+        run: >
+            conan install . 
+            -s build_type=${{env.BUILD_TYPE}} 
+            -if ${{github.workspace}}/build 
+            -pr default 
+            -b missing
+            
+      - name: CMake configure
+        run: >
+          cmake -G "${{matrix.config.generator}}" 
+          -DCMAKE_C_COMPILER=${{ matrix.config.cc }} 
+          -DCMAKE_CXX_COMPILER=${{ matrix.config.cxx}} 
+          -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
+          -DWITH_EXAMPLES=$WITH_EXAMPLES 
+          -B ${{github.workspace}}/build
+                
+      - name: Build library
+        run: >
+          cmake 
+          --build ${{github.workspace}}/build 
+          --config ${{env.BUILD_TYPE}}

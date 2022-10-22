@@ -202,7 +202,7 @@ bool Serialize::remove_option(Option::code op, CoAP::Error& ec) noexcept
 	Option::option current, before;
 	unsigned offset = 0;
 
-	while((next = parser.next()))
+	while((next = parser.next()) != nullptr)
 	{
 		before = current;
 		current = *next;

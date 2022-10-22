@@ -310,14 +310,16 @@ process_signaling_csm(socket sock, CoAP::Message::Reliable::message const& msg) 
 {
 	debug(engine_mod, "CSM message received");
 
-	if constexpr(!has_connection_list) return;
+	if constexpr(!has_connection_list) 
+		return;
+	else {
+		using namespace CoAP::Message;
 
-	using namespace CoAP::Message;
+		connection_hold_t* conn = conn_list_.find(sock);
+		if(!conn) return;
 
-	connection_hold_t* conn = conn_list_.find(sock);
-	if(!conn) return;
-
-	CoAP::Transmission::Reliable::process_signaling_csm(conn->csm(), msg);
+		CoAP::Transmission::Reliable::process_signaling_csm(conn->csm(), msg);
+	}
 }
 
 template<typename Connection,

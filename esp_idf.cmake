@@ -4,7 +4,7 @@ list(APPEND MAIN_SRC ${SRC_DIR_PORT}/c_standard_port.cpp)
 
 idf_component_register(SRCS ${MAIN_SRC} ${SRC_PORT_POSIX} ${SRC_PORT_ESP_MESH}
                        INCLUDE_DIRS ${MAIN_INCLUDE_DIRS}
-                       REQUIRES)
+                       REQUIRES esp_timer)
 
 if(CONFIG_COAP_TE_MESSAGE_ERROR)
 	set(CONFIG_COAP_TE_MESSAGE_ERROR 1)

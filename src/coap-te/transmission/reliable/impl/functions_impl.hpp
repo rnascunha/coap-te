@@ -80,7 +80,7 @@ inline void process_signaling_csm(csm_configure& csm,
 
 	Option::Parser<Option::csm> parse(msg);
 	Option::option_csm const* opt;
-	while((opt = parse.next()))
+	while((opt = parse.next()) != nullptr)
 	{
 		switch(opt->ocode)
 		{

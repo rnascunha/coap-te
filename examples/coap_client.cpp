@@ -541,7 +541,7 @@ int main(int argc, char** argv)
 	{
 		using namespace CoAP::URI;
 		case host_type::ipv4:
-			ep.set(uri.host.host.ip4.s_addr, uri.port);
+			ep.set(static_cast<in_addr_t>(uri.host.host.ip4.s_addr), uri.port);
 			break;
 		case host_type::ipv6:
 			ep.set(uri.host.host.ip6, uri.port);

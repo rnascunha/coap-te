@@ -86,7 +86,7 @@ static bool split_to_list(std::uint8_t* buffer, std::size_t& buffer_len,
 			std::size_t length;// = buffer_len;
 			buffer += sizeof(Option::node);
 
-			if(!(length = CoAP::Helper::percent_decode(data + j, i - j)))
+			if((length = CoAP::Helper::percent_decode(data + j, i - j)) == 0)
 			{
 				return false;
 			}
@@ -132,7 +132,7 @@ static bool split_to_list(std::uint8_t* buffer, std::size_t& buffer_len,
 			std::size_t length = buffer_len;
 
 			buffer += sizeof(Option::node);
-			if(!(length = CoAP::Helper::percent_decode(reinterpret_cast<char*>(buffer), buffer_len, data + j, i - j)))
+			if((length = CoAP::Helper::percent_decode(reinterpret_cast<char*>(buffer), buffer_len, data + j, i - j)) == 0)
 			{
 				return false;
 			}

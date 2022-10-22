@@ -2,6 +2,10 @@
 #include "output_string.hpp"
 #include <cstdio>
 
+#ifdef WIN32
+#define inet_ntop(family, addr, addr_str, len)	InetNtop(family, addr, addr_str, len)
+#endif /* WIN32 */
+
 namespace CoAP{
 namespace Debug{
 

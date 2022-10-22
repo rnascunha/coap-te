@@ -204,7 +204,7 @@ static void print_message_options(CoAP::Message::Reliable::message const& msg,
 {
 	CoAP::Message::Option::Parser<OptionCode> parser(msg);
 	CoAP::Message::Option::option_template<OptionCode> const* opt;
-	while((opt = parser.next()))
+	while((opt = parser.next()) != nullptr)
 	{
 		std::printf("%s", prefix);
 		print_option(*opt, true);
