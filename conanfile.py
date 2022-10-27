@@ -15,7 +15,7 @@ class CoapTeConan(ConanFile):
     generators = "cmake_find_package"
     requires = "tree_trunks/0.1@base/stable"
     exports = "LICENSE", "README.md", "URL.txt"
-    exports_sources = "*.hpp", "*.cpp", "CMakeLists.txt", "files.cmake", "Kconfig"
+    exports_sources = "*.hpp", "*.cpp", "CMakeLists.txt", "files.cmake", "Kconfig", "cmake/coap-teConfig.cmake.in"
 
     def build_requirements(self):
         if CMake.get_version() < Version("3.10"):

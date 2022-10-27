@@ -6,6 +6,9 @@ idf_component_register(SRCS ${MAIN_SRC} ${SRC_PORT_POSIX} ${SRC_PORT_ESP_MESH}
                        INCLUDE_DIRS ${MAIN_INCLUDE_DIRS}
                        REQUIRES esp_timer)
 
+add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/third/tree_trunks")
+target_link_libraries(${COMPONENT_LIB} PUBLIC tree_trunks)
+
 if(CONFIG_COAP_TE_MESSAGE_ERROR)
 	set(CONFIG_COAP_TE_MESSAGE_ERROR 1)
 else()
@@ -31,5 +34,4 @@ target_compile_options(${COMPONENT_LIB}
 							-DCOAP_TE_USE_SELECT=1
 							-DCOAP_TE_USE_ERROR_MESSAGES=${CONFIG_COAP_TE_MESSAGE_ERROR}
 							-DCOAP_TE_LOG_COLOR=${CONFIG_COAP_TE_USE_COLOR}
-							-DCOAP_TE_LOG_LEVEL=${CONFIG_COAP_TE_LOG_LEVEL}
-						)
+							-DCOAP_TE_LOG_LEVEL=${CONFIG_COAP_TE_LOG_LEVEL})
