@@ -1,6 +1,7 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_CONFIG_HPP
 #define COAP_TE_MESSAGE_OPTIONS_CONFIG_HPP
 
+#include <string_view>
 #if COAP_TE_MESSAGE_OPTION_NO_RESPONSE == 1
 #include <cstdint>
 #endif /* COAP_TE_MESSAGE_OPTION_NO_RESPONSE == 1 */

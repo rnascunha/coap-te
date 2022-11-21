@@ -22,7 +22,7 @@ add_compile_definitions(COAP_TE_MESSAGE_OPTION_OBSERVABLE_RESOURCE=$<BOOL:${COAP
 				COAP_TE_MESSAGE_OPTION_NO_RESPONSE=$<BOOL:${COAP_TE_MESSAGE_OPTION_NO_RESPONSE}>)
 
 if(MSVC)
-	set(CMAKE_CXX_FLAGS "/GR- /W4")
+	set(CMAKE_CXX_FLAGS "/GR- /W4 /EHsc")
 	set(CMAKE_CXX_FLAGS_RELEASE "/O2")
 else()
 	set(CMAKE_CXX_FLAGS "-Wall -Wextra -pedantic -fno-exceptions -fno-rtti") 
@@ -34,9 +34,6 @@ set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/include)
 add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
                                                         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
-# set_target_properties(foo PROPERTIES INTERFACE_LINK_LIBRARIES std:c++fs)
-target_compile_features(${PROJECT_NAME} INTERFACE cxx_std_17)
-
 
 if (COAP_TE_WITH_EXAMPLES)
 	include(examples/examples.cmake)
