@@ -112,4 +112,4 @@ jobs:
 
       - name: Run tests
         if: ${{env.WITH_TESTS == '1'}}
-        run: ctest
+        run: ctest --test-dir ${{github.workspace}}/build/
