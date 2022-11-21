@@ -5,11 +5,16 @@ on:
   workflow_dispatch:
     inputs:
       WITH_EXAMPLES:
-        description: Compile with examples
+        description: Compile examples
+        required: true
+        default: '1'
+      WITH_TESTS:
+        description: Compile tests
         required: true
         default: '1'
 env:
   WITH_EXAMPLES: ${{ github.event.inputs.WITH_EXAMPLES || '1' }}
+  WITH_TESTS: ${{ github.event.inputs.WITH_TESTS || '1' }}
   BUILD_TYPE: Release
 jobs:
   build:
@@ -54,40 +59,49 @@ jobs:
       - name: Checking out repostitory
         uses: actions/checkout@v2
 
-      - name: Install Conan
-        id: install-conan
-        uses: turtlebrowser/get-conan@main
+      # - name: Install Conan
+      #   id: install-conan
+      #   uses: turtlebrowser/get-conan@main
         
-      - name: Create default Conan profile
-        run: |
-          conan profile new default --detect
-          conan profile update settings.compiler='${{matrix.config.compiler}}' default
-          conan profile update settings.compiler.version=${{matrix.config.version}} default
+      # - name: Create default Conan profile
+      #   run: |
+      #     conan profile new default --detect
+      #     conan profile update settings.compiler='${{matrix.config.compiler}}' default
+      #     conan profile update settings.compiler.version=${{matrix.config.version}} default
 
-      - name: Config MinGW
-        if: ${{matrix.config.name == 'Windows MinGW'}}
-        run: conan profile update settings.compiler.libcxx=libstdc++ default
+      # - name: Config MinGW
+      #   if: ${{matrix.config.name == 'Windows MinGW'}}
+      #   run: conan profile update settings.compiler.libcxx=libstdc++ default
         
-      - name: Conan configure remotes
-        run:  |
-            conan remote add owner https://rnascunha.jfrog.io/artifactory/api/conan/owner-conan
-            conan config set general.revisions_enabled=1
+      # - name: Conan configure remotes
+      #   run:  |
+      #       conan remote add owner https://rnascunha.jfrog.io/artifactory/api/conan/owner-conan
+      #       conan config set general.revisions_enabled=1
             
-      - name: Conan install dependencies
-        run: >
-            conan install . 
-            -s build_type=${{env.BUILD_TYPE}} 
-            -if ${{github.workspace}}/build 
-            -pr default 
-            -b missing
+      # - name: Conan install dependencies
+      #   run: >
+      #       conan install . 
+      #       -s build_type=${{env.BUILD_TYPE}} 
+      #       -if ${{github.workspace}}/build 
+      #       -pr default 
+      #       -b missing
             
+      # - name: CMake configure
+      #   run: >
+      #     cmake -G "${{matrix.config.generator}}" 
+      #     -DCMAKE_C_COMPILER=${{matrix.config.cc }} 
+      #     -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} 
+      #     -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
+      #     -DWITH_EXAMPLES=${{env.WITH_EXAMPLES}}
+      #     -B ${{github.workspace}}/build
       - name: CMake configure
         run: >
           cmake -G "${{matrix.config.generator}}" 
           -DCMAKE_C_COMPILER=${{matrix.config.cc }} 
           -DCMAKE_CXX_COMPILER=${{matrix.config.cxx}} 
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
-          -DWITH_EXAMPLES=${{env.WITH_EXAMPLES}}
+          -DCOAP_TE_WITH_EXAMPLES=${{env.WITH_EXAMPLES}}
+          -DCOAP_TE_WITH_TESTS=${{env.WITH_TESTS}}
           -B ${{github.workspace}}/build
                 
       - name: Build library
@@ -95,3 +109,7 @@ jobs:
           cmake 
           --build ${{github.workspace}}/build 
           --config ${{env.BUILD_TYPE}}
+
+      - name: Run tests
+        if: ${{env.WITH_TESTS == '1'}}
+        run: ctest
