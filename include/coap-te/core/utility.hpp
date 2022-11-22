@@ -1,5 +1,17 @@
-#ifndef COAP_TE_CORE_UTILITY_HPP
-#define COAP_TE_CORE_UTILITY_HPP
+/**
+ * @file utility.hpp
+ * @author Rafael Cunha (rnascunha@gmail.com)
+ * @brief Utility functions used across all library
+ * @version 0.1
+ * @date 2022-11-21
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ * 
+ */
+
+#ifndef COAP_TE_CORE_UTILITY_HPP_
+#define COAP_TE_CORE_UTILITY_HPP_
 
 #include "coap-te/core/traits.hpp"
 
@@ -19,27 +31,13 @@ namespace core {
  * @return constexpr BidiIt 
  */
 template<typename RandomAccessIt, typename T>
-[[nodiscard]] constexpr RandomAccessIt 
-binary_search(RandomAccessIt begin, RandomAccessIt end, T const& value) noexcept{
-	static_assert(is_random_access_iterator_v<RandomAccessIt>, "Wrong iterator type. Must be random access");
+[[nodiscard]] constexpr RandomAccessIt
+binary_search(RandomAccessIt begin, RandomAccessIt end,
+              T const& value) noexcept;
 
-	if (begin >= end)
-		return end;
+}  // namespace core
+}  // namespace coap_te
 
-    auto rend = end;
-	while (begin <= end) {
-		auto mid = begin + (end - begin) / 2;
-		if (*mid == value)
-			return mid;
-		if (*mid < value)
-			begin = mid + 1;
-		else 
-			end = mid - 1;
-	}
-	return rend;
-}
+#include "impl/utility.ipp"
 
-}//core
-}//coap_te
-
-#endif /* COAP_TE_CORE_UTILITY_HPP */
+#endif  // COAP_TE_CORE_UTILITY_HPP_

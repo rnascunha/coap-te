@@ -5,8 +5,8 @@ PROJECT(coap-te LANGUAGES CXX VERSION 0.1.0)
 # Compile options	#
 #####################
 option(COAP_TE_WITH_EXAMPLES "compile examples"	ON)
-option(COAP_TE_WITH_TESTS	 "compile tests"	ON)
-option(COAP_TE_WITH_DOCS	 "compile docs"		ON)
+option(COAP_TE_WITH_TESTS	 "compile tests"    	ON)
+option(COAP_TE_WITH_DOCS	 "compile docs"		    OFF)
 
 #
 # Choose CoAP options to compile
@@ -35,10 +35,17 @@ add_library(${PROJECT_NAME} INTERFACE)
 target_include_directories(${PROJECT_NAME} INTERFACE "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
                                                         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
 
+# Compile examples
 if (COAP_TE_WITH_EXAMPLES)
 	include(examples/examples.cmake)
 endif()
 
+# Compile and run tests
 if (COAP_TE_WITH_TESTS)
 	include(tests/tests.cmake)
+endif()
+
+# Compile documentation
+if (COAP_TE_WITH_DOCS)
+  include(docs/docs.cmake)
 endif()

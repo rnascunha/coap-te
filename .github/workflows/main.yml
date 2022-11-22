@@ -111,5 +111,5 @@ jobs:
           --config ${{env.BUILD_TYPE}}
 
       - name: Run tests
-        if: ${{env.WITH_TESTS == '1'}}
+        if: ${{env.WITH_TESTS == '1' and matrix.config.name != 'Windows MinGW'}}
         run: ctest --test-dir ${{github.workspace}}/build/
