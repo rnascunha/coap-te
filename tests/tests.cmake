@@ -12,7 +12,10 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 set(TEST_DIR    tests)
-set(TESTS       utility options)
+set(TESTS       utility 
+                options 
+                core_traits
+                buffer)
 set(OUTPUT_TEST    ${CMAKE_BINARY_DIR}/tests)
 
 include(GoogleTest)
@@ -24,7 +27,7 @@ foreach(TEST ${TESTS})
     target_link_libraries(
         ${TEST}
         GTest::gtest_main
-        # gmock
+        gmock
         ${PROJECT_NAME})
 
     set_target_properties(${TEST} PROPERTIES

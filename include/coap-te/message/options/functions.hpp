@@ -11,6 +11,8 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_FUNCTIONS_HPP_
 #define COAP_TE_MESSAGE_OPTIONS_FUNCTIONS_HPP_
 
+#include <system_error>   // NOLINT
+
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/constants.hpp"
 
@@ -42,6 +44,33 @@ is_safe_to_forward(number op) noexcept {
 is_no_cache_key(number op) noexcept {
   return (static_cast<number_type>(op) & no_cache_key) == no_cache_key;
 }
+
+// template<typename Buffer,
+//          typename CheckOption>
+// size_format serialize(
+//             number before,
+//             number current,
+//             Buffer&,
+//             std::error_code&) noexcept;
+
+// template<typename Buffer,
+//          typename CheckOption>
+// size_format serialize(
+//             number before,
+//             number current,
+//             unsigned,
+//             Buffer&,
+//             std::error_code&) noexcept;
+
+// template<typename Buffer,
+//          typename ConstBuffer,
+//          typename CheckOption>
+// size_format serialize(
+//             number before,
+//             number current,
+//             const ConstBuffer&,
+//             Buffer&,
+//             std::error_code&) noexcept;
 
 }  // namespace options
 }  // namespace message

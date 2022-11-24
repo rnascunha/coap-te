@@ -1,16 +1,25 @@
+/**
+ * @file options.cpp
+ * @author Rafael Cunha (rnascunha@gmail.com)
+ * @brief 
+ * @version 0.1
+ * @date 2022-11-22
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+#include <gtest/gtest.h>
 #include <algorithm>
 
-#include "coap-te.hpp"
-
-#include <gtest/gtest.h>
+#include "coap-te.hpp"    // NOLINT
 
 TEST(Options, Traits) {
-    using namespace coap_te::message::options;
+    using namespace coap_te::message::options;  // NOLINT
 
-    //Check if definitions options container is sorted increseing (required)
+    // Check if definitions options container is sorted increseing (required)
     ASSERT_TRUE(std::is_sorted(std::begin(definitions), std::end(definitions)));
 
-    //Check if find options definitions correctly
+    // Check if find options definitions correctly
     EXPECT_EQ(get_definition(number::if_match), number::if_match);
     EXPECT_EQ(get_definition(number::uri_host), number::uri_host);
     EXPECT_EQ(get_definition(number::etag), number::etag);
@@ -29,7 +38,7 @@ TEST(Options, Traits) {
 #endif /* COAP_TE_MESSAGE_OPTION_HOP_LIMIT == 1 */
     EXPECT_EQ(get_definition(number::accept), number::accept);
     EXPECT_EQ(get_definition(number::location_query), number::location_query);
-#if	COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
+#if COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
     EXPECT_EQ(get_definition(number::block2), number::block2);
     EXPECT_EQ(get_definition(number::block1), number::block1);
     EXPECT_EQ(get_definition(number::size2), number::size2);
@@ -41,7 +50,7 @@ TEST(Options, Traits) {
     EXPECT_EQ(get_definition(number::no_response), number::no_response);
 #endif /* COAP_TE_MESSAGE_OPTION_NO_RESPONSE == 1 */
 
-    //Invalid options must return invalid definition
+    // Invalid options must return invalid definition
     EXPECT_EQ(get_definition(static_cast<number>(500)), number::invalid);
     EXPECT_EQ(get_definition(static_cast<number>(1000)), number::invalid);
     EXPECT_EQ(get_definition(static_cast<number>(1500)), number::invalid);

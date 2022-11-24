@@ -1,3 +1,6 @@
+#ifndef COAP_TE_CORE_IMPL_UTILITY_IPP_
+#define COAP_TE_CORE_IMPL_UTILITY_IPP_
+
 namespace coap_te {
 namespace core {
 
@@ -7,6 +10,8 @@ binary_search(RandomAccessIt begin, RandomAccessIt end,
               T const& value) noexcept {
   static_assert(is_random_access_iterator_v<RandomAccessIt>,
                 "Wrong iterator type. Must be random access");
+  //https://stackoverflow.com/a/44522730
+  static_assert(is_equal_comparable_v<std::remove_reference_t<decltype(*begin)>, T>);
 
   if (begin >= end) {
     return end;
@@ -26,4 +31,6 @@ binary_search(RandomAccessIt begin, RandomAccessIt end,
 }
 
 }  // namespace core
-}  // namespace coap_te0
+}  // namespace coap_te
+
+#endif  // COAP_TE_CORE_IMPL_UTILITY_IPP_

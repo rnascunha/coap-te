@@ -6,8 +6,6 @@
  * @date 2022-11-21
  * 
  * @copyright Copyright (c) 2022
- * 
- * 
  */
 
 #ifndef COAP_TE_CORE_UTILITY_HPP_
@@ -19,21 +17,33 @@ namespace coap_te {
 namespace core {
 
 /**
- * @brief
+ * @defgroup utility Utility
+ * Utility functions used all over CoAP-te library
  * 
- * @precondition must be not-decreasing container
+ * @ingroup core
+ * @{
+ */
+
+/**
+ * @brief Makes a binary search in a container
  * 
- * @tparam BidiIt 
- * @tparam T 
- * @param begin
- * @param end 
- * @param value 
- * @return constexpr BidiIt 
+ * @note The container must be sorted strictly increasing
+ * @note The defered value of the iterator must be comparable with T
+ * 
+ * @tparam RandomAccessIt Iterator type (must be random access iterator)
+ * @tparam T    Type of value to be searched
+ * 
+ * @param begin Begining of the container
+ * @param end   End of the container
+ * @param value Value to be searched
+ * @return      the iterator to the value found or end
  */
 template<typename RandomAccessIt, typename T>
 [[nodiscard]] constexpr RandomAccessIt
 binary_search(RandomAccessIt begin, RandomAccessIt end,
               T const& value) noexcept;
+
+/** @} */  // end of utility group
 
 }  // namespace core
 }  // namespace coap_te

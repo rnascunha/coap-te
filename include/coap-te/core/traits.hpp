@@ -7,6 +7,8 @@
  * 
  * @copyright Copyright (c) 2022
  * 
+ * @defgroup core Core
+ * Definitions and inplementations using among all library
  */
 
 #ifndef COAP_TE_CORE_TRAITS_HPP_
@@ -15,9 +17,29 @@
 #include <type_traits>
 #include <iterator>
 
+#include "impl/traits.ipp"
+
 namespace coap_te {
+/**
+ * @ingroup core
+ */
 namespace core {
 
+/** 
+ * @defgroup coretraits Type Traits
+ * Type traits use on all CoAP-te library
+ * 
+ * @ingroup core
+ * @{
+ */
+
+/**
+ * @brief Checks if a iterator class is equal or convertible
+ * to another category
+ * 
+ * @tparam Iter iterator class to check if can be converted
+ * @tparam IterCategory iterator category required
+ */
 template<typename Iter, typename IterCategory>
 struct is_iterator_type :
     std::bool_constant<
@@ -26,10 +48,18 @@ struct is_iterator_type :
             IterCategory>>
 {};
 
+/**
+ * @brief Helper template of @ref is_iterator_type
+ */
 template<typename Iter, typename IterCategory>
 static constexpr bool
 is_iterator_type_v = is_iterator_type<Iter, IterCategory>::value;
 
+/**
+ * @brief Checks if a iterator is bidirectional
+ * 
+ * @tparam Iter iterator to check
+ */
 template<typename Iter>
 struct is_bidirectional_iterator :
     is_iterator_type<
@@ -37,10 +67,20 @@ struct is_bidirectional_iterator :
         std::bidirectional_iterator_tag>
 {};
 
+/**
+ * @brief Helper template of @ref is_bidirectional_iterator
+ * 
+ * @tparam Iter 
+ */
 template<typename Iter>
 static constexpr bool
 is_bidirectional_iterator_v = is_bidirectional_iterator<Iter>::value;
 
+/**
+ * @brief Checks if a iterator is random access
+ * 
+ * @tparam Iter iterator to check
+ */
 template<typename Iter>
 struct is_random_access_iterator :
     is_iterator_type<
@@ -48,9 +88,58 @@ struct is_random_access_iterator :
         std::random_access_iterator_tag>
 {};
 
+/**
+ * @brief Helper template of @ref is_random_access_iterator
+ * 
+ * @tparam Iter 
+ */
 template<typename Iter>
 static constexpr bool
 is_random_access_iterator_v = is_random_access_iterator<Iter>::value;
+
+/**
+ * @brief Checks if types are equal comparable
+ * 
+ * Checks if operator== is defined to type T and EqualTo
+ * 
+ * @tparam T        Left hand side of operator==
+ * @tparam EqualTo  Right hand side of operator==
+ */
+template<class T, class EqualTo = T>
+struct is_equal_comparable :
+  detail::is_equal_comparable_impl<T, EqualTo>::type {};
+
+/**
+ * @brief Helper template of @ref is_equal_comparable
+ * 
+ * @tparam T        Left hand side of operator==
+ * @tparam EqualTo  Right hand side of operator==
+ */
+template<class T, class EqualTo = T>
+static constexpr bool
+is_equal_comparable_v = is_equal_comparable<T, EqualTo>::value;
+
+/**
+ * @brief Checks if T is of buffer type
+ * 
+ * Here, buffer type is defined as class that have defined the
+ * _data_ and _size_ method.
+ * 
+ * @tparam T type to check if is buffer
+ */
+template<typename T>
+struct is_buffer_type : detail::is_buffer_type_impl<T>::type{};
+
+/**
+ * @brief Helper template of @ref is_buffer_type
+ * 
+ * @tparam T type to check if is buffer
+ */
+template<typename T>
+static constexpr bool
+is_buffer_type_v = is_buffer_type<T>::value;
+
+/** @} */  // end of CoreTraits
 
 }  // namespace core
 }  // namespace coap_te

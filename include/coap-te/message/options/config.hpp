@@ -27,6 +27,12 @@ enum class format {
   uint,
   string  //NOLINT
 };
+using size_format = std::size_t;
+
+struct empty_format_tag{};
+struct opaque_format_tag{};
+struct uint_format_tag{};
+struct string_format_tag{};
 
 enum class number : number_type;
 

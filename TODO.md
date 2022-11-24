@@ -8,6 +8,7 @@
 * reestructure code directories.
 * Remove JSON functionality (make as a outside library)
 * Do not hardcode log library (remove tree_trunks dependency)
+* Benchmark library
 
 ## Compatibiliy
 
