@@ -93,7 +93,7 @@ TEST(CoreBuffer, ConstBufferChar) {
 void test_const_buffer_int_12345(const coap_te::const_buffer& buf) {
   EXPECT_EQ(buf.size(), 5 * sizeof(int));
   {
-    int size = buf.size() / sizeof(int);
+    int size = static_cast<int>(buf.size() / sizeof(int));
     int v = 1;
     auto it = buf.begin();
     for (int i = 0; i < size; ++i) {
@@ -104,7 +104,7 @@ void test_const_buffer_int_12345(const coap_te::const_buffer& buf) {
     }
   }
   {
-    int size = buf.size() / sizeof(int);
+    int size = static_cast<int>(buf.size() / sizeof(int));
     int v = 1;
     auto it = buf.begin();
     for (int i = 0; i < size; ++i) {

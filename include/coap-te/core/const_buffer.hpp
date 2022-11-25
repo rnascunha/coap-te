@@ -11,7 +11,6 @@
 #ifndef COAP_TE_CORE_CONST_BUFFER_HPP_
 #define COAP_TE_CORE_CONST_BUFFER_HPP_
 
-#include <cstring>    // std::strlen
 #include <iterator>
 
 #include "coap-te/core/traits.hpp"
@@ -53,7 +52,7 @@ class const_buffer {
       return *this;
     }
 
-    const_iterator operator+(int n) noexcept {
+    const_iterator operator+(int n) const noexcept {
       return const_iterator(ptr_ + n);
     }
 
@@ -100,7 +99,7 @@ class const_buffer {
 
   constexpr
   explicit const_buffer(const char* data) noexcept
-    : data_(data), size_(std::strlen(data))
+    : const_buffer(std::string_view(data))
   {}
 
   template<typename T>
