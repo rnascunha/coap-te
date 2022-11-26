@@ -12,19 +12,16 @@
 #define COAP_TE_MESSAGE_OPTIONS_OPTION_VIEW_HPP_
 
 #include <variant>
-#include <string_view>
-#include <utility>
 
-#include "coap_te/message/options/config.hpp"
+#include "coap-te/message/options/config.hpp"
+#include "coap-te/core/const_buffer.hpp"
+
 
 namespace coap_te {
 namespace message {
 namespace options {
 
-struct span {
-  const void* data = nullptr;
-  std::size_t size = 0;
-};
+struct empty_format{};
 
 class option_view {
  public:
@@ -32,10 +29,11 @@ class option_view {
                       std::monostate,
                       empty_format,
                       unsigned,
-                      std::string_view,
-                      span>;
+                      coap_te::const_buffer>;
+
  private:
-  value_type data_;
+  number      op;
+  value_type  data_;
 };
 
 }  // namespace options

@@ -1,6 +1,8 @@
 #ifndef COAP_TE_CORE_IMPL_UTILITY_IPP_
 #define COAP_TE_CORE_IMPL_UTILITY_IPP_
 
+#include <cstring>
+
 namespace coap_te {
 namespace core {
 
@@ -28,6 +30,41 @@ binary_search(RandomAccessIt begin, RandomAccessIt end,
       end = mid - 1;
   }
   return rend;
+}
+
+template<typename Interger>
+constexpr void
+to_big_endian(std::uint8_t* dest,
+              Interger value,
+              std::size_t count /* = sizeof(Interger) */) noexcept {
+  static_assert(std::is_integral<Interger>::value, "Interger required");
+
+  for (unsigned i = 0; i < count; i++) {
+    dest[i] = static_cast<std::uint8_t>(value >> ((count - (i + 1)) * 8));
+  }
+}
+
+template<typename UnsignedType>
+[[nodiscard]] constexpr std::size_t
+make_short_unsigned(UnsignedType& value) noexcept {     //NOLINT
+  static_assert(std::is_unsigned_v<UnsignedType>, "Must be unsigned");
+
+  if (value == 0)
+    return 0;
+
+  bool skip = false;
+  std::size_t size = 0;
+  std::uint8_t d[sizeof(UnsignedType)];
+  for (UnsignedType i = 0; i < sizeof(UnsignedType); ++i) {
+    int v = value >> ((sizeof(UnsignedType) - (i + 1)) * 8);
+    std::uint8_t nv = static_cast<std::uint8_t>(v);
+    if (!skip && nv == 0)
+      continue;
+    d[size++] = nv;
+    skip = true;
+  }
+  std::memcpy(reinterpret_cast<uint8_t*>(&value), d, size);
+  return size;
 }
 
 }  // namespace core

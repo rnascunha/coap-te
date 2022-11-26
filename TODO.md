@@ -77,3 +77,13 @@ Binding to languages like:
 ### Tools
 
 Web tool to construct and exchange menssage.
+
+
+# Review
+
+At the end, remember:
+
+* Check lines with "//NOLINT"
+* Run static analisys
+* Check if all functions/class are documented
+* Check if all functions/class are tested

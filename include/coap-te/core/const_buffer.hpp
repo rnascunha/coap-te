@@ -11,15 +11,17 @@
 #ifndef COAP_TE_CORE_CONST_BUFFER_HPP_
 #define COAP_TE_CORE_CONST_BUFFER_HPP_
 
+#include <cstdint>
 #include <iterator>
 
 #include "coap-te/core/traits.hpp"
+#include "coap-te/core/mutable_buffer.hpp"
 
 namespace coap_te {
 
 class const_buffer {
  public:
-  using value_type = unsigned char;
+  using value_type = std::uint8_t;
   using pointer = const value_type*;
   using reference = const value_type&;
   using size_type = std::size_t;
@@ -98,6 +100,11 @@ class const_buffer {
   {}
 
   constexpr
+  const_buffer(const mutable_buffer& buf) noexcept   //NOLINT
+    : data_(buf.data()), size_(buf.size())
+  {}
+
+  constexpr
   explicit const_buffer(const char* data) noexcept
     : const_buffer(std::string_view(data))
   {}
@@ -107,7 +114,7 @@ class const_buffer {
   explicit const_buffer(const T& container) noexcept
     : data_(container.data()),
       size_(container.size() * sizeof(typename T::value_type)) {
-    static_assert(core::is_buffer_type_v<T>, "Is not buffer type");
+    static_assert(core::is_const_buffer_type_v<T>, "Is not buffer type");
   }
 
   template<std::size_t N, typename T>
@@ -116,8 +123,16 @@ class const_buffer {
     : data_(arr), size_(N * sizeof(T))
   {}
 
+  constexpr
   value_type operator[](std::size_t n) const noexcept {
     return static_cast<pointer>(data_)[n];
+  }
+
+  constexpr
+  const_buffer& operator+=(std::size_t n) noexcept {
+    data_ = static_cast<pointer>(data_) + n;
+    size_ -= n;
+    return *this;
   }
 
   constexpr

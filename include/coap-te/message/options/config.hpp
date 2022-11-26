@@ -78,15 +78,10 @@ struct definition {
   }
 };
 
-enum class delta {
-  one_byte = 13,
-  two_byte = 14,
-  error    = 15
-};
-
-enum class length {
+enum class extend : std::uint8_t {
+  no_extend = 0,
   one_byte  = 13,
-  two_byte  = 14,
+  two_bytes = 14,
   error     = 15
 };
 

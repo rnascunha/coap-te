@@ -17,11 +17,17 @@
 #include "coap-te/core/traits.hpp"
 #include "coap-te/core/utility.hpp"
 
+// buffers
+#include "coap-te/core/mutable_buffer.hpp"
+#include "coap-te/core/const_buffer.hpp"
+
 // message
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/constants.hpp"
 #include "coap-te/message/options/functions.hpp"
 #include "coap-te/message/options/definitions.hpp"
 #include "coap-te/message/options/to_string.hpp"
+#include "coap-te/message/options/serialize.hpp"
+#include "coap-te/message/options/option_view.hpp"
 
 #endif  // COAP_TE_HPP_

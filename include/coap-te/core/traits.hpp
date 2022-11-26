@@ -128,7 +128,8 @@ is_equal_comparable_v = is_equal_comparable<T, EqualTo>::value;
  * @tparam T type to check if is buffer
  */
 template<typename T>
-struct is_buffer_type : detail::is_buffer_type_impl<T>::type{};
+struct is_const_buffer_type :
+  detail::is_buffer_type_impl<T, const void*>::type{};
 
 /**
  * @brief Helper template of @ref is_buffer_type
@@ -137,7 +138,28 @@ struct is_buffer_type : detail::is_buffer_type_impl<T>::type{};
  */
 template<typename T>
 static constexpr bool
-is_buffer_type_v = is_buffer_type<T>::value;
+is_const_buffer_type_v = is_const_buffer_type<T>::value;
+
+/**
+ * @brief Checks if T is of buffer type
+ * 
+ * Here, buffer type is defined as class that have defined the
+ * _data_ and _size_ method.
+ * 
+ * @tparam T type to check if is buffer
+ */
+template<typename T>
+struct is_mutable_buffer_type :
+  detail::is_buffer_type_impl<T, void*>::type{};
+
+/**
+ * @brief Helper template of @ref is_buffer_type
+ * 
+ * @tparam T type to check if is buffer
+ */
+template<typename T>
+static constexpr bool
+is_mutable_buffer_type_v = is_mutable_buffer_type<T>::value;
 
 /** @} */  // end of CoreTraits
 

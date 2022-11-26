@@ -16,6 +16,7 @@
 #include <string>
 #include <string_view>
 
+#include "coap-te/core/mutable_buffer.hpp"
 #include "coap-te/core/const_buffer.hpp"
 
 void test_const_buffer_12345(const coap_te::const_buffer& buf) noexcept {
@@ -131,5 +132,75 @@ TEST(CoreBuffer, ConstBufferInt) {
     std::vector<int> data{1, 2, 3, 4, 5};
     coap_te::const_buffer buf(data);
     test_const_buffer_int_12345(buf);
+  }
+}
+
+TEST(CoreBuffer, Const2MutableBufferChar) {
+  {
+    char data[] = {'1', '2', '3', '4', '5'};
+    coap_te::mutable_buffer buf(data, 5);
+    test_const_buffer_12345(buf);
+  }
+  {
+    std::array<char, 5> data{'1', '2', '3', '4', '5'};
+    coap_te::mutable_buffer buf(data);
+    test_const_buffer_12345(buf);
+  }
+  {
+    std::vector<char> data{'1', '2', '3', '4', '5'};
+    coap_te::mutable_buffer buf(data);
+    test_const_buffer_12345(buf);
+  }
+  {
+    std::string data{"12345"};
+    coap_te::mutable_buffer buf(data);
+    test_const_buffer_12345(buf);
+  }
+}
+
+TEST(CoreBuffer, Const2MutableBufferInt) {
+  {
+    int data[]{1, 2, 3, 4, 5};
+    coap_te::mutable_buffer buf(data);
+    test_const_buffer_int_12345(buf);
+  }
+  {
+    std::array<int, 5> data{1, 2, 3, 4, 5};
+    coap_te::mutable_buffer buf(data);
+    test_const_buffer_int_12345(buf);
+  }
+  {
+    std::vector<int> data{1, 2, 3, 4, 5};
+    coap_te::mutable_buffer buf(data);
+    test_const_buffer_int_12345(buf);
+  }
+}
+
+void test_change_mutable_buffer(coap_te::mutable_buffer& buf) noexcept {  // NOLINT
+  for (int i = 0; i < 5; ++i)
+      buf[i] = i + 1 + '0';
+  test_const_buffer_12345(buf);
+}
+
+TEST(CoreBuffer, ChangingMutableBufferChar) {
+  {
+    char data[5];
+    coap_te::mutable_buffer buf(data, 5);
+    test_change_mutable_buffer(buf);
+  }
+  {
+    std::array<char, 5> data;
+    coap_te::mutable_buffer buf(data);
+    test_change_mutable_buffer(buf);
+  }
+  {
+    std::vector<char> data(5);
+    coap_te::mutable_buffer buf(data);
+    test_change_mutable_buffer(buf);
+  }
+  {
+    std::string data{"12345"};
+    coap_te::mutable_buffer buf(data);
+    test_change_mutable_buffer(buf);
   }
 }
