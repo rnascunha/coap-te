@@ -93,6 +93,9 @@ class const_buffer {
     pointer ptr_;
   };
 
+  constexpr
+  const_buffer() noexcept = default;
+
   template<typename T>
   constexpr
   const_buffer(const T* data, std::size_t size) noexcept
@@ -104,11 +107,6 @@ class const_buffer {
     : data_(buf.data()), size_(buf.size())
   {}
 
-  constexpr
-  explicit const_buffer(const char* data) noexcept
-    : const_buffer(std::string_view(data))
-  {}
-
   template<typename T>
   constexpr
   explicit const_buffer(const T& container) noexcept
@@ -116,6 +114,11 @@ class const_buffer {
       size_(container.size() * sizeof(typename T::value_type)) {
     static_assert(core::is_const_buffer_type_v<T>, "Is not buffer type");
   }
+
+  constexpr
+  explicit const_buffer(const char* data) noexcept
+    : const_buffer(std::string_view(data))
+  {}
 
   template<std::size_t N, typename T>
   constexpr

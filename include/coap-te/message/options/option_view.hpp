@@ -31,9 +31,9 @@ class option_view {
                       unsigned,
                       coap_te::const_buffer>;
 
- private:
-  number      op;
-  value_type  data_;
+//  private:
+//   number      op;
+//   value_type  data_;
 };
 
 }  // namespace options

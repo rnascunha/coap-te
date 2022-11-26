@@ -43,11 +43,11 @@ serialize_option_header(std::size_t size,
     hdr.byte_op = static_cast<std::uint8_t>(size);
   } else if (size < 269) {
     hdr.byte_op = static_cast<std::uint8_t>(extend::one_byte);
-    hdr.data_extend = size - 13;
+    hdr.data_extend = static_cast<std::uint16_t>(size - 13);
     size = 1;
   } else {
     hdr.byte_op = static_cast<std::uint8_t>(extend::two_bytes);
-    hdr.data_extend = size - 269;
+    hdr.data_extend = static_cast<std::uint16_t>(size - 269);
     size = 2;
   }
 }
@@ -61,22 +61,16 @@ std::size_t serialize(number before,
                       MutableBuffer& output,              // NOLINT
                       std::error_code& ec) noexcept {     // NOLINT
   header delta{};
-  ec = serialize_option_header(static_cast<std::uint16_t>(op) -
-                               static_cast<std::uint16_t>(before),
-                               delta);
-  if (ec) {
-    return 0;
-  }
+  serialize_option_header(static_cast<std::uint16_t>(op) -
+                          static_cast<std::uint16_t>(before),
+                          delta);
 
   header length{};
-  ec = serialize_option_header(input.size(), length);
-  if (ec) {
-    return 0;
-  }
+  serialize_option_header(input.size(), length);
 
   std::size_t size = 1 + delta.size + length.size + input.size();
   if (size > output.size) {
-    ec = std::errc::no_buffer_space;
+    ec = std::make_error_code(std::errc::no_buffer_space);
     return 0;
   }
 
@@ -84,7 +78,7 @@ std::size_t serialize(number before,
   output += 1;
 
   for (const header& h : {delta, length}) {
-    switch (h.byte_op) {
+    switch (static_cast<extend>(h.byte_op)) {
       case extend::one_byte:
         output[0] = static_cast<std::uint8_t>(h.data_extend);
         break;
