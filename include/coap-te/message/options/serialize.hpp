@@ -83,7 +83,7 @@ std::size_t serialize(number before,
         output[0] = static_cast<std::uint8_t>(h.data_extend);
         break;
       case extend::two_bytes:
-        coap_te::core::to_big_endian(output.data(), h.data_extend);
+        coap_te::core::to_big_endian(h.data_extend, output.data());
         break;
       default:
         break;
@@ -104,7 +104,7 @@ std::size_t serialize(number before,
                       unsigned input,
                       MutableBuffer& output,              // NOLINT
                       std::error_code& ec) noexcept {     // NOLINT
-  auto size = ::coap_te::core::make_short_unsigned(input);
+  auto size = ::coap_te::core::to_big_endian(input);
   return serialize(before, op,
                   ::coap_te::const_buffer{&input, size},
                   output,

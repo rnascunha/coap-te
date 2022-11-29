@@ -18,6 +18,11 @@
 
 namespace coap_te {
 
+/**
+ * @ingroup buffer
+ * @{
+ */
+
 class mutable_buffer {
  public:
   using value_type = std::uint8_t;
@@ -92,24 +97,31 @@ class mutable_buffer {
     pointer ptr_;
   };
 
-  template<typename T>
   constexpr
-  mutable_buffer(T* data, std::size_t size) noexcept
-    : data_(data), size_(size * sizeof(T))
+  mutable_buffer(void* data, std::size_t size) noexcept
+    : data_(data), size_(size)
+  {}
+
+  constexpr
+  mutable_buffer(void* data,
+               std::size_t size,
+               std::size_t type_size) noexcept
+    : mutable_buffer(data, size * type_size)
   {}
 
   template<typename T>
   constexpr
-  explicit mutable_buffer(T& container) noexcept  // NOLINT
-    : data_(container.data()),
-      size_(container.size() * sizeof(typename T::value_type)) {
+  explicit mutable_buffer(T& container) noexcept      //NOLINT
+    : mutable_buffer(container.data(),
+                   container.size(),
+                   sizeof(typename T::value_type)) {
     static_assert(core::is_mutable_buffer_type_v<T>, "Is not buffer type");
   }
 
   template<std::size_t N, typename T>
   constexpr
   explicit mutable_buffer(T (&arr)[N]) noexcept
-    : data_(arr), size_(N * sizeof(T))
+    : mutable_buffer(arr, N, sizeof(T))
   {}
 
   constexpr
@@ -163,6 +175,8 @@ class mutable_buffer {
   void* data_ = nullptr;
   size_type size_ = 0;
 };
+
+/** @} */  // end of buffer
 
 }  // namespace coap_te
 

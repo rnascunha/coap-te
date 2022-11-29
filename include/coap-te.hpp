@@ -16,6 +16,7 @@
 // core
 #include "coap-te/core/traits.hpp"
 #include "coap-te/core/utility.hpp"
+#include "coap-te/core/byte_order.hpp"
 
 // buffers
 #include "coap-te/core/mutable_buffer.hpp"

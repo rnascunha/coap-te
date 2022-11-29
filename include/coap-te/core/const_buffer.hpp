@@ -13,11 +13,20 @@
 
 #include <cstdint>
 #include <iterator>
+#include <string_view>
 
 #include "coap-te/core/traits.hpp"
 #include "coap-te/core/mutable_buffer.hpp"
 
 namespace coap_te {
+
+/** 
+ * @defgroup buffer Buffer
+ * Defines buffer view functions
+ * 
+ * @ingroup buffer
+ * @{
+ */
 
 class const_buffer {
  public:
@@ -96,22 +105,29 @@ class const_buffer {
   constexpr
   const_buffer() noexcept = default;
 
-  template<typename T>
   constexpr
-  const_buffer(const T* data, std::size_t size) noexcept
-    : data_(data), size_(size * sizeof(T))
+  const_buffer(const void* data, std::size_t size) noexcept
+    : data_(data), size_(size)
+  {}
+
+  constexpr
+  const_buffer(const void* data,
+               std::size_t size,
+               std::size_t type_size) noexcept
+    : const_buffer(data, size * type_size)
   {}
 
   constexpr
   const_buffer(const mutable_buffer& buf) noexcept   //NOLINT
-    : data_(buf.data()), size_(buf.size())
+    : const_buffer(buf.data(), buf.size())
   {}
 
   template<typename T>
   constexpr
   explicit const_buffer(const T& container) noexcept
-    : data_(container.data()),
-      size_(container.size() * sizeof(typename T::value_type)) {
+    : const_buffer(container.data(),
+                   container.size(),
+                   sizeof(typename T::value_type)) {
     static_assert(core::is_const_buffer_type_v<T>, "Is not buffer type");
   }
 
@@ -123,7 +139,7 @@ class const_buffer {
   template<std::size_t N, typename T>
   constexpr
   explicit const_buffer(const T (&arr)[N]) noexcept
-    : data_(arr), size_(N * sizeof(T))
+    : const_buffer(arr, N, sizeof(T))
   {}
 
   constexpr
@@ -172,6 +188,8 @@ class const_buffer {
   const void* data_ = nullptr;
   size_type size_ = 0;
 };
+
+/** @} */  // end of buffer
 
 }  // namespace coap_te
 

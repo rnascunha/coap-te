@@ -15,7 +15,8 @@ set(TEST_DIR    tests)
 set(TESTS       utility 
                 options 
                 core_traits
-                buffer)
+                buffer
+                byte_order)
 set(OUTPUT_TEST    ${CMAKE_BINARY_DIR}/tests)
 
 include(GoogleTest)
