@@ -1,15 +1,21 @@
 /**
  * @file byte_order.hpp
  * @author Rafael Cunha (rnascunha@gmail.com)
- * @brief 
+ * @copyright Copyright (c) 2022
+ * @brief Calculate the unsigned options value as defined at RFC7252
+ * 
+ * The unsigned value must be sent in network byte order (big endian),
+ * in the smallest possible bytes. So '0' should send no bytes, '1' to
+ * '255' in one byte, and so on.
+ * 
  * @version 0.1
  * @date 2022-11-28
- * 
- * @copyright Copyright (c) 2022
  * 
  */
 #ifndef COAP_TE_CORE_BYTE_ORDER_HPP_
 #define COAP_TE_CORE_BYTE_ORDER_HPP_
+
+#include <utility>
 
 namespace coap_te {
 namespace core {
@@ -23,35 +29,35 @@ namespace core {
  */
 
 /**
- * @brief Returns a unsigned value at network byte order
+ * @brief Converts from a little endian to small big-endian.
  * 
- * This functions will convert in place a unsigned value to big endian
- * byte order. It will remove any leading zeros, as described
- * at RFC7252 to unsigned type options
+ * @note Small big endian is the value in the small possible bytes
+ * been represented.
  * 
- * @tparam UnsignedType Unsigned type to be converted
- * @param value Value to be converted
- * @return std::size_t Size of converted type
+ * @tparam Unsigned type value to be converted
+ * @param value value to be converted
+ * @return std::pair<Unsigned, std::size_t> The first value of the pair is
+ * used as a storage of the bytes, and the second how many bytes of this
+ * storage should be considered
  */
-template<typename UnsignedType>
-constexpr std::size_t
-to_big_endian(UnsignedType& value) noexcept;    // NOLINT
+template<typename Unsigned>
+constexpr std::pair<Unsigned, std::size_t>
+to_small_big_endian(Unsigned value) noexcept;
 
 /**
- * @brief Calculate big endian value and copy to buffer
+ * @brief Converts a buffer representing a small big-endian to a 
+ * little endian number
  * 
- * Copies sizeof(value) bytes to buffer
+ * @warning if sizeof(Unsigned) < size, the value will be truncated
  * 
- * @warning It's responsability of the user that the buffer is of
- * size sizeof(value).
- * 
- * @tparam UnsignedType Unsigned type to be converted
- * @param value Value to be converted
- * @return std::size_t void
+ * @tparam Unsigned Type to be converted to.
+ * @param value Buffer values to be conveted
+ * @param size Size of the buffer
+ * @return Unsigned Converted little-endian value 
  */
-template<typename UnsignedType>
-constexpr void
-to_big_endian(UnsignedType value, std::uint8_t* buffer) noexcept;
+template<typename Unsigned = unsigned>
+constexpr Unsigned
+from_small_big_endian(const std::uint8_t* value, std::size_t size) noexcept;
 
 /** @} */  // end of byte_order
 

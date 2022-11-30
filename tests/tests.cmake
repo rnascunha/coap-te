@@ -13,10 +13,11 @@ enable_testing()
 
 set(TEST_DIR    tests)
 set(TESTS       utility 
-                options 
+                options_definitions
                 core_traits
                 buffer
-                byte_order)
+                byte_order
+                serialize_option)
 set(OUTPUT_TEST    ${CMAKE_BINARY_DIR}/tests)
 
 include(GoogleTest)
@@ -32,9 +33,9 @@ foreach(TEST ${TESTS})
         ${PROJECT_NAME})
 
     set_target_properties(${TEST} PROPERTIES
-		CXX_STANDARD 17
-		CXX_STANDARD_REQUIRED ON
-		CXX_EXTENSIONS OFF
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        CXX_EXTENSIONS OFF
         RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_TEST})
 
     gtest_discover_tests(${TEST})

@@ -45,6 +45,21 @@ template<typename RandomAccessIt, typename T>
 binary_search(RandomAccessIt begin, RandomAccessIt end,
               T const& value) noexcept;
 
+/**
+ * @brief Converts enum to underlying type
+ * 
+ * @link https://stackoverflow.com/a/8357462
+ * 
+ * @tparam E enum type to be converted
+ * @param e enum value to be converted
+ * @return std::underlying_type<E>::type underlying type of enum
+ */
+template <typename E>
+constexpr typename std::underlying_type<E>::type
+to_underlying(E e) noexcept {
+    return static_cast<typename std::underlying_type<E>::type>(e);
+}
+
 /** @} */  // end of utility group
 
 }  // namespace core

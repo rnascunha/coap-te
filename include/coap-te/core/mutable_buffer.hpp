@@ -142,7 +142,7 @@ class mutable_buffer {
   }
 
   constexpr
-  const void* data() const noexcept {
+  void* data() const noexcept {
     return data_;
   }
 

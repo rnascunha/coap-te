@@ -6,39 +6,56 @@
 namespace coap_te {
 namespace core {
 
-template<typename UnsignedType>
-constexpr std::size_t
-to_big_endian(UnsignedType& value) noexcept {     //NOLINT
-  static_assert(std::is_unsigned_v<UnsignedType>, "Must be unsigned");
+namespace detail {
 
-  // Invert bytes
+template<typename Integer>
+constexpr Integer
+invert_byte_order(Integer value) noexcept {
+  static_assert(std::is_integral_v<Integer>, "Must be integer");
+
   std::uint8_t* d = reinterpret_cast<std::uint8_t*>(&value);
-  std::size_t n = sizeof(UnsignedType) >> 1;
-  for (std::size_t i = 0; i < n; ++i) {
-      auto temp = d[i];
-      d[i] = d[sizeof(UnsignedType) - 1 - i];
-      d[sizeof(UnsignedType) - 1 - i] = temp;
+  for (int i = 0, j = sizeof(value) - 1;
+       i < j;
+       ++i, --j) {
+    std::swap(d[i], d[j]);
   }
+  return *reinterpret_cast<Integer*>(d);
+}
 
-  // Calulate size
-  std::size_t size = 0;
-  bool flag = false;
-  for (std::size_t i = 0; i < sizeof(UnsignedType); ++i) {
-    if (flag || d[i] != 0) {
-        ++size;
-        flag = true;
-    }
+template<typename Unsigned>
+constexpr std::size_t unsigned_size(Unsigned t) {
+  std::size_t size = sizeof(Unsigned);
+  std::uint8_t* d = reinterpret_cast<std::uint8_t*>(&t);
+  while (size != 0 && *d++ == 0) {
+      --size;
   }
   return size;
 }
 
-template<typename UnsignedType>
-constexpr void
-to_big_endian(UnsignedType value, std::uint8_t* buffer) noexcept {
-  static_assert(std::is_unsigned_v<UnsignedType>, "Must be unsigned");
+}  // namespace deltail
 
-  to_big_endian(value);
-  std::memcpy(buffer, &value, sizeof(value));
+template<typename Unsigned>
+constexpr std::pair<Unsigned, std::size_t>
+to_small_big_endian(Unsigned value) noexcept {
+  static_assert(std::is_unsigned_v<Unsigned>, "Must be unsigned");
+
+  value = detail::invert_byte_order(value);
+  auto size = detail::unsigned_size(value);
+  value >>= (8 * (sizeof(Unsigned) - size));
+  return {value, size};
+}
+
+template<typename Unsigned /* = unsigned */>
+constexpr Unsigned
+from_small_big_endian(const std::uint8_t* value, std::size_t size) noexcept {
+  static_assert(std::is_unsigned_v<Unsigned>, "Must be unsigned");
+
+  Unsigned n_value = 0;
+  std::memcpy(&n_value, value, size);
+  n_value = detail::invert_byte_order(n_value);
+  n_value >>= (8 * (sizeof(Unsigned) - size));
+
+  return n_value;
 }
 
 }  // namespace core

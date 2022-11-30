@@ -142,16 +142,31 @@ class const_buffer {
     : const_buffer(arr, N, sizeof(T))
   {}
 
-  constexpr
-  value_type operator[](std::size_t n) const noexcept {
+  constexpr value_type
+  operator[](std::size_t n) const noexcept {
     return static_cast<pointer>(data_)[n];
   }
 
-  constexpr
-  const_buffer& operator+=(std::size_t n) noexcept {
+  constexpr const_buffer&
+  operator+=(std::size_t n) noexcept {
     data_ = static_cast<pointer>(data_) + n;
     size_ -= n;
     return *this;
+  }
+
+  // copy assignment
+  constexpr const_buffer&
+  operator=(const const_buffer& other) noexcept {
+    data_ = other.data_;
+    size_ = other.size_;
+
+    return *this;
+  }
+
+  constexpr void
+  set(const void* data, std::size_t size) noexcept {
+    data_ = data;
+    size_ = size;
   }
 
   constexpr

@@ -84,7 +84,9 @@ Web tool to construct and exchange menssage.
 At the end, remember:
 
 * Check byte order functions. Dealing only from little-endian to big-endian.
-* Check lines with "//NOLINT"
+* Check lines with "//NOLINT":
+* * header files like "system_error";
+* * non-const references;
 * Run static analisys
 * Check if all functions/class are documented
 * Check if all functions/class are tested

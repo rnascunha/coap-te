@@ -13,7 +13,7 @@
 
 #include "coap-te.hpp"    // NOLINT
 
-TEST(Options, Traits) {
+TEST(Options, Definitions) {
     using namespace coap_te::message::options;  // NOLINT
 
     // Check if definitions options container is sorted increseing (required)

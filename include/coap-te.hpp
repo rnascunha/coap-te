@@ -29,6 +29,7 @@
 #include "coap-te/message/options/definitions.hpp"
 #include "coap-te/message/options/to_string.hpp"
 #include "coap-te/message/options/serialize.hpp"
+#include "coap-te/message/options/parse.hpp"
 #include "coap-te/message/options/option_view.hpp"
 
 #endif  // COAP_TE_HPP_
