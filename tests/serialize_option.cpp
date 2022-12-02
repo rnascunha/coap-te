@@ -18,6 +18,7 @@
 
 #include "coap-te/core/mutable_buffer.hpp"
 #include "coap-te/core/utility.hpp"
+#include "coap-te/core/byte_order.hpp"
 #include "coap-te/message/options/definitions.hpp"
 #include "coap-te/message/options/serialize.hpp"
 #include "coap-te/message/options/parse.hpp"
@@ -25,59 +26,230 @@
 namespace opt = coap_te::message::options;
 namespace core = coap_te::core;
 
-void check_option_header_success(
-                        opt::number_type before,
-                        opt::number_type current,
-                        std::size_t buffer_size,
-                        std::size_t output_size) {
-  std::vector<std::uint8_t> data(buffer_size, 0);
-  coap_te::mutable_buffer buf(data);
+template<typename CheckOptions, typename Arg>
+void test_options_definitions_fail(
+        opt::number before,
+        opt::number current,
+        Arg         arg,
+        std::errc   expected_error) {
   std::error_code ec;
+  coap_te::mutable_buffer mbuf(nullptr, 0);
 
-  auto size = opt::serialize(
-                      before,
-                      current,
-                      buf,
+  auto size = opt::serialize<CheckOptions>(
+                      core::to_underlying(before),
+                      core::to_underlying(current),
+                      arg,
+                      mbuf,
                       ec);
-  EXPECT_FALSE(ec);       // No error
-  EXPECT_EQ(size, output_size);
-  EXPECT_EQ(buf.size(), buffer_size - size);
-
-  auto diff = current - before;
-  opt::number_type header = diff;
-  EXPECT_THAT(coap_te::const_buffer(data.data(), size),
-              ::testing::ElementsAre(
-                header << 4 | 0));
-
-  coap_te::const_buffer input(data.data(), size);
-  coap_te::const_buffer output{};
-  opt::number_type op_num{};
-  auto size_parse = opt::parse(before, input, op_num, output, ec);
-  EXPECT_FALSE(ec);
-  EXPECT_EQ(size_parse, size);
-  EXPECT_EQ(op_num, current);
-  EXPECT_EQ(output.size(), 0);
+  EXPECT_TRUE(ec);
+  EXPECT_EQ(size, 0);
+  EXPECT_EQ(ec, expected_error);
 }
 
-void check_option_header_fail(
-                        opt::number_type before,
-                        opt::number_type current,
-                        std::size_t buffer_size) {
-  std::vector<std::uint8_t> data(buffer_size, 0);
+TEST(Options, CheckDefinitions) {
+  {
+    SCOPED_TRACE("Fail invalid option");
+    test_options_definitions_fail<opt::check_all>(opt::number::invalid,
+                                  opt::number::invalid,
+                                  8u,
+                                  std::errc::no_protocol_option);
+  }
+  {
+    SCOPED_TRACE("Fail wrong type");
+    test_options_definitions_fail<opt::check_all>(opt::number::invalid,
+                                  opt::number::if_match,
+                                  1u,
+                                  std::errc::wrong_protocol_type);
+  }
+  {
+    SCOPED_TRACE("Fail sequence options error");
+    test_options_definitions_fail<opt::check_all>(opt::number::etag,
+                                  opt::number::uri_host,
+                                  coap_te::const_buffer(nullptr, 100),
+                                  std::errc::protocol_error);
+  }
+  {
+    SCOPED_TRACE("Fail sequence options repeated invalid");
+    test_options_definitions_fail<opt::check_all>(opt::number::uri_host,
+                                  opt::number::uri_host,
+                                  coap_te::const_buffer(nullptr, 100),
+                                  std::errc::protocol_error);
+  }
+  {
+    SCOPED_TRACE("Fail options length bigger");
+    test_options_definitions_fail<opt::check_all>(opt::number::invalid,
+                                  opt::number::uri_host,
+                                  coap_te::const_buffer(nullptr, 256),
+                                  std::errc::argument_out_of_domain);
+  }
+  {
+    SCOPED_TRACE("Fail options length smaller");
+    test_options_definitions_fail<opt::check_all>(opt::number::invalid,
+                                  opt::number::etag,
+                                  coap_te::const_buffer(nullptr, 0),
+                                  std::errc::argument_out_of_domain);
+  }
+}
+
+TEST(Options, IgnoreCheckDefinitions) {
+  /*
+   * All this tests must ignore check definitions. It should still
+   * fail because we are not providing any buffer. So the error will
+   * be 'std::no_buffer_space'.
+   */
+  {
+    SCOPED_TRACE("Ignore invalid option");
+    test_options_definitions_fail<opt::check_type<false, false, false>>(
+                                  opt::number::invalid,
+                                  opt::number::invalid,
+                                  8u,
+                                  std::errc::no_buffer_space);
+  }
+  {
+    SCOPED_TRACE("Ignore wrong type");
+    test_options_definitions_fail<opt::check_type<true, false, true>>(
+                                  opt::number::invalid,
+                                  opt::number::if_match,
+                                  1u,
+                                  std::errc::no_buffer_space);
+  }
+  {
+    SCOPED_TRACE("Ignore sequence options error");
+    test_options_definitions_fail<opt::check_type<false, true, true>>(
+                                  opt::number::etag,
+                                  opt::number::uri_host,
+                                  coap_te::const_buffer(nullptr, 100),
+                                  std::errc::no_buffer_space);
+  }
+  {
+    SCOPED_TRACE("Ignore sequence options repeated invalid");
+    test_options_definitions_fail<opt::check_type<false, true, true>>(
+                                  opt::number::uri_host,
+                                  opt::number::uri_host,
+                                  coap_te::const_buffer(nullptr, 100),
+                                  std::errc::no_buffer_space);
+  }
+  {
+    SCOPED_TRACE("Ignore options length bigger");
+    test_options_definitions_fail<opt::check_type<true, true, false>>(
+                                  opt::number::invalid,
+                                  opt::number::uri_host,
+                                  coap_te::const_buffer(nullptr, 256),
+                                  std::errc::no_buffer_space);
+  }
+  {
+    SCOPED_TRACE("Ignore options length smaller");
+    test_options_definitions_fail<opt::check_type<true, true, false>>(
+                                  opt::number::invalid,
+                                  opt::number::etag,
+                                  coap_te::const_buffer(nullptr, 0),
+                                  std::errc::no_buffer_space);
+  }
+}
+
+std::size_t calc_options_size(
+              opt::number_type before,
+              opt::number_type current,
+              std::size_t size_input) {
+  std::size_t size = 1 + size_input;
+  std::size_t diff = current - before;
+  for (std::size_t i : {diff, size_input}) {
+    if (i >= 69)
+      size += 2;
+    else if (i >= 13)
+      size += 1;
+  }
+  return size;
+}
+
+void test_serialize_parse_success(
+                  opt::number before_n,
+                  opt::number current_n,
+                  const coap_te::const_buffer& buf_in) {
+  std::uint8_t data[256];
   coap_te::mutable_buffer buf(data);
-  std::error_code ec;
-  auto size = opt::serialize(
-                    before,
-                    current,
-                    buf,
-                    ec);
-  EXPECT_TRUE(ec);
-  EXPECT_EQ(ec, std::errc::no_buffer_space);
-  EXPECT_EQ(size, 0);
+  opt::number_type before = core::to_underlying(before_n);
+  opt::number_type current = core::to_underlying(current_n);
+  std::error_code ecs;
+
+  auto size_s = opt::serialize<opt::check_type<true, false, true>>(
+                before,
+                current,
+                buf_in,
+                buf,
+                ecs);
+  EXPECT_FALSE(ecs);
+  EXPECT_EQ(size_s, calc_options_size(before, current, buf_in.size()));
+
+  coap_te::const_buffer buf_out;
+  std::error_code ecp;
+  opt::number_type current_parse = core::to_underlying(opt::number::invalid);
+  coap_te::const_buffer input(data, size_s);
+  auto size_p = opt::parse(before,
+                          input,
+                          current_parse,
+                          buf_out,
+                          ecp);
+
+  EXPECT_FALSE(ecp);
+  EXPECT_EQ(size_s, size_p);
+  EXPECT_EQ(current, current_parse);
+  EXPECT_EQ(buf_in.size(), buf_out.size());
+  EXPECT_EQ(0, std::memcmp(buf_out.data(),
+                           buf_in.data(), buf_out.size()));
+}
+
+void test_serialize_parse_success(
+                  opt::number before_n,
+                  opt::number current_n,
+                  unsigned value) {
+  auto [data, size] = core::to_small_big_endian(value);
+  test_serialize_parse_success(before_n,
+                               current_n,
+                               coap_te::const_buffer(&data, size));
+}
+
+void test_serialize_parse_success(
+                  opt::number before_n,
+                  opt::number current_n) {
+  test_serialize_parse_success(before_n,
+                               current_n,
+                               coap_te::const_buffer(nullptr, 0));
 }
 
 TEST(Options, Serialize) {
-  check_option_header_success(
-    0, core::to_underlying(opt::number::if_none_match), 10, 1);
-  check_option_header_fail(0, 5, 0);
+  {
+    SCOPED_TRACE("Serialize parse string uri-host");
+    test_serialize_parse_success(opt::number::invalid,
+                               opt::number::uri_host,
+                               coap_te::const_buffer("192.168.0.1"));
+  }
+  {
+    SCOPED_TRACE("Serialize parse big string uri-host");
+    test_serialize_parse_success(opt::number::invalid,
+                               opt::number::uri_host,
+                               coap_te::const_buffer("192.168.111.111"));
+  }
+  {
+    SCOPED_TRACE("Serialize parse number max-age");
+    test_serialize_parse_success(opt::number::invalid,
+                               opt::number::max_age,
+                               60);
+  }
+  {
+    SCOPED_TRACE("Serialize parse empty if_none_match");
+    test_serialize_parse_success(opt::number::invalid,
+                               opt::number::if_none_match);
+  }
+  {
+    SCOPED_TRACE("Serialize parse big string uri-host");
+    test_serialize_parse_success(opt::number::uri_path,
+                               opt::number::uri_path,
+                               coap_te::const_buffer(
+                                "testedeumpathgrandemasmuito"
+                                "grandemesmoqueatepergoacont"
+                                "adequaograndeelaemasegrande"
+                                "mesmoemnossoquegrandemeudeu"
+                                "sgrandao"));
+  }
 }

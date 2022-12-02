@@ -15,13 +15,13 @@
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/byte_order.hpp"    // NOLINT
 
-namespace core = coap_te::core;
-
 template<typename Unsigned>
 void test_endianess_impl(
         Unsigned value,
         Unsigned value_expected,
         std::size_t size_expected) noexcept {
+  namespace core = coap_te::core;
+
   auto [value_coverted,
         size_converted] = core::to_small_big_endian<Unsigned>(value);
   EXPECT_EQ(value_coverted, value_expected);

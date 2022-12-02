@@ -16,6 +16,7 @@
 
 #include "coap-te/core/traits.hpp"
 #include "coap-te/message/options/config.hpp"
+#include "coap-te/message/options/checks.hpp"
 
 namespace coap_te {
 namespace message {
@@ -50,7 +51,8 @@ parse_option_header(std::uint8_t op,
 
 }  // namespace
 
-template<typename ConstBuffer>
+template<typename CheckOptions,
+         typename ConstBuffer>
 std::size_t parse(number_type before,
                   ConstBuffer& input,                // NOLINT
                   number_type& current,              // NOLINT
@@ -107,6 +109,14 @@ std::size_t parse(number_type before,
 
   output.set(input.data(), length.data_extend);
   input += length.data_extend;
+
+  // As a sequence of bytes can be any type, we cannot check it
+  using check_n = check_type<CheckOptions::sequence,
+                             false,
+                             CheckOptions::length>;
+  if constexpr (check_n::check_any()) {
+    ec = check<check_n>(before, current, format::empty, length.data_extend);
+  }
 
   return size + length.data_extend;
 }

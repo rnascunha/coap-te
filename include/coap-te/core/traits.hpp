@@ -161,6 +161,19 @@ template<typename T>
 static constexpr bool
 is_mutable_buffer_type_v = is_mutable_buffer_type<T>::value;
 
+/**
+ * @brief Checks if a type is instantiated from a specific template
+ * 
+ * The template arguments must be all bools.
+ * 
+ * @link https://stackoverflow.com/a/69019297
+ */
+template <class, template <bool...> class>
+struct is_instance : public std::false_type {};
+
+template <bool ...Bs, template <bool...> class U>
+struct is_instance<U<Bs...>, U> : public std::true_type {};
+
 /** @} */  // end of CoreTraits
 
 }  // namespace core

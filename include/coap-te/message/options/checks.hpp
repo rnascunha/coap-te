@@ -11,15 +11,28 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_CHECKS_HPP_
 #define COAP_TE_MESSAGE_OPTIONS_CHECKS_HPP_
 
-#include <type_traits>
-#include <system_error> //NOLINT
+#include "coap-te/message/options/checks.hpp"
 
-#include "coap-te/message/options/definitions.hpp"
+#include <initializer_list>
+#include <system_error> //NOLINT
 
 namespace coap_te {
 namespace message {
 namespace options {
 
+/**
+ * @brief Type to define what kinds of checks should be
+ * done to options
+ * 
+ * All options have requirements of order, type, length and others.
+ * This type defines which of this requirements should be checked
+ * when data is been serialized to send, or when parsing when
+ * received.
+ * 
+ * @tparam CheckSequence true to check order of options
+ * @tparam CheckFormat   true to check if options is the correct format to the option
+ * @tparam CheckLength   true to check the data length of the option
+ */
 template<bool CheckSequence,
          bool CheckFormat,
          bool CheckLength>
@@ -28,149 +41,59 @@ struct check_type {
   static constexpr bool format      = CheckFormat;
   static constexpr bool length      = CheckLength;
 
+  /** Checks if any of the checks should be made */
   static bool constexpr
   check_any() noexcept {
     return sequence || format || length;
   }
 };
 
+/** Convenint type to check all requirements
+ */
 using check_all = check_type<true, true , true>;
+/** Convenint type to not check any requirements
+ */
 using check_none = check_type<false, false, false>;
 
-template<typename CheckOptions>
-constexpr bool
-check_sequence(number before, number current,
-      const definition& def) noexcept {
-  if constexpr (!CheckOptions::sequence) {
-    return true;
-  } else {
-    if (before > current)
-      return false;
-    if (before == current && !def.repeatable) {
-      return false;
-    }
-    return true;
-  }
-}
-
-template<typename CheckOptions, typename UnsignedType>
-constexpr bool
-check_length(UnsignedType value,
-             const definition& def,
-             uint_format_tag) noexcept {
-  static_assert(std::is_unsigned_v<UnsignedType>, "Not unsigned type");
-
-  if constexpr (!CheckOptions::length) {
-    return true;
-  } else {
-    if ((def.length_min == 0u || value >= (1u << (8u * def.length_min))) &&
-        value < (1u << (8u * def.length_max))) {
-      return true;
-    }
-    return false;
-  }
-}
-
-template<typename CheckOptions, typename BufferType>
-constexpr bool
-check_length(const BufferType& buffer,
-             const definition& def,
-             opaque_format_tag) noexcept {
-  if constexpr (!CheckOptions::length) {
-    return true;
-  } else {
-    if (buffer.size() >= def.length_min &&
-        buffer.size() <= def.length_max) {
-      return true;
-    }
-    return false;
-  }
-}
-
-template<typename CheckOptions, typename BufferType>
-constexpr bool
-check_length(const BufferType& buffer,
-             const definition& def,
-             string_format_tag) noexcept {
-  if constexpr (!CheckOptions::length) {
-    return true;
-  } else {
-    if (buffer.size() >= def.length_min &&
-        buffer.size() <= def.length_max) {
-      return true;
-    }
-    return false;
-  }
-}
-
+/**
+ * @brief Make all the checks requested
+ * 
+ * @tparam CheckOptions Defines which checks should be done
+ * @param before The option number before this
+ * @param op The current option to be checked
+ * @param type The type that was passed
+ * @param opt_length The length of the option passed
+ * @return std::error_code error code returned
+ * @retval std::errc::no_protocol_option Invalid option (not found)
+ * @retval std::errc::protocol_error Sequence option error
+ * @retval std::errc::wrong_protocol_type Wrong type sent with option
+ * @retval std::errc::argument_out_of_domain Argument length out of bound
+ */
 template<typename CheckOptions>
 constexpr std::error_code
-check(number op) noexcept {
-  if constexpr (CheckOptions::check_any()) {
-    const auto& def = get_definition(op);
-    if (!def)
-      return std::make_error_code(std::errc::no_protocol_option);
+check(number_type before,
+      number_type op,
+      format type,
+      std::size_t opt_length) noexcept;
 
-    if constexpr (CheckOptions::format) {
-      if (def.type != format::empty)
-        return std::make_error_code(std::errc::wrong_protocol_type);
-    }
-    return {};
-  } else {
-    return {};
-  }
-}
-
-template<typename CheckOptions, typename UnsignedType>
+/**
+ * @brief Make all the checks requested
+ * 
+ * See @ref check
+ * 
+ * @param types list of types to be checked
+ */
+template<typename CheckOptions>
 constexpr std::error_code
-check(number op, UnsignedType value) noexcept {
-  static_assert(std::is_unsigned_v<UnsignedType>, "No unsigned type");
-
-  if constexpr (CheckOptions::check_any()) {
-    const auto& def = get_definition(op);
-    if (!def)
-      return std::make_error_code(std::errc::no_protocol_option);
-
-    if constexpr (CheckOptions::format) {
-      if (def.type != format::uint)
-        return std::make_error_code(std::errc::wrong_protocol_type);
-    }
-
-    if (!check_length(value, def, uint_format_tag{})) {
-      return std::make_error_code(std::errc::argument_out_of_domain);
-    }
-
-    return {};
-  } else {
-    return {};
-  }
-}
-
-template<typename CheckOptions, typename BufferType>
-constexpr std::error_code
-check(number op, const BufferType& value) noexcept {
-  if constexpr (CheckOptions::check_any()) {
-    const auto& def = get_definition(op);
-    if (!def)
-      return std::make_error_code(std::errc::no_protocol_option);
-
-    if constexpr (CheckOptions::format) {
-      if (def.type != format::uint)
-        return std::make_error_code(std::errc::wrong_protocol_type);
-    }
-
-    if (!check_length(value, def, opaque_format_tag{})) {
-      return std::make_error_code(std::errc::argument_out_of_domain);
-    }
-
-    return {};
-  } else {
-    return {};
-  }
-}
+check(number_type before,
+      number_type op,
+      const std::initializer_list<format>& types,
+      std::size_t opt_length) noexcept;
 
 }  // namespace options
 }  // namespace message
 }  // namespace coap_te
+
+#include "impl/checks.ipp"
 
 #endif  // COAP_TE_MESSAGE_OPTIONS_CHECKS_HPP_

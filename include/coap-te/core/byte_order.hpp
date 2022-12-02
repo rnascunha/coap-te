@@ -48,7 +48,7 @@ to_small_big_endian(Unsigned value) noexcept;
  * @brief Converts a buffer representing a small big-endian to a 
  * little endian number
  * 
- * @warning if sizeof(Unsigned) < size, the value will be truncated
+ * @warning if sizeof(Unsigned) < size, the converted value will be truncated.
  * 
  * @tparam Unsigned Type to be converted to.
  * @param value Buffer values to be conveted

@@ -90,3 +90,6 @@ At the end, remember:
 * Run static analisys
 * Check if all functions/class are documented
 * Check if all functions/class are tested
+* Benchmark library:
+* * binary size;
+* * cpu time;

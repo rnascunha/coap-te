@@ -15,12 +15,14 @@
 #include <system_error>   // NOLINT
 
 #include "coap-te/message/options/config.hpp"
+#include "coap-te/message/options/checks.hpp"
 
 namespace coap_te {
 namespace message {
 namespace options {
 
-template<typename ConstBuffer>
+template<typename CheckOptions = check_all,
+         typename ConstBuffer>
 std::size_t parse(number_type before,
                   ConstBuffer& input,                // NOLINT
                   number_type& current,              // NOLINT

@@ -14,22 +14,27 @@
 #include <type_traits>
 #include <system_error>   //NOLINT
 
+#include "coap-te/message/options/checks.hpp"
+
 namespace coap_te {
 namespace message {
 namespace options {
 
-template<typename ConstBuffer,
+template<typename CheckOptions = check_all,
+         typename ConstBuffer,
          typename MutableBuffer>
 [[nodiscard]] constexpr
 std::enable_if_t<
-  coap_te::core::is_mutable_buffer_type_v<MutableBuffer>, std::size_t>
+  coap_te::core::is_const_buffer_type_v<ConstBuffer>, std::size_t>
 serialize(number_type before,
           number_type op,
           const ConstBuffer& input,
           MutableBuffer& output,              // NOLINT
           std::error_code& ec) noexcept;      // NOLINT
 
-template<typename MutableBuffer, typename UnsignedType>
+template<typename CheckOptions = check_all,
+         typename MutableBuffer,
+         typename UnsignedType>
 [[nodiscard]] constexpr
 std::enable_if_t<std::is_unsigned_v<UnsignedType>, std::size_t>
 serialize(number_type before,
@@ -38,7 +43,8 @@ serialize(number_type before,
           MutableBuffer& output,              // NOLINT
           std::error_code& ec) noexcept;      // NOLINT
 
-template<typename MutableBuffer>
+template<typename CheckOptions = check_all,
+         typename MutableBuffer>
 [[nodiscard]] constexpr std::size_t
 serialize(number_type before,
           number_type op,

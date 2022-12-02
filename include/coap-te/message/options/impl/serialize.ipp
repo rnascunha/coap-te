@@ -20,12 +20,13 @@
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/byte_order.hpp"
 #include "coap-te/message/options/config.hpp"
+#include "coap-te/message/options/checks.hpp"
 
 namespace coap_te {
 namespace message {
 namespace options {
 
-namespace {
+namespace detail {
 
 struct header {
   std::uint16_t data_extend = 0;
@@ -42,24 +43,21 @@ serialize_option_header(std::size_t size,
 
   if (size < 13) {
     hdr.byte_op = static_cast<std::uint8_t>(size);
-  } else if (size < 269) {
+  } else if (size < 69) {
     hdr.byte_op = static_cast<std::uint8_t>(extend::one_byte);
     hdr.data_extend = static_cast<std::uint16_t>(size - 13);
-    size = 1;
+    hdr.size = 1;
   } else {
     hdr.byte_op = static_cast<std::uint8_t>(extend::two_bytes);
     hdr.data_extend = static_cast<std::uint16_t>(size - 269);
-    size = 2;
+    hdr.size = 2;
   }
 }
-
-}  // namespace
 
 template<typename ConstBuffer,
          typename MutableBuffer>
 [[nodiscard]] constexpr
-std::enable_if_t<
-  coap_te::core::is_mutable_buffer_type_v<MutableBuffer>, std::size_t>
+std::size_t
 serialize(number_type before,
           number_type op,
           const ConstBuffer& input,
@@ -105,7 +103,33 @@ serialize(number_type before,
   return size;
 }
 
-template<typename MutableBuffer, typename UnsignedType>
+}  // namespace detail
+
+template<typename CheckOptions,
+         typename ConstBuffer,
+         typename MutableBuffer>
+[[nodiscard]] constexpr
+std::enable_if_t<
+  coap_te::core::is_const_buffer_type_v<ConstBuffer>, std::size_t>
+serialize(number_type before,
+          number_type op,
+          const ConstBuffer& input,
+          MutableBuffer& output,              // NOLINT
+          std::error_code& ec) noexcept {     // NOLINT
+  if constexpr (CheckOptions::check_any()) {
+    ec = check<CheckOptions>(before, op, {format::opaque, format::string}, input.size());
+    if (ec)
+      return 0;
+  }
+  return detail::serialize(before, op,
+                          input,
+                          output,
+                          ec);
+}
+
+template<typename CheckOptions /* = check_all */,
+         typename MutableBuffer,
+         typename UnsignedType>
 [[nodiscard]] constexpr
 std::enable_if_t<std::is_unsigned_v<UnsignedType>, std::size_t>
 serialize(number_type before,
@@ -116,19 +140,32 @@ serialize(number_type before,
   static_assert(std::is_unsigned_v<UnsignedType>, "Must be unsigned");
 
   auto [value, size] = ::coap_te::core::to_small_big_endian(input);
-  return serialize(before, op,
-                  ::coap_te::const_buffer{&value, size},
-                  output,
-                  ec);
+
+  if constexpr (CheckOptions::check_any()) {
+    ec = check<CheckOptions>(before, op, format::uint, size);
+    if (ec)
+      return 0;
+  }
+
+  return detail::serialize(before, op,
+                          ::coap_te::const_buffer{&value, size},
+                          output,
+                          ec);
 }
 
-template<typename MutableBuffer>
+template<typename CheckOptions /* = check_all */,
+         typename MutableBuffer>
 [[nodiscard]] constexpr std::size_t
 serialize(number_type before,
           number_type op,
           MutableBuffer& output,              // NOLINT
           std::error_code& ec) noexcept {     // NOLINT
-  return serialize(before, op, ::coap_te::const_buffer{}, output, ec);
+  if constexpr (CheckOptions::check_any()) {
+    ec = check<CheckOptions>(before, op, format::empty, 0u);
+    if (ec)
+      return 0;
+  }
+  return detail::serialize(before, op, ::coap_te::const_buffer{}, output, ec);
 }
 
 }  // namespace options
