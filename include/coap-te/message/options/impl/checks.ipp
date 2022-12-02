@@ -71,7 +71,7 @@ check_length(std::size_t length,
 } // namesapce detail
 
 template<typename CheckOptions>
-constexpr std::error_code
+std::error_code
 check([[maybe_unused]] number_type before,
       [[maybe_unused]] number_type op,
       [[maybe_unused]] format type,
@@ -104,7 +104,7 @@ check([[maybe_unused]] number_type before,
 }
 
 template<typename CheckOptions>
-constexpr std::error_code
+std::error_code
 check([[maybe_unused]] number_type before,
       [[maybe_unused]] number_type op,
       [[maybe_unused]] const std::initializer_list<format>& types,

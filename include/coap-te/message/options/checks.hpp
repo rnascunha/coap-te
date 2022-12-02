@@ -70,7 +70,7 @@ using check_none = check_type<false, false, false>;
  * @retval std::errc::argument_out_of_domain Argument length out of bound
  */
 template<typename CheckOptions>
-constexpr std::error_code
+std::error_code
 check(number_type before,
       number_type op,
       format type,
@@ -84,7 +84,7 @@ check(number_type before,
  * @param types list of types to be checked
  */
 template<typename CheckOptions>
-constexpr std::error_code
+std::error_code
 check(number_type before,
       number_type op,
       const std::initializer_list<format>& types,
