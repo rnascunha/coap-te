@@ -154,7 +154,7 @@ std::size_t calc_options_size(
   std::size_t size = 1 + size_input;
   std::size_t diff = current - before;
   for (std::size_t i : {diff, size_input}) {
-    if (i >= 69)
+    if (i >= 269)
       size += 2;
     else if (i >= 13)
       size += 1;

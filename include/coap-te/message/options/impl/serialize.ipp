@@ -43,7 +43,7 @@ serialize_option_header(std::size_t size,
 
   if (size < 13) {
     hdr.byte_op = static_cast<std::uint8_t>(size);
-  } else if (size < 69) {
+  } else if (size < 269) {
     hdr.byte_op = static_cast<std::uint8_t>(extend::one_byte);
     hdr.data_extend = static_cast<std::uint16_t>(size - 13);
     hdr.size = 1;
