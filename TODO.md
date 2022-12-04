@@ -78,7 +78,6 @@ Binding to languages like:
 
 Web tool to construct and exchange menssage.
 
-
 # Review
 
 At the end, remember:
@@ -93,3 +92,7 @@ At the end, remember:
 * Benchmark library:
 * * binary size;
 * * cpu time;
+
+# Know issues
+
+* At debug mode at MSVC, the checks in iterators at the binary_search asserts a error. This is a false error, as de bound is checked after.

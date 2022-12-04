@@ -76,6 +76,12 @@ class sorted_no_alloc_list {
     node(Args&&... args) :    //NOLINT
       value(std::forward<Args>(args)...) {}
 
+    node(const T& other)      //NOLINT
+      : value(other) {}
+
+    // node(const node& other)
+    //   : value(other.value), next_(nullptr) {}
+
     /**
      * @brief Equality operator
      * 

@@ -13,13 +13,16 @@ binary_search(RandomAccessIt begin, RandomAccessIt end,
   static_assert(is_random_access_iterator_v<RandomAccessIt>,
                 "Wrong iterator type. Must be random access");
   //https://stackoverflow.com/a/44522730
-  static_assert(is_equal_comparable_v<std::remove_reference_t<decltype(*begin)>, T>);
+  static_assert(is_equal_comparable_v<std::remove_reference_t<decltype(*begin)>, T> &&
+                is_less_comparable_v<std::remove_reference_t<decltype(*begin)>, T>,
+                "Type must be '==' and '<' comparable");
 
   if (begin >= end) {
     return end;
   }
 
   auto rend = end;
+  --end;
   while (begin <= end) {
     auto mid = begin + (end - begin) / 2;
     if (*mid == value)

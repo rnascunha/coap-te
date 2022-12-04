@@ -15,6 +15,12 @@
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/byte_order.hpp"    // NOLINT
 
+#ifdef _MSC_VER
+// False positive warning.
+#pragma warning(push)
+#pragma warning(disable : 4244)
+#endif  // _MSVC_VER
+
 template<typename Unsigned>
 void test_endianess_impl(
         Unsigned value,
@@ -43,6 +49,10 @@ void test_endianess(
   if constexpr (sizeof...(Args) > 0)
     test_endianess<Args...>(value, value_expected, size_expected);
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif  // _MSVC_VER
 
 TEST(CoreByteOrder, ConvertBigLittleEndianCornerCases) {
   // 0x0
