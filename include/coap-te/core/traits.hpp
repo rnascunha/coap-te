@@ -120,6 +120,28 @@ static constexpr bool
 is_equal_comparable_v = is_equal_comparable<T, EqualTo>::value;
 
 /**
+ * @brief Checks if types are less comparable
+ * 
+ * Checks if operator< is defined to type T and EqualTo
+ * 
+ * @tparam T        Left hand side of operator<
+ * @tparam LessTo   Right hand side of operator<
+ */
+template<class T, class LessTo = T>
+struct is_less_comparable :
+  detail::is_less_comparable_impl<T, LessTo>::type {};
+
+/**
+ * @brief Helper template of @ref is_less_comparable
+ * 
+ * @tparam T        Left hand side of operator<
+ * @tparam LessTo   Right hand side of operator<
+ */
+template<class T, class LessTo = T>
+static constexpr bool
+is_less_comparable_v = is_less_comparable<T, LessTo>::value;
+
+/**
  * @brief Checks if T is of buffer type
  * 
  * Here, buffer type is defined as class that have defined the

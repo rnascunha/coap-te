@@ -13,11 +13,12 @@ enable_testing()
 
 set(TEST_DIR    tests)
 set(TESTS       utility 
-                options_definitions
+                sorted_no_alloc_list
                 core_traits
+                options_definitions
                 buffer
                 byte_order
-                serialize_option)
+                option_serialize_parse)
 set(OUTPUT_TEST    ${CMAKE_BINARY_DIR}/tests)
 
 include(GoogleTest)
