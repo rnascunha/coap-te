@@ -90,7 +90,6 @@ class sorted_no_alloc_list {
       return value == rhs;
     }
 
-    template<>
     [[nodiscard]] bool
     operator==(const node& rhs) const noexcept {
       return value == rhs.value;
@@ -110,7 +109,6 @@ class sorted_no_alloc_list {
       return value < rhs;
     }
 
-    template<>
     [[nodiscard]] bool
     operator<(const node& rhs) const noexcept {
       return value < rhs.value;
@@ -161,10 +159,6 @@ class sorted_no_alloc_list {
     }
 
     pointer operator->() noexcept {
-      return &ptr_->value;
-    }
-
-    const pointer operator->() const noexcept {
       return &ptr_->value;
     }
 
@@ -341,11 +335,11 @@ class sorted_no_alloc_list {
   }
 
   /**
-   * @brief Returns the first element of the list
+   * @brief Returns first value of list
    * 
-   * If no element is present, return the end iterator.
+   * If no value is presented returns end iterator
    * 
-   * @return iterator The first element of the list
+   * @return iterator First value of the list
    */
   [[nodiscard]] iterator
   front() noexcept {
@@ -354,6 +348,8 @@ class sorted_no_alloc_list {
 
     return iterator(*head_);
   }
+
+  // Iterator interface
 
   iterator begin() noexcept {
     return iterator(*head_);

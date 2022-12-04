@@ -40,7 +40,7 @@ void test_endianess(
         Arg value_expected,
         std::size_t size_expected) {
   test_endianess_impl<Arg>(value, value_expected, size_expected);
-  if (sizeof...(Args) > 0)
+  if constexpr (sizeof...(Args) > 0)
     test_endianess<Args...>(value, value_expected, size_expected);
 }
 
