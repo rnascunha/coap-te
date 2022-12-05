@@ -191,10 +191,20 @@ is_mutable_buffer_type_v = is_mutable_buffer_type<T>::value;
  * @link https://stackoverflow.com/a/69019297
  */
 template <class, template <bool...> class>
-struct is_instance : public std::false_type {};
+struct is_instance : std::false_type {};
 
 template <bool ...Bs, template <bool...> class U>
-struct is_instance<U<Bs...>, U> : public std::true_type {};
+struct is_instance<U<Bs...>, U> : std::true_type {};
+
+// template<typename T>
+// struct remove_cvref : std::remove_reference_t<std::remove_cv_t<T>>{};
+template< class T >
+struct remove_cvref {
+    typedef std::remove_cv_t<std::remove_reference_t<T>> type;
+};
+
+template<typename T>
+using remove_cvref_t = typename remove_cvref<T>::type;
 
 /** @} */  // end of CoreTraits
 

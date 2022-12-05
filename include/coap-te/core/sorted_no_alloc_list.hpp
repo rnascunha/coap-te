@@ -72,15 +72,22 @@ class sorted_no_alloc_list {
      * @param args values to construct T. The values are
      * forward to T constructor.
      */
-    template<typename ...Args>
-    node(Args&&... args) :    //NOLINT
-      value(std::forward<Args>(args)...) {}
+    template <typename Arg,
+              typename ...Args,
+              typename = typename std::enable_if_t<
+                    !std::is_same_v<remove_cvref_t<Arg>, T> &&
+                    !std::is_same_v<remove_cvref_t<Arg>, node>>>
+    node(Arg&& arg, Args&&... args) :    //NOLINT
+      value(std::forward<Arg>(arg), std::forward<Args>(args)...) {}
 
     node(const T& other)      //NOLINT
       : value(other) {}
 
-    // node(const node& other)
-    //   : value(other.value), next_(nullptr) {}
+    node(T&& other)      //NOLINT
+      : value(std::move(other)) {}
+
+    node(const node& other)
+      : value(other.value), next_(nullptr) {}
 
     /**
      * @brief Equality operator
