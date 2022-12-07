@@ -18,7 +18,8 @@ set(TESTS       utility
                 options_definitions
                 buffer
                 byte_order
-                option_serialize_parse)
+                option_serialize_parse
+                option)
 set(OUTPUT_TEST    ${CMAKE_BINARY_DIR}/tests)
 
 include(GoogleTest)
@@ -38,6 +39,8 @@ foreach(TEST ${TESTS})
         CXX_STANDARD_REQUIRED ON
         CXX_EXTENSIONS OFF
         RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_TEST})
+
+    target_compile_options(${TEST} PUBLIC -fexceptions)
 
     gtest_discover_tests(${TEST})
 endforeach()

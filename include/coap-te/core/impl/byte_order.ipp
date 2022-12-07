@@ -7,7 +7,19 @@ namespace coap_te {
 namespace core {
 
 template<typename Unsigned>
-constexpr std::pair<Unsigned, std::size_t>
+[[nodiscard]] constexpr std::size_t
+small_big_endian_size(Unsigned value) noexcept {
+  std::size_t size = sizeof(value);
+  std::uint8_t *f = reinterpret_cast<std::uint8_t*>(&value) + size - 1;
+
+  while (size != 0 && *f == 0) {
+    --size; --f;
+  }
+  return size;
+}
+
+template<typename Unsigned>
+[[nodiscard]] constexpr std::pair<Unsigned, std::size_t>
 to_small_big_endian(Unsigned value) noexcept {
   static_assert(std::is_unsigned_v<Unsigned>, "Must be unsigned");
 
@@ -26,7 +38,7 @@ to_small_big_endian(Unsigned value) noexcept {
 }
 
 template<typename Unsigned /* = unsigned */>
-constexpr Unsigned
+[[nodiscard]] constexpr Unsigned
 from_small_big_endian(const std::uint8_t* value, std::size_t size) noexcept {
   static_assert(std::is_unsigned_v<Unsigned>, "Must be unsigned");
 

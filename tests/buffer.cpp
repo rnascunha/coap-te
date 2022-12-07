@@ -177,7 +177,7 @@ TEST(CoreBuffer, Const2MutableBufferInt) {
 }
 
 void test_change_mutable_buffer(coap_te::mutable_buffer& buf) noexcept {  // NOLINT
-  for (int i = 0; i < 5; ++i)
+  for (std::uint8_t i = 0; i < 5; ++i)
       buf[i] = i + 1 + '0';
   test_const_buffer_12345(buf);
 }

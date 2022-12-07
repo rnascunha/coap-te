@@ -106,6 +106,9 @@ class const_buffer {
   const_buffer() noexcept = default;
 
   constexpr
+  const_buffer(const const_buffer& buf) = default;
+
+  constexpr
   const_buffer(const void* data, std::size_t size) noexcept
     : data_(data), size_(size)
   {}

@@ -29,6 +29,16 @@ namespace core {
  */
 
 /**
+ * @brief Gets size of unsigned value in big endian format
+ * 
+ * @tparam Unsigned Value type to calculate size
+ * @return std::size_t size computed
+ */
+template<typename Unsigned>
+[[nodiscard]] constexpr std::size_t
+small_big_endian_size(Unsigned) noexcept;
+
+/**
  * @brief Converts from a little endian to small big-endian.
  * 
  * @note Small big endian is the value in the small possible bytes
@@ -41,7 +51,7 @@ namespace core {
  * storage should be considered
  */
 template<typename Unsigned>
-constexpr std::pair<Unsigned, std::size_t>
+[[nodiscard]] constexpr std::pair<Unsigned, std::size_t>
 to_small_big_endian(Unsigned value) noexcept;
 
 /**
@@ -56,7 +66,7 @@ to_small_big_endian(Unsigned value) noexcept;
  * @return Unsigned Converted little-endian value 
  */
 template<typename Unsigned = unsigned>
-constexpr Unsigned
+[[nodiscard]] constexpr Unsigned
 from_small_big_endian(const std::uint8_t* value, std::size_t size) noexcept;
 
 /** @} */  // end of byte_order

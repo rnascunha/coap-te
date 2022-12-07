@@ -54,6 +54,16 @@ using check_all = check_type<true, true , true>;
 /** Convenint type to not check any requirements
  */
 using check_none = check_type<false, false, false>;
+/** Convenint type to check only sequence requirement
+ */
+using check_sequence = check_type<true, false, false>;
+/** Convenint type to check only format requirement
+ */
+using check_format = check_type<false, true, false>;
+/** Convenint type to check only length requirement
+ */
+using check_length = check_type<false, false, true>;
+
 
 /**
  * @brief Make all the checks requested
