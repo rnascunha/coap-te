@@ -23,8 +23,11 @@
 #include "coap-te/core/const_buffer.hpp"
 
 // message
+#include "coap-te/message/config.hpp"
+#include "coap-te/message/code.hpp"
+#include "coap-te/message/serialize.hpp"
+// message/options
 #include "coap-te/message/options/config.hpp"
-#include "coap-te/message/options/constants.hpp"
 #include "coap-te/message/options/functions.hpp"
 #include "coap-te/message/options/definitions.hpp"
 #include "coap-te/message/options/to_string.hpp"

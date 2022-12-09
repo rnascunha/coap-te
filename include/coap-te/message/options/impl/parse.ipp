@@ -51,7 +51,7 @@ parse_option_header(std::uint8_t op,
 
 }  // namespace
 
-template<typename CheckOptions,
+template<typename CheckOptions /* = check_all */,
          typename ConstBuffer>
 std::size_t parse(number_type before,
                   ConstBuffer& input,                // NOLINT
@@ -119,6 +119,22 @@ std::size_t parse(number_type before,
   }
 
   return size + length.data_extend;
+}
+
+template<typename CheckOptions /* = check_all */,
+         typename ConstBuffer>
+std::size_t parse(number_type before,
+                  ConstBuffer& input,                // NOLINT
+                  option& output,                    // NOLINT
+                  std::error_code& ec) noexcept {    // NOLINT
+  number_type current = invalid;
+  coap_te::const_buffer buf;
+  auto size = parse<CheckOptions>(before, input, current, buf, ec);
+  
+  if (!ec) {
+    output = option::create<check_none, false>(static_cast<number>(current), buf);
+  }
+  return size;
 }
 
 }  // namespace options

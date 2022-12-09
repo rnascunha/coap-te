@@ -94,6 +94,17 @@ enum class suppress : std::uint8_t{
 };
 #endif /* COAP_TE_MESSAGE_OPTION_NO_RESPONSE == 1 */
 
+/** Constants */
+
+static constexpr const number_type no_cache_key = 0b11100;
+
+static constexpr const unsigned
+max_age_default = 60;  // seconds
+
+#if COAP_TE_MESSAGE_OPTION_NO_RESPONSE == 1
+static constexpr const suppress suppress_default = suppress::none;
+#endif /* COAP_TE_MESSAGE_OPTION_NO_RESPONSE == 1 */
+
 }  // namespace options
 }  // namespace message
 }  // namespace coap_te

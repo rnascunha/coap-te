@@ -24,7 +24,6 @@
 #include "coap-te/message/options/checks.hpp"
 #include "coap-te/message/options/serialize.hpp"
 
-
 namespace coap_te {
 namespace message {
 namespace options {
@@ -51,7 +50,7 @@ class option {
 
   template<typename CheckOptions = check_all,
            bool ToThrow = false>
-  static constexpr option
+  [[nodiscard]] static constexpr option
   create(number op) noexcept(!ToThrow) {
     option nop(op);
     check_constructor<CheckOptions, ToThrow>(nop, format::empty);
@@ -60,7 +59,7 @@ class option {
 
   template<typename CheckOptions = check_all,
            bool ToThrow = false>
-  static constexpr option
+  [[nodiscard]] static constexpr option
   create(number op, unsigned value) noexcept(!ToThrow) {
     option nop(op, value);
     check_constructor<CheckOptions, ToThrow>(nop, format::uint);
@@ -69,7 +68,7 @@ class option {
 
   template<typename CheckOptions = check_all,
            bool ToThrow = false>
-  static constexpr option
+  [[nodiscard]] static constexpr option
   create(number op, std::string_view value) noexcept(!ToThrow) {
     option nop(op, value);
     check_constructor<CheckOptions, ToThrow>(nop, format::string);
@@ -78,7 +77,7 @@ class option {
 
   template<typename CheckOptions = check_all,
            bool ToThrow = false>
-  static constexpr option
+  [[nodiscard]] static constexpr option
   create(number op, const const_buffer& value) noexcept(!ToThrow) {
     option nop(op, value);
     check_constructor<CheckOptions, ToThrow>(nop, format::opaque);
@@ -95,23 +94,26 @@ class option {
     using n_check = check_type<CheckOptions::sequence, false, false>;
 
     return std::visit(overloaded {
-      [](auto) {
+      [](std::monostate) {
         return std::size_t(0);
       },
       [&](empty_format) {
-        return serialize<n_check>(coap_te::core::to_underlying(before),
+        return coap_te::message::options::serialize<n_check>(
+                                  coap_te::core::to_underlying(before),
                                   coap_te::core::to_underlying(op_),
                                   output, ec);
       },
       [&](unsigned data) {
-        return serialize<n_check>(coap_te::core::to_underlying(before),
+        return coap_te::message::options::serialize<n_check>(
+                                  coap_te::core::to_underlying(before),
                                   coap_te::core::to_underlying(op_),
                                   data, output, ec);
       },
       [&](const coap_te::const_buffer& data) {
-        return serialize<n_check>(coap_te::core::to_underlying(before),
+        return coap_te::message::options::serialize<n_check>(
+                                  coap_te::core::to_underlying(before),
                                   coap_te::core::to_underlying(op_),
-                                  data, ec);
+                                  data, output, ec);
       }
     }, data_);
   }
@@ -128,29 +130,6 @@ class option {
     return size;
   }
 
-  // bool set(number op) noexcept(!ToThrow) {
-  //   op_ = op;
-  //   check_constructor(format::empty);
-  // }
-
-  // bool set(number op, unsigned value) noexcept(!ToThrow) {
-  //   op_ = op;
-  //   data_ = value;
-  //   check_constructor(format::uint);
-  // }
-
-  // bool set(number op, std::string_view value) noexcept(!ToThrow) {
-  //   op_ = op;
-  //   data_ = coap_te::const_buffer{value};
-  //   check_constructor(format::string);
-  // }
-
-  // bool set(number op, coap_te::const_buffer value) noexcept(!ToThrow) {
-  //   op_ = op;
-  //   data_ = coap_te::const_buffer{value};
-  //   check_constructor(format::opaque);
-  // }
-
   number option_number() const noexcept {
     return op_;
   }
@@ -161,9 +140,10 @@ class option {
 
   std::size_t size() const noexcept {
     return std::visit(overloaded {
-      [](auto) { return std::size_t(0); },
-      [](const coap_te::const_buffer&  data) { return data.size(); },
-      [](unsigned data) { return coap_te::core::small_big_endian_size(data); }
+      [](std::monostate) { return std::size_t(0); },
+      [](empty_format) { return std::size_t(0); },
+      [](unsigned data) { return coap_te::core::small_big_endian_size(data); },
+      [](const coap_te::const_buffer&  data) { return data.size(); }
     }, data_);
   }
 
@@ -179,6 +159,11 @@ class option {
     return op_ != number::invalid;
   }
 
+  constexpr bool
+  operator==(const option& op) const noexcept {
+    return op_ == op.op_;
+  }
+
  private:
   template<typename Arg>
   void set_no_check(number op, Arg&& arg) noexcept {
@@ -190,7 +175,7 @@ class option {
            bool ToThrow>
   static constexpr void
   check_constructor(option& nop,      // NOLINT
-                    format type) noexcept(!ToThrow) {
+                    [[maybe_unused]] format type) noexcept(!ToThrow) {
     using n_check = check_type<false,
                                CheckOptions::format,
                                CheckOptions::length>;
@@ -210,7 +195,7 @@ class option {
 
   constexpr
   explicit option(number op) noexcept
-    : op_(op) {}
+    : op_(op), data_(empty_format{}) {}
 
   constexpr
   option(number op, unsigned value) noexcept

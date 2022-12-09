@@ -96,3 +96,6 @@ At the end, remember:
 # Know issues
 
 * At debug mode at MSVC, the checks in iterators at the binary_search asserts a error. This is a false error, as de bound is checked after.
+* Clang is giving error when not compiling with '-fexception', even if no function that throws exceptions is called.
+* Some functions could not be used as 'constexpr' (serialize/parse kind) because of std::error_code that is not constexpr. Something can be done?
+* message/option uses create static function to create a option. This was necessary to make a compile options like checks/thorw avaiable (contructors can't explicitly set template options). Is options check really necessary?

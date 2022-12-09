@@ -11,15 +11,18 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
+#include "coap-te/core/byte_order.hpp"
 #include "coap-te/message/options/definitions.hpp"
 #include "coap-te/message/options/option.hpp"
+#include "coap-te/message/options/parse.hpp"
 
 namespace opt = coap_te::message::options;
 
 template<typename ...Args>
 constexpr auto
 create(opt::number op, Args&& ... args)  {
-  return opt::option::create<opt::check_all, true>(op, std::forward<Args>(args)...);
+  return opt::option::create<opt::check_all, true>(
+              op, std::forward<Args>(args)...);
 }
 
 TEST(CoAPMessage, OptionConstructor) {
@@ -112,5 +115,109 @@ TEST(CoAPMessage, OptionConstructor) {
       EXPECT_THROW(create(opt::number::if_match, "myoption"),
                    std::system_error);
     }
+  }
+}
+
+std::size_t calc_options_size(
+              opt::number_type before,
+              opt::number_type current,
+              std::size_t size_input) {
+  std::size_t size = 1 + size_input;
+  std::size_t diff = current - before;
+  for (std::size_t i : {diff, size_input}) {
+    if (i >= 269)
+      size += 2;
+    else if (i >= 13)
+      size += 1;
+  }
+  return size;
+}
+
+void test_serialize_parse_success(
+                  opt::number before,
+                  opt::number current,
+                  const coap_te::const_buffer& buf_in) {
+  std::uint8_t data[256];
+  coap_te::mutable_buffer buf(data);
+  std::error_code ecs;
+
+  opt::option ops = opt::option::create
+                  <opt::check_type<true, false, true>>
+                  (current, buf_in);
+  auto size_s = ops.serialize<opt::check_none>(before, buf, ecs);
+  EXPECT_FALSE(ecs);
+  EXPECT_EQ(size_s, calc_options_size(
+                        static_cast<opt::number_type>(before),
+                        static_cast<opt::number_type>(current),
+                        buf_in.size()));
+
+  std::error_code ecp;
+  opt::option opp;
+  coap_te::const_buffer input(data, size_s);
+  auto size_p = opt::parse(static_cast<opt::number_type>(before),
+                          input,
+                          opp,
+                          ecp);
+
+  EXPECT_FALSE(ecp);
+  EXPECT_EQ(size_s, size_p);
+  EXPECT_EQ(current, opp.option_number());
+  EXPECT_EQ(buf_in.size(), opp.size());
+  // EXPECT_EQ(0, std::memcmp(opp.data(),
+  //                          buf_in.data(), opp.size()));
+}
+
+void test_serialize_parse_success(
+                  opt::number before,
+                  opt::number current,
+                  unsigned value) {
+  auto [data, size] = coap_te::core::to_small_big_endian(value);
+  test_serialize_parse_success(before,
+                               current,
+                               coap_te::const_buffer(&data, size));
+}
+
+void test_serialize_parse_success(
+                  opt::number before,
+                  opt::number current) {
+  test_serialize_parse_success(before,
+                               current,
+                               coap_te::const_buffer{});
+}
+
+TEST(CoAPMessage, OptionSerializeParse) {
+  {
+    SCOPED_TRACE("Serialize parse string uri-host");
+    test_serialize_parse_success(opt::number::invalid,
+                               opt::number::uri_host,
+                               coap_te::const_buffer("192.168.0.1"));
+  }
+  {
+    SCOPED_TRACE("Serialize parse big string uri-host");
+    test_serialize_parse_success(opt::number::invalid,
+                               opt::number::uri_host,
+                               coap_te::const_buffer("192.168.111.111"));
+  }
+  {
+    SCOPED_TRACE("Serialize parse number max-age");
+    test_serialize_parse_success(opt::number::invalid,
+                               opt::number::max_age,
+                               60);
+  }
+  {
+    SCOPED_TRACE("Serialize parse empty if_none_match");
+    test_serialize_parse_success(opt::number::invalid,
+                               opt::number::if_none_match);
+  }
+  {
+    SCOPED_TRACE("Serialize parse big string uri-host");
+    test_serialize_parse_success(opt::number::uri_path,
+                               opt::number::uri_path,
+                               coap_te::const_buffer(
+                                "testedeumpathgrandemasmuito"
+                                "grandemesmoqueatepergoacont"
+                                "adequaograndeelaemasegrande"
+                                "mesmoemnossoquegrandemeudeu"
+                                "sgrandao"));
   }
 }

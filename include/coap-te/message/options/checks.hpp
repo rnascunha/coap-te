@@ -11,10 +11,10 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_CHECKS_HPP_
 #define COAP_TE_MESSAGE_OPTIONS_CHECKS_HPP_
 
-#include "coap-te/message/options/checks.hpp"
-
 #include <initializer_list>
 #include <system_error> //NOLINT
+
+#include "coap-te/message/options/config.hpp"
 
 namespace coap_te {
 namespace message {

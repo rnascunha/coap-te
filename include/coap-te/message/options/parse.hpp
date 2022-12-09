@@ -30,6 +30,13 @@ std::size_t parse(number_type before,
                   ConstBuffer& output,               // NOLINT
                   std::error_code& ec) noexcept;     // NOLINT
 
+template<typename CheckOptions = check_all,
+         typename ConstBuffer>
+std::size_t parse(number_type before,
+                  ConstBuffer& input,                // NOLINT
+                  option& output,                    // NOLINT
+                  std::error_code& ec) noexcept;     // NOLINT
+
 }  // namespace options
 }  // namespace message
 }  // namespace coap_te

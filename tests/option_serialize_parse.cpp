@@ -217,7 +217,7 @@ void test_serialize_parse_success(
                                coap_te::const_buffer(nullptr, 0));
 }
 
-TEST(Options, Serialize) {
+TEST(Options, SerializeParse) {
   {
     SCOPED_TRACE("Serialize parse string uri-host");
     test_serialize_parse_success(opt::number::invalid,

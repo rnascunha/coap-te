@@ -11,4 +11,6 @@ foreach(EXAMPLE ${EXAMPLES})
 		CXX_STANDARD_REQUIRED ON
 		CXX_EXTENSIONS OFF
 		RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_EXAMPLE})
+
+    target_compile_options(${EXAMPLE} PUBLIC -fexceptions)
 endforeach()

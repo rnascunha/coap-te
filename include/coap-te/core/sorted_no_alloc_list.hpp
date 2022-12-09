@@ -89,6 +89,11 @@ class sorted_no_alloc_list {
     node(const node& other)
       : value(other.value), next_(nullptr) {}
 
+    node& operator=(const node& other) noexcept {
+      value = other.value;
+      return *this;
+    }
+
     /**
      * @brief Equality operator
      * 

@@ -15,11 +15,13 @@ set(TEST_DIR    tests)
 set(TESTS       utility 
                 sorted_no_alloc_list
                 core_traits
-                options_definitions
                 buffer
                 byte_order
+                options_definitions
                 option_serialize_parse
-                option)
+                option
+                option_list
+                message_serialize)
 set(OUTPUT_TEST    ${CMAKE_BINARY_DIR}/tests)
 
 include(GoogleTest)

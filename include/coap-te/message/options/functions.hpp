@@ -14,7 +14,6 @@
 #include <system_error>   // NOLINT
 
 #include "coap-te/message/options/config.hpp"
-#include "coap-te/message/options/constants.hpp"
 
 namespace coap_te {
 namespace message {
