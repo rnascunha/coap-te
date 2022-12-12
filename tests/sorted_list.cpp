@@ -1,5 +1,5 @@
 /**
- * @file sorted_no_alloc_list.cpp
+ * @file sorted_list.cpp
  * @author Rafael Cunha (rnascunha@gmail.com)
  * @brief 
  * @version 0.1
@@ -12,12 +12,11 @@
 
 #include <algorithm>
 
-#include "coap-te/core/sorted_no_alloc_list.hpp"
+#include "coap-te/core/sorted_list.hpp"
 
 namespace core = coap_te::core;
 
-using list = core::sorted_no_alloc_list<int>;
-using node = list::node;
+using list = core::sorted_list<int>;
 
 template<typename Container>
 void check_list_equality(const list& l, const Container& sorted) {
@@ -30,41 +29,21 @@ void check_list_equality(const list& l, const Container& sorted) {
 }
 
 void test_list_inclusion(const std::initializer_list<int>& ll) {
-  std::vector<node> original;
-  original.reserve(ll.size());
-
-  std::vector<int> sorted;
-  sorted.reserve(ll.size());
-  for (auto i : ll) {
-    original.emplace_back(i);
-    sorted.push_back(i);
-  }
-
-  std::sort(sorted.begin(), sorted.end());
-
-  list l;
-  ASSERT_TRUE(l.empty());
-  int size = 0;
-  for (auto& n : original) {
-    l.add(n);
-    ++size;
-    EXPECT_EQ(l.size(), size);
-  }
-
-  check_list_equality(l, sorted);
+  list l(ll);
+  EXPECT_EQ(ll.size(), l.size());
+  EXPECT_FALSE(l.empty());
+  std::is_sorted(l.begin(), l.end());
 }
 
-TEST(CoreSortedNoAllocList, Insert) {
+TEST(CoreSortedList, Insert) {
   // Insert
   {
     list l;
-    node n1(1);
-    node n2(2);
-    node n3(3);
+    EXPECT_TRUE(l.empty());
 
-    l.add(n1)
-      .add(n2)
-      .add(n3);
+    l.add(1)
+      .add(2)
+      .add(3);
     check_list_equality(l, std::vector{1, 2, 3});
   }
   {
@@ -92,21 +71,17 @@ TEST(CoreSortedNoAllocList, Insert) {
   }
 }
 
-TEST(CoreSortedNoAllocList, Get) {
+TEST(CoreSortedList, Get) {
   // get
   {
     list l;
-    node n1(1);
-    node n2(2);
-    node n3(3);
-    node n11(1);
-    node n22(2);
+    EXPECT_TRUE(l.empty());
 
-    l.add(n1)
-      .add(n2)
-      .add(n22)
-      .add(n3)
-      .add(n11);
+    l.add(1)
+      .add(2)
+      .add(3)
+      .add(1)
+      .add(2);
 
     auto it = l.get(1);
     EXPECT_NE(it, l.end());
@@ -145,27 +120,18 @@ TEST(CoreSortedNoAllocList, Get) {
         return value < v;
       }
     };
-    using list_test = core::sorted_no_alloc_list<test>;
-    using node_test = list_test::node;
 
+    using list_test = coap_te::core::sorted_list<test>;
     list_test l;
-    node_test n11(1, "1");
-    node_test n12(1, "2");
-    node_test n13(1, "3");
-    node_test n21(2, "1");
-    node_test n22(2, "2");
-    node_test n31(3, "1");
-    node_test n32(3, "2");
-    node_test n33(3, "3");
 
-    l.add(n31)
-      .add(n11)
-      .add(n32)
-      .add(n12)
-      .add(n21)
-      .add(n13)
-      .add(n22)
-      .add(n33);
+    l.add({1, "1"})
+      .add({1, "2"})
+      .add({1, "3"})
+      .add({2, "1"})
+      .add({2, "2"})
+      .add({3, "1"})
+      .add({3, "2"})
+      .add({3, "3"});
 
     std::vector<std::tuple<int, int, const char*>> vs = {
       {1, 0, "1"}, {1, 1, "2"}, {1, 2, "3"},
@@ -192,109 +158,103 @@ TEST(CoreSortedNoAllocList, Get) {
     }
   }
 
-  // front
+  // front // pop_front
   {
-    node nodes[]{1, 2, 3, 4, 5};
+    int nodes[]{1, 2, 3, 4, 5};
     list l(std::begin(nodes), std::end(nodes));
     for (auto i = std::begin(nodes); i != std::end(nodes); ++i) {
-      EXPECT_EQ(*i, l.front());
+      EXPECT_EQ(l.front(), *i);
       l.pop_front();
     }
     EXPECT_TRUE(l.empty());
   }
   {
-    node nodes[]{5, 4, 3, 2, 1};
+    int nodes[]{5, 4, 3, 2, 1};
     list l(std::begin(nodes), std::end(nodes));
     for (auto i = std::rbegin(nodes); i != std::rend(nodes); ++i) {
-      EXPECT_EQ(*i, l.front());
+      EXPECT_EQ(l.front(), *i);
       l.pop_front();
     }
     EXPECT_TRUE(l.empty());
   }
 }
 
-void test_list_remove(std::vector<node>& ll) {    // NOLINT
+void test_list_remove(std::vector<int>& ll) {    // NOLINT
   list l(ll.begin(), ll.end());
 
   auto size = l.size();
   EXPECT_EQ(size, ll.size());
 
   for (std::size_t i = 0; i < ll.size(); ++i) {
-    auto it = l.remove(ll[i].value);
-    EXPECT_TRUE(it);
-    EXPECT_EQ(*it, ll[i].value);
+    EXPECT_TRUE(l.remove(ll[i]));
     --size;
     EXPECT_EQ(l.size(), size);
   }
   EXPECT_TRUE(l.empty());
 }
 
-void test_list_pop_front(std::vector<node>& ll) {   // NOLINT
+void test_list_pop_front(std::vector<int>& ll) {   // NOLINT
   list l(ll.begin(), ll.end());
 
-  // We need to make this copy becuase sorting the original
-  // array will change the values from the list, becuause it is
-  // where is stored
-  std::vector<node> copy(ll);
-  std::sort(copy.begin(), copy.end());
+  std::sort(ll.begin(), ll.end());
 
   auto size = l.size();
   EXPECT_EQ(size, ll.size());
 
   for (std::size_t i = 0; i < ll.size(); ++i) {
-    auto it = l.pop_front();
-    EXPECT_TRUE(it);
-    EXPECT_EQ(*it, copy[i].value);
+    auto value = l.front();
+    l.pop_front();
+    EXPECT_EQ(value, ll[i]);
     --size;
     EXPECT_EQ(l.size(), size);
   }
   EXPECT_TRUE(l.empty());
 }
 
-TEST(CoreSortedNoAllocList, Remove) {
+TEST(CoreSortedList, Remove) {
   // Remove
   {
     SCOPED_TRACE("Remove from begin");
-    std::vector<node> ll{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    std::vector<int> ll{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     test_list_remove(ll);
   }
   {
     SCOPED_TRACE("Remove from end");
-    std::vector<node> ll{10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+    std::vector<int> ll{10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
     test_list_remove(ll);
   }
   {
     SCOPED_TRACE("Remove mix and repeated");
-    std::vector<node> ll{10, 9, 8, 7, 6, 5, 4, 3, 2, 1,
+    std::vector<int> ll{10, 9, 8, 7, 6, 5, 4, 3, 2, 1,
                          1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     test_list_remove(ll);
   }
   {
     SCOPED_TRACE("Remove mix and repeated 2");
-    std::vector<node> ll{10, 9, 7, 6, 7, 5, 4, 3, 2, 1,
+    std::vector<int> ll{10, 9, 7, 6, 7, 5, 4, 3, 2, 1,
                          1, 2, 2, 4, 4, 6, 7, 1, 0, 10};
     test_list_remove(ll);
   }
   // Pop front
   {
     SCOPED_TRACE("Pop front sorted");
-    std::vector<node> ll{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    std::vector<int> ll{1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     test_list_pop_front(ll);
   }
   {
     SCOPED_TRACE("Pop front revert insert");
-    std::vector<node> ll{10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+    std::vector<int> ll{10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
     test_list_pop_front(ll);
   }
   {
     SCOPED_TRACE("Pop front mix and repeated");
-    std::vector<node> ll{10, 9, 8, 7, 6, 5, 4, 3, 2, 1,
+    std::vector<int> ll{10, 9, 8, 7, 6, 5, 4, 3, 2, 1,
                          1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
     test_list_pop_front(ll);
   }
   {
     SCOPED_TRACE("prop_front mix and repeated 2");
-    std::vector<node> ll{10, 9, 7, 6, 7, 5, 4, 3, 2, 1,
+    std::vector<int> ll{10, 9, 7, 6, 7, 5, 4, 3, 2, 1,
                          1, 2, 2, 4, 4, 6, 7, 1, 0, 10};
     test_list_pop_front(ll);
   }

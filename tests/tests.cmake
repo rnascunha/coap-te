@@ -14,6 +14,7 @@ enable_testing()
 set(TEST_DIR    tests)
 set(TESTS       utility 
                 sorted_no_alloc_list
+                sorted_list
                 core_traits
                 buffer
                 byte_order

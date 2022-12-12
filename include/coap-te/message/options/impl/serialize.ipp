@@ -168,6 +168,46 @@ serialize(number_type before,
   return detail::serialize(before, op, ::coap_te::const_buffer{}, output, ec);
 }
 
+/**
+ * Serialize list
+ */
+template<typename CheckOptions = check_all,
+         typename ForwardIt,
+         typename MutableBuffer>
+[[nodiscard]] constexpr std::size_t
+serialize(ForwardIt begin,
+          ForwardIt end,
+          MutableBuffer& output,               // NOLINT
+          std::error_code& ec) noexcept {      // NOLINT
+  static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>,
+                "Must be mutable buffer");
+  std::size_t size = 0;
+  number prev = number::invalid;
+  while (begin != end) {
+    size += begin->serialize(prev, output, ec);
+    if (ec)
+      break;
+    prev = begin->option_number();
+    ++begin;
+  }
+  return size;
+}
+
+template<typename CheckOptions = check_all,
+         typename Container,
+         typename MutableBuffer>
+[[nodiscard]] constexpr std::size_t
+serialize(const Container& option_list,
+          MutableBuffer& output,              // NOLINT
+          std::error_code& ec) noexcept {      // NOLINT
+  static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>,
+                "Must be mutable buffer");
+  return serialize(option_list.begin(),
+                   option_list.end(),
+                   output,
+                   ec);
+}
+
 }  // namespace options
 }  // namespace message
 }  // namespace coap_te

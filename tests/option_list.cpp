@@ -11,101 +11,175 @@
 #include <gtest/gtest.h>
 
 #include <vector>
+#include <set>
 #include <cstdint>
 
 #include "coap-te/core/mutable_buffer.hpp"
+#include "coap-te/core/sorted_no_alloc_list.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/option.hpp"
-// #include "coap-te/message/options/vector_options.hpp"
+#include "coap-te/message/options/checks.hpp"
+#include "coap-te/message/options/vector_options.hpp"
 
 namespace opt = coap_te::message::options;
 
-std::size_t calc_options_size(
-              opt::number before,
-              opt::number current,
-              std::size_t size_input) {
-  std::size_t size = 1 + size_input;
-  std::size_t diff = static_cast<opt::number_type>(current) -
-                     static_cast<opt::number_type>(before);
-  for (std::size_t i : {diff, size_input}) {
-    if (i >= 269)
-      size += 2;
-    else if (i >= 13)
-      size += 1;
+template<bool Sort = true, typename Container>
+void test_option_list_success(Container& list) {    // NOLINT
+  if constexpr (Sort) {
+    std::stable_sort(list.begin(), list.end());
   }
-  return size;
+
+  std::uint8_t data[100];
+  coap_te::mutable_buffer buf(data);
+  std::error_code ec;
+  std::size_t size = opt::serialize<opt::check_none>(list, buf, ec);
+  EXPECT_FALSE(ec);
+
+  opt::vector_options list_s(coap_te::const_buffer(data, size));
+  auto i = list.begin();
+  for (auto it = list_s.begin(); it.is_end(); ++i) {
+    auto op = *it;
+    EXPECT_EQ(op, *i);
+    EXPECT_EQ(op.option_number(), i->option_number());
+    EXPECT_EQ(op.size(), i->size());
+    EXPECT_EQ(0, std::memcmp(op.data(), i->data(), op.size()));
+    ++i;
+  }
 }
 
 TEST(OptionList, List) {
   {
-    auto op = opt::option::create<opt::check_all, false>
-                            (opt::number::if_none_match);
-    EXPECT_TRUE(op.is_valid());
-
-    std::uint8_t data[100];
-    coap_te::mutable_buffer buf(data);
-    std::size_t size = 0;
-    opt::number prev = opt::number::invalid;
-    std::error_code ec;
-    size += op.serialize<opt::check_none>(prev, buf, ec);
-    EXPECT_FALSE(ec);
-    EXPECT_EQ(op.option_number(), opt::number::if_none_match);
-    // prev = op.option_number();
-    EXPECT_EQ(size, calc_options_size(prev, opt::number::if_none_match, 0));
-
-    // opt::vector_options vec(coap_te::const_buffer(data, size));
-    // int i = 0;
-    // for (auto it = vec.begin(); it.is_end(); ++it, ++i) {
-    //   auto op = *it;
-    //   EXPECT_EQ(op, list[i]);
-    // }
-    // for (auto it = vec.begin(); i < list.size(); ++it, ++i) {
-    //   auto op = *it;
-    //   EXPECT_EQ(op, list[i]);
-    // }
+    std::vector<opt::option> list{
+      opt::option::create<opt::check_all, false>
+                            (opt::number::if_none_match),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_host, "192.169.9.2"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_port, 5683)};
+    test_option_list_success(list);
   }
   {
-    auto op = opt::option::create<opt::check_all, false>
-                            (opt::number::uri_path, "123456");
-    EXPECT_TRUE(op.is_valid());
+    std::vector<opt::option> list{
+      opt::option::create<opt::check_all, false>
+                            (opt::number::if_none_match),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_host, "192.169.9.2"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_port, 5683),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "my"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "path"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "resource")};
+    test_option_list_success(list);
+  }
+  {
+    std::vector<opt::option> list{
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_host, "192.169.9.2"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::if_none_match),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "path"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "my"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "resource"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_port, 5683)};
+    test_option_list_success(list);
+  }
 
-    std::uint8_t data[100];
-    coap_te::mutable_buffer buf(data);
-    std::size_t size = 0;
-    opt::number prev = opt::number::invalid;
-    std::error_code ec;
-    size += op.serialize<opt::check_none>(prev, buf, ec);
-    EXPECT_FALSE(ec);
-    EXPECT_EQ(op.option_number(), opt::number::uri_path);
-    // prev = op.option_number();
-    EXPECT_EQ(size, calc_options_size(prev, opt::number::uri_path, 6));
-    // std::vector<opt::option> list;
-    // list.push_back(opt::option::create(opt::number::if_none_match));
-    // EXPECT_EQ(list.size(), 1);
-    // EXPECT_TRUE(list[0].is_valid());
+  // multiset
+  {
+    std::multiset<opt::option> list{
+      opt::option::create<opt::check_all, false>
+                            (opt::number::if_none_match),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_host, "192.169.9.2"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_port, 5683)};
+    test_option_list_success<false>(list);
+  }
+  {
+    std::multiset<opt::option> list{
+      opt::option::create<opt::check_all, false>
+                            (opt::number::if_none_match),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_host, "192.169.9.2"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_port, 5683),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "my"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "path"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "resource")};
+    test_option_list_success<false>(list);
+  }
+  {
+    std::multiset<opt::option> list{
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_host, "192.169.9.2"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::if_none_match),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "path"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "my"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "resource"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_port, 5683)};
+    test_option_list_success<false>(list);
+  }
 
-    // std::uint8_t data[100];
-    // coap_te::mutable_buffer buf(data);
-    // std::size_t size = 0;
-    // opt::number prev = opt::number::invalid;
-    // for (auto const& op : list) {
-    //   std::error_code ec;
-    //   size += op.serialize<opt::check_none>(prev, buf, ec);
-    //   EXPECT_FALSE(ec);
-    //   EXPECT_EQ(op.option_number(), opt::number::if_none_match);
-    //   prev = op.option_number();
-    // }
-    // EXPECT_EQ(size, calc_options_size(prev, opt::number::if_none_match, 0));
+  using list = coap_te::core::sorted_no_alloc_list<opt::option>;
+  {
+    std::vector<list::node> storage_list{
+      opt::option::create<opt::check_all, false>
+                            (opt::number::if_none_match),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_host, "192.169.9.2"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_port, 5683)};
+    list op_list(storage_list.begin(), storage_list.end());
+    test_option_list_success<false>(op_list);
+  }
+  {
+    std::vector<list::node> storage_list{
+      opt::option::create<opt::check_all, false>
+                            (opt::number::if_none_match),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_host, "192.169.9.2"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_port, 5683),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "my"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "path"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "resource")};
+    list op_list(storage_list.begin(), storage_list.end());
+    test_option_list_success<false>(op_list);
+  }
+  {
+    std::vector<list::node> storage_list{
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_host, "192.169.9.2"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::if_none_match),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "path"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "my"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "resource"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_port, 5683)};
 
-    // opt::vector_options vec(coap_te::const_buffer(data, size));
-    // int i = 0;
-    // for (auto it = vec.begin(); it.is_end(); ++it, ++i) {
-    //   auto op = *it;
-    //   EXPECT_EQ(op, list[i]);
-    // }
-    // for (auto it = vec.begin(); i < list.size(); ++it, ++i) {
-    //   auto op = *it;
-    //   EXPECT_EQ(op, list[i]);
-    // }
+    list op_list(storage_list.begin(), storage_list.end());
+    test_option_list_success<false>(op_list);
   }
 }

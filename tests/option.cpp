@@ -163,8 +163,8 @@ void test_serialize_parse_success(
   EXPECT_EQ(size_s, size_p);
   EXPECT_EQ(current, opp.option_number());
   EXPECT_EQ(buf_in.size(), opp.size());
-  // EXPECT_EQ(0, std::memcmp(opp.data(),
-  //                          buf_in.data(), opp.size()));
+  EXPECT_EQ(0, std::memcmp(opp.data(),
+                           buf_in.data(), opp.size()));
 }
 
 void test_serialize_parse_success(

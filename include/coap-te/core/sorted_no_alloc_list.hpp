@@ -359,12 +359,9 @@ class sorted_no_alloc_list {
    * 
    * @return iterator First value of the list
    */
-  [[nodiscard]] iterator
+  [[nodiscard]] reference
   front() noexcept {
-    if (head_ == nullptr)
-      return iterator{};
-
-    return iterator(*head_);
+    return head_->value;
   }
 
   // Iterator interface

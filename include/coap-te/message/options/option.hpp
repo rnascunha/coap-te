@@ -11,6 +11,7 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_OPTION_HPP_
 #define COAP_TE_MESSAGE_OPTIONS_OPTION_HPP_
 
+#include <limits>
 #include <variant>
 #include <utility>
 #include <string_view>
@@ -39,11 +40,14 @@ overloaded(Ts...) -> overloaded<Ts...>;
 
 class option {
  public:
+  using unsigned_type = unsigned;
   using value_type = std::variant<
                       std::monostate,
                       empty_format,
-                      unsigned,
+                      unsigned_type,
                       coap_te::const_buffer>;
+  static constexpr unsigned_type
+  invalid_unsigned = std::numeric_limits<unsigned_type>::max();
 
   constexpr
   option() noexcept = default;
@@ -60,7 +64,7 @@ class option {
   template<typename CheckOptions = check_all,
            bool ToThrow = false>
   [[nodiscard]] static constexpr option
-  create(number op, unsigned value) noexcept(!ToThrow) {
+  create(number op, unsigned_type value) noexcept(!ToThrow) {
     option nop(op, value);
     check_constructor<CheckOptions, ToThrow>(nop, format::uint);
     return nop;
@@ -103,7 +107,7 @@ class option {
                                   coap_te::core::to_underlying(op_),
                                   output, ec);
       },
-      [&](unsigned data) {
+      [&](unsigned_type data) {
         return coap_te::message::options::serialize<n_check>(
                                   coap_te::core::to_underlying(before),
                                   coap_te::core::to_underlying(op_),
@@ -142,8 +146,34 @@ class option {
     return std::visit(overloaded {
       [](std::monostate) { return std::size_t(0); },
       [](empty_format) { return std::size_t(0); },
-      [](unsigned data) { return coap_te::core::small_big_endian_size(data); },
+      [](unsigned_type data) {
+        return coap_te::core::small_big_endian_size(data);
+      },
       [](const coap_te::const_buffer&  data) { return data.size(); }
+    }, data_);
+  }
+
+  constexpr unsigned_type
+  get_unsigned() const noexcept {
+    auto* buffer = std::get_if<coap_te::const_buffer>(&data_);
+    if (buffer != nullptr) {
+      return coap_te::core::from_small_big_endian<unsigned_type>(
+                          reinterpret_cast<const std::uint8_t*>(buffer->data()),
+                          buffer->size());
+    }
+    return invalid_unsigned;
+  }
+
+  constexpr const void*
+  data() const noexcept {
+    return std::visit(overloaded {
+      [](auto) -> const void* { return nullptr; },
+      [](const unsigned_type& data) {
+        return reinterpret_cast<const void*>(&data);
+      },
+      [](const coap_te::const_buffer&  data) {
+        return data.data();
+      }
     }, data_);
   }
 
@@ -162,6 +192,11 @@ class option {
   constexpr bool
   operator==(const option& op) const noexcept {
     return op_ == op.op_;
+  }
+
+  constexpr bool
+  operator<(const option& op) const noexcept {
+    return op_ < op.op_;
   }
 
  private:
@@ -198,7 +233,7 @@ class option {
     : op_(op), data_(empty_format{}) {}
 
   constexpr
-  option(number op, unsigned value) noexcept
+  option(number op, unsigned_type value) noexcept
     : op_(op), data_(value) {}
 
   constexpr

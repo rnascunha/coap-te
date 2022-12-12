@@ -51,6 +51,26 @@ serialize(number_type before,
           MutableBuffer& output,              // NOLINT
           std::error_code& ec) noexcept;      // NOLINT
 
+/**
+ * Serialize list
+ */
+template<typename CheckOptions = check_all,
+         typename ForwardIt,
+         typename MutableBuffer>
+[[nodiscard]] constexpr std::size_t
+serialize(ForwardIt begin,
+          ForwardIt end,
+          MutableBuffer& output,              // NOLINT
+          std::error_code& ec) noexcept;      // NOLINT
+
+template<typename CheckOptions = check_all,
+         typename Container,
+         typename MutableBuffer>
+[[nodiscard]] constexpr std::size_t
+serialize(const Container& options_list,
+          MutableBuffer& output,              // NOLINT
+          std::error_code& ec) noexcept;      // NOLINT
+
 }  // namespace options
 }  // namespace message
 }  // namespace coap_te
