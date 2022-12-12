@@ -171,7 +171,7 @@ serialize(number_type before,
 /**
  * Serialize list
  */
-template<typename CheckOptions = check_all,
+template<typename CheckOptions /* = check_all */,
          typename ForwardIt,
          typename MutableBuffer>
 [[nodiscard]] constexpr std::size_t
@@ -193,7 +193,7 @@ serialize(ForwardIt begin,
   return size;
 }
 
-template<typename CheckOptions = check_all,
+template<typename CheckOptions /* = check_all */,
          typename Container,
          typename MutableBuffer>
 [[nodiscard]] constexpr std::size_t

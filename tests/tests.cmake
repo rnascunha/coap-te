@@ -43,7 +43,9 @@ foreach(TEST ${TESTS})
         CXX_EXTENSIONS OFF
         RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_TEST})
 
-    target_compile_options(${TEST} PUBLIC -fexceptions)
+    if (NOT MSVC)
+      target_compile_options(${TEST} PUBLIC -fexceptions)
+    endif()
 
     gtest_discover_tests(${TEST})
 endforeach()
