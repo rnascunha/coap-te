@@ -18,10 +18,10 @@
 namespace coap_te {
 namespace message {
 
-template<typename ConstBuffer>
-std::size_t parse(const ConstBuffer& input,
-                  message&,
-                  std::error_code&) noexcept;
+// template<typename ConstBuffer>
+// std::size_t parse(const ConstBuffer& input,
+//                   message&,
+//                   std::error_code&) noexcept;
 
 }  // namespace message
 }  // namespace coap_te

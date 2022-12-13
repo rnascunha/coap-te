@@ -16,6 +16,7 @@
 
 #include "coap-te/core/mutable_buffer.hpp"
 #include "coap-te/core/sorted_no_alloc_list.hpp"
+#include "coap-te/core/sorted_list.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/checks.hpp"
@@ -29,25 +30,90 @@ void test_option_list_success(Container& list) {    // NOLINT
     std::stable_sort(list.begin(), list.end());
   }
 
-  std::uint8_t data[100]{};
+  std::uint8_t data[100];
   coap_te::mutable_buffer buf(data);
   std::error_code ec;
   std::size_t size = opt::serialize<opt::check_none>(list, buf, ec);
   EXPECT_FALSE(ec);
+  // EXPECT_EQ(size, 1);
 
   opt::vector_options list_s(coap_te::const_buffer(data, size));
-  auto i = list.begin();
-  for (auto it = list_s.begin(); it.is_end(); ++i) {
-    auto op = *it;
-    EXPECT_EQ(op, *i);
-    EXPECT_EQ(op.option_number(), i->option_number());
-    EXPECT_EQ(op.size(), i->size());
-    EXPECT_EQ(0, std::memcmp(op.data(), i->data(), op.size()));
-    ++i;
+  {
+    auto i = list.begin();
+    for (auto it = list_s.begin(); !it.is_end(); ++i, ++it) {
+      auto op = *it;
+      EXPECT_EQ(op, *i);
+      EXPECT_EQ(op.option_number(), i->option_number());
+      EXPECT_EQ(op.size(), i->size());
+      EXPECT_EQ(0, std::memcmp(op.data(), i->data(), op.size()));
+    }
+  }
+  {
+    // same checks as above, but using for range interface
+    auto i = list.begin();
+    for (auto op : list_s) {
+      EXPECT_EQ(op, *i);
+      EXPECT_EQ(op.option_number(), i->option_number());
+      EXPECT_EQ(op.size(), i->size());
+      EXPECT_EQ(0, std::memcmp(op.data(), i->data(), op.size()));
+      ++i;
+    }
+  }
+}
+
+template<bool Sort,
+         typename Container>
+void test_option_list_success_lists(
+      const std::initializer_list<std::initializer_list<opt::option>>& lists) {
+  for (auto const& list : lists) {
+    Container l(list.begin(), list.end());
+    test_option_list_success<Sort>(l);
   }
 }
 
 TEST(OptionList, List) {
+  std::initializer_list<std::initializer_list<opt::option>>
+  lists{
+    {
+      opt::option::create<opt::check_all, false>
+                            (opt::number::if_none_match),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_host, "192.169.9.2"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_port, 5683)
+    },
+    {
+      opt::option::create<opt::check_all, false>
+                          (opt::number::if_none_match),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_host, "192.169.9.2"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_port, 5683),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "my"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "path"),
+      opt::option::create<opt::check_all, false>
+                          (opt::number::uri_path, "resource")
+    },
+    {
+      opt::option::create<opt::check_all, false>
+                          (opt::number::uri_host, "192.169.9.2"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::if_none_match),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "path"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "my"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "resource"),
+      opt::option::create<opt::check_all, false>
+                          (opt::number::uri_port, 5683)
+    }
+  };
+  {
+    test_option_list_success_lists<true, std::vector<opt::option>>(lists);
+  }
   {
     std::vector<opt::option> list{
       opt::option::create<opt::check_all, false>
@@ -120,6 +186,22 @@ TEST(OptionList, List) {
   }
   {
     std::multiset<opt::option> list{
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_host, "192.169.9.2"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::if_none_match),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "path"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "my"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_path, "resource"),
+      opt::option::create<opt::check_all, false>
+                            (opt::number::uri_port, 5683)};
+    test_option_list_success<false>(list);
+  }
+  {
+    coap_te::core::sorted_list<opt::option> list{
       opt::option::create<opt::check_all, false>
                             (opt::number::uri_host, "192.169.9.2"),
       opt::option::create<opt::check_all, false>

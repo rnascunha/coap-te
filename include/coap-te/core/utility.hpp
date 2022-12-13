@@ -27,6 +27,24 @@ namespace core {
  */
 
 /**
+ * @brief Computer de distrance of 2 pointer in bytes
+ * 
+ * @warning begin must be smaller or equal to end. No checks
+ * are done.
+ * 
+ * @param begin pointer at the begin of the interval
+ * @param end pointer at the end of the interval
+ * @return std::size_t distance of the pointers
+ */
+std::size_t
+pointer_distance(const void* begin,
+                 const void* end) noexcept {
+  return static_cast<std::size_t>(
+    reinterpret_cast<const std::uint8_t*>(end) -
+    reinterpret_cast<const std::uint8_t*>(begin));
+}
+
+/**
  * @brief Makes a binary search in a container
  * 
  * @note The container must be sorted strictly increasing
@@ -59,6 +77,19 @@ constexpr typename std::underlying_type<E>::type
 to_underlying(E e) noexcept {
     return static_cast<typename std::underlying_type<E>::type>(e);
 }
+
+/**
+ * @brief Trait to overload lambadas to be used with std::variant/std::visit
+ * 
+ * @tparam Ts Lambadas types tha will be overloaded
+ */
+template<class... Ts>
+struct overloaded : Ts... {
+  using Ts::operator()...;
+};
+
+template<class... Ts>
+overloaded(Ts...) -> overloaded<Ts...>;
 
 /** @} */  // end of utility group
 

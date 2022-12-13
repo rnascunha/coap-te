@@ -31,13 +31,6 @@ namespace options {
 
 struct empty_format{};
 
-template<class... Ts>
-struct overloaded : Ts... {
-  using Ts::operator()...;
-};
-template<class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
-
 class option {
  public:
   using unsigned_type = unsigned;
@@ -97,27 +90,16 @@ class option {
                   "Must be mutable buffer type");
     using n_check = check_type<CheckOptions::sequence, false, false>;
 
-    return std::visit(overloaded {
+    return std::visit(coap_te::core::overloaded {
       [](std::monostate) {
         return std::size_t(0);
       },
-      [&](empty_format) {
+      [&, this](auto) {
         return coap_te::message::options::serialize<n_check>(
                                   coap_te::core::to_underlying(before),
                                   coap_te::core::to_underlying(op_),
+                                  coap_te::const_buffer{data(), size()},
                                   output, ec);
-      },
-      [&](unsigned_type data) {
-        return coap_te::message::options::serialize<n_check>(
-                                  coap_te::core::to_underlying(before),
-                                  coap_te::core::to_underlying(op_),
-                                  data, output, ec);
-      },
-      [&](const coap_te::const_buffer& data) {
-        return coap_te::message::options::serialize<n_check>(
-                                  coap_te::core::to_underlying(before),
-                                  coap_te::core::to_underlying(op_),
-                                  data, output, ec);
       }
     }, data_);
   }
@@ -143,7 +125,7 @@ class option {
   }
 
   std::size_t size() const noexcept {
-    return std::visit(overloaded {
+    return std::visit(coap_te::core::overloaded {
       [](std::monostate) { return std::size_t(0); },
       [](empty_format) { return std::size_t(0); },
       [](unsigned_type data) {
@@ -153,20 +135,26 @@ class option {
     }, data_);
   }
 
-  constexpr unsigned_type
+  [[nodiscard]] constexpr unsigned_type
   get_unsigned() const noexcept {
-    auto* buffer = std::get_if<coap_te::const_buffer>(&data_);
-    if (buffer != nullptr) {
-      return coap_te::core::from_small_big_endian<unsigned_type>(
-                          reinterpret_cast<const std::uint8_t*>(buffer->data()),
-                          buffer->size());
-    }
-    return invalid_unsigned;
+    return std::visit(coap_te::core::overloaded {
+      [](auto) { return invalid_unsigned; },
+      [](unsigned_type data) {
+        return coap_te::core::from_small_big_endian<unsigned_type>(
+                          reinterpret_cast<const std::uint8_t*>(&data),
+                          coap_te::core::small_big_endian_size(data));
+      },
+      [](const const_buffer& data) {
+        return coap_te::core::from_small_big_endian<unsigned_type>(
+                            reinterpret_cast<const std::uint8_t*>(data.data()),
+                            data.size());
+      }
+    }, data_);
   }
 
-  constexpr const void*
+  [[nodiscard]] constexpr const void*
   data() const noexcept {
-    return std::visit(overloaded {
+    return std::visit(coap_te::core::overloaded {
       [](auto) -> const void* { return nullptr; },
       [](const unsigned_type& data) {
         return reinterpret_cast<const void*>(&data);
@@ -177,6 +165,11 @@ class option {
     }, data_);
   }
 
+  [[nodiscard]] constexpr const value_type&
+  raw_data() const noexcept {
+    return data_;
+  }
+
   /**
    * @brief Check if options is valid
    * 
@@ -185,7 +178,8 @@ class option {
    * @return true Is in a valid state
    * @return false Is not in a not valid
    */
-  bool is_valid() const noexcept {
+  [[nodiscard]] constexpr bool
+  is_valid() const noexcept {
     return op_ != number::invalid;
   }
 
@@ -234,7 +228,8 @@ class option {
 
   constexpr
   option(number op, unsigned_type value) noexcept
-    : op_(op), data_(value) {}
+    : op_(op),
+      data_(coap_te::core::to_small_big_endian(value).first) {}
 
   constexpr
   option(number op, std::string_view str) noexcept

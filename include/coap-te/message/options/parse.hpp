@@ -13,6 +13,7 @@
 
 #include <cstdint>
 #include <system_error>   // NOLINT
+#include <utility>
 
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/checks.hpp"
@@ -36,6 +37,9 @@ std::size_t parse(number_type before,
                   ConstBuffer& input,                // NOLINT
                   option& output,                    // NOLINT
                   std::error_code& ec) noexcept;     // NOLINT
+
+[[nodiscard]] std::pair<std::size_t, std::error_code>
+option_list_size(const coap_te::const_buffer& buf) noexcept;
 
 }  // namespace options
 }  // namespace message

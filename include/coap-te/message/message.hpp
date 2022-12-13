@@ -15,7 +15,7 @@
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/code.hpp"
-#include "coap-te/message/options/option.hpp>"
+#include "coap-te/message/options/option.hpp"
 
 namespace coap_te {
 namespace message {
@@ -28,7 +28,7 @@ class message {
                 "Must be const buffer type");
 
   message() = default;
-  message(type tp, code co, token = ConstBuffer{})
+  message(type tp, code co, const ConstBuffer& token = ConstBuffer{})
     : type_{tp}, code_{co}, token_{token} {}
 
   // Getters
@@ -65,7 +65,7 @@ class message {
   }
 
   message& set(code tp) noexcept {
-    type_ = tp;
+    code_ = tp;
     return *this;
   }
 
@@ -76,7 +76,7 @@ class message {
 
   template<typename OptionType>
   message& add_option(OptionType op) noexcept {
-    OptionList.add(op);
+    opt_list_.add(op);
     return *this;
   }
 

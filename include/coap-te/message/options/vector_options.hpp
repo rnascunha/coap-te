@@ -60,18 +60,19 @@ class vector_options {
       return temp;
     }
 
-    constexpr bool
+    [[nodiscard]] constexpr bool
     is_end() noexcept {
       return buf_[0] == coap_te::message::payload_marker ||
              buf_.size() == 0;
     }
 
-    constexpr
+    [[nodiscard]] constexpr
     operator bool() noexcept {
       return is_end();
     }
 
-    value_type operator*() noexcept {
+    [[nodiscard]] value_type
+    operator*() noexcept {
       value_type op;
       std::error_code ec;
       coap_te::const_buffer copy_buf(buf_);
@@ -80,19 +81,37 @@ class vector_options {
       return op;
     }
 
+    [[nodiscard]] constexpr const const_buffer&
+    buffer() const noexcept {
+      return buf_;
+    }
+
    private:
     number_type prev_ = invalid;
     coap_te::const_buffer buf_;
   };
 
-  constexpr
-  explicit vector_options(const const_buffer& buf) noexcept
-    : buf_(buf) {}
-
+  // constexpr
+  // explicit vector_options(const const_buffer& buf) noexcept
+  //   : buf_(buf.data(), compute_option_list_size(buf)) {}
+  explicit vector_options(const const_buffer& buf) noexcept {
+    auto [size, ec] = option_list_size(buf);
+    if (ec) {
+      return;
+    }
+    buf_.set(buf.data(), size);
+  }
 
   // iterator interface
-  const_iterator begin() const noexcept {
+  [[nodiscard]] const_iterator
+  begin() const noexcept {
     return const_iterator(buf_);
+  }
+
+  [[nodiscard]] const_iterator
+  end() const noexcept {
+    return const_iterator(
+      const_buffer((const std::uint8_t*)buf_.data() + buf_.size(), 0));
   }
 
  private:

@@ -1,5 +1,6 @@
 set(EXAMPLES_DIR    "examples")
-set(EXAMPLES        "option_table")
+set(EXAMPLES        "option_table"
+                    "option_list_example")
 set(OUTPUT_EXAMPLE	${CMAKE_BINARY_DIR}/examples)
 
 foreach(EXAMPLE ${EXAMPLES})
@@ -12,5 +13,7 @@ foreach(EXAMPLE ${EXAMPLES})
 		CXX_EXTENSIONS OFF
 		RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_EXAMPLE})
 
-    target_compile_options(${EXAMPLE} PUBLIC -fexceptions)
+    if (NOT MSVC)
+      target_compile_options(${EXAMPLE} PUBLIC -fexceptions)
+    endif()
 endforeach()

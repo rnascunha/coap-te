@@ -87,7 +87,7 @@ static constexpr const definition definitions[] = {
 };
 
 [[nodiscard]] constexpr const definition&
-get_definitions(number n) noexcept;
+get_definition(number n) noexcept;
 
 }  // namespace options
 }  // namespace message

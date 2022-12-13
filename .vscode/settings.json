@@ -56,7 +56,18 @@
       "streambuf": "cpp",
       "typeinfo": "cpp",
       "*.ipp": "cpp",
-      "variant": "cpp"
+      "variant": "cpp",
+      "any": "cpp",
+      "charconv": "cpp",
+      "condition_variable": "cpp",
+      "map": "cpp",
+      "set": "cpp",
+      "unordered_set": "cpp",
+      "iomanip": "cpp",
+      "mutex": "cpp",
+      "semaphore": "cpp",
+      "stop_token": "cpp",
+      "thread": "cpp"
     },
     "C_Cpp.errorSquiggles": "Disabled"
 }

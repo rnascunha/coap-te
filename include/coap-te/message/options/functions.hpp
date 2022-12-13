@@ -44,33 +44,6 @@ is_no_cache_key(number op) noexcept {
   return (static_cast<number_type>(op) & no_cache_key) == no_cache_key;
 }
 
-// template<typename Buffer,
-//          typename CheckOption>
-// size_format serialize(
-//             number before,
-//             number current,
-//             Buffer&,
-//             std::error_code&) noexcept;
-
-// template<typename Buffer,
-//          typename CheckOption>
-// size_format serialize(
-//             number before,
-//             number current,
-//             unsigned,
-//             Buffer&,
-//             std::error_code&) noexcept;
-
-// template<typename Buffer,
-//          typename ConstBuffer,
-//          typename CheckOption>
-// size_format serialize(
-//             number before,
-//             number current,
-//             const ConstBuffer&,
-//             Buffer&,
-//             std::error_code&) noexcept;
-
 }  // namespace options
 }  // namespace message
 }  // namespace coap_te

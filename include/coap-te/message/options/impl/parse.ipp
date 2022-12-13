@@ -15,6 +15,7 @@
 #include <system_error>   // NOLINT
 
 #include "coap-te/core/traits.hpp"
+#include "coap-te/message/config.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/checks.hpp"
 
@@ -135,6 +136,24 @@ std::size_t parse(number_type before,
     output = option::create<check_none, false>(static_cast<number>(current), buf);
   }
   return size;
+}
+
+[[nodiscard]] std::pair<std::size_t, std::error_code>
+option_list_size(
+  const coap_te::const_buffer& buf) noexcept {   // NOLINT
+  coap_te::const_buffer cbuf(buf);
+  number_type prev = invalid;
+  std::error_code ec;
+
+  while (cbuf.size() != 0 && cbuf[0] != coap_te::message::payload_marker) {
+    option op;
+    parse(prev, cbuf, op, ec);
+    if (ec) {
+      return {0, ec};
+    }
+    prev = static_cast<number_type>(op.option_number());
+  }
+  return {coap_te::core::pointer_distance(buf.data(), cbuf.data()), ec};
 }
 
 }  // namespace options
