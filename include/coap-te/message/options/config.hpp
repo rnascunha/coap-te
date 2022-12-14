@@ -85,6 +85,27 @@ enum class extend : std::uint8_t {
   error     = 15
 };
 
+
+template<bool IsContentFormat>
+struct content_format {
+  enum class type : std::uint16_t {
+    text_plain      = 0,    // text/plain;charset=utf-8
+    link_format     = 40,   // application/link-format
+    xml             = 41,   // application/xml
+    octet_stream    = 42,   // application/octet-stream
+    exi             = 47,   // application/exi
+    json            = 50,   // application/json
+#if COAP_TE_FETCH_PATCH == 1
+    // https://tools.ietf.org/html/rfc8132#section-6
+    json_patch_json = 51,   // application/json-patch+json
+    merge_patch_json = 52   // application/merge-patch+json
+#endif /* COAP_TE_FETCH_PATCH == 1 */
+  };
+};
+
+using content = content_format<true>::type;
+using accept = content_format<false>::type;
+
 #if COAP_TE_MESSAGE_OPTION_NO_RESPONSE == 1
 enum class suppress : std::uint8_t{
   none          = 0b0'0000,

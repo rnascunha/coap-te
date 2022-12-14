@@ -35,7 +35,6 @@ void test_option_list_success(Container& list) {    // NOLINT
   std::error_code ec;
   std::size_t size = opt::serialize<opt::check_none>(list, buf, ec);
   EXPECT_FALSE(ec);
-  // EXPECT_EQ(size, 1);
 
   opt::vector_options list_s(coap_te::const_buffer(data, size));
   {
@@ -49,7 +48,7 @@ void test_option_list_success(Container& list) {    // NOLINT
     }
   }
   {
-    // same checks as above, but using for range interface
+    // same checks as above, but using range for interface
     auto i = list.begin();
     for (auto op : list_s) {
       EXPECT_EQ(op, *i);

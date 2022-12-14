@@ -20,6 +20,7 @@
 
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/option.hpp"
+#include "coap-te/message/options/to_string.hpp"
 
 namespace coap_te {
 namespace debug {
@@ -38,7 +39,16 @@ print_option_data(std::ostream& os,
       os << coap_te::core::to_hex(coap_te::const_buffer{op.data(), op.size()});
       break;
     case opt::format::uint:
-      os << op.get_unsigned();
+    {
+      auto u = op.get_unsigned();
+      os << u;
+      if (op.option_number() == opt::number::content_format ||
+          op.option_number() == opt::number::accept) {
+            os << ' '
+               << opt::to_string(
+                    static_cast<opt::content>(u));
+          }
+    }
       break;
     case opt::format::string:
       os << coap_te::core::to_string(

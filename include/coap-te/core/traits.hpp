@@ -196,13 +196,20 @@ struct is_instance : std::false_type {};
 template <bool ...Bs, template <bool...> class U>
 struct is_instance<U<Bs...>, U> : std::true_type {};
 
-// template<typename T>
-// struct remove_cvref : std::remove_reference_t<std::remove_cv_t<T>>{};
+/**
+ * @brief Remove reference and const/volatile qualifier from
+ * type
+ * 
+ * @tparam T type to remove qualifies
+ */
 template< class T >
 struct remove_cvref {
     typedef std::remove_cv_t<std::remove_reference_t<T>> type;
 };
 
+/**
+ * @brief Convenint call to @ref remove_cvref
+ */
 template<typename T>
 using remove_cvref_t = typename remove_cvref<T>::type;
 

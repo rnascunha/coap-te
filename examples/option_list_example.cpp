@@ -33,7 +33,9 @@ int main() {
                             (opt::number::uri_port, 5683),
       opt::option::create<opt::check_all, false>
                             (opt::number::if_match,
-                            coap_te::const_buffer(data))};
+                            coap_te::const_buffer(data)),
+      opt::option(opt::content::text_plain),
+      opt::option(opt::accept::json)};
 
   // std::stable_sort(list.begin(), list.end());
 

@@ -91,9 +91,6 @@ class vector_options {
     coap_te::const_buffer buf_;
   };
 
-  // constexpr
-  // explicit vector_options(const const_buffer& buf) noexcept
-  //   : buf_(buf.data(), compute_option_list_size(buf)) {}
   explicit vector_options(const const_buffer& buf) noexcept {
     auto [size, ec] = option_list_size(buf);
     if (ec) {

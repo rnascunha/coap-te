@@ -45,6 +45,17 @@ class option {
   constexpr
   option() noexcept = default;
 
+  constexpr
+  explicit option(content value) noexcept
+    : op_(number::content_format),
+      data_(static_cast<unsigned_type>(value)) {}
+
+  constexpr
+  explicit option(accept value) noexcept
+    : op_(number::accept),
+      data_(static_cast<unsigned_type>(value)) {}
+
+
   template<typename CheckOptions = check_all,
            bool ToThrow = false>
   [[nodiscard]] static constexpr option

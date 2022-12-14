@@ -32,7 +32,7 @@ void test_list_inclusion(const std::initializer_list<int>& ll) {
   list l(ll);
   EXPECT_EQ(ll.size(), l.size());
   EXPECT_FALSE(l.empty());
-  std::is_sorted(l.begin(), l.end());
+  EXPECT_TRUE(std::is_sorted(l.begin(), l.end()));
 }
 
 TEST(CoreSortedList, Insert) {

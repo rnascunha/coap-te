@@ -27,6 +27,8 @@ class message {
   static_assert(coap_te::core::is_const_buffer_type_v<ConstBuffer>,
                 "Must be const buffer type");
 
+  using const_iterator = typename OptionList::const_iteraror;
+
   message() = default;
   message(type tp, code co, const ConstBuffer& token = ConstBuffer{})
     : type_{tp}, code_{co}, token_{token} {}
@@ -50,6 +52,16 @@ class message {
   [[nodiscard]] constexpr ConstBuffer&
   payload() const noexcept {
     return payload_;
+  }
+
+  [[nodiscard]] const_iterator
+  begin() const noexcept {
+    return opt_list_.begin();
+  }
+
+  [[nodiscard]] const_iterator
+  end() const noexcept {
+    return opt_list_.end();
   }
 
   // Setters
