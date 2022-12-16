@@ -15,6 +15,7 @@
 #include <algorithm>    // std::for_each
 
 #include "coap-te.hpp"
+#include "coap-te-debug.hpp"
 
 int main() {
   // Namespace where all options are defined
@@ -29,7 +30,7 @@ int main() {
                 std::end(definitions),
               [](auto const& def) {
                   if (!def) return;
-                  auto const& type = to_string(def.type);
+                  auto const& type = coap_te::debug::to_string(def.type);
                   std::printf("|%4u | %c | %c | %c | %c | %-15.*s | %-7.*s | %u-%-4u |\n",       // NOLINT
                           static_cast<number_type>(def.op),
                           is_critical(def.op) ? 'x' : ' ',

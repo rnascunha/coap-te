@@ -109,7 +109,7 @@ class option {
         return coap_te::message::options::serialize<n_check>(
                                   coap_te::core::to_underlying(before),
                                   coap_te::core::to_underlying(op_),
-                                  coap_te::const_buffer{data(), size()},
+                                  coap_te::const_buffer{data(), data_size()},
                                   output, ec);
       }
     }, data_);
@@ -135,7 +135,23 @@ class option {
     return data_;
   }
 
-  std::size_t size() const noexcept {
+  [[nodiscard]] constexpr std::size_t
+  header_size(number previous) const noexcept {
+    std::size_t size = 1;
+    std::size_t diff = coap_te::core::to_underlying(op_) -
+                coap_te::core::to_underlying(previous);
+
+    for (std::size_t s : {diff, data_size()}) {
+      if (s >= 269)
+        size +=  2;
+      else if (s >= 13)
+        size += 1;
+    }
+    return size;
+  }
+
+  [[nodiscard]] constexpr std::size_t
+  data_size() const noexcept {
     return std::visit(coap_te::core::overloaded {
       [](std::monostate) { return std::size_t(0); },
       [](empty_format) { return std::size_t(0); },
@@ -144,6 +160,11 @@ class option {
       },
       [](const coap_te::const_buffer&  data) { return data.size(); }
     }, data_);
+  }
+
+  [[nodiscard]] constexpr std::size_t
+  size(number previous) const noexcept {
+    return header_size(previous) + data_size();
   }
 
   [[nodiscard]] constexpr unsigned_type
@@ -223,7 +244,7 @@ class option {
       auto ec = check<n_check>(
                         coap_te::core::to_underlying(number::invalid),
                         coap_te::core::to_underlying(nop.option_number()),
-                        type, nop.size());
+                        type, nop.data_size());
       if (ec) {
         nop.set_no_check(number::invalid, std::monostate{});
         if constexpr (ToThrow) {

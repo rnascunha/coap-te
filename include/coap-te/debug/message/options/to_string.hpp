@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2022
  * 
  */
-#ifndef COAP_TE_MESSAGE_OPTIONS_TO_STRING_HPP_
-#define COAP_TE_MESSAGE_OPTIONS_TO_STRING_HPP_
+#ifndef COAP_TE_DEBUG_MESSAGE_OPTIONS_TO_STRING_HPP_
+#define COAP_TE_DEBUG_MESSAGE_OPTIONS_TO_STRING_HPP_
 
 #include <string_view>
 
@@ -17,12 +17,12 @@
 #include "coap-te/message/options/definitions.hpp"
 
 namespace coap_te {
-namespace message {
-namespace options {
+namespace debug {
 
 [[nodiscard]] constexpr std::string_view
-to_string(format t) noexcept {
+to_string(coap_te::message::options::format t) noexcept {
   switch (t) {
+    using format = coap_te::message::options::format;
     case format::empty:
       return "empty";
     case format::opaque:
@@ -38,19 +38,20 @@ to_string(format t) noexcept {
 }
 
 [[nodiscard]] constexpr std::string_view
-to_string(const definition& def) noexcept {
+to_string(const coap_te::message::options::definition& def) noexcept {
   return def.name;
 }
 
 [[nodiscard]] constexpr std::string_view
-to_string(number op) noexcept {
+to_string(coap_te::message::options::number op) noexcept {
   return to_string(get_definition(op));
 }
 
 [[nodiscard]] constexpr std::string_view
-to_string(content format) noexcept {
+to_string(coap_te::message::options::content format) noexcept {
   switch (format) {
-    using type = content;  // typename content_format<IsContentFormat>::type;
+    using type =
+      coap_te::message::options::content;
     case type::text_plain:    //  = 0,    // text/plain;charset=utf-8
       return "text/plain";
     case type::link_format:   //  = 40,   // application/link-format
@@ -75,8 +76,7 @@ to_string(content format) noexcept {
   return "unknown";
 }
 
-}  // namespace options
-}  // namespace message
+}  // namespace debug
 }  // namespace coap_te
 
-#endif  // COAP_TE_MESSAGE_OPTIONS_TO_STRING_HPP_
+#endif  // COAP_TE_DEBUG_MESSAGE_OPTIONS_TO_STRING_HPP_

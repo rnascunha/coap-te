@@ -29,6 +29,8 @@ class sorted_list {
   using reference = T&;
 
   using Container = std::list<T>;
+  using iterator = typename Container::iterator;
+  using const_iterator = typename Container::const_iterator;
 
   sorted_list() = default;
   sorted_list(std::initializer_list<T> list) {

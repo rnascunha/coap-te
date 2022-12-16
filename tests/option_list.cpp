@@ -43,8 +43,8 @@ void test_option_list_success(Container& list) {    // NOLINT
       auto op = *it;
       EXPECT_EQ(op, *i);
       EXPECT_EQ(op.option_number(), i->option_number());
-      EXPECT_EQ(op.size(), i->size());
-      EXPECT_EQ(0, std::memcmp(op.data(), i->data(), op.size()));
+      EXPECT_EQ(op.data_size(), i->data_size());
+      EXPECT_EQ(0, std::memcmp(op.data(), i->data(), op.data_size()));
     }
   }
   {
@@ -53,8 +53,8 @@ void test_option_list_success(Container& list) {    // NOLINT
     for (auto op : list_s) {
       EXPECT_EQ(op, *i);
       EXPECT_EQ(op.option_number(), i->option_number());
-      EXPECT_EQ(op.size(), i->size());
-      EXPECT_EQ(0, std::memcmp(op.data(), i->data(), op.size()));
+      EXPECT_EQ(op.data_size(), i->data_size());
+      EXPECT_EQ(0, std::memcmp(op.data(), i->data(), op.data_size()));
       ++i;
     }
   }

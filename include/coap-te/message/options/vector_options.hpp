@@ -19,6 +19,7 @@
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/parse.hpp"
+#include "coap-te/message/options/option_list_func.hpp"
 
 namespace coap_te {
 namespace message {
@@ -99,13 +100,38 @@ class vector_options {
     buf_.set(buf.data(), size);
   }
 
+  constexpr
+  vector_options() noexcept = default;
+
+  constexpr
+  vector_options(const void* data, std::size_t size) noexcept
+    : buf_{data, size} {}
+
+  constexpr void
+  update(const const_buffer& buf) noexcept {
+    buf_ = buf;
+  }
+
+  [[nodiscard]] constexpr std::size_t
+  size() const noexcept {
+    return buf_.size();
+  }
+
+  [[nodiscard]] constexpr std::size_t
+  count() const noexcept {
+    std::size_t s = 0;
+    for (auto it = begin(); it != end(); ++it)
+      ++s;
+    return s;
+  }
+
   // iterator interface
-  [[nodiscard]] const_iterator
+  [[nodiscard]] constexpr const_iterator
   begin() const noexcept {
     return const_iterator(buf_);
   }
 
-  [[nodiscard]] const_iterator
+  [[nodiscard]] constexpr const_iterator
   end() const noexcept {
     return const_iterator(
       const_buffer((const std::uint8_t*)buf_.data() + buf_.size(), 0));
@@ -114,6 +140,20 @@ class vector_options {
  private:
   coap_te::const_buffer buf_;
 };
+
+template<>
+[[nodiscard]] constexpr std::size_t
+size(const vector_options& list) noexcept {
+  // static_assert(is_option_list_v<OptionList>, "Must be a option list");
+  return list.size();
+}
+
+template<>
+[[nodiscard]] constexpr std::size_t
+count(const vector_options& list) noexcept {
+  // static_assert(is_option_list_v<OptionList>, "Must be a option list");
+  return list.count();
+}
 
 }  // namespace options
 }  // namespace message

@@ -1,6 +1,7 @@
 set(EXAMPLES_DIR    "examples")
 set(EXAMPLES        "option_table"
-                    "option_list_example")
+                    "option_list_example"
+                    "message")
 set(OUTPUT_EXAMPLE	${CMAKE_BINARY_DIR}/examples)
 
 foreach(EXAMPLE ${EXAMPLES})

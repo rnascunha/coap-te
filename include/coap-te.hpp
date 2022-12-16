@@ -36,10 +36,10 @@
 #include "coap-te/message/options/functions.hpp"
 #include "coap-te/message/options/checks.hpp"
 #include "coap-te/message/options/definitions.hpp"
-#include "coap-te/message/options/to_string.hpp"
 #include "coap-te/message/options/serialize.hpp"
 #include "coap-te/message/options/parse.hpp"
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/vector_options.hpp"
+#include "coap-te/message/options/option_list_func.hpp"
 
 #endif  // COAP_TE_HPP_

@@ -29,23 +29,23 @@ TEST(CoAPMessage, OptionConstructor) {
   // Testing constructors
   {
     opt::option invalid_op;
-    EXPECT_EQ(invalid_op.size(), 0);
+    EXPECT_EQ(invalid_op.data_size(), 0);
     EXPECT_FALSE(invalid_op.is_valid());
   }
   {
     opt::option empty_op = opt::option::create(opt::number::if_none_match);
-    EXPECT_EQ(empty_op.size(), 0);
+    EXPECT_EQ(empty_op.data_size(), 0);
     EXPECT_TRUE(empty_op.is_valid());
   }
   {
     opt::option uint_op = opt::option::create(opt::number::uri_port, 10);
-    EXPECT_EQ(uint_op.size(), 1);
+    EXPECT_EQ(uint_op.data_size(), 1);
     EXPECT_TRUE(uint_op.is_valid());
   }
   {
     opt::option string_op =
                   opt::option::create(opt::number::uri_host, "myhost");
-    EXPECT_EQ(string_op.size(), 6);
+    EXPECT_EQ(string_op.data_size(), 6);
     EXPECT_TRUE(string_op.is_valid());
   }
   {
@@ -54,7 +54,7 @@ TEST(CoAPMessage, OptionConstructor) {
                   opt::option::create(
                     opt::number::if_match,
                     coap_te::const_buffer(arr));
-    EXPECT_EQ(opaque_op.size(), 5);
+    EXPECT_EQ(opaque_op.data_size(), 5);
     EXPECT_TRUE(opaque_op.is_valid());
   }
   // Faling constructor - NOT throwing!
@@ -64,7 +64,7 @@ TEST(CoAPMessage, OptionConstructor) {
       opt::option empty_op = opt::option::create<
                                     opt::check_all,
                                     false>(opt::number::if_none_match, 1);
-      EXPECT_EQ(empty_op.size(), 0);
+      EXPECT_EQ(empty_op.data_size(), 0);
       EXPECT_FALSE(empty_op.is_valid());
     }
     {
@@ -72,7 +72,7 @@ TEST(CoAPMessage, OptionConstructor) {
       opt::option uint_op = opt::option::create<
                                     opt::check_all,
                                     false>(opt::number::uri_port);
-      EXPECT_EQ(uint_op.size(), 0);
+      EXPECT_EQ(uint_op.data_size(), 0);
       EXPECT_FALSE(uint_op.is_valid());
     }
     {
@@ -82,7 +82,7 @@ TEST(CoAPMessage, OptionConstructor) {
                                     opt::check_all,
                                     false>(opt::number::uri_host,
                                      coap_te::const_buffer(arr));
-      EXPECT_EQ(string_op.size(), 0);
+      EXPECT_EQ(string_op.data_size(), 0);
       EXPECT_FALSE(string_op.is_valid());
     }
     {
@@ -90,7 +90,7 @@ TEST(CoAPMessage, OptionConstructor) {
       opt::option opaque_op = opt::option::create<
                                     opt::check_all,
                                     false>(opt::number::if_match, "myoption");
-      EXPECT_EQ(opaque_op.size(), 0);
+      EXPECT_EQ(opaque_op.data_size(), 0);
       EXPECT_FALSE(opaque_op.is_valid());
     }
   }
@@ -162,9 +162,9 @@ void test_serialize_parse_success(
   EXPECT_FALSE(ecp);
   EXPECT_EQ(size_s, size_p);
   EXPECT_EQ(current, opp.option_number());
-  EXPECT_EQ(buf_in.size(), opp.size());
+  EXPECT_EQ(buf_in.size(), opp.data_size());
   EXPECT_EQ(0, std::memcmp(opp.data(),
-                           buf_in.data(), opp.size()));
+                           buf_in.data(), opp.data_size()));
 }
 
 void test_serialize_parse_success(

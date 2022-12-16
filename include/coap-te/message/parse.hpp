@@ -20,7 +20,13 @@ namespace message {
 
 template<typename ConstBuffer,
          typename Message>
-std::size_t parse(const ConstBuffer& input,
+std::size_t parse_header(ConstBuffer&,
+                  Message&,
+                  std::error_code&) noexcept;
+
+template<typename ConstBuffer,
+         typename Message>
+std::size_t parse(ConstBuffer&,
                   Message&,
                   std::error_code&) noexcept;
 

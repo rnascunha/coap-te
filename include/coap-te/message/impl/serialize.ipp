@@ -43,6 +43,7 @@ serialize_header(type tp, code co, message_id mid,
   output += 1;
   output[0] = static_cast<std::uint8_t>(co);
   output += 1;
+  mid = (mid >> 8) | ((mid << 8) & 0xFF00);     // Inverting, network byte order
   std::memcpy(output.data(), &mid, sizeof(message_id));
   output += sizeof(message_id);
   std::memcpy(output.data(), token.data(), token_len);

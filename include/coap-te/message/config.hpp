@@ -23,7 +23,7 @@ static constexpr std::uint8_t version = 0b01;
 enum class type : std::uint8_t {
   confirmable     = 0,
   nonconfirmable  = 1,
-  acknowlodgement = 2,
+  ack             = 2,
   reset           = 3
 };
 

@@ -20,7 +20,7 @@
 
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/option.hpp"
-#include "coap-te/message/options/to_string.hpp"
+#include "coap-te/debug/message/options/to_string.hpp"
 
 namespace coap_te {
 namespace debug {
@@ -36,7 +36,8 @@ print_option_data(std::ostream& os,
       os << "<empty>";
       break;
     case opt::format::opaque:
-      os << coap_te::core::to_hex(coap_te::const_buffer{op.data(), op.size()});
+      os << coap_te::core::to_hex(
+              coap_te::const_buffer{op.data(), op.data_size()});
       break;
     case opt::format::uint:
     {
@@ -45,14 +46,14 @@ print_option_data(std::ostream& os,
       if (op.option_number() == opt::number::content_format ||
           op.option_number() == opt::number::accept) {
             os << ' '
-               << opt::to_string(
+               << to_string(
                     static_cast<opt::content>(u));
           }
     }
       break;
     case opt::format::string:
       os << coap_te::core::to_string(
-                coap_te::const_buffer{op.data(), op.size()});
+                coap_te::const_buffer{op.data(), op.data_size()});
       break;
     default:
       break;
@@ -82,7 +83,7 @@ print_option(std::ostream& os,
   auto& def = opt::get_definition(op.option_number());
   os << static_cast<opt::number_type>(op.option_number()) << '|'
      << def.name << '['
-     << op.size() << "]:";
+     << op.data_size() << "]:";
   print_option_data(os, op, def.type);
 }
 

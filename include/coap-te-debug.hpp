@@ -11,7 +11,12 @@
 #ifndef COAP_TE_DEBUG_HPP_
 #define COAP_TE_DEBUG_HPP_
 
+// message
+#include "coap-te/debug/message/to_string.hpp"
+#include "coap-te/debug/message/message.hpp"
+
 // message/options
+#include "coap-te/debug/message/options/to_string.hpp"
 #include "coap-te/debug/message/options/option.hpp"
 
 #endif  // COAP_TE_DEBUG_HPP_

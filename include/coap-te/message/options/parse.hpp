@@ -38,9 +38,6 @@ std::size_t parse(number_type before,
                   option& output,                    // NOLINT
                   std::error_code& ec) noexcept;     // NOLINT
 
-[[nodiscard]] std::pair<std::size_t, std::error_code>
-option_list_size(const coap_te::const_buffer& buf) noexcept;
-
 }  // namespace options
 }  // namespace message
 }  // namespace coap_te
