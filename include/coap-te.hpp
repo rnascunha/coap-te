@@ -31,6 +31,7 @@
 #include "coap-te/message/serialize.hpp"
 #include "coap-te/message/parse.hpp"
 #include "coap-te/message/message.hpp"
+#include "coap-te/message/token.hpp"
 // message/options
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/functions.hpp"
@@ -41,5 +42,8 @@
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/vector_options.hpp"
 #include "coap-te/message/options/option_list_func.hpp"
+
+// alias
+#include "coap-te/alias.hpp"
 
 #endif  // COAP_TE_HPP_

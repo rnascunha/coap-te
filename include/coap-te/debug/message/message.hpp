@@ -22,10 +22,11 @@
 namespace coap_te {
 namespace debug {
 
-template<typename Message,
-         bool PayloadAsString = false>
-void print_message(std::ostream& os, const Message& message) noexcept {
-  // static_assert(is_message_v<Message>, "Must be message type");
+template<bool PayloadAsString = false,
+         typename Message>
+void print_message(const Message& message,
+                   std::ostream& os = std::cout) noexcept {
+  // static_assert(is_message_type_v<Message>, "Must be message type");
   // header
   os << "[" << message.size() << "]"
      << to_string(message.get_type()) << "|"
@@ -33,7 +34,7 @@ void print_message(std::ostream& os, const Message& message) noexcept {
      << std::setw(4) << std::setfill('0') << std::hex
      << message.mid() << std::dec << "]/t["
      << message.token().size() << "]:"
-     << coap_te::core::to_hex(message.token()) << "\n";
+     << coap_te::core::to_hex(message.token(), "-") << "\n";
 
   // options
   os << "op[" << message.count_options() << "]\n";

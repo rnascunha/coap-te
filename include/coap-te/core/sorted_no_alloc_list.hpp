@@ -197,6 +197,8 @@ class sorted_no_alloc_list {
     node* ptr_ = nullptr;
   };
 
+  using const_iterator = iterator;
+
   sorted_no_alloc_list() = default;
 
   template<typename Iterator>

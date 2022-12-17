@@ -28,8 +28,10 @@ enum class type : std::uint8_t {
 };
 
 
-static constexpr std::size_t minimum_header_size = 4;
-static constexpr std::size_t max_token_size = 8;
+static constexpr const
+std::size_t minimum_header_size = 4;
+static constexpr const
+std::size_t max_token_size = 8;
 
 using message_id = std::uint16_t;
 

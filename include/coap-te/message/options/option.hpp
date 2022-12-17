@@ -46,6 +46,23 @@ class option {
   option() noexcept = default;
 
   constexpr
+  explicit option(number op) noexcept
+    : op_(op), data_(empty_format{}) {}
+
+  constexpr
+  option(number op, unsigned_type value) noexcept
+    : op_(op),
+      data_(coap_te::core::to_small_big_endian(value).first) {}
+
+  constexpr
+  option(number op, std::string_view str) noexcept
+    : op_(op), data_(const_buffer{str}) {}
+
+  constexpr
+  option(number op, const const_buffer& value) noexcept
+    : op_(op), data_(const_buffer{value}) {}
+
+  constexpr
   explicit option(content value) noexcept
     : op_(number::content_format),
       data_(static_cast<unsigned_type>(value)) {}
@@ -54,78 +71,6 @@ class option {
   explicit option(accept value) noexcept
     : op_(number::accept),
       data_(static_cast<unsigned_type>(value)) {}
-
-
-  template<typename CheckOptions = check_all,
-           bool ToThrow = false>
-  [[nodiscard]] static constexpr option
-  create(number op) noexcept(!ToThrow) {
-    option nop(op);
-    check_constructor<CheckOptions, ToThrow>(nop, format::empty);
-    return nop;
-  }
-
-  template<typename CheckOptions = check_all,
-           bool ToThrow = false>
-  [[nodiscard]] static constexpr option
-  create(number op, unsigned_type value) noexcept(!ToThrow) {
-    option nop(op, value);
-    check_constructor<CheckOptions, ToThrow>(nop, format::uint);
-    return nop;
-  }
-
-  template<typename CheckOptions = check_all,
-           bool ToThrow = false>
-  [[nodiscard]] static constexpr option
-  create(number op, std::string_view value) noexcept(!ToThrow) {
-    option nop(op, value);
-    check_constructor<CheckOptions, ToThrow>(nop, format::string);
-    return nop;
-  }
-
-  template<typename CheckOptions = check_all,
-           bool ToThrow = false>
-  [[nodiscard]] static constexpr option
-  create(number op, const const_buffer& value) noexcept(!ToThrow) {
-    option nop(op, value);
-    check_constructor<CheckOptions, ToThrow>(nop, format::opaque);
-    return nop;
-  }
-
-  template<typename CheckOptions = check_sequence,
-           typename MutableBuffer>
-  std::size_t serialize(number before,
-                        MutableBuffer& output,                  //NOLINT
-                        std::error_code& ec) const noexcept {   //NOLINT
-    static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>,
-                  "Must be mutable buffer type");
-    using n_check = check_type<CheckOptions::sequence, false, false>;
-
-    return std::visit(coap_te::core::overloaded {
-      [](std::monostate) {
-        return std::size_t(0);
-      },
-      [&, this](auto) {
-        return coap_te::message::options::serialize<n_check>(
-                                  coap_te::core::to_underlying(before),
-                                  coap_te::core::to_underlying(op_),
-                                  coap_te::const_buffer{data(), data_size()},
-                                  output, ec);
-      }
-    }, data_);
-  }
-
-  template<typename CheckOptions = check_sequence,
-           typename MutableBuffer>
-  std::size_t serialize(number before,
-                        MutableBuffer& output) const {   //NOLINT
-    std::error_code ec;
-    auto size = serialize<CheckOptions>(before, output, ec);
-    if (ec) {
-      throw std::system_error{ec};
-    }
-    return size;
-  }
 
   number option_number() const noexcept {
     return op_;
@@ -225,58 +170,85 @@ class option {
     return op_ < op.op_;
   }
 
- private:
-  template<typename Arg>
-  void set_no_check(number op, Arg&& arg) noexcept {
-    op_ = op;
-    data_ = arg;
-  }
+  /**
+   * Serialize functions
+   * 
+   */
+  template<typename CheckOptions = check_sequence,
+           typename MutableBuffer>
+  std::size_t serialize(number before,
+                        MutableBuffer& output,                  //NOLINT
+                        std::error_code& ec) const noexcept {   //NOLINT
+    static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>,
+                  "Must be mutable buffer type");
+    using n_check = check_type<CheckOptions::sequence, false, false>;
 
-  template<typename CheckOptions,
-           bool ToThrow>
-  static constexpr void
-  check_constructor(option& nop,      // NOLINT
-                    [[maybe_unused]] format type) noexcept(!ToThrow) {
-    using n_check = check_type<false,
-                               CheckOptions::format,
-                               CheckOptions::length>;
-    if constexpr (n_check::check_any()) {
-      auto ec = check<n_check>(
-                        coap_te::core::to_underlying(number::invalid),
-                        coap_te::core::to_underlying(nop.option_number()),
-                        type, nop.data_size());
-      if (ec) {
-        nop.set_no_check(number::invalid, std::monostate{});
-        if constexpr (ToThrow) {
-          throw std::system_error{ec};
-        }
+    return std::visit(coap_te::core::overloaded {
+      [](std::monostate) {
+        return std::size_t(0);
+      },
+      [&, this](auto) {
+        return coap_te::message::options::serialize<n_check>(
+                                  coap_te::core::to_underlying(before),
+                                  coap_te::core::to_underlying(op_),
+                                  coap_te::const_buffer{data(), data_size()},
+                                  output, ec);
       }
-    }
+    }, data_);
   }
 
-  constexpr
-  explicit option(number op) noexcept
-    : op_(op), data_(empty_format{}) {}
+  template<typename CheckOptions = check_sequence,
+           typename MutableBuffer>
+  std::size_t serialize(number before,
+                        MutableBuffer& output) const {   //NOLINT
+    std::error_code ec;
+    auto size = serialize<CheckOptions>(before, output, ec);
+    if (ec) {
+      throw std::system_error{ec};
+    }
+    return size;
+  }
 
-  constexpr
-  option(number op, unsigned_type value) noexcept
-    : op_(op),
-      data_(coap_te::core::to_small_big_endian(value).first) {}
-
-  constexpr
-  option(number op, std::string_view str) noexcept
-    : op_(op), data_(const_buffer{str}) {}
-
-  constexpr
-  option(number op, const const_buffer& value) noexcept
-    : op_(op), data_(const_buffer{value}) {}
-
+ private:
   number      op_  = number::invalid;
   value_type  data_;
 };
 
+/*
+ * The functions above are a way to create options
+ * in a more checkable way. You can check if the options
+ * is of the correc type and in with lengths permited by
+ * the option.
+ * 
+ * There is also the possibility to throw a exception when
+ * the requiriments are not met.
+ */
+
+
+template<typename CheckOptions = check_all,
+         bool ToThrow = false>
+[[nodiscard]] constexpr option
+create(number) noexcept(!ToThrow);
+
+template<typename CheckOptions = check_all,
+         bool ToThrow = false>
+[[nodiscard]] constexpr option
+create(number, option::unsigned_type) noexcept(!ToThrow);
+
+template<typename CheckOptions = check_all,
+         bool ToThrow = false>
+[[nodiscard]] constexpr option
+create(number, std::string_view) noexcept(!ToThrow);
+
+template<typename CheckOptions = check_all,
+         bool ToThrow = false>
+[[nodiscard]] constexpr option
+create(number, const const_buffer&) noexcept(!ToThrow);
+
 }  // namespace options
 }  // namespace message
 }  // namespace coap_te
+
+#include "impl/option.ipp"
 
 #endif  // COAP_TE_MESSAGE_OPTIONS_OPTION_HPP_

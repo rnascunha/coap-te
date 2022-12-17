@@ -1,5 +1,5 @@
 /**
- * @file message.cpp
+ * @file no_alloc_message.cpp
  * @author Rafael Cunha (rnascunha@gmail.com)
  * @brief 
  * @version 0.1
@@ -23,13 +23,19 @@ int main() {
    */
   std::cout << "Creating a request message\n-----------------\n";
 
-  request req{type::confirmable, code::get, const_buffer("token")};
+  no_alloc::request req{type::confirmable, code::get, const_buffer("token")};
+  no_alloc::option accept_op{accept::text_plain};
+  no_alloc::option content_op{content::json};
+  no_alloc::option if_none_op{number::if_none_match};
+  no_alloc::option path1_op{number::uri_path, "my"};
+  no_alloc::option path2_op{number::uri_path, "path"};
+
   req.mid(0x1234)
-    .add_option(option{accept::text_plain})
-    .add_option(option{content::json})
-    .add_option(option{number::if_none_match})
-    .add_option(option{number::uri_path, "my"})
-    .add_option(option{number::uri_path, "path"})
+    .add_option(accept_op)
+    .add_option(content_op)
+    .add_option(if_none_op)
+    .add_option(path1_op)
+    .add_option(path2_op)
     .payload(const_buffer{"my payload"});
 
   std::cout << "Request";

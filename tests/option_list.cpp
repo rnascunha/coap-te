@@ -74,39 +74,39 @@ TEST(OptionList, List) {
   std::initializer_list<std::initializer_list<opt::option>>
   lists{
     {
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::if_none_match),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_host, "192.169.9.2"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_port, 5683)
     },
     {
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                           (opt::number::if_none_match),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_host, "192.169.9.2"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_port, 5683),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "my"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "path"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                           (opt::number::uri_path, "resource")
     },
     {
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                           (opt::number::uri_host, "192.169.9.2"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::if_none_match),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "path"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "my"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "resource"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                           (opt::number::uri_port, 5683)
     }
   };
@@ -115,43 +115,43 @@ TEST(OptionList, List) {
   }
   {
     std::vector<opt::option> list{
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::if_none_match),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_host, "192.169.9.2"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_port, 5683)};
     test_option_list_success(list);
   }
   {
     std::vector<opt::option> list{
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::if_none_match),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_host, "192.169.9.2"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_port, 5683),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "my"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "path"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "resource")};
     test_option_list_success(list);
   }
   {
     std::vector<opt::option> list{
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_host, "192.169.9.2"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::if_none_match),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "path"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "my"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "resource"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_port, 5683)};
     test_option_list_success(list);
   }
@@ -159,59 +159,59 @@ TEST(OptionList, List) {
   // multiset
   {
     std::multiset<opt::option> list{
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::if_none_match),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_host, "192.169.9.2"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_port, 5683)};
     test_option_list_success<false>(list);
   }
   {
     std::multiset<opt::option> list{
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::if_none_match),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_host, "192.169.9.2"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_port, 5683),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "my"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "path"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "resource")};
     test_option_list_success<false>(list);
   }
   {
     std::multiset<opt::option> list{
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_host, "192.169.9.2"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::if_none_match),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "path"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "my"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "resource"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_port, 5683)};
     test_option_list_success<false>(list);
   }
   {
     coap_te::core::sorted_list<opt::option> list{
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_host, "192.169.9.2"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::if_none_match),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "path"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "my"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "resource"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_port, 5683)};
     test_option_list_success<false>(list);
   }
@@ -219,45 +219,45 @@ TEST(OptionList, List) {
   using list = coap_te::core::sorted_no_alloc_list<opt::option>;
   {
     std::vector<list::node> storage_list{
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::if_none_match),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_host, "192.169.9.2"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_port, 5683)};
     list op_list(storage_list.begin(), storage_list.end());
     test_option_list_success<false>(op_list);
   }
   {
     std::vector<list::node> storage_list{
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::if_none_match),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_host, "192.169.9.2"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_port, 5683),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "my"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "path"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "resource")};
     list op_list(storage_list.begin(), storage_list.end());
     test_option_list_success<false>(op_list);
   }
   {
     std::vector<list::node> storage_list{
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_host, "192.169.9.2"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::if_none_match),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "path"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "my"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_path, "resource"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_port, 5683)};
 
     list op_list(storage_list.begin(), storage_list.end());

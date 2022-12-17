@@ -133,7 +133,7 @@ std::size_t parse(number_type before,
   auto size = parse<CheckOptions>(before, input, current, buf, ec);
   
   if (!ec) {
-    output = option::create<check_none, false>(static_cast<number>(current), buf);
+    output = create<check_none, false>(static_cast<number>(current), buf);
   }
   return size;
 }

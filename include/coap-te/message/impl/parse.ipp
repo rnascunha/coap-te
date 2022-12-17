@@ -17,6 +17,8 @@
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/code.hpp"
 #include "coap-te/message/options/parse.hpp"
+// #include "coap-te/message/options/vector_options.hpp"
+#include "coap-te/message/options/parse_options.hpp"
 
 namespace coap_te {
 namespace message {
@@ -82,14 +84,10 @@ std::size_t parse(ConstBuffer& input,
     return size;
   }
 
-  auto [size_opt, ecp] = options::option_list_size(input);
-  if (ecp) {
-    ec = ecp;
+  auto size_opt = parse_options(input, message.option_list(), ec);
+  if (ec) {
     return size;
   }
-
-  // message.option_list().update(coap_te::const_buffer{input.data(), size_opt});
-  message.options(options::vector_options{input.data(), size_opt});
   input += size_opt;
   size += size_opt;
 

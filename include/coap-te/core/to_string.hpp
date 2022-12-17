@@ -29,7 +29,8 @@ std::string_view to_string(const ConstBuffer& buffer) noexcept {
 }
 
 template<typename ConstBuffer>
-std::string to_hex(const ConstBuffer& buffer) noexcept {
+std::string to_hex(const ConstBuffer& buffer,
+                   const std::string_view& separator = " ") noexcept {
   static_assert(is_const_buffer_type_v<ConstBuffer>,
                 "Must be const buffer type");
 
@@ -44,7 +45,7 @@ std::string to_hex(const ConstBuffer& buffer) noexcept {
   for (auto i = buffer.size() - 1; i != 0; --i, ++b) {
     s.push_back(hex[(*b) >> 4]);
     s.push_back(hex[(*b) & 0x0F]);
-    s.push_back(' ');
+    s.append(separator);
   }
   s.push_back(hex[(*b) >> 4]);
   s.push_back(hex[(*b) & 0x0F]);

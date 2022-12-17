@@ -25,13 +25,13 @@ int main() {
   // using container = vector<opt::option>;
 
   container list{
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::if_none_match),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_host, "192.169.9.2"),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::uri_port, 5683),
-      opt::option::create<opt::check_all, false>
+      opt::create<opt::check_all, false>
                             (opt::number::if_match,
                             coap_te::const_buffer(data)),
       opt::option(opt::content::text_plain),

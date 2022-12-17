@@ -101,7 +101,7 @@ At the end, remember:
 * message/option uses create static function to create a option. This was necessary to make a compile options like checks/thorw avaiable (contructors can't explicitly set template options). Is options check really necessary?
 * Some libraries are been added that may not be used/necessary/avaialble for embemded development, like containers/strings/ostream. Functions mostly used for development/debbugging.
 * Need to create some type traits:
-* * is_message
-* * is_option
-* * is_option_list
+* * is_message_type
+* * is_option_type
+* * is_option_list_type
 * Test/use expected class (core/expected.hpp) or remove it.

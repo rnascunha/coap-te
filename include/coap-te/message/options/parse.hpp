@@ -38,6 +38,8 @@ std::size_t parse(number_type before,
                   option& output,                    // NOLINT
                   std::error_code& ec) noexcept;     // NOLINT
 
+
+
 }  // namespace options
 }  // namespace message
 }  // namespace coap_te

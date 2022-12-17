@@ -11,6 +11,8 @@
 #ifndef COAP_TE_MESSAGE_MESSAGE_HPP_
 #define COAP_TE_MESSAGE_MESSAGE_HPP_
 
+#include <utility>
+
 #include "coap-te/core/traits.hpp"
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/message/config.hpp"
@@ -22,17 +24,25 @@
 namespace coap_te {
 namespace message {
 
-template<typename ConstBuffer = coap_te::const_buffer,
-         typename OptionList = options::vector_options>
+template<typename OptionList,
+         typename ConstBufferToken = coap_te::const_buffer,
+         typename ConstBufferPayload = coap_te::const_buffer>
 class message {
  public:
-  static_assert(coap_te::core::is_const_buffer_type_v<ConstBuffer>,
+  static_assert(coap_te::core::is_const_buffer_type_v<ConstBufferToken>,
                 "Must be const buffer type");
+  static_assert(coap_te::core::is_const_buffer_type_v<ConstBufferPayload>,
+                "Must be const buffer type");
+  // static_assert(is_option_list_type_v<OptionList>,
+  //              "Must be option list type")
 
+  using option_list_type = OptionList;
+  using token_type = ConstBufferToken;
+  using payload_type = ConstBufferPayload;
   using const_iterator = typename OptionList::const_iterator;
 
   message() = default;
-  message(type tp, code co, const ConstBuffer& token = ConstBuffer{})
+  message(type tp, code co, const token_type& token = token_type{})
     : type_{tp}, code_{co}, token_{token} {}
 
   // Getters
@@ -47,7 +57,7 @@ class message {
     return code_;
   }
 
-  [[nodiscard]] constexpr const ConstBuffer&
+  [[nodiscard]] constexpr const token_type&
   token() const noexcept {
     return token_;
   }
@@ -58,8 +68,13 @@ class message {
   }
 
   // Option
-  [[nodiscard]] constexpr const OptionList&
+  [[nodiscard]] constexpr const option_list_type&
   option_list() const noexcept {
+    return opt_list_;
+  }
+
+  [[nodiscard]] constexpr option_list_type&
+  option_list() noexcept {
     return opt_list_;
   }
 
@@ -79,7 +94,7 @@ class message {
   }
 
   // Payload
-  [[nodiscard]] constexpr const ConstBuffer&
+  [[nodiscard]] constexpr const payload_type&
   payload() const noexcept {
     return payload_;
   }
@@ -120,25 +135,28 @@ class message {
   }
 
   constexpr message&
-  token(const ConstBuffer& tk) noexcept {
+  token(const token_type& tk) noexcept {
     token_ = {tk.data(), (std::min)(tk.size(), max_token_size)};
     return *this;
   }
 
   constexpr message&
-  options(const OptionList& opt_list) noexcept {
+  options(const option_list_type& opt_list) noexcept {
     opt_list_ = opt_list;
     return *this;
   }
 
+  template<typename Option>
   constexpr message&
-  add_option(const options::option& op) noexcept {
-    opt_list_.add(op);
+  add_option(Option&& op) noexcept {
+    // static_assert(is_option_type_v<Option>,
+    //               "Must be option type")
+    opt_list_.add(std::forward<Option>(op));
     return *this;
   }
 
   constexpr message&
-  payload(const ConstBuffer& pl) noexcept {
+  payload(const payload_type& pl) noexcept {
     payload_ = pl;
     return *this;
   }
@@ -162,12 +180,12 @@ class message {
   }
 
  private:
-  type          type_ = type::reset;
-  code          code_ = code::empty;
-  message_id    mid_ = 0;
-  ConstBuffer   token_{};
-  OptionList    opt_list_{};
-  ConstBuffer   payload_{};
+  type              type_ = type::reset;
+  code              code_ = code::empty;
+  message_id        mid_ = 0;
+  token_type        token_{};
+  option_list_type  opt_list_{};
+  payload_type      payload_{};
 };
 
 }  // namespace message

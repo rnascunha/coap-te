@@ -12,7 +12,7 @@
 #define COAP_TE_MESSAGE_OPTIONS_IMPL_OPTION_LIST_FUNC_HPP_
 
 #include "coap-te/message/options/config.hpp"
-#include "coap-te/message/options/vector_options.hpp"
+#include "coap-te/message/options/parse.hpp"
 
 namespace coap_te {
 namespace message {

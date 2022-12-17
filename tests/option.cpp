@@ -21,7 +21,7 @@ namespace opt = coap_te::message::options;
 template<typename ...Args>
 constexpr auto
 create(opt::number op, Args&& ... args)  {
-  return opt::option::create<opt::check_all, true>(
+  return opt::create<opt::check_all, true>(
               op, std::forward<Args>(args)...);
 }
 
@@ -33,25 +33,25 @@ TEST(CoAPMessage, OptionConstructor) {
     EXPECT_FALSE(invalid_op.is_valid());
   }
   {
-    opt::option empty_op = opt::option::create(opt::number::if_none_match);
+    opt::option empty_op = opt::create(opt::number::if_none_match);
     EXPECT_EQ(empty_op.data_size(), 0);
     EXPECT_TRUE(empty_op.is_valid());
   }
   {
-    opt::option uint_op = opt::option::create(opt::number::uri_port, 10);
+    opt::option uint_op = opt::create(opt::number::uri_port, 10);
     EXPECT_EQ(uint_op.data_size(), 1);
     EXPECT_TRUE(uint_op.is_valid());
   }
   {
     opt::option string_op =
-                  opt::option::create(opt::number::uri_host, "myhost");
+                  opt::create(opt::number::uri_host, "myhost");
     EXPECT_EQ(string_op.data_size(), 6);
     EXPECT_TRUE(string_op.is_valid());
   }
   {
     unsigned char arr[] = {1, 2, 3, 4, 5};
     opt::option opaque_op =
-                  opt::option::create(
+                  opt::create(
                     opt::number::if_match,
                     coap_te::const_buffer(arr));
     EXPECT_EQ(opaque_op.data_size(), 5);
@@ -61,7 +61,7 @@ TEST(CoAPMessage, OptionConstructor) {
   {
     {
       // Empty option not empty
-      opt::option empty_op = opt::option::create<
+      opt::option empty_op = opt::create<
                                     opt::check_all,
                                     false>(opt::number::if_none_match, 1);
       EXPECT_EQ(empty_op.data_size(), 0);
@@ -69,7 +69,7 @@ TEST(CoAPMessage, OptionConstructor) {
     }
     {
       // Unsigned option empty
-      opt::option uint_op = opt::option::create<
+      opt::option uint_op = opt::create<
                                     opt::check_all,
                                     false>(opt::number::uri_port);
       EXPECT_EQ(uint_op.data_size(), 0);
@@ -78,7 +78,7 @@ TEST(CoAPMessage, OptionConstructor) {
     {
       // String option opaque
       unsigned char arr[] = {1, 2, 3, 4, 5};
-      opt::option string_op = opt::option::create<
+      opt::option string_op = opt::create<
                                     opt::check_all,
                                     false>(opt::number::uri_host,
                                      coap_te::const_buffer(arr));
@@ -87,7 +87,7 @@ TEST(CoAPMessage, OptionConstructor) {
     }
     {
       // Opaque option string
-      opt::option opaque_op = opt::option::create<
+      opt::option opaque_op = opt::create<
                                     opt::check_all,
                                     false>(opt::number::if_match, "myoption");
       EXPECT_EQ(opaque_op.data_size(), 0);
@@ -98,21 +98,21 @@ TEST(CoAPMessage, OptionConstructor) {
   {
     {
       // Empty option not empty
-      EXPECT_THROW(create(opt::number::if_none_match, 1), std::system_error);
+      EXPECT_THROW(::create(opt::number::if_none_match, 1), std::system_error);
     }
     {
       // Unsigned option empty
-      EXPECT_THROW(create(opt::number::uri_port), std::system_error);
+      EXPECT_THROW(::create(opt::number::uri_port), std::system_error);
     }
     {
       // String option opaque
       unsigned char arr[] = {1, 2, 3, 4, 5};
-      EXPECT_THROW(create(opt::number::uri_host, coap_te::const_buffer(arr)),
+      EXPECT_THROW(::create(opt::number::uri_host, coap_te::const_buffer(arr)),
                    std::system_error);
     }
     {
       // Opaque option string
-      EXPECT_THROW(create(opt::number::if_match, "myoption"),
+      EXPECT_THROW(::create(opt::number::if_match, "myoption"),
                    std::system_error);
     }
   }
@@ -141,7 +141,7 @@ void test_serialize_parse_success(
   coap_te::mutable_buffer buf(data);
   std::error_code ecs;
 
-  opt::option ops = opt::option::create
+  opt::option ops = opt::create
                   <opt::check_type<true, false, true>>
                   (current, buf_in);
   auto size_s = ops.serialize<opt::check_none>(before, buf, ecs);
