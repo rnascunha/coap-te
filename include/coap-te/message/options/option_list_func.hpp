@@ -55,18 +55,17 @@ size(const OptionList& list) noexcept;
 [[nodiscard]] std::pair<std::size_t, std::error_code>
 option_list_size(const coap_te::const_buffer& buf) noexcept;
 
+/**
+ * @brief 
+ * 
+ * @tparam OptionList 
+ * @tparam Option 
+ * @param op 
+ */
 template<typename OptionList,
          typename Option>
 void
 insert(OptionList&, Option&& op) noexcept;
-
-// template<typename OptionList>
-// void
-// insert(OptionList&, const option& op) noexcept;
-
-// template<typename OptionList>
-// void
-// insert(OptionList&, option&& op) noexcept;
 
 }  // namespace options
 }  // namespace message

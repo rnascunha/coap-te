@@ -11,6 +11,10 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_IMPL_OPTION_LIST_FUNC_HPP_
 #define COAP_TE_MESSAGE_OPTIONS_IMPL_OPTION_LIST_FUNC_HPP_
 
+#include <algorithm>
+#include <type_traits>
+#include <utility>
+#include <vector>
 #include <map>
 
 #include "coap-te/message/options/config.hpp"
