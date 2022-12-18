@@ -47,36 +47,38 @@ class option {
 
   constexpr
   explicit option(number op) noexcept
-    : op_(op), data_(empty_format{}) {}
+    : data_(empty_format{}), op_(op) {}
 
   constexpr
   option(number op, unsigned_type value) noexcept
-    : op_(op),
-      data_(coap_te::core::to_small_big_endian(value).first) {}
+    : data_(coap_te::core::to_small_big_endian(value).first),
+      op_(op) {}
 
   constexpr
   option(number op, std::string_view str) noexcept
-    : op_(op), data_(const_buffer{str}) {}
+    : data_(const_buffer{str}), op_(op) {}
 
   constexpr
   option(number op, const const_buffer& value) noexcept
-    : op_(op), data_(const_buffer{value}) {}
+    : data_(const_buffer{value}), op_(op) {}
 
   constexpr
   explicit option(content value) noexcept
-    : op_(number::content_format),
-      data_(static_cast<unsigned_type>(value)) {}
+    : data_(static_cast<unsigned_type>(value)),
+      op_(number::content_format) {}
 
   constexpr
   explicit option(accept value) noexcept
-    : op_(number::accept),
-      data_(static_cast<unsigned_type>(value)) {}
+    : data_(static_cast<unsigned_type>(value)),
+      op_(number::accept) {}
 
-  number option_number() const noexcept {
+  constexpr number
+  option_number() const noexcept {
     return op_;
   }
 
-  const value_type& value() const noexcept {
+  constexpr const value_type&
+  value() const noexcept {
     return data_;
   }
 
@@ -210,8 +212,8 @@ class option {
   }
 
  private:
-  number      op_  = number::invalid;
   value_type  data_;
+  number      op_  = number::invalid;
 };
 
 /*

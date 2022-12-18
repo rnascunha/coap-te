@@ -41,9 +41,9 @@ TEST(CoreSortedList, Insert) {
     list l;
     EXPECT_TRUE(l.empty());
 
-    l.add(1)
-      .add(2)
-      .add(3);
+    l.insert(1)
+      .insert(2)
+      .insert(3);
     check_list_equality(l, std::vector{1, 2, 3});
   }
   {
@@ -77,11 +77,11 @@ TEST(CoreSortedList, Get) {
     list l;
     EXPECT_TRUE(l.empty());
 
-    l.add(1)
-      .add(2)
-      .add(3)
-      .add(1)
-      .add(2);
+    l.insert(1)
+      .insert(2)
+      .insert(3)
+      .insert(1)
+      .insert(2);
 
     auto it = l.get(1);
     EXPECT_NE(it, l.end());
@@ -124,14 +124,14 @@ TEST(CoreSortedList, Get) {
     using list_test = coap_te::core::sorted_list<test>;
     list_test l;
 
-    l.add({1, "1"})
-      .add({1, "2"})
-      .add({1, "3"})
-      .add({2, "1"})
-      .add({2, "2"})
-      .add({3, "1"})
-      .add({3, "2"})
-      .add({3, "3"});
+    l.insert({1, "1"})
+      .insert({1, "2"})
+      .insert({1, "3"})
+      .insert({2, "1"})
+      .insert({2, "2"})
+      .insert({3, "1"})
+      .insert({3, "2"})
+      .insert({3, "3"});
 
     std::vector<std::tuple<int, int, const char*>> vs = {
       {1, 0, "1"}, {1, 1, "2"}, {1, 2, "3"},

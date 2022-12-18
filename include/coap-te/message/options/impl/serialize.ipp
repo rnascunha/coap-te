@@ -17,6 +17,7 @@
 #include <cstring>        // std::memcpy
 #include <cstdint>
 
+#include "coap-te/core/utility.hpp"
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/byte_order.hpp"
 #include "coap-te/message/options/config.hpp"
@@ -179,15 +180,28 @@ serialize(ForwardIt begin,
           ForwardIt end,
           MutableBuffer& output,               // NOLINT
           std::error_code& ec) noexcept {      // NOLINT
+  // static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>,
+  //               "Must be mutable buffer");
+  // std::size_t size = 0;
+  // number prev = number::invalid;
+  // while (begin != end) {
+  //   size += begin->serialize(prev, output, ec);
+  //   if (ec)
+  //     break;
+  //   prev = begin->option_number();
+  //   ++begin;
+  // }
+  // return size;
+
   static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>,
                 "Must be mutable buffer");
   std::size_t size = 0;
   number prev = number::invalid;
   while (begin != end) {
-    size += begin->serialize(prev, output, ec);
+    size += coap_te::core::forward_if_second(*begin).serialize(prev, output, ec);
     if (ec)
       break;
-    prev = begin->option_number();
+    prev = coap_te::core::forward_if_second(*begin).option_number();
     ++begin;
   }
   return size;

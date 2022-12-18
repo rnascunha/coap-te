@@ -204,7 +204,7 @@ class sorted_no_alloc_list {
   template<typename Iterator>
   sorted_no_alloc_list(Iterator begin, Iterator end) {
     while (begin != end) {
-      add(*begin++);
+      insert(*begin++);
     }
   }
 
@@ -243,7 +243,7 @@ class sorted_no_alloc_list {
    * @return sorted_no_alloc_list& Returns this list
    */
   sorted_no_alloc_list&
-  add(node& n) noexcept {    // NOLINT
+  insert(node& n) noexcept {    // NOLINT
     node* curr = head_;
     node* prev = nullptr;
     while (curr != nullptr && *curr <= n) {

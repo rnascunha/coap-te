@@ -35,19 +35,19 @@ class sorted_list {
   sorted_list() = default;
   sorted_list(std::initializer_list<T> list) {
     for (auto& t : list) {
-      add(t);
+      insert(t);
     }
   }
 
   template<typename Iterator>
   sorted_list(Iterator begin, Iterator end) {
     while (begin != end) {
-      add(*begin++);
+      insert(*begin++);
     }
   }
 
   sorted_list&
-  add(const T& i) noexcept {
+  insert(const T& i) noexcept {
     auto it = std::upper_bound(v_.begin(), v_.end(), i);
     v_.insert(it, i);
 

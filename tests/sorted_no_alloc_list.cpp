@@ -46,7 +46,7 @@ void test_list_inclusion(const std::initializer_list<int>& ll) {
   ASSERT_TRUE(l.empty());
   int size = 0;
   for (auto& n : original) {
-    l.add(n);
+    l.insert(n);
     ++size;
     EXPECT_EQ(l.size(), size);
   }
@@ -62,9 +62,9 @@ TEST(CoreSortedNoAllocList, Insert) {
     node n2(2);
     node n3(3);
 
-    l.add(n1)
-      .add(n2)
-      .add(n3);
+    l.insert(n1)
+      .insert(n2)
+      .insert(n3);
     check_list_equality(l, std::vector{1, 2, 3});
   }
   {
@@ -102,11 +102,11 @@ TEST(CoreSortedNoAllocList, Get) {
     node n11(1);
     node n22(2);
 
-    l.add(n1)
-      .add(n2)
-      .add(n22)
-      .add(n3)
-      .add(n11);
+    l.insert(n1)
+      .insert(n2)
+      .insert(n22)
+      .insert(n3)
+      .insert(n11);
 
     auto it = l.get(1);
     EXPECT_NE(it, l.end());
@@ -158,14 +158,14 @@ TEST(CoreSortedNoAllocList, Get) {
     node_test n32(3, "2");
     node_test n33(3, "3");
 
-    l.add(n31)
-      .add(n11)
-      .add(n32)
-      .add(n12)
-      .add(n21)
-      .add(n13)
-      .add(n22)
-      .add(n33);
+    l.insert(n31)
+      .insert(n11)
+      .insert(n32)
+      .insert(n12)
+      .insert(n21)
+      .insert(n13)
+      .insert(n22)
+      .insert(n33);
 
     std::vector<std::tuple<int, int, const char*>> vs = {
       {1, 0, "1"}, {1, 1, "2"}, {1, 2, "3"},

@@ -12,6 +12,7 @@
 #define COAP_TE_CORE_UTILITY_HPP_
 
 #include <cstdint>
+#include <utility>
 
 #include "coap-te/core/traits.hpp"
 
@@ -90,6 +91,22 @@ struct overloaded : Ts... {
 
 template<class... Ts>
 overloaded(Ts...) -> overloaded<Ts...>;
+
+/**
+ * @brief 
+ * 
+ * @tparam Type 
+ * @param t 
+ * @return constexpr auto 
+ */
+template<typename Type>
+constexpr auto
+forward_if_second(Type&& t) noexcept {
+  if constexpr (!is_pair_v<std::decay_t<Type>>)
+    return std::forward<Type>(t);
+  else
+    return t.second;
+}
 
 /** @} */  // end of utility group
 

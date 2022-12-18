@@ -92,13 +92,9 @@ serialize(type tp, code co, message_id mid,
     return size;
   }
 
-  options::number prev = options::number::invalid;
-  for (const options::option& opt : opt_list) {
-    size += opt.serialize<CheckOptions>(prev, output, ec);
-    if (ec) {
-      return size;
-    }
-    prev = opt.option_number();
+  size += options::serialize(opt_list, output, ec);
+  if (ec) {
+    return size;
   }
 
   if (payload.size() == 0)

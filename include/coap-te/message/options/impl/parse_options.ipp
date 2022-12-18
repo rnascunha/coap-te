@@ -37,36 +37,19 @@ parse_options(const coap_te::const_buffer& buf,
   return size;
 }
 
-template<>
-std::size_t
-parse_options(const coap_te::const_buffer& buf,
-              coap_te::core::sorted_list<coap_te::message::options::option>& list,   // NOLINT
-              std::error_code& ec) noexcept {             // NOLINT
-  coap_te::message::options::vector_options list_v;
-  auto size = parse_options(buf, list_v, ec);
-  if (ec) {
-    return size;
-  }
-
-  for (auto op : list_v) {
-    list.add(std::move(op));
-  }
-  return size;
-}
-
 template<typename OptionList>
 std::size_t
 parse_options(const coap_te::const_buffer& buf,
               OptionList& list,   // NOLINT
               std::error_code& ec) noexcept {             // NOLINT
-  coap_te::message::options::vector_options list_v;
+  vector_options list_v;
   auto size = parse_options(buf, list_v, ec);
   if (ec) {
     return size;
   }
 
   for (auto op : list_v) {
-    list.push_back(op);
+    insert(list, std::move(op));
   }
   return size;
 }

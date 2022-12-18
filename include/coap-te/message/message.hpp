@@ -151,7 +151,7 @@ class message {
   add_option(Option&& op) noexcept {
     // static_assert(is_option_type_v<Option>,
     //               "Must be option type")
-    opt_list_.add(std::forward<Option>(op));
+    options::insert(opt_list_, std::forward<Option>(op));
     return *this;
   }
 

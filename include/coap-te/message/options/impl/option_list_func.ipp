@@ -11,8 +11,11 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_IMPL_OPTION_LIST_FUNC_HPP_
 #define COAP_TE_MESSAGE_OPTIONS_IMPL_OPTION_LIST_FUNC_HPP_
 
+#include <map>
+
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/parse.hpp"
+#include "coap-te/message/options/option.hpp"
 
 namespace coap_te {
 namespace message {
@@ -38,6 +41,19 @@ size(const OptionList& list) noexcept {
   return s;
 }
 
+template<typename>
+[[nodiscard]] std::size_t
+size(const std::multimap<number, option>& list) noexcept {
+  // static_assert(is_option_list_v<OptionList>, "Must be a option list");
+  std::size_t s = 0;
+  number prev = number::invalid;
+  for (auto const& [_, op] : list) {
+    s += op.size(prev);
+    prev = op.option_number();
+  }
+  return s;
+}
+
 [[nodiscard]] std::pair<std::size_t, std::error_code>
 option_list_size(
   const coap_te::const_buffer& buf) noexcept {   // NOLINT
@@ -54,6 +70,20 @@ option_list_size(
     prev = static_cast<number_type>(op.option_number());
   }
   return {coap_te::core::pointer_distance(buf.data(), cbuf.data()), ec};
+}
+
+template<typename OptionList,
+         typename Option>
+void
+insert(OptionList& list, Option&& op) noexcept {
+  if constexpr (std::is_same_v<std::vector<option>, OptionList> || 
+                std::is_same_v<std::list<option>, OptionList>) {
+    auto it = std::upper_bound(list.begin(), list.end(), op);
+    list.insert(it, std::forward<Option>(op));
+  } else if constexpr (std::is_same_v<std::multimap<number, option>, OptionList>) {
+    list.insert({op.option_number(), std::forward<Option>(op)});
+  } else
+    list.insert(std::forward<Option>(op));
 }
 
 }  // namespace options 

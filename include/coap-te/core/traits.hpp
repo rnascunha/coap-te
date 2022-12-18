@@ -16,6 +16,7 @@
 
 #include <type_traits>
 #include <iterator>
+#include <utility>
 
 #include "impl/traits.ipp"
 
@@ -212,6 +213,20 @@ struct remove_cvref {
  */
 template<typename T>
 using remove_cvref_t = typename remove_cvref<T>::type;
+
+/**
+ * @brief Checks if the type is a pair
+ * 
+ */
+template <typename>
+struct is_pair : std::false_type {};
+
+template <typename T, typename U>
+struct is_pair<std::pair<T, U>> : std::true_type {};
+
+template<typename T>
+static constexpr bool
+is_pair_v = is_pair<T>::value;
 
 /** @} */  // end of CoreTraits
 

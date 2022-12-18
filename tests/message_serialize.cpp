@@ -15,7 +15,10 @@
 #include <system_error>     // NOLINT
 #include <vector>
 #include <list>
+#include <set>
+#include <map>
 
+#include "coap-te/core/utility.hpp"
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/mutable_buffer.hpp"
 #include "coap-te/core/sorted_list.hpp"
@@ -38,17 +41,47 @@ using msg_vector = msg::message<std::vector<opt>>;
 using msg_list = msg::message<std::list<opt>>;
 using msg_no_alloc_sort =
           msg::message<coap_te::core::sorted_no_alloc_list<opt>>;
+using msg_multiset = msg::message<std::multiset<opt>>;
+using msg_multimap = msg::message<std::multimap<msg::options::number, opt>>;
 
-#define PARSEABLE_TYPES  resp, msg_sort, msg_vector, msg_list
-#define TYPES_COMBINE    msg_sort, resp,       \
-                         msg_sort, msg_sort,   \
-                         msg_sort, msg_vector, \
-                         msg_sort, msg_list
+#define PARSEABLE_TYPES  resp, msg_sort, msg_vector, msg_list, msg_multiset
+#define TYPES_COMBINE    msg_sort, resp,              \
+                         msg_sort, msg_sort,          \
+                         msg_sort, msg_vector,        \
+                         msg_sort, msg_list,          \
+                         msg_sort, msg_multiset,      \
+                         msg_sort, msg_multimap,      \
+                         msg_multiset, resp,          \
+                         msg_multiset, msg_sort,      \
+                         msg_multiset, msg_vector,    \
+                         msg_multiset, msg_list,      \
+                         msg_multiset, msg_multiset,  \
+                         msg_multiset, msg_multimap,  \
+                         msg_vector, resp,            \
+                         msg_vector, msg_sort,        \
+                         msg_vector, msg_vector,      \
+                         msg_vector, msg_list,        \
+                         msg_vector, msg_multiset,    \
+                         msg_vector, msg_multimap,    \
+                         msg_list, resp,              \
+                         msg_list, msg_sort,          \
+                         msg_list, msg_vector,        \
+                         msg_list, msg_list,          \
+                         msg_list, msg_multiset,      \
+                         msg_list, msg_multimap,      \
+                         msg_multimap, resp,          \
+                         msg_multimap, msg_sort,      \
+                         msg_multimap, msg_vector,    \
+                         msg_multimap, msg_list,      \
+                         msg_multimap, msg_multiset,  \
+                         msg_multimap, msg_multimap
 
 #define TYPES_COMBINE_NO_ALLOC    msg_no_alloc_sort, resp,       \
                                   msg_no_alloc_sort, msg_sort,   \
                                   msg_no_alloc_sort, msg_vector, \
-                                  msg_no_alloc_sort, msg_list
+                                  msg_no_alloc_sort, msg_list,   \
+                                  msg_no_alloc_sort, msg_multiset, \
+                                  msg_no_alloc_sort, msg_multimap
 
 template<typename Message,
          bool Parse = true>
@@ -193,40 +226,40 @@ void serialize_parse_success_impl(
   if (expected_size > 0) {
     EXPECT_EQ(size_s, expected_size);
   }
-  {
-    // Parsing
-    coap_te::const_buffer buf(data, size_s);
-    std::error_code ec;
-    MessageParse resp;
-    auto size_p = msg::parse(buf, resp, ec);
-    EXPECT_FALSE(ec);
-    EXPECT_EQ(size_s, size_p);
-    // Header
-    EXPECT_EQ(tp, resp.get_type());
-    EXPECT_EQ(co, resp.get_code());
-    EXPECT_EQ(mid, resp.mid());
-    EXPECT_EQ(msg::clamp_token_size(tk.size()), resp.token().size());
-    EXPECT_EQ(0, std::memcmp(resp.token().data(), tk.data(),
-                             resp.token().size()));
-    // Option
-    EXPECT_EQ(opt_list.size(), resp.count_options());
-    auto it = resp.begin();
-    msg::options::number prev = msg::options::number::invalid;
-    for (auto& op : req) {
-      auto op2 = *it++;
-      EXPECT_EQ(op, op2);
-      EXPECT_EQ(op.option_number(), op2.option_number());
-      EXPECT_EQ(op.data_size(), op2.data_size());
-      EXPECT_EQ(op.header_size(prev), op2.header_size(prev));
-      EXPECT_EQ(op.size(prev), op2.size(prev));
-      EXPECT_EQ(0, std::memcmp(op.data(), op2.data(), op.data_size()));
-      prev = op.option_number();
-    }
-    // Payload
-    EXPECT_EQ(payload.size(), resp.payload().size());
-    EXPECT_EQ(0, std::memcmp(resp.payload().data(), payload.data(),
-                             resp.payload().size()));
+
+  // Parsing
+  coap_te::const_buffer buf_p(data, size_s);
+  std::error_code ecp;
+  MessageParse resp;
+  auto size_p = msg::parse(buf_p, resp, ecp);
+  EXPECT_FALSE(ecp);
+  EXPECT_EQ(size_s, size_p);
+  // Header
+  EXPECT_EQ(tp, resp.get_type());
+  EXPECT_EQ(co, resp.get_code());
+  EXPECT_EQ(mid, resp.mid());
+  EXPECT_EQ(msg::clamp_token_size(tk.size()), resp.token().size());
+  EXPECT_EQ(0, std::memcmp(resp.token().data(), tk.data(),
+                            resp.token().size()));
+  // Option
+  EXPECT_EQ(opt_list.size(), resp.count_options());
+  auto it = resp.begin();
+  msg::options::number prev = msg::options::number::invalid;
+  for (auto& op0 : req) {
+    auto op = coap_te::core::forward_if_second(op0);
+    auto op2 = coap_te::core::forward_if_second(*it++);
+    EXPECT_EQ(op, op2);
+    EXPECT_EQ(op.option_number(), op2.option_number());
+    EXPECT_EQ(op.data_size(), op2.data_size());
+    EXPECT_EQ(op.header_size(prev), op2.header_size(prev));
+    EXPECT_EQ(op.size(prev), op2.size(prev));
+    EXPECT_EQ(0, std::memcmp(op.data(), op2.data(), op.data_size()));
+    prev = op.option_number();
   }
+  // Payload
+  EXPECT_EQ(payload.size(), resp.payload().size());
+  EXPECT_EQ(0, std::memcmp(resp.payload().data(), payload.data(),
+                            resp.payload().size()));
 }
 
 template<typename MessageSerialize,
@@ -268,7 +301,7 @@ TEST(CoAPMessage, SerializeParseMessage) {
                     msg::code::put,
                     0x1234U,
                     coap_te::const_buffer{"teste"},         // token
-                    std::initializer_list<opt_node>{},           // option list
+                    std::initializer_list<opt_node>{},      // option list
                     coap_te::const_buffer{},                // payload
                     0);                                 // output
   }

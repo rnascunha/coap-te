@@ -104,4 +104,6 @@ At the end, remember:
 * * is_message_type
 * * is_option_type
 * * is_option_list_type
-* Test/use expected class (core/expected.hpp) or remove it.
+* Test/use expected class (core/expected.hpp) or remove it;
+* Isolate code that use standard containers (option_list codes).
+* Generalize requiriments of standard containers codes (option_list codes) to accept other containers like this;

@@ -50,24 +50,24 @@ to_string(coap_te::message::options::number op) noexcept {
 [[nodiscard]] constexpr std::string_view
 to_string(coap_te::message::options::content format) noexcept {
   switch (format) {
-    using type =
+    using ftype =
       coap_te::message::options::content;
-    case type::text_plain:    //  = 0,    // text/plain;charset=utf-8
+    case ftype::text_plain:    //  = 0,    // text/plain;charset=utf-8
       return "text/plain";
-    case type::link_format:   //  = 40,   // application/link-format
+    case ftype::link_format:   //  = 40,   // application/link-format
       return "link-format";
-    case type::xml:           //  = 41,   // application/xml
+    case ftype::xml:           //  = 41,   // application/xml
       return "xml";
-    case type::octet_stream:  //  = 42,   // application/octet-stream
+    case ftype::octet_stream:  //  = 42,   // application/octet-stream
       return "octet-stream";
-    case type::exi:           //  = 47,   // application/exi
+    case ftype::exi:           //  = 47,   // application/exi
       return "exi";
-    case type::json:          //  = 50,   // application/json
+    case ftype::json:          //  = 50,   // application/json
       return "json";
 #if COAP_TE_FETCH_PATCH == 1
-    case type::json_patch_json:  // = 51,   // application/json-patch+json
+    case ftype::json_patch_json:  // = 51,   // application/json-patch+json
       return "json-patch+json"
-    case type::merge_patch_json:  // = 52   // application/merge-patch+json
+    case ftype::merge_patch_json:  // = 52   // application/merge-patch+json
       return "merge-patch+json"
 #endif /* COAP_TE_FETCH_PATCH == 1 */
     default:
