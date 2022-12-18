@@ -18,6 +18,7 @@
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/code.hpp"
 #include "coap-te/message/options/option.hpp"
+#include "coap-te/message/token.hpp"
 
 namespace coap_te {
 namespace message {
@@ -32,7 +33,7 @@ serialize_header(type tp, code co, message_id mid,
   static_assert(coap_te::core::is_const_buffer_type_v<ConstBuffer>, "Must be const buffer type");
   static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>, "Must be mutable buffer type");
 
-  std::uint8_t token_len = static_cast<std::uint8_t>((std::min)(token.size(), max_token_size));
+  std::uint8_t token_len = static_cast<std::uint8_t>(clamp_token_size(token.size()));
   std::size_t size = minimum_header_size + token_len;
   if (output.size() < size) {
     ec = std::make_error_code(std::errc::no_buffer_space);

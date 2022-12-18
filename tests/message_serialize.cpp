@@ -28,14 +28,27 @@
 #include "coap-te/message/options/option.hpp"
 
 namespace msg = coap_te::message;
+// options
 using opt = msg::options::option;
+using opt_node = coap_te::core::sorted_no_alloc_list<opt>::node;
 // requests
-using req = msg::message<msg::options::vector_options>;
-using req_sort = msg::message<coap_te::core::sorted_list<opt>>;
-using req_vector = msg::message<std::vector<opt>>;
-using req_list = msg::message<std::list<opt>>;
-using req_no_alloc_sort =
+using resp = msg::message<msg::options::vector_options>;
+using msg_sort = msg::message<coap_te::core::sorted_list<opt>>;
+using msg_vector = msg::message<std::vector<opt>>;
+using msg_list = msg::message<std::list<opt>>;
+using msg_no_alloc_sort =
           msg::message<coap_te::core::sorted_no_alloc_list<opt>>;
+
+#define PARSEABLE_TYPES  resp, msg_sort, msg_vector, msg_list
+#define TYPES_COMBINE    msg_sort, resp,       \
+                         msg_sort, msg_sort,   \
+                         msg_sort, msg_vector, \
+                         msg_sort, msg_list
+
+#define TYPES_COMBINE_NO_ALLOC    msg_no_alloc_sort, resp,       \
+                                  msg_no_alloc_sort, msg_sort,   \
+                                  msg_no_alloc_sort, msg_vector, \
+                                  msg_no_alloc_sort, msg_list
 
 template<typename Message,
          bool Parse = true>
@@ -86,16 +99,7 @@ void serialize_parse_header_success(
 TEST(CoAPMessage, SerializeParseHeaderSuccess) {
   {
     SCOPED_TRACE("Minimum header");
-    serialize_parse_header_success<req,
-                                   req_sort,
-                                   req_vector,
-                                   req_list>(
-                    msg::type::confirmable,
-                    msg::code::put,
-                    0x1234U,                    // message_id
-                    coap_te::const_buffer{},    // empty token
-                    4);
-    serialize_parse_header_success_impl<req_no_alloc_sort, false>(
+    serialize_parse_header_success<PARSEABLE_TYPES>(
                     msg::type::confirmable,
                     msg::code::put,
                     0x1234U,                    // message_id
@@ -104,37 +108,19 @@ TEST(CoAPMessage, SerializeParseHeaderSuccess) {
   }
   {
     SCOPED_TRACE("Header + token");
-    serialize_parse_header_success<req,
-                                   req_sort,
-                                   req_vector,
-                                   req_list>(
+    serialize_parse_header_success<PARSEABLE_TYPES>(
                     msg::type::confirmable,
                     msg::code::put,
                     0x1234U,                         // message_id
                     coap_te::const_buffer{"teste"},
                     4 + 5);
-    serialize_parse_header_success_impl<req_no_alloc_sort, false>(
-                    msg::type::confirmable,
-                    msg::code::put,
-                    0x1234U,                    // message_id
-                    coap_te::const_buffer{"teste"},    // empty token
-                    4 + 5);
   }
   {
     SCOPED_TRACE("Header + long token (truncaded)");
-    serialize_parse_header_success<req,
-                                   req_sort,
-                                   req_vector,
-                                   req_list>(
+    serialize_parse_header_success<PARSEABLE_TYPES>(
                     msg::type::confirmable,
                     msg::code::put,
                     0x1234U,                         // message_id
-                    coap_te::const_buffer{"teste12345678"},
-                    4 + 8);
-    serialize_parse_header_success_impl<req_no_alloc_sort, false>(
-                    msg::type::confirmable,
-                    msg::code::put,
-                    0x1234U,                          // message_id
                     coap_te::const_buffer{"teste12345678"},
                     4 + 8);
   }
@@ -175,9 +161,9 @@ TEST(CoAPMessage, SerializeHeaderFail) {
   }
 }
 
-template<typename Message,
-         typename Option,
-         bool Parse = true>
+template<typename MessageSerialize,
+         typename MessageParse,
+         typename Option>
 void serialize_parse_success_impl(
             msg::type tp,
             msg::code co,
@@ -186,34 +172,56 @@ void serialize_parse_success_impl(
             std::initializer_list<Option> opt_list,
             const coap_te::const_buffer& payload,
             std::size_t expected_size) noexcept {
-  std::error_code ec;
   std::uint8_t data[100];
+  std::size_t size_s = 0;
+  // The storage is need for the no alloc sorted list
+  std::vector<Option> storage(opt_list);
+
+  // Serialzing
+  std::error_code ecs;
   coap_te::mutable_buffer buf(data);
-  Message req{tp, co, tk};
-  for (auto op : opt_list)
+
+  MessageSerialize req{tp, co, tk};
+  for (auto& op : storage)
     req.add_option(op);
+  EXPECT_EQ(opt_list.size(), req.count_options());
+
   req.payload(payload);
 
-  auto size = req.serialize(mid, buf, ec);
-  EXPECT_FALSE(ec);
-  EXPECT_EQ(size, expected_size);
-
-  // Parsing
-  if constexpr (Parse) {
-    coap_te::const_buffer buf_p(data, size);
-    std::error_code ecp;
-    Message resp;
-    auto size_p = msg::parse(buf_p, resp, ec);
+  size_s = req.serialize(mid, buf, ecs);
+  EXPECT_FALSE(ecs);
+  if (expected_size > 0) {
+    EXPECT_EQ(size_s, expected_size);
+  }
+  {
+    // Parsing
+    coap_te::const_buffer buf(data, size_s);
+    std::error_code ec;
+    MessageParse resp;
+    auto size_p = msg::parse(buf, resp, ec);
     EXPECT_FALSE(ec);
-    EXPECT_EQ(size, size_p);
+    EXPECT_EQ(size_s, size_p);
     // Header
     EXPECT_EQ(tp, resp.get_type());
     EXPECT_EQ(co, resp.get_code());
     EXPECT_EQ(mid, resp.mid());
-    EXPECT_EQ(msg::token_size(tk.size()), resp.token().size());
+    EXPECT_EQ(msg::clamp_token_size(tk.size()), resp.token().size());
     EXPECT_EQ(0, std::memcmp(resp.token().data(), tk.data(),
                              resp.token().size()));
     // Option
+    EXPECT_EQ(opt_list.size(), resp.count_options());
+    auto it = resp.begin();
+    msg::options::number prev = msg::options::number::invalid;
+    for (auto& op : req) {
+      auto op2 = *it++;
+      EXPECT_EQ(op, op2);
+      EXPECT_EQ(op.option_number(), op2.option_number());
+      EXPECT_EQ(op.data_size(), op2.data_size());
+      EXPECT_EQ(op.header_size(prev), op2.header_size(prev));
+      EXPECT_EQ(op.size(prev), op2.size(prev));
+      EXPECT_EQ(0, std::memcmp(op.data(), op2.data(), op.data_size()));
+      prev = op.option_number();
+    }
     // Payload
     EXPECT_EQ(payload.size(), resp.payload().size());
     EXPECT_EQ(0, std::memcmp(resp.payload().data(), payload.data(),
@@ -221,22 +229,30 @@ void serialize_parse_success_impl(
   }
 }
 
-// template<typename Arg, typename ...Args>
-// void serialize_parse_success(
-//             msg::type tp,
-//             msg::code co,
-//             msg::message_id mid,
-//             const coap_te::const_buffer& tk,
-//             std::size_t expected_size) noexcept {
-//   serialize_parse_success_impl<Arg>(tp, co, mid, tk, expected_size);
-//   if constexpr (sizeof...(Args) > 0)
-//     serialize_parse_success<Args...>(tp, co, mid, tk, expected_size);
-// }
+template<typename MessageSerialize,
+         typename MessageParse,
+         typename ...Args,
+         typename Option>
+void serialize_parse_success(
+            msg::type tp,
+            msg::code co,
+            msg::message_id mid,
+            const coap_te::const_buffer& tk,
+            std::initializer_list<Option> opt_list,
+            const coap_te::const_buffer& payload,
+            std::size_t expected_size = 0) noexcept {
+  serialize_parse_success_impl<MessageSerialize, MessageParse, Option>(
+              tp, co, mid, tk,
+              opt_list, payload, expected_size);
+  if constexpr (sizeof...(Args) >= 2)
+    serialize_parse_success<Args...>(tp, co, mid, tk,
+              opt_list, payload, expected_size);
+}
 
 TEST(CoAPMessage, SerializeParseMessage) {
   {
-    SCOPED_TRACE("Header + token + no option + no payload");
-    serialize_parse_success_impl<req_sort, opt>(
+    SCOPED_TRACE("Header + token + no option + no payload 2");
+    serialize_parse_success<TYPES_COMBINE>(
                     msg::type::confirmable,
                     msg::code::put,
                     0x1234U,
@@ -245,39 +261,47 @@ TEST(CoAPMessage, SerializeParseMessage) {
                     coap_te::const_buffer{},                // payload
                     4 + 5);                                 // output
   }
-  //   std::error_code ec;
-  //   std::uint8_t data[msg::minimum_header_size + 5];    // NOLINT
-  //   coap_te::mutable_buffer buf(data);
-
-  //   auto size = msg::serialize(
-  //                   msg::type::confirmable,
-  //                   msg::code::put,
-  //                   0x1234U,
-  //                   coap_te::const_buffer{"teste"},
-  //                   std::vector<msg::options::option>{},    // option list
-  //                   coap_te::const_buffer{},                // payload
-  //                   buf,                                    // output
-  //                   ec);
-  //   EXPECT_FALSE(ec);
-  //   EXPECT_EQ(size, 4 + 5);
-  // }
-  // {
-  //   SCOPED_TRACE("Header + token + no option + payload");
-
-  //   std::error_code ec;
-  //   std::uint8_t data[msg::minimum_header_size + 5 + 17];    // NOLINT
-  //   coap_te::mutable_buffer buf(data);
-
-  //   auto size = msg::serialize(
-  //                   msg::type::confirmable,
-  //                   msg::code::put,
-  //                   0x1234U,
-  //                   coap_te::const_buffer{"teste"},
-  //                   std::vector<msg::options::option>{},      // option list
-  //                   coap_te::const_buffer{"payload123456790"},  // payload
-  //                   buf,                                      // output
-  //                   ec);
-  //   EXPECT_FALSE(ec);
-  //   EXPECT_EQ(size, 4 + 5 + 17);
-  // }
+  {
+    SCOPED_TRACE("Header + token + no option + no payload NO ALLOC");
+    serialize_parse_success<TYPES_COMBINE_NO_ALLOC>(
+                    msg::type::confirmable,
+                    msg::code::put,
+                    0x1234U,
+                    coap_te::const_buffer{"teste"},         // token
+                    std::initializer_list<opt_node>{},           // option list
+                    coap_te::const_buffer{},                // payload
+                    0);                                 // output
+  }
+  {
+    SCOPED_TRACE("Header + token + options + no payload");
+    serialize_parse_success<TYPES_COMBINE>(
+                    msg::type::confirmable,
+                    msg::code::put,
+                    0x1234U,
+                    coap_te::const_buffer{"teste"},         // token
+                    std::initializer_list<opt>{
+                      opt{msg::options::accept::text_plain},
+                      opt{msg::options::content::json},
+                      opt{msg::options::number::uri_port, 5683},
+                      opt{msg::options::number::uri_path, "my"},
+                      opt{msg::options::number::uri_path, "path"}
+                    },           // option list
+                    coap_te::const_buffer{});
+  }
+  {
+    SCOPED_TRACE("Header + token + options + no payload NO ALLOC");
+    serialize_parse_success<TYPES_COMBINE_NO_ALLOC>(
+                    msg::type::confirmable,
+                    msg::code::put,
+                    0x1234U,
+                    coap_te::const_buffer{"teste"},         // token
+                    std::initializer_list<opt_node>{
+                      opt_node{msg::options::accept::text_plain},
+                      opt_node{msg::options::content::json},
+                      opt_node{msg::options::number::uri_port, 5683},
+                      opt_node{msg::options::number::uri_path, "my"},
+                      opt_node{msg::options::number::uri_path, "path"}
+                    },           // option list
+                    coap_te::const_buffer{});
+  }
 }

@@ -23,7 +23,7 @@ namespace coap_te {
 namespace message {
 
 [[nodiscard]] inline constexpr std::size_t
-token_size(std::size_t size) noexcept {
+clamp_token_size(std::size_t size) noexcept {
   return (std::min)(size, max_token_size);
 }
 
@@ -34,18 +34,18 @@ class token_view {
 
   constexpr
   token_view(const void* data, std::size_t size) noexcept
-    : size_(token_size(size)), data_(data) {}
+    : size_(clamp_token_size(size)), data_(data) {}
 
   constexpr
   token_view(const std::string_view& str) noexcept    // NOLINT
-    : size_(token_size(str.size())), data_(str.data()) {}
+    : size_(clamp_token_size(str.size())), data_(str.data()) {}
 
   template<typename ConstBuffer>
   constexpr token_view&
   operator=(const ConstBuffer& other) noexcept {
     static_assert(coap_te::core::is_const_buffer_type_v<ConstBuffer>,
                   "Must be const buffer type");
-    size_ = token_size(other.size());
+    size_ = clamp_token_size(other.size());
     data_ = other.data();
     return *this;
   }
@@ -73,24 +73,22 @@ class token {
  public:
   token() = default;
 
-  constexpr
   token(const void* data, std::size_t size) noexcept
-    : size_(token_size(size)) {
+    : size_(clamp_token_size(size)) {
       std::memcpy(data_, data, size_);
   }
 
-  constexpr
   token(const std::string_view& str) noexcept       // NOLINT
-    : size_(token_size(str.size())) {
+    : size_(clamp_token_size(str.size())) {
       std::memcpy(data_, str.data(), size_);
   }
 
   template<typename ConstBuffer>
-  constexpr token&
+  token&
   operator=(const ConstBuffer& other) noexcept {
     static_assert(coap_te::core::is_const_buffer_type_v<ConstBuffer>,
                   "Must be const buffer type");
-    size_ = token_size(other.size());
+    size_ = clamp_token_size(other.size());
     std::memcpy(data_, other.data(), size_);
     return *this;
   }
