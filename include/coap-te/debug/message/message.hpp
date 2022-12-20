@@ -14,8 +14,9 @@
 #include <iostream>
 #include <iomanip>
 
-#include "coap-te/core/to_string.hpp"
 #include "coap-te/message/message.hpp"
+#include "coap-te/message/traits.hpp"
+#include "coap-te/debug/to_string.hpp"
 #include "coap-te/debug/message/to_string.hpp"
 #include "coap-te/debug/message/options/option.hpp"
 
@@ -26,7 +27,8 @@ template<bool PayloadAsString = false,
          typename Message>
 void print_message(const Message& message,
                    std::ostream& os = std::cout) noexcept {
-  // static_assert(is_message_type_v<Message>, "Must be message type");
+  static_assert(coap_te::message::is_message_v<Message>,
+                "Must be message type");
   // header
   os << "[" << message.size() << "]"
      << to_string(message.get_type()) << "|"
@@ -34,7 +36,7 @@ void print_message(const Message& message,
      << std::setw(4) << std::setfill('0') << std::hex
      << message.mid() << std::dec << "]/t["
      << message.token().size() << "]:"
-     << coap_te::core::to_hex(message.token(), "-") << "\n";
+     << to_hex(message.token(), "-") << "\n";
 
   // options
   os << "op[" << message.count_options() << "]\n";
@@ -45,9 +47,9 @@ void print_message(const Message& message,
   // payload
   os << "P[" << message.payload().size() << "]:";
   if constexpr(PayloadAsString)
-    os << coap_te::core::to_string(message.payload());
+    os << to_string(message.payload());
   else
-    os << coap_te::core::to_hex(message.payload());
+    os << to_hex(message.payload());
 }
 
 }  // namespace debug

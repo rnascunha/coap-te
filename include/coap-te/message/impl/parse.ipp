@@ -29,7 +29,7 @@ template<typename ConstBuffer,
 std::size_t parse_header(ConstBuffer& input,
                   Message& message,
                   std::error_code& ec) noexcept {
-  static_assert(coap_te::core::is_const_buffer_type_v<ConstBuffer>,
+  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
                 "Must be of ype message");
   static_assert(is_message_v<Message>,
                 "Must be of type message");
@@ -85,7 +85,7 @@ template<typename ConstBuffer,
 std::size_t parse(ConstBuffer& input,
                   Message& message,
                   std::error_code& ec) noexcept {
-  static_assert(coap_te::core::is_const_buffer_type_v<ConstBuffer>,
+  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
                 "Must be of ype message");
   static_assert(is_message_v<Message>,
                 "Must be of type message");

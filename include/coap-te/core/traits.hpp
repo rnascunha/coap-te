@@ -151,8 +151,8 @@ is_less_comparable_v = is_less_comparable<T, LessTo>::value;
  * @tparam T type to check if is buffer
  */
 template<typename T>
-struct is_const_buffer_type :
-  detail::is_buffer_type_impl<T, const void*>::type{};
+struct is_const_buffer :
+  detail::is_buffer_impl<T, const void*>::type{};
 
 /**
  * @brief Helper template of @ref is_buffer_type
@@ -161,7 +161,7 @@ struct is_const_buffer_type :
  */
 template<typename T>
 static constexpr bool
-is_const_buffer_type_v = is_const_buffer_type<T>::value;
+is_const_buffer_v = is_const_buffer<T>::value;
 
 /**
  * @brief Checks if T is of buffer type
@@ -172,8 +172,8 @@ is_const_buffer_type_v = is_const_buffer_type<T>::value;
  * @tparam T type to check if is buffer
  */
 template<typename T>
-struct is_mutable_buffer_type :
-  detail::is_buffer_type_impl<T, void*>::type{};
+struct is_mutable_buffer :
+  detail::is_buffer_impl<T, void*>::type{};
 
 /**
  * @brief Helper template of @ref is_buffer_type
@@ -182,7 +182,7 @@ struct is_mutable_buffer_type :
  */
 template<typename T>
 static constexpr bool
-is_mutable_buffer_type_v = is_mutable_buffer_type<T>::value;
+is_mutable_buffer_v = is_mutable_buffer<T>::value;
 
 /**
  * @brief Checks if a type is instantiated from a specific template

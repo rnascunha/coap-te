@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2022
  * 
  */
-#ifndef COAP_TE_CORE_TO_STRING_HPP_
-#define COAP_TE_CORE_TO_STRING_HPP_
+#ifndef COAP_TE_DEBUG_TO_STRING_HPP_
+#define COAP_TE_DEBUG_TO_STRING_HPP_
 
 #include <string>
 #include <string_view>
@@ -17,11 +17,11 @@
 #include "coap-te/core/traits.hpp"
 
 namespace coap_te {
-namespace core {
+namespace debug {
 
 template<typename ConstBuffer>
 std::string_view to_string(const ConstBuffer& buffer) noexcept {
-  static_assert(is_const_buffer_type_v<ConstBuffer>,
+  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
                 "Must be const buffer type");
 
   return std::string_view{static_cast<const char*>(buffer.data()),
@@ -31,7 +31,7 @@ std::string_view to_string(const ConstBuffer& buffer) noexcept {
 template<typename ConstBuffer>
 std::string to_hex(const ConstBuffer& buffer,
                    const std::string_view& separator = " ") noexcept {
-  static_assert(is_const_buffer_type_v<ConstBuffer>,
+  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
                 "Must be const buffer type");
 
   if (buffer.size() == 0)
@@ -53,7 +53,7 @@ std::string to_hex(const ConstBuffer& buffer,
   return s;
 }
 
-}  // namespace core
+}  // namespace debug
 }  // namespace coap_te
 
-#endif  // COAP_TE_CORE_TO_STRING_HPP_
+#endif  // COAP_TE_DEBUG_TO_STRING_HPP_

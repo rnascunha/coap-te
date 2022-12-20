@@ -131,7 +131,7 @@ class const_buffer {
     : const_buffer(container.data(),
                    container.size(),
                    sizeof(typename T::value_type)) {
-    static_assert(core::is_const_buffer_type_v<T>, "Is not buffer type");
+    static_assert(core::is_const_buffer_v<T>, "Is not buffer type");
   }
 
   constexpr

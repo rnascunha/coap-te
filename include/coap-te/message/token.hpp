@@ -43,7 +43,7 @@ class token_view {
   template<typename ConstBuffer>
   constexpr token_view&
   operator=(const ConstBuffer& other) noexcept {
-    static_assert(coap_te::core::is_const_buffer_type_v<ConstBuffer>,
+    static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
                   "Must be const buffer type");
     size_ = clamp_token_size(other.size());
     data_ = other.data();
@@ -53,7 +53,7 @@ class token_view {
   template<typename ConstBuffer>
   constexpr bool
   operator==(const ConstBuffer& other) const noexcept {
-    static_assert(coap_te::core::is_const_buffer_type_v<ConstBuffer>,
+    static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
                   "Must be const buffer type");
     if (size_ != other.size())
       return false;
@@ -86,7 +86,7 @@ class token {
   template<typename ConstBuffer>
   token&
   operator=(const ConstBuffer& other) noexcept {
-    static_assert(coap_te::core::is_const_buffer_type_v<ConstBuffer>,
+    static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
                   "Must be const buffer type");
     size_ = clamp_token_size(other.size());
     std::memcpy(data_, other.data(), size_);
@@ -96,7 +96,7 @@ class token {
   template<typename ConstBuffer>
   constexpr bool
   operator==(const ConstBuffer& other) const noexcept {
-    static_assert(coap_te::core::is_const_buffer_type_v<ConstBuffer>,
+    static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
                   "Must be const buffer type");
     if (size_ != other.size())
       return false;

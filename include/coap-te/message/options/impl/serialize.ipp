@@ -64,8 +64,8 @@ serialize(number_type before,
           const ConstBuffer& input,
           MutableBuffer& output,              // NOLINT
           std::error_code& ec) noexcept {     // NOLINT
-  static_assert(coap_te::core::is_const_buffer_type_v<ConstBuffer>, "Must be const_buffer type");
-  static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>, "Must be mutable_buffer type");
+  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>, "Must be const_buffer type");
+  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>, "Must be mutable_buffer type");
 
   header delta{};
   serialize_option_header(op - before, delta);
@@ -111,7 +111,7 @@ template<typename CheckOptions,
          typename MutableBuffer>
 [[nodiscard]] constexpr
 std::enable_if_t<
-  coap_te::core::is_const_buffer_type_v<ConstBuffer>, std::size_t>
+  coap_te::core::is_const_buffer_v<ConstBuffer>, std::size_t>
 serialize(number_type before,
           number_type op,
           const ConstBuffer& input,
@@ -181,13 +181,13 @@ serialize(ForwardIt begin,
           MutableBuffer& output,               // NOLINT
           std::error_code& ec) noexcept {      // NOLINT
 
-  static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>,
+  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer");
   std::size_t size = 0;
   number prev = number::invalid;
   while (begin != end) {
-    // the use of @ref forward_second_if_pair is because the container my
-    // be a associative container (std::multimap)
+    // the use of @ref forward_second_if_pair is because the container may
+    // be a associative container 
     size += coap_te::core::forward_second_if_pair(*begin).serialize(prev, output, ec);
     if (ec)
       break;
@@ -204,7 +204,7 @@ template<typename CheckOptions /* = check_all */,
 serialize(const Container& option_list,
           MutableBuffer& output,              // NOLINT
           std::error_code& ec) noexcept {      // NOLINT
-  static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>,
+  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer");
   return serialize(option_list.begin(),
                    option_list.end(),

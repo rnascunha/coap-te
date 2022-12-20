@@ -15,8 +15,8 @@
 #include <variant>
 
 #include "coap-te/core/utility.hpp"
-#include "coap-te/core/to_string.hpp"
 #include "coap-te/core/const_buffer.hpp"
+#include "coap-te/debug/to_string.hpp"
 
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/option.hpp"
@@ -36,7 +36,7 @@ print_option_data(std::ostream& os,
       os << "<empty>";
       break;
     case opt::format::opaque:
-      os << coap_te::core::to_hex(
+      os << to_hex(
               coap_te::const_buffer{op.data(), op.data_size()});
       break;
     case opt::format::uint:
@@ -52,7 +52,7 @@ print_option_data(std::ostream& os,
     }
       break;
     case opt::format::string:
-      os << coap_te::core::to_string(
+      os << to_string(
                 coap_te::const_buffer{op.data(), op.data_size()});
       break;
     default:
@@ -70,7 +70,7 @@ print_option_data(std::ostream& os,
     [&](opt::empty_format){ os << "<empty>"; },
     [&](opt::option::unsigned_type data) { os << data; },
     [&](const coap_te::const_buffer& data) {
-      os << coap_te::core::to_hex(data);
+      os << to_hex(data);
     }
   }, var);
 }

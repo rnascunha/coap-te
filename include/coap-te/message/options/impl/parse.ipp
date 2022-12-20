@@ -59,7 +59,7 @@ std::size_t parse(number_type before,
                   number_type& current,              // NOLINT
                   ConstBuffer& output,               // NOLINT
                   std::error_code& ec) noexcept {    // NOLINT
-  static_assert(core::is_const_buffer_type_v<ConstBuffer>, "Must be const buffer");
+  static_assert(core::is_const_buffer_v<ConstBuffer>, "Must be const buffer");
 
   if (input.size() == 0) {
     ec = std::make_error_code(std::errc::no_buffer_space);

@@ -115,7 +115,7 @@ class mutable_buffer {
     : mutable_buffer(container.data(),
                    container.size(),
                    sizeof(typename T::value_type)) {
-    static_assert(core::is_mutable_buffer_type_v<T>, "Is not buffer type");
+    static_assert(core::is_mutable_buffer_v<T>, "Is not buffer type");
   }
 
   template<std::size_t N, typename T>

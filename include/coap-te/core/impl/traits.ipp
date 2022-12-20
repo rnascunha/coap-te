@@ -36,7 +36,7 @@ struct is_less_comparable_impl {
 };
 
 template<class T, class R>
-struct is_buffer_type_impl
+struct is_buffer_impl
 {
     template<class U, class V>
     static auto test(U*) 

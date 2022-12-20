@@ -181,7 +181,7 @@ class option {
   std::size_t serialize(number before,
                         MutableBuffer& output,                  //NOLINT
                         std::error_code& ec) const noexcept {   //NOLINT
-    static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>,
+    static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
                   "Must be mutable buffer type");
     using n_check = check_type<CheckOptions::sequence, false, false>;
 

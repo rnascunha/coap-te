@@ -19,7 +19,6 @@
 #include "coap-te/core/byte_order.hpp"
 #include "coap-te/core/sorted_list.hpp"
 #include "coap-te/core/sorted_no_alloc_list.hpp"
-#include "coap-te/core/to_string.hpp"
 
 // buffers
 #include "coap-te/core/mutable_buffer.hpp"

@@ -199,12 +199,12 @@ TEST(CoreTraits, CheckOperator) {
 TEST(CoreTraits, IsConstBufferTrait) {
   // Check if class can be used as buffer type
   {
-    auto vv = coap_te::core::is_const_buffer_type_v<std::array<int, 4>>;
+    auto vv = coap_te::core::is_const_buffer_v<std::array<int, 4>>;
     EXPECT_TRUE(vv);
   }
-  EXPECT_TRUE(coap_te::core::is_const_buffer_type_v<std::vector<int>>);
-  EXPECT_TRUE(coap_te::core::is_const_buffer_type_v<std::string>);
-  EXPECT_TRUE(coap_te::core::is_const_buffer_type_v<std::string_view>);
+  EXPECT_TRUE(coap_te::core::is_const_buffer_v<std::vector<int>>);
+  EXPECT_TRUE(coap_te::core::is_const_buffer_v<std::string>);
+  EXPECT_TRUE(coap_te::core::is_const_buffer_v<std::string_view>);
 
   struct A{};
   struct B {
@@ -230,24 +230,24 @@ TEST(CoreTraits, IsConstBufferTrait) {
     int size() { return 0; }
   };
 
-  EXPECT_FALSE(coap_te::core::is_const_buffer_type_v<A>);
-  EXPECT_FALSE(coap_te::core::is_const_buffer_type_v<B>);
-  EXPECT_FALSE(coap_te::core::is_const_buffer_type_v<C>);
-  EXPECT_TRUE(coap_te::core::is_const_buffer_type_v<D>);
-  EXPECT_TRUE(coap_te::core::is_const_buffer_type_v<E>);
-  EXPECT_FALSE(coap_te::core::is_const_buffer_type_v<F>);
-  EXPECT_FALSE(coap_te::core::is_const_buffer_type_v<G>);
+  EXPECT_FALSE(coap_te::core::is_const_buffer_v<A>);
+  EXPECT_FALSE(coap_te::core::is_const_buffer_v<B>);
+  EXPECT_FALSE(coap_te::core::is_const_buffer_v<C>);
+  EXPECT_TRUE(coap_te::core::is_const_buffer_v<D>);
+  EXPECT_TRUE(coap_te::core::is_const_buffer_v<E>);
+  EXPECT_FALSE(coap_te::core::is_const_buffer_v<F>);
+  EXPECT_FALSE(coap_te::core::is_const_buffer_v<G>);
 }
 
 TEST(CoreTraits, IsMutableBufferTrait) {
   // Check if class can be used as buffer type
   {
-    auto vv = coap_te::core::is_mutable_buffer_type_v<std::array<int, 4>>;
+    auto vv = coap_te::core::is_mutable_buffer_v<std::array<int, 4>>;
     EXPECT_TRUE(vv);
   }
-  EXPECT_TRUE(coap_te::core::is_mutable_buffer_type_v<std::vector<int>>);
-  EXPECT_TRUE(coap_te::core::is_mutable_buffer_type_v<std::string>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_type_v<std::string_view>);
+  EXPECT_TRUE(coap_te::core::is_mutable_buffer_v<std::vector<int>>);
+  EXPECT_TRUE(coap_te::core::is_mutable_buffer_v<std::string>);
+  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<std::string_view>);
 
   struct A{};
   struct B {
@@ -273,20 +273,20 @@ TEST(CoreTraits, IsMutableBufferTrait) {
     int size() { return 0; }
   };
 
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_type_v<A>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_type_v<B>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_type_v<C>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_type_v<D>);
-  EXPECT_TRUE(coap_te::core::is_mutable_buffer_type_v<E>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_type_v<F>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_type_v<G>);
+  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<A>);
+  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<B>);
+  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<C>);
+  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<D>);
+  EXPECT_TRUE(coap_te::core::is_mutable_buffer_v<E>);
+  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<F>);
+  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<G>);
 
   // // Must fail because const
   {
-    auto vv = coap_te::core::is_mutable_buffer_type_v<const std::array<int, 4>>;
+    auto vv = coap_te::core::is_mutable_buffer_v<const std::array<int, 4>>;
     EXPECT_FALSE(vv);
   }
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_type_v<const std::vector<int>>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_type_v<const std::string>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_type_v<const E>);
+  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<const std::vector<int>>);
+  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<const std::string>);
+  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<const E>);
 }
