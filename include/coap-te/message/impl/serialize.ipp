@@ -17,8 +17,9 @@
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/code.hpp"
-#include "coap-te/message/options/option.hpp"
 #include "coap-te/message/token.hpp"
+#include "coap-te/message/options/option.hpp"
+#include "coap-te/message/options/traits.hpp"
 
 namespace coap_te {
 namespace message {
@@ -85,7 +86,7 @@ serialize(type tp, code co, message_id mid,
   static_assert(coap_te::core::is_const_buffer_type_v<ConstBufferToken>, "Must be const buffer type");
   static_assert(coap_te::core::is_const_buffer_type_v<ConstBufferPayload>, "Must be const buffer type");
   static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>, "Must be mutable buffer type");
-  // static_assert(coap_te::core::is_option_list_type_v<OptionList>, "Must be option list type");
+  static_assert(options::is_option_list_v<OptionList>, "Must be option list type");
 
   auto size = serialize_header(tp, co, mid, token, output, ec);
   if (ec) {
@@ -108,6 +109,7 @@ serialize(type tp, code co, message_id mid,
   output[0] = payload_marker;
   output += 1;
   std::memcpy(output.data(), payload.data(), payload.size());
+  output += payload.size();
 
   return size;
 }
@@ -126,7 +128,7 @@ serialize(type tp, code co, message_id mid,
   static_assert(coap_te::core::is_const_buffer_type_v<ConstBufferToken>, "Must be const buffer type");
   static_assert(coap_te::core::is_const_buffer_type_v<ConstBufferPayload>, "Must be const buffer type");
   static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>, "Must be mutable buffer type");
-  // static_assert(coap_te::core::is_option_list_type_v<OptionList>, "Must be option list type");
+  static_assert(options::is_option_list_v<OptionList>, "Must be option list type");
 
   std::error_code ec;
   auto size = serialize<CheckOptions>(tp, co, mid, token, opt_list, payload, output, ec);

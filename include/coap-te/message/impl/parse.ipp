@@ -14,10 +14,11 @@
 #include <cstdint>
 #include <system_error>
 
+#include "coap-te/core/traits.hpp"
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/code.hpp"
+#include "coap-te/message/traits.hpp"
 #include "coap-te/message/options/parse.hpp"
-// #include "coap-te/message/options/vector_options.hpp"
 #include "coap-te/message/options/parse_options.hpp"
 
 namespace coap_te {
@@ -28,6 +29,11 @@ template<typename ConstBuffer,
 std::size_t parse_header(ConstBuffer& input,
                   Message& message,
                   std::error_code& ec) noexcept {
+  static_assert(coap_te::core::is_const_buffer_type_v<ConstBuffer>,
+                "Must be of ype message");
+  static_assert(is_message_v<Message>,
+                "Must be of type message");
+
   if (input.size() < minimum_header_size) {
     ec = std::make_error_code(std::errc::no_buffer_space);
     return 0;
@@ -79,6 +85,11 @@ template<typename ConstBuffer,
 std::size_t parse(ConstBuffer& input,
                   Message& message,
                   std::error_code& ec) noexcept {
+  static_assert(coap_te::core::is_const_buffer_type_v<ConstBuffer>,
+                "Must be of ype message");
+  static_assert(is_message_v<Message>,
+                "Must be of type message");
+
   auto size = parse_header(input, message, ec);
   if (ec) {
     return size;

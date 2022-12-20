@@ -61,7 +61,6 @@ serialize(type, code, message_id,
           const ConstBufferPayload& payload,
           MutableBuffer&);         //NOLINT
 
-
 }  // namespace message
 }  // namespace coap_te
 

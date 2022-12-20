@@ -144,14 +144,12 @@ class vector_options {
 template<>
 [[nodiscard]] constexpr std::size_t
 size(const vector_options& list) noexcept {
-  // static_assert(is_option_list_v<OptionList>, "Must be a option list");
   return list.size();
 }
 
 template<>
 [[nodiscard]] constexpr std::size_t
 count(const vector_options& list) noexcept {
-  // static_assert(is_option_list_v<OptionList>, "Must be a option list");
   return list.count();
 }
 

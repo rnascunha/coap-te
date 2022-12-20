@@ -228,6 +228,59 @@ template<typename T>
 static constexpr bool
 is_pair_v = is_pair<T>::value;
 
+/**
+ * @brief Checks if a type is a container
+ * 
+ * @link https://stackoverflow.com/a/31207079
+ */
+template<typename, typename = void>
+struct is_container : std::false_type {};
+
+template<typename... Ts>
+struct is_container_helper {};
+
+template<typename T>
+struct is_container<
+        T,
+        std::conditional_t<
+            false,
+            is_container_helper<
+                typename T::value_type,
+                // typename T::size_type,
+                // typename T::allocator_type,
+                // typename T::iterator,
+                // typename T::const_iterator,
+                decltype(std::declval<T>().size()),
+                decltype(std::declval<T>().begin()),
+                decltype(std::declval<T>().end())   //,
+                // decltype(std::declval<T>().cbegin()),
+                // decltype(std::declval<T>().cend())
+                >,
+            void
+            >
+        > : public std::true_type {};
+
+template<typename T>
+static constexpr bool
+is_container_v = is_container<T>::value;
+
+/**
+ * @brief If T is a pair, forward the second value, otherwise foward T
+ * 
+ */
+template<typename T, typename = void>
+struct value_type_if_pair {
+    using type = T;
+};
+
+template<typename T>
+struct value_type_if_pair<T, std::enable_if_t<is_pair_v<T>>> {
+    using type = typename T::second_type;
+};
+
+template<typename T>
+using value_type_if_pair_t = typename value_type_if_pair<T>::type;
+
 /** @} */  // end of CoreTraits
 
 }  // namespace core

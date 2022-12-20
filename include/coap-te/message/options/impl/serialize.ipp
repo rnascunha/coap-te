@@ -180,28 +180,18 @@ serialize(ForwardIt begin,
           ForwardIt end,
           MutableBuffer& output,               // NOLINT
           std::error_code& ec) noexcept {      // NOLINT
-  // static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>,
-  //               "Must be mutable buffer");
-  // std::size_t size = 0;
-  // number prev = number::invalid;
-  // while (begin != end) {
-  //   size += begin->serialize(prev, output, ec);
-  //   if (ec)
-  //     break;
-  //   prev = begin->option_number();
-  //   ++begin;
-  // }
-  // return size;
 
   static_assert(coap_te::core::is_mutable_buffer_type_v<MutableBuffer>,
                 "Must be mutable buffer");
   std::size_t size = 0;
   number prev = number::invalid;
   while (begin != end) {
-    size += coap_te::core::forward_if_second(*begin).serialize(prev, output, ec);
+    // the use of @ref forward_second_if_pair is because the container my
+    // be a associative container (std::multimap)
+    size += coap_te::core::forward_second_if_pair(*begin).serialize(prev, output, ec);
     if (ec)
       break;
-    prev = coap_te::core::forward_if_second(*begin).option_number();
+    prev = coap_te::core::forward_second_if_pair(*begin).option_number();
     ++begin;
   }
   return size;

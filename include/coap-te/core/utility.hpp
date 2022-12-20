@@ -100,8 +100,8 @@ overloaded(Ts...) -> overloaded<Ts...>;
  * @return constexpr auto 
  */
 template<typename Type>
-constexpr auto
-forward_if_second(Type&& t) noexcept {
+constexpr decltype(auto)
+forward_second_if_pair(Type&& t) noexcept {
   if constexpr (!is_pair_v<std::decay_t<Type>>)
     return std::forward<Type>(t);
   else

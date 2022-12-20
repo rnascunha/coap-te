@@ -56,11 +56,15 @@ size(const OptionList& list) noexcept;
 option_list_size(const coap_te::const_buffer& buf) noexcept;
 
 /**
- * @brief 
+ * @brief Inserts a option in a option container
  * 
- * @tparam OptionList 
- * @tparam Option 
- * @param op 
+ * This function is responsible to deal with the complexity
+ * to add a option to the diferent kinds of containers that
+ * are supported.
+ * 
+ * @tparam OptionList type of the container
+ * @tparam Option type of option
+ * @param op option to be inserted
  */
 template<typename OptionList,
          typename Option>

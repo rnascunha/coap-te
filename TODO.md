@@ -107,3 +107,4 @@ At the end, remember:
 * Test/use expected class (core/expected.hpp) or remove it;
 * Isolate code that use standard containers (option_list codes).
 * Generalize requiriments of standard containers codes (option_list codes) to accept other containers like this;
+* 'options list' types use 'count_options' to return the number of options and 'size' to return the serilized size of the message. Is this confusining?

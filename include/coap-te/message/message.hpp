@@ -18,6 +18,8 @@
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/code.hpp"
 #include "coap-te/message/serialize.hpp"
+#include "coap-te/message/token.hpp"
+#include "coap-te/message/options/traits.hpp"
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/option_list_func.hpp"
 
@@ -33,8 +35,8 @@ class message {
                 "Must be const buffer type");
   static_assert(coap_te::core::is_const_buffer_type_v<ConstBufferPayload>,
                 "Must be const buffer type");
-  // static_assert(is_option_list_type_v<OptionList>,
-  //              "Must be option list type")
+  static_assert(options::is_option_list_v<OptionList>,
+               "Must be option list type");
 
   using option_list_type = OptionList;
   using token_type = ConstBufferToken;
@@ -136,7 +138,7 @@ class message {
 
   constexpr message&
   token(const token_type& tk) noexcept {
-    token_ = {tk.data(), (std::min)(tk.size(), max_token_size)};
+    token_ = {tk.data(), clamp_token_size(tk.size())};
     return *this;
   }
 
@@ -149,8 +151,8 @@ class message {
   template<typename Option>
   constexpr message&
   add_option(Option&& op) noexcept {
-    // static_assert(is_option_type_v<Option>,
-    //               "Must be option type")
+    static_assert(options::is_option_v<Option>,
+                  "Must be option type");
     options::insert(opt_list_, std::forward<Option>(op));
     return *this;
   }
