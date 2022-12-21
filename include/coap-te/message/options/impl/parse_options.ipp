@@ -11,6 +11,8 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_IMPL_PARSE_OPTIONS_IPP_
 #define COAP_TE_MESSAGE_OPTIONS_IMPL_PARSE_OPTIONS_IPP_
 
+#include <utility>      // std::move
+
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/sorted_list.hpp"
 #include "coap-te/message/options/option.hpp"
@@ -54,8 +56,8 @@ parse_options(const coap_te::const_buffer& buf,
   return size;
 }
 
-}  // namespace options 
+}  // namespace options
 }  // namespace message
-}  // namespace coap-te
+}  // namespace coap_te
 
 #endif  // COAP_TE_MESSAGE_OPTIONS_IMPL_PARSE_OPTIONS_IPP_

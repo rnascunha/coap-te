@@ -12,7 +12,7 @@
 #define COAP_TE_MESSAGE_IMPL_PARSE_IPP_
 
 #include <cstdint>
-#include <system_error>
+#include <system_error>     // NOLINT
 
 #include "coap-te/core/traits.hpp"
 #include "coap-te/message/config.hpp"
@@ -26,9 +26,9 @@ namespace message {
 
 template<typename ConstBuffer,
          typename Message>
-std::size_t parse_header(ConstBuffer& input,
-                  Message& message,
-                  std::error_code& ec) noexcept {
+std::size_t parse_header(ConstBuffer& input,          // NOLINT
+                  Message& message,                   // NOLINT
+                  std::error_code& ec) noexcept {     // NOLINT
   static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
                 "Must be of ype message");
   static_assert(is_message_v<Message>,
@@ -38,7 +38,7 @@ std::size_t parse_header(ConstBuffer& input,
     ec = std::make_error_code(std::errc::no_buffer_space);
     return 0;
   }
-  
+
   // byte 0
   std::uint8_t byte0 = input[0];
   if (byte0 >> 6 != version) {
@@ -82,9 +82,9 @@ std::size_t parse_header(ConstBuffer& input,
 
 template<typename ConstBuffer,
          typename Message>
-std::size_t parse(ConstBuffer& input,
-                  Message& message,
-                  std::error_code& ec) noexcept {
+std::size_t parse(ConstBuffer& input,               // NOLINT
+                  Message& message,                 // NOLINT
+                  std::error_code& ec) noexcept {   // NOLINT
   static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
                 "Must be of ype message");
   static_assert(is_message_v<Message>,
@@ -114,7 +114,7 @@ std::size_t parse(ConstBuffer& input,
   return size;
 }
 
-}  // namespace message 
+}  // namespace message
 }  // namespace coap_te
 
 #endif  // COAP_TE_MESSAGE_IMPL_PARSE_IPP_

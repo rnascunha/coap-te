@@ -64,8 +64,10 @@ serialize(number_type before,
           const ConstBuffer& input,
           MutableBuffer& output,              // NOLINT
           std::error_code& ec) noexcept {     // NOLINT
-  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>, "Must be const_buffer type");
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>, "Must be mutable_buffer type");
+  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
+                "Must be const_buffer type");
+  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+                "Must be mutable_buffer type");
 
   header delta{};
   serialize_option_header(op - before, delta);
@@ -118,7 +120,8 @@ serialize(number_type before,
           MutableBuffer& output,              // NOLINT
           std::error_code& ec) noexcept {     // NOLINT
   if constexpr (CheckOptions::check_any()) {
-    ec = check<CheckOptions>(before, op, {format::opaque, format::string}, input.size());
+    ec = check<CheckOptions>(before, op,
+                    {format::opaque, format::string}, input.size());
     if (ec)
       return 0;
   }
@@ -180,15 +183,15 @@ serialize(ForwardIt begin,
           ForwardIt end,
           MutableBuffer& output,               // NOLINT
           std::error_code& ec) noexcept {      // NOLINT
-
   static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer");
   std::size_t size = 0;
   number prev = number::invalid;
   while (begin != end) {
     // the use of @ref forward_second_if_pair is because the container may
-    // be a associative container 
-    size += coap_te::core::forward_second_if_pair(*begin).serialize(prev, output, ec);
+    // be a associative container
+    size += coap_te::core::forward_second_if_pair(*begin)
+                            .serialize(prev, output, ec);
     if (ec)
       break;
     prev = coap_te::core::forward_second_if_pair(*begin).option_number();

@@ -93,7 +93,9 @@ std::size_t parse(number_type before,
         h->data_extend = input[0] + 13;
         break;
       case extend::two_bytes:
-        h->data_extend = coap_te::core::from_small_big_endian<std::uint16_t>(reinterpret_cast<const std::uint8_t*>(input.data()), 2) + 269;
+        h->data_extend = coap_te::core::from_small_big_endian<std::uint16_t>(
+                          reinterpret_cast<const std::uint8_t*>(input.data()), 2)     // NOLINT
+                          + 269;
         break;
       default:
         h->data_extend = static_cast<uint16_t>(h->byte_op);
@@ -107,8 +109,8 @@ std::size_t parse(number_type before,
     ec = std::make_error_code(std::errc::no_buffer_space);
     return size;
   }
-
-  output.set(input.data(), length.data_extend);
+  
+  output = {input.data(), length.data_extend};
   input += length.data_extend;
 
   // As a sequence of bytes can be any type, we cannot check it
@@ -131,7 +133,7 @@ std::size_t parse(number_type before,
   number_type current = invalid;
   coap_te::const_buffer buf;
   auto size = parse<CheckOptions>(before, input, current, buf, ec);
-  
+
   if (!ec) {
     output = create<check_none, false>(static_cast<number>(current), buf);
   }

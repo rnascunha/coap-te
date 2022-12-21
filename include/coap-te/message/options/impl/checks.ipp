@@ -52,7 +52,8 @@ check_format(format type,
 std::error_code
 check_format(const std::initializer_list<format>& types,
              const definition& def) noexcept {
-  if (std::find(std::begin(types), std::end(types), def.type) == std::end(types)) {
+  if (std::find(std::begin(types), std::end(types), def.type)
+            == std::end(types)) {
     return std::make_error_code(std::errc::wrong_protocol_type);
   }
   return std::error_code{};
@@ -68,7 +69,7 @@ check_length(std::size_t length,
   return std::error_code{};
 }
 
-} // namesapce detail
+}  // namespace detail
 
 template<typename CheckOptions>
 std::error_code

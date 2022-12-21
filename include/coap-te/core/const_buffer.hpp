@@ -50,57 +50,68 @@ class const_buffer {
     constexpr
     explicit const_iterator(const const_iterator& other) noexcept = default;
 
-    bool operator==(const const_iterator& rhs) const noexcept {
+    [[nodiscard]] constexpr bool
+    operator==(const const_iterator& rhs) const noexcept {
       return ptr_ == rhs.ptr_;
     }
 
-    bool operator!=(const const_iterator& rhs) const noexcept {
+    [[nodiscard]] constexpr bool
+    operator!=(const const_iterator& rhs) const noexcept {
       return !(ptr_ == rhs.ptr_);
     }
 
-    const_iterator& operator+=(int n) noexcept {
+    constexpr const_iterator&
+    operator+=(int n) noexcept {
       ptr_ += n;
       return *this;
     }
 
-    const_iterator operator+(int n) const noexcept {
+    constexpr const_iterator
+    operator+(int n) const noexcept {
       return const_iterator(ptr_ + n);
     }
 
-    const_iterator& operator=(const const_iterator& rhs) noexcept {
+    constexpr const_iterator&
+    operator=(const const_iterator& rhs) noexcept {
       ptr_ = rhs.ptr_;
       return *this;
     }
 
-    const_iterator& operator++() noexcept {
+    constexpr const_iterator&
+    operator++() noexcept {
       ++ptr_;
       return *this;
     }
 
-    const_iterator& operator--() noexcept {
+    constexpr const_iterator&
+    operator--() noexcept {
       --ptr_;
       return *this;
     }
 
-    const_iterator operator++(int) noexcept {
+    constexpr const_iterator
+    operator++(int) noexcept {
       pointer temp = ptr_;
       ++ptr_;
       return const_iterator(temp);
     }
 
-    const_iterator operator--(int) noexcept {
+    constexpr const_iterator
+    operator--(int) noexcept {
       pointer temp = ptr_;
       --ptr_;
       return const_iterator(temp);
     }
 
-    reference operator*() const noexcept {
+    constexpr reference
+    operator*() const noexcept {
       return *ptr_;
     }
 
    private:
     pointer ptr_;
   };
+  using iterator = const_iterator;
 
   constexpr
   const_buffer() noexcept = default;
@@ -145,7 +156,7 @@ class const_buffer {
     : const_buffer(arr, N, sizeof(T))
   {}
 
-  constexpr value_type
+  [[nodiscard]] constexpr value_type
   operator[](std::size_t n) const noexcept {
     return static_cast<pointer>(data_)[n];
   }
@@ -166,40 +177,47 @@ class const_buffer {
     return *this;
   }
 
-  constexpr void
-  set(const void* data, std::size_t size) noexcept {
-    data_ = data;
-    size_ = size;
-  }
-
-  constexpr
-  const void* data() const noexcept {
+  [[nodiscard]] constexpr const void*
+  data() const noexcept {
     return data_;
   }
 
-  constexpr
-  size_type size() const noexcept {
+  [[nodiscard]] constexpr size_type
+  size() const noexcept {
     return size_;
   }
 
-  constexpr
-  const_iterator begin() const noexcept {
+  [[nodiscard]] constexpr const_iterator
+  begin() const noexcept {
     return const_iterator(static_cast<pointer>(data_));
   }
 
-  constexpr
-  const_iterator end() const noexcept {
+  [[nodiscard]] constexpr const_iterator
+  end() const noexcept {
     return const_iterator(static_cast<pointer>(data_) + size_);
   }
 
-  constexpr
-  const_iterator cbegin() const noexcept {
+  [[nodiscard]] constexpr const_iterator
+  cbegin() const noexcept {
     return const_iterator(static_cast<pointer>(data_));
   }
 
-  constexpr
-  const_iterator cend() const noexcept {
+  [[nodiscard]] constexpr const_iterator
+  cend() const noexcept {
     return const_iterator(static_cast<pointer>(data_) + size_);
+  }
+
+  // friends
+  [[nodiscard]] friend constexpr const_buffer
+  operator+(const const_buffer& buf, std::size_t n) noexcept {
+    const_buffer b{buf};
+    b += n;
+    return b;
+  }
+
+  [[nodiscard]] friend constexpr const_buffer
+  operator+(std::size_t n, const const_buffer& buf) noexcept {
+    return buf + n;
   }
 
  private:

@@ -17,7 +17,6 @@
 #include <string_view>
 #include <system_error>   // NOLINT
 
-// #include "coap-te/core/traits.hpp"
 #include "coap-te/core/utility.hpp"
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/byte_order.hpp"
@@ -162,14 +161,24 @@ class option {
     return op_ != number::invalid;
   }
 
-  constexpr bool
+  [[nodiscard]] constexpr bool
   operator==(const option& op) const noexcept {
     return op_ == op.op_;
   }
 
-  constexpr bool
+  [[nodiscard]] constexpr bool
   operator<(const option& op) const noexcept {
     return op_ < op.op_;
+  }
+
+  [[nodiscard]] friend constexpr bool
+  operator==(const option& op, number num) noexcept {
+    return op.op_ == num;
+  }
+
+  [[nodiscard]] friend constexpr bool
+  operator<(const option& op, number num) noexcept {
+    return op.op_ < num;
   }
 
   /**

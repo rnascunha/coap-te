@@ -29,12 +29,15 @@ template<typename ConstBuffer,
 std::size_t
 serialize_header(type tp, code co, message_id mid,
                 const ConstBuffer& token,
-                MutableBuffer& output,         //NOLINT
-                std::error_code& ec) noexcept {
-  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>, "Must be const buffer type");
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>, "Must be mutable buffer type");
+                MutableBuffer& output,          //NOLINT
+                std::error_code& ec) noexcept { // NOLINT
+  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
+                "Must be const buffer type");
+  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+                "Must be mutable buffer type");
 
-  std::uint8_t token_len = static_cast<std::uint8_t>(clamp_token_size(token.size()));
+  std::uint8_t token_len =
+                static_cast<std::uint8_t>(clamp_token_size(token.size()));
   std::size_t size = minimum_header_size + token_len;
   if (output.size() < size) {
     ec = std::make_error_code(std::errc::no_buffer_space);
@@ -60,8 +63,10 @@ std::size_t
 serialize_header(type tp, code co, message_id mid,
                 const ConstBuffer& token,
                 MutableBuffer& output) {         //NOLINT
-  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>, "Must be const buffer type");
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>, "Must be mutable buffer type");
+  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
+                "Must be const buffer type");
+  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+                "Must be mutable buffer type");
 
   std::error_code ec;
   auto size = serialize_header(tp, co, mid, token, output, ec);
@@ -81,12 +86,16 @@ serialize(type tp, code co, message_id mid,
           const ConstBufferToken& token,
           const OptionList& opt_list,
           const ConstBufferPayload& payload,
-          MutableBuffer& output,         //NOLINT
-          std::error_code& ec) noexcept {
-  static_assert(coap_te::core::is_const_buffer_v<ConstBufferToken>, "Must be const buffer type");
-  static_assert(coap_te::core::is_const_buffer_v<ConstBufferPayload>, "Must be const buffer type");
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>, "Must be mutable buffer type");
-  static_assert(options::is_option_list_v<OptionList>, "Must be option list type");
+          MutableBuffer& output,          //NOLINT
+          std::error_code& ec) noexcept { // NOLINT
+  static_assert(coap_te::core::is_const_buffer_v<ConstBufferToken>,
+                "Must be const buffer type");
+  static_assert(coap_te::core::is_const_buffer_v<ConstBufferPayload>,
+                "Must be const buffer type");
+  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+                "Must be mutable buffer type");
+  static_assert(options::is_option_list_v<OptionList>,
+                "Must be option list type");
 
   auto size = serialize_header(tp, co, mid, token, output, ec);
   if (ec) {
@@ -124,21 +133,28 @@ serialize(type tp, code co, message_id mid,
           const ConstBufferToken& token,
           const OptionList& opt_list,
           const ConstBufferPayload& payload,
-          MutableBuffer& output) {
-  static_assert(coap_te::core::is_const_buffer_v<ConstBufferToken>, "Must be const buffer type");
-  static_assert(coap_te::core::is_const_buffer_v<ConstBufferPayload>, "Must be const buffer type");
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>, "Must be mutable buffer type");
-  static_assert(options::is_option_list_v<OptionList>, "Must be option list type");
+          MutableBuffer& output) {        // NOLINT
+  static_assert(coap_te::core::is_const_buffer_v<ConstBufferToken>,
+                "Must be const buffer type");
+  static_assert(coap_te::core::is_const_buffer_v<ConstBufferPayload>,
+                "Must be const buffer type");
+  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+                "Must be mutable buffer type");
+  static_assert(options::is_option_list_v<OptionList>,
+                "Must be option list type");
 
   std::error_code ec;
-  auto size = serialize<CheckOptions>(tp, co, mid, token, opt_list, payload, output, ec);
+  auto size = serialize<CheckOptions>(tp, co, mid,
+                                      token, opt_list,
+                                      payload, output,
+                                      ec);
   if (ec) {
     throw std::system_error{ec};
   }
   return size;
 }
 
-}  // message 
-}  // coap_te
+}  // namespace message
+}  // namespace coap_te
 
 #endif  // COAP_TE_MESSAGE_IMPL_SERIALIZE_IPP_

@@ -45,51 +45,66 @@ class mutable_buffer {
     constexpr
     explicit iterator(const iterator& other) noexcept = default;
 
-    bool operator==(const iterator& rhs) const noexcept {
+    [[nodiscard]] constexpr bool
+    operator==(const iterator& rhs) const noexcept {
       return ptr_ == rhs.ptr_;
     }
 
-    bool operator!=(const iterator& rhs) const noexcept {
+    [[nodiscard]] constexpr bool
+    operator!=(const iterator& rhs) const noexcept {
       return !(ptr_ == rhs.ptr_);
     }
 
-    iterator& operator+=(int n) noexcept {
+    [[nodiscard]] constexpr iterator&
+    operator+=(int n) noexcept {
       ptr_ += n;
       return *this;
     }
 
-    iterator operator+(int n) const noexcept {
+    [[nodiscard]] constexpr iterator
+    operator+(int n) const noexcept {
       return iterator(ptr_ + n);
     }
 
-    iterator& operator=(const iterator& rhs) noexcept {
+    [[nodiscard]] constexpr iterator&
+    operator=(const iterator& rhs) noexcept {
       ptr_ = rhs.ptr_;
       return *this;
     }
 
-    iterator& operator++() noexcept {
+    [[nodiscard]] constexpr iterator&
+    operator++() noexcept {
       ++ptr_;
       return *this;
     }
 
-    iterator& operator--() noexcept {
+    constexpr iterator&
+    operator--() noexcept {
       --ptr_;
       return *this;
     }
 
-    iterator operator++(int) noexcept {
+    constexpr iterator
+    operator++(int) noexcept {
       pointer temp = ptr_;
       ++ptr_;
       return iterator(temp);
     }
 
-    iterator operator--(int) noexcept {
+    constexpr iterator
+    operator--(int) noexcept {
       pointer temp = ptr_;
       --ptr_;
       return iterator(temp);
     }
 
-    reference operator*() const noexcept {
+    [[nodiscard]] reference
+    operator*() const noexcept {
+      return *ptr_;
+    }
+
+    [[nodiscard]] reference
+    operator*() noexcept {
       return *ptr_;
     }
 
@@ -124,51 +139,75 @@ class mutable_buffer {
     : mutable_buffer(arr, N, sizeof(T))
   {}
 
-  constexpr
-  reference operator[](std::size_t n) const noexcept {
+  [[nodiscard]] constexpr reference
+  operator[](std::size_t n) const noexcept {
     return static_cast<pointer>(data_)[n];
   }
 
-  constexpr
-  reference operator[](std::size_t n) noexcept {
+  [[nodiscard]] constexpr reference
+  operator[](std::size_t n) noexcept {
     return static_cast<pointer>(data_)[n];
   }
 
-  constexpr
-  mutable_buffer& operator+=(std::size_t n) noexcept {
+  constexpr mutable_buffer&
+  operator+=(std::size_t n) noexcept {
     data_ = static_cast<pointer>(data_) + n;
     size_ -= n;
     return *this;
   }
 
-  constexpr
-  void* data() const noexcept {
+  [[nodiscard]] constexpr void*
+  data() const noexcept {
     return data_;
   }
 
-  constexpr
-  size_type size() const noexcept {
+  [[nodiscard]] constexpr size_type
+  size() const noexcept {
     return size_;
   }
 
-  constexpr
-  iterator begin() const noexcept {
+  // iterator iterface
+  [[nodiscard]] constexpr iterator
+  begin() noexcept {
     return iterator(static_cast<pointer>(data_));
   }
 
-  constexpr
-  iterator end() const noexcept {
+  [[nodiscard]] constexpr iterator
+  end() noexcept {
     return iterator(static_cast<pointer>(data_) + size_);
   }
 
-  constexpr
-  iterator cbegin() const noexcept {
+  [[nodiscard]] constexpr iterator
+  begin() const noexcept {
     return iterator(static_cast<pointer>(data_));
   }
 
-  constexpr
-  iterator cend() const noexcept {
+  [[nodiscard]] constexpr iterator
+  end() const noexcept {
     return iterator(static_cast<pointer>(data_) + size_);
+  }
+
+  [[nodiscard]] constexpr iterator
+  cbegin() const noexcept {
+    return iterator(static_cast<pointer>(data_));
+  }
+
+  [[nodiscard]] constexpr iterator
+  cend() const noexcept {
+    return iterator(static_cast<pointer>(data_) + size_);
+  }
+
+  // friends
+  [[nodiscard]] friend constexpr mutable_buffer
+  operator+(const mutable_buffer& buf, std::size_t n) noexcept {
+    mutable_buffer b{buf};
+    b += n;
+    return b;
+  }
+
+  [[nodiscard]] friend constexpr mutable_buffer
+  operator+(std::size_t n, const mutable_buffer& buf) noexcept {
+    return buf + n;
   }
 
  private:

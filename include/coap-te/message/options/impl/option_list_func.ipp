@@ -8,18 +8,20 @@
  * @copyright Copyright (c) 2022
  * 
  */
-#ifndef COAP_TE_MESSAGE_OPTIONS_IMPL_OPTION_LIST_FUNC_HPP_
-#define COAP_TE_MESSAGE_OPTIONS_IMPL_OPTION_LIST_FUNC_HPP_
+#ifndef COAP_TE_MESSAGE_OPTIONS_IMPL_OPTION_LIST_FUNC_IPP_
+#define COAP_TE_MESSAGE_OPTIONS_IMPL_OPTION_LIST_FUNC_IPP_
 
 #include <algorithm>
 #include <type_traits>
 #include <utility>
 #include <vector>
+#include <list>
 #include <map>
 
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/parse.hpp"
 #include "coap-te/message/options/option.hpp"
+#include "coap-te/message/options/traits.hpp"
 
 namespace coap_te {
 namespace message {
@@ -28,32 +30,19 @@ namespace options {
 template<typename OptionList>
 [[nodiscard]] constexpr std::size_t
 count(const OptionList& list) noexcept {
-  // static_assert(is_option_list_v<OptionList>, "Must be a option list");
+  static_assert(is_option_list_v<OptionList>, "Must be a option list");
   return list.size();
 }
 
 template<typename OptionList>
 [[nodiscard]] constexpr std::size_t
 size(const OptionList& list) noexcept {
-  // static_assert(is_option_list_v<OptionList>, "Must be a option list");
+  static_assert(is_option_list_v<OptionList>, "Must be a option list");
   std::size_t s = 0;
   number prev = number::invalid;
   for (auto const& op : list) {
-    s += op.size(prev);
-    prev = op.option_number();
-  }
-  return s;
-}
-
-template<typename>
-[[nodiscard]] std::size_t
-size(const std::multimap<number, option>& list) noexcept {
-  // static_assert(is_option_list_v<OptionList>, "Must be a option list");
-  std::size_t s = 0;
-  number prev = number::invalid;
-  for (auto const& [_, op] : list) {
-    s += op.size(prev);
-    prev = op.option_number();
+    s += coap_te::core::forward_second_if_pair(op).size(prev);
+    prev = coap_te::core::forward_second_if_pair(op).option_number();
   }
   return s;
 }
@@ -79,19 +68,22 @@ option_list_size(
 template<typename OptionList,
          typename Option>
 void
-insert(OptionList& list, Option&& op) noexcept {
-  if constexpr (std::is_same_v<std::vector<option>, OptionList> || 
+insert(OptionList& list, Option&& op) noexcept {      // NOLINT
+  if constexpr (std::is_same_v<std::vector<option>, OptionList> ||
                 std::is_same_v<std::list<option>, OptionList>) {
     auto it = std::upper_bound(list.begin(), list.end(), op);
     list.insert(it, std::forward<Option>(op));
-  } else if constexpr (std::is_same_v<std::multimap<number, option>, OptionList>) {
+  } else if constexpr (std::is_same_v<std::multimap<number, option>,    // NOLINT
+                                      OptionList>) {
     list.insert({op.option_number(), std::forward<Option>(op)});
-  } else
+  } else {
     list.insert(std::forward<Option>(op));
+  }
 }
 
-}  // namespace options 
+}  // namespace options
 }  // namespace message
 }  // namespace coap_te
 
-#endif // COAP_TE_MESSAGE_OPTIONS_IMPL_OPTION_LIST_FUNC_HPP_
+#endif  // COAP_TE_MESSAGE_OPTIONS_IMPL_OPTION_LIST_FUNC_IPP_
+

@@ -73,7 +73,8 @@ template<typename CheckOptions /* = check_all */,
          bool ToThrow /* = false */>
 [[nodiscard]] constexpr option
 create(number op, std::string_view value) noexcept(!ToThrow) {
-  if (!detail::check_constructor<CheckOptions, ToThrow>(op, format::string, value.size())) {
+  if (!detail::check_constructor<CheckOptions, ToThrow>(
+        op, format::string, value.size())) {
     return option{};
   }
   return option{op, value};
@@ -83,13 +84,14 @@ template<typename CheckOptions /* = check_all */,
          bool ToThrow /* = false */>
 [[nodiscard]] constexpr option
 create(number op, const const_buffer& value) noexcept(!ToThrow) {
-  if (!detail::check_constructor<CheckOptions, ToThrow>(op, format::opaque, value.size())) {
+  if (!detail::check_constructor<CheckOptions, ToThrow>(
+        op, format::opaque, value.size())) {
     return option{};
   }
   return option{op, value};
 }
 
-}  // namespace options 
+}  // namespace options
 }  // namespace message
 }  // namespace coap_te
 

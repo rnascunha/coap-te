@@ -100,11 +100,9 @@ At the end, remember:
 * Some functions could not be used as 'constexpr' (serialize/parse kind) because of std::error_code that is not constexpr. Something can be done?
 * message/option uses create static function to create a option. This was necessary to make a compile options like checks/thorw avaiable (contructors can't explicitly set template options). Is options check really necessary?
 * Some libraries are been added that may not be used/necessary/avaialble for embemded development, like containers/strings/ostream. Functions mostly used for development/debbugging.
-* Need to create some type traits:
-* * is_message_type
-* * is_option_type
-* * is_option_list_type
 * Test/use expected class (core/expected.hpp) or remove it;
 * Isolate code that use standard containers (option_list codes).
 * Generalize requiriments of standard containers codes (option_list codes) to accept other containers like this;
 * 'options list' types use 'count_options' to return the number of options and 'size' to return the serilized size of the message. Is this confusining?
+* Also, equality (==) and less operator (<) just compare the option number, not the data. Is this also confusing?
+* The iterator interface at const_buffer and mutable_buffer necessary?

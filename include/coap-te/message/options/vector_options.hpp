@@ -63,8 +63,8 @@ class vector_options {
 
     [[nodiscard]] constexpr bool
     is_end() noexcept {
-      return buf_[0] == coap_te::message::payload_marker ||
-             buf_.size() == 0;
+      return buf_.size() == 0 ||
+             buf_[0] == coap_te::message::payload_marker;
     }
 
     [[nodiscard]] constexpr
@@ -97,7 +97,7 @@ class vector_options {
     if (ec) {
       return;
     }
-    buf_.set(buf.data(), size);
+    buf_ = {buf.data(), size};
   }
 
   constexpr
@@ -123,6 +123,33 @@ class vector_options {
     for (auto it = begin(); it != end(); ++it)
       ++s;
     return s;
+  }
+
+  [[nodiscard]] constexpr bool
+  empty() const noexcept {
+    return buf_.size() == 0;
+  }
+
+  [[nodiscard]] constexpr option
+  front() const noexcept {
+    return *begin();
+  }
+
+  [[nodiscard]] constexpr const_iterator
+  get(number n, std::size_t index = 0) const noexcept {
+    for (auto it = begin(); it; ++it) {
+      auto op = *it;
+      if (op < n) {
+        continue;
+      }
+      if (op == n) {
+        if (index == 0) {
+          return it;
+        }
+        --index;
+      }
+    }
+    return const_iterator({nullptr, 0});
   }
 
   // iterator interface

@@ -18,6 +18,7 @@
 
 #include "coap-te/core/mutable_buffer.hpp"
 #include "coap-te/core/const_buffer.hpp"
+#include "coap-te/core/buffer.hpp"
 
 void test_const_buffer_12345(const coap_te::const_buffer& buf) noexcept {
   EXPECT_EQ(buf.size(), 5);
@@ -202,5 +203,28 @@ TEST(CoreBuffer, ChangingMutableBufferChar) {
     std::string data{"12345"};
     coap_te::mutable_buffer buf(data);
     test_change_mutable_buffer(buf);
+  }
+}
+
+TEST(CoreBuffer, BufferSequenece) {
+  {
+    std::vector<coap_te::const_buffer> v;
+    char d1[5], d2[6], d3[7];
+    v.push_back(coap_te::buffer(d1));
+    v.push_back(coap_te::buffer(d2));
+    v.push_back(coap_te::buffer(d3));
+    EXPECT_EQ(coap_te::buffer_size(v), 18);
+  }
+  {
+    char a[] = "12345", b[] = "67890";
+    char c[12];
+    std::vector<coap_te::const_buffer> v;
+    v.push_back(coap_te::buffer(a));
+    v.push_back(coap_te::buffer(b));
+    auto m = coap_te::buffer(c);
+    EXPECT_EQ(coap_te::buffer_size(v), 12);
+    EXPECT_EQ(coap_te::buffer_size(m), 12);
+    EXPECT_EQ(coap_te::buffer_copy(m, v), 12);
+    EXPECT_EQ(0, std::memcmp(c, "12345\0" "67890\0", 12));
   }
 }
