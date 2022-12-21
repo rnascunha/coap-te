@@ -130,7 +130,7 @@ class vector_options {
     return buf_.size() == 0;
   }
 
-  [[nodiscard]] constexpr option
+  [[nodiscard]] option
   front() const noexcept {
     return *begin();
   }
