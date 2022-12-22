@@ -11,6 +11,9 @@
 #ifndef COAP_TE_DEBUG_HPP_
 #define COAP_TE_DEBUG_HPP_
 
+// system
+#include "coap-te/debug/error.hpp"
+
 // message
 #include "coap-te/debug/message/to_string.hpp"
 #include "coap-te/debug/message/message.hpp"

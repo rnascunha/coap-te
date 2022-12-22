@@ -8,9 +8,9 @@
  * 				Protocol (CoAP)
  * https://tools.ietf.org/html/rfc7959
  */
-#ifndef COAP_TE_BLOCKWISE_TRANSFER
-#define COAP_TE_BLOCKWISE_TRANSFER	1
-#endif /* COAP_TE_BLOCKWISE_TRANSFER */
+#ifndef COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER
+#define COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER	1
+#endif /* COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER */
 
 /**
  * RFC6690 - Constrained RESTful Environments (CoRE) Link Format
@@ -24,9 +24,9 @@
  * RFC8283 - CoAP (Constrained Application Protocol) over TCP, TLS, and WebSockets
  * https://tools.ietf.org/html/rfc8323
  */
-#ifndef COAP_TE_RELIABLE_CONNECTION
-#define COAP_TE_RELIABLE_CONNECTION 1
-#endif /* COAP_TE_RELIABLE_CONNECTION */
+#ifndef COAP_TE_ENABLE_STREAM_CONNECTION
+#define COAP_TE_ENABLE_STREAM_CONNECTION 1
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION */
 
 /**
  * RFC7641 - Observing Resources in the Constrained Application Protocol (CoAP)
@@ -40,9 +40,9 @@
  * RFC8132 - PATCH and FETCH Methods for the Constrained Application Protocol (CoAP)
  * https://tools.ietf.org/html/rfc8132
  */
-#ifndef COAP_TE_FETCH_PATCH
-#define COAP_TE_FETCH_PATCH	1
-#endif /* COAP_TE_FETCH_PATCH */
+#ifndef COAP_TE_ENABLE_FETCH_PATCH_VERBS
+#define COAP_TE_ENABLE_FETCH_PATCH_VERBS	1
+#endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS */
 
 /**
  * RFC7967 - Constrained Application Protocol (CoAP) Option for No Server Response
@@ -64,10 +64,10 @@ namespace CoAP{
 
 static constexpr std::uint16_t default_port = 5683;
 static constexpr std::uint16_t default_security_port = 5684;
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 static constexpr std::uint16_t default_ws_port = 80;
 static constexpr std::uint16_t default_wss_port = 433;
-#endif /* COAP_TE_RELIABLE_CONNECTION */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION */
 
 using disable = void*;
 

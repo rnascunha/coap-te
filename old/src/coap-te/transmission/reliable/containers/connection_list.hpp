@@ -7,7 +7,7 @@ namespace CoAP{
 namespace Transmission{
 namespace Reliable{
 
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 
 template<typename Conn,
 		unsigned Size>
@@ -32,7 +32,7 @@ class connection_list{
 		Conn	nodes_[Size];
 };
 
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 
 }//CoAP
 }//Transmission

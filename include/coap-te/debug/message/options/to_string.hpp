@@ -64,12 +64,12 @@ to_string(coap_te::message::options::content format) noexcept {
       return "exi";
     case ftype::json:          //  = 50,   // application/json
       return "json";
-#if COAP_TE_FETCH_PATCH == 1
+#if COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1
     case ftype::json_patch_json:  // = 51,   // application/json-patch+json
-      return "json-patch+json"
+      return "json-patch+json";
     case ftype::merge_patch_json:  // = 52   // application/merge-patch+json
-      return "merge-patch+json"
-#endif /* COAP_TE_FETCH_PATCH == 1 */
+      return "merge-patch+json";
+#endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
     default:
       break;
   }

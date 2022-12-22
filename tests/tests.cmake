@@ -12,7 +12,8 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 set(TEST_DIR    tests)
-set(TESTS       utility 
+set(TESTS       utility
+                error_code
                 sorted_no_alloc_list
                 sorted_list
                 core_traits

@@ -34,7 +34,7 @@ to_string(coap_te::message::type tp) noexcept {
     default:
       break;
   }
-  return "unknow";
+  return "unknown";
 }
 
 [[nodiscard]] constexpr std::string_view
@@ -52,14 +52,14 @@ to_string(coap_te::message::code co) noexcept {
       return "put";
     case code::cdelete:          // 0.04 DELETE
       return "delete";
-    #if  COAP_TE_FETCH_PATCH  == 1
+    #if  COAP_TE_ENABLE_FETCH_PATCH_VERBS  == 1
     case code::fetch:            // 0.05 FETCH
       return "fetch";
     case code::patch:            // 0.06 PATCH
       return "patch";
     case code::ipatch:          // 0.07 PATCH
       return "ipatch";
-    #endif /* COAP_TE_FETCH_PATCH == 1 */
+    #endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
     //  response
     //  success
     case code::success:          // 2.00 Success
@@ -74,10 +74,10 @@ to_string(coap_te::message::code co) noexcept {
       return "changed";
     case code::content:          // 2.05 Content
       return "content";
-#if  COAP_TE_BLOCKWISE_TRANSFER == 1
+#if  COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
     case code::ccontinue:        // 2.31 Continue
       return "continue";
-#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
+#endif /* COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1 */
     //  Client Error
     case code::bad_request:      // 4.00 Bad Request
       return "bad request";
@@ -93,24 +93,24 @@ to_string(coap_te::message::code co) noexcept {
       return "method not allowed";
     case code::not_accpetable:  // 4.06 Not Acceptable
       return "not accpetable";
-#if  COAP_TE_BLOCKWISE_TRANSFER == 1
+#if  COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
     case code::request_entity_incomplete:  // 4.08 Request Entity Incomplete
       return "request entity incomplete";
-#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
-#if  COAP_TE_FETCH_PATCH  == 1
+#endif /* COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1 */
+#if  COAP_TE_ENABLE_FETCH_PATCH_VERBS  == 1
     case code::conflict:                  // 4.09 Conflict
       return "conflict";
-#endif /* COAP_TE_FETCH_PATCH == 1 */
+#endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
     case code::precondition_failed:        // 4.12 Precondition Failed
       return "precondition failed";
     case code::request_entity_too_large:  // 4.13 Request Entity Too Large
       return "request entity too large";
     case code::unsupported_content_format:  // 4.15 Unsupported Content-Format
       return "unsupported content format";
-#if  COAP_TE_FETCH_PATCH  == 1
+#if  COAP_TE_ENABLE_FETCH_PATCH_VERBS  == 1
     case code::unprocessable_entity:    // 4.22 Unprocessable Entity
       return "unprocessable entity";
-#endif /* COAP_TE_FETCH_PATCH == 1 */
+#endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
     //  Server Error
     case code::internal_server_error:    // 5.00 Internal Server Error
       return "internal server error";
@@ -124,7 +124,7 @@ to_string(coap_te::message::code co) noexcept {
       return "gateway timeout";
     case code::proxying_not_supported:  // 5.05 Proxying Not Supported
       return "proxying not supported";
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
     case code::csm:                      // 7.01 CSM
       return "csm";
     case code::ping:                    // 7.02 Ping
@@ -135,7 +135,7 @@ to_string(coap_te::message::code co) noexcept {
       return "release";
     case code::abort:                    // 7.05 Abort
       return "abort";
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
     default:
       break;
   }
@@ -157,14 +157,14 @@ to_string_code(coap_te::message::code co) noexcept {
       return "0.03";
     case code::cdelete:          // 0.04 DELETE
       return "0.04";
-    #if  COAP_TE_FETCH_PATCH  == 1
+    #if COAP_TE_ENABLE_FETCH_PATCH_VERBS  == 1
     case code::fetch:            // 0.05 FETCH
       return "0.05";
     case code::patch:            // 0.06 PATCH
       return "0.06";
     case code::ipatch:          // 0.07 PATCH
       return "0.07";
-    #endif /* COAP_TE_FETCH_PATCH == 1 */
+    #endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
     //  response
     //  success
     case code::success:          // 2.00 Success
@@ -179,10 +179,10 @@ to_string_code(coap_te::message::code co) noexcept {
       return "2.04";
     case code::content:          // 2.05 Content
       return "2.05";
-#if  COAP_TE_BLOCKWISE_TRANSFER == 1
+#if  COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
     case code::ccontinue:        // 2.31 Continue
       return "2.31";
-#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
+#endif /* COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1 */
     //  Client Error
     case code::bad_request:      // 4.00 Bad Request
       return "4.00";
@@ -198,24 +198,24 @@ to_string_code(coap_te::message::code co) noexcept {
       return "4.05";
     case code::not_accpetable:  // 4.06 Not Acceptable
       return "4.06";
-#if  COAP_TE_BLOCKWISE_TRANSFER == 1
+#if  COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
     case code::request_entity_incomplete:  // 4.08 Request Entity Incomplete
       return "4.08";
-#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
-#if  COAP_TE_FETCH_PATCH  == 1
+#endif /* COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1 */
+#if  COAP_TE_ENABLE_FETCH_PATCH_VERBS  == 1
     case code::conflict:                  // 4.09 Conflict
       return "4.09";
-#endif /* COAP_TE_FETCH_PATCH == 1 */
+#endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
     case code::precondition_failed:        // 4.12 Precondition Failed
       return "4.12";
     case code::request_entity_too_large:  // 4.13 Request Entity Too Large
       return "4.13";
     case code::unsupported_content_format:  // 4.15 Unsupported Content-Format
       return "4.15";
-#if  COAP_TE_FETCH_PATCH  == 1
+#if  COAP_TE_ENABLE_FETCH_PATCH_VERBS  == 1
     case code::unprocessable_entity:    // 4.22 Unprocessable Entity
       return "4.22";
-#endif /* COAP_TE_FETCH_PATCH == 1 */
+#endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
     //  Server Error
     case code::internal_server_error:    // 5.00 Internal Server Error
       return "5.00";
@@ -229,7 +229,7 @@ to_string_code(coap_te::message::code co) noexcept {
       return "5.04";
     case code::proxying_not_supported:  // 5.05 Proxying Not Supported
       return "5.05";
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
     case code::csm:                      // 7.01 CSM
       return "7.01";
     case code::ping:                    // 7.02 Ping
@@ -240,7 +240,7 @@ to_string_code(coap_te::message::code co) noexcept {
       return "7.04";
     case code::abort:                    // 7.05 Abort
       return "7.05";
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
     default:
       break;
   }

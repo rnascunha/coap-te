@@ -9,7 +9,7 @@ namespace CoAP{
 namespace Message{
 namespace Reliable{
 
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 
 enum class extend_length
 {
@@ -47,7 +47,7 @@ struct message{
 template<CoAP::Message::code Code>
 struct option_type;
 
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 
 }//Reliable
 }//Message

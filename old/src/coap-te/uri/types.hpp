@@ -14,12 +14,12 @@ namespace URI{
 enum class scheme{
 	coap = 0,
 	coaps,
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 	coap_tcp,
 	coaps_tcp,
 	coap_ws,
 	coaps_ws
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 };
 
 enum class host_type{

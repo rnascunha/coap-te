@@ -62,7 +62,7 @@ bool decompose_scheme(uri<Host>& uri, char* uri_string, char** new_uri_string) n
 		uri.port = CoAP::default_security_port;
 		uri_string += 1;
 	}
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 	if constexpr(CheckReliable)
 	{
 		if(uri_string[0] == '+')
@@ -91,7 +91,7 @@ bool decompose_scheme(uri<Host>& uri, char* uri_string, char** new_uri_string) n
 				return false;
 		}
 	}
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 	*new_uri_string = uri_string;
 
 	return true;

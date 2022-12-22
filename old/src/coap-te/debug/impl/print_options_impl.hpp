@@ -59,7 +59,7 @@ static void print_payload(CoAP::Message::Option::option_template<OptionCode> con
 	}
 #endif /* COAP_TE_OPTION_NO_RESPONSE == 1 */
 
-#if	COAP_TE_BLOCKWISE_TRANSFER == 1
+#if	COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
 	if constexpr(std::is_same<OptionCode, CoAP::Message::Option::code>::value)
 	{
 		if(op.ocode == CoAP::Message::Option::code::block1 ||
@@ -77,7 +77,7 @@ static void print_payload(CoAP::Message::Option::option_template<OptionCode> con
 			return;
 		}
 	}
-#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
+#endif /* COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1 */
 
 	CoAP::Message::Option::config<OptionCode> const* oconfig = CoAP::Message::Option::get_config(op.ocode);
 	switch(oconfig->otype)

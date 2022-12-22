@@ -30,11 +30,11 @@ const char* code_string(CoAP::Message::code code) noexcept
 		case code::post: 				return "0.02 POST";
 		case code::put: 				return "0.03 PUT";
 		case code::cdelete: 			return "0.04 DELETE";
-#if COAP_TE_FETCH_PATCH == 1
+#if COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1
 		case code::fetch:				return "0.05 FETCH";
 		case code::patch:				return "0.06 PATCH";
 		case code::ipatch:				return "0.07 IPATCH";
-#endif /* COAP_TE_FETCH_PATCH == 1 */
+#endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
 		//response
 		//success
 		case code::success:				return "2.00 Success";
@@ -43,9 +43,9 @@ const char* code_string(CoAP::Message::code code) noexcept
 		case code::valid: 				return "2.03 Valid";
 		case code::changed: 			return "2.04 Changed";
 		case code::content: 			return "2.05 Content";
-#if	COAP_TE_BLOCKWISE_TRANSFER == 1
+#if	COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
 		case code::ccontinue:			return "2.31 Continue";
-#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
+#endif /* COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1 */
 		//Client Error
 		case code::bad_request: 		return "4.00 Bad Request";
 		case code::unauthorized: 		return "4.01 Unauthorized";
@@ -54,18 +54,18 @@ const char* code_string(CoAP::Message::code code) noexcept
 		case code::not_found: 			return "4.04 Not Found";
 		case code::method_not_allowed: 	return "4.05 Method Not Allowed";
 		case code::not_accpetable: 		return "4.06 Not Acceptable";
-#if	COAP_TE_BLOCKWISE_TRANSFER == 1
+#if	COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
 		case code::request_entity_incomplete: return "4.08 Request Entity Incomplete";
-#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
-#if	COAP_TE_FETCH_PATCH	== 1
+#endif /* COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1 */
+#if	COAP_TE_ENABLE_FETCH_PATCH_VERBS	== 1
 		case code::conflict:			return "4.09 Conflict";
-#endif /* COAP_TE_FETCH_PATCH == 1 */
+#endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
 		case code::precondition_failed: return "4.12 Precondition Failed";
 		case code::request_entity_too_large: return "4.13 Request Entity Too Large";
 		case code::unsupported_content_format: return "4.15 Unsupported Content-Format";
-#if COAP_TE_FETCH_PATCH == 1
+#if COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1
 		case code::unprocessable_entity:	return "4.22 Unprocessable Entity";
-#endif /* COAP_TE_FETCH_PATCH == 1 */
+#endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
 		//Server Error
 		case code::internal_server_error: return "5.00 Internal Server Error";
 		case code::not_implemented: 	return "5.01 Not Implemented";
@@ -76,13 +76,13 @@ const char* code_string(CoAP::Message::code code) noexcept
 #if COAP_TE_OPTION_HOP_LIMIT == 1
 		case code::hop_limit_reached:	return "5.08 Hop Limit Reached";
 #endif /* COAP_TE_OPTION_HOP_LIMIT == 1 */
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 		case code::csm:					return "7.01 CSM";
 		case code::ping:				return "7.02 Ping";
 		case code::pong:				return "7.03 Pong";
 		case code::release:				return "7.04 Release";
 		case code::abort:				return "7.05 Abort";
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 		default:
 			break;
 	}
@@ -101,11 +101,11 @@ const char* option_string(CoAP::Message::Option::code op) noexcept
 #endif /* COAP_TE_OBSERVABLE_RESOURCE == 1 */
 		case code::location_path: 	return "Location-Path";
 		case code::location_query: 	return "Location-Query";
-#if	COAP_TE_BLOCKWISE_TRANSFER == 1
+#if	COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
 		case code::block2:			return "Block2";
 		case code::block1:			return "Block1";
 		case code::size2:			return "Size2";
-#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
+#endif /* COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1 */
 		case code::max_age: 		return "Max-Age";
 		case code::proxy_uri: 		return "Proxy-Uri";
 		case code::proxy_scheme: 	return "Proxy-Scheme";
@@ -129,7 +129,7 @@ const char* option_string(CoAP::Message::Option::code op) noexcept
 	return "undefined";
 }
 
-#if	COAP_TE_BLOCKWISE_TRANSFER == 1
+#if	COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
 
 const char* option_string(CoAP::Message::Option::csm op) noexcept
 {
@@ -181,7 +181,7 @@ const char* option_string(CoAP::Message::Option::abort op) noexcept
 	return "undefined";
 }
 
-#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
+#endif /* COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1 */
 
 const char* content_format_string(CoAP::Message::content_format format) noexcept
 {
@@ -224,7 +224,7 @@ const char* scheme_string(CoAP::URI::scheme sch) noexcept
 			return "coap";
 		case scheme::coaps:
 			return "coaps";
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 		case scheme::coap_tcp:
 			return "coap+tcp";
 		case scheme::coaps_tcp:
@@ -233,7 +233,7 @@ const char* scheme_string(CoAP::URI::scheme sch) noexcept
 			return "coap+ws";
 		case scheme::coaps_ws:
 			return "coaps+ws";
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 		default:
 			break;
 	}

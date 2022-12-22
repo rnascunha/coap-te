@@ -14,7 +14,7 @@ namespace CoAP{
 namespace Message{
 namespace Reliable{
 
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 
 unsigned make_header(std::uint8_t* buffer, std::size_t buffer_len,
 		code mcode,
@@ -62,7 +62,7 @@ std::size_t serialize(std::uint8_t* buffer, std::size_t buffer_len,
 		void const* const payload, std::size_t payload_len,
 		CoAP::Error& ec) noexcept;
 
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 
 }//Reliable
 }//Message

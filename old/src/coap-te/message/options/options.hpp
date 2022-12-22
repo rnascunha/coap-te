@@ -35,11 +35,11 @@ enum class code {
 #endif /* COAP_TE_OPTION_HOP_LIMIT == 1 */
 	accept			= 17,	//Accept
 	location_query	= 20,	//Location-Query
-#if	COAP_TE_BLOCKWISE_TRANSFER == 1
+#if	COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
 	block2			= 23,	//Block2
 	block1			= 27,	//Block1
 	size2			= 28,	//Size2
-#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
+#endif /* COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1 */
 	proxy_uri		= 35,	//Proxy-Uri
 	proxy_scheme	= 39,	//Proxy-Scheme
 	size1			= 60,	//Size1
@@ -67,11 +67,11 @@ static constexpr const config<code> options[] = {
 #endif /* COAP_TE_OPTION_HOP_LIMIT == 1 */
 	{code::accept, 			false, 	type::uint},
 	{code::location_query, 	true, 	type::string},
-#if	COAP_TE_BLOCKWISE_TRANSFER == 1
+#if	COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
 	{code::block2,			false,	type::uint},
 	{code::block1,			false,	type::uint},
 	{code::size2,			false,	type::uint},
-#endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
+#endif /* COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1 */
 	{code::proxy_uri, 		false, 	type::string},
 	{code::proxy_scheme, 	false, 	type::string},
 	{code::size1, 			false, 	type::uint},
@@ -87,7 +87,7 @@ using node = node_option<code>;
 void create(option&, content_format const&) noexcept;
 void create(option&, accept const&) noexcept;
 
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 
 enum class csm{
 	max_message_size	= 2,
@@ -139,7 +139,7 @@ static constexpr const config<abort> options_abort[] = {
 using option_abort = option_template<abort>;
 using node_abort = node_option<abort>;
 
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 
 template<typename OptionCode>
 config<OptionCode> const * get_config(OptionCode ocode) noexcept
@@ -150,7 +150,7 @@ config<OptionCode> const * get_config(OptionCode ocode) noexcept
 			if(ocode == options[i].ocode)
 				return &options[i];
 	}
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 	else if constexpr(std::is_same<OptionCode, csm>::value)
 	{
 		for(unsigned i = 0; i < sizeof(options_csm) / sizeof(config<csm>); i++)
@@ -175,7 +175,7 @@ config<OptionCode> const * get_config(OptionCode ocode) noexcept
 			if(ocode == options_abort[i].ocode)
 				return &options_abort[i];
 	}
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 	return nullptr;
 }
 

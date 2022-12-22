@@ -196,7 +196,7 @@ bool print_byte_message(std::uint8_t const* arr, std::size_t size) noexcept
 	return true;
 }
 
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 
 template<typename OptionCode>
 static void print_message_options(CoAP::Message::Reliable::message const& msg,
@@ -334,7 +334,7 @@ bool print_byte_reliable_message(std::uint8_t const* arr, std::size_t size) noex
 	return true;
 }
 
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 
 }//Debug
 }//CoAP

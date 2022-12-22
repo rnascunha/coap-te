@@ -8,7 +8,7 @@ namespace CoAP{
 namespace Message{
 namespace Reliable{
 
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 
 template<CoAP::Message::code Code>
 struct option_type
@@ -46,7 +46,7 @@ struct option_type<CoAP::Message::code::abort>
 	using type = CoAP::Message::Option::abort;
 };
 
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 
 }//Reliable
 }//Message

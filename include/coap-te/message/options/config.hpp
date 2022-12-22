@@ -95,11 +95,11 @@ struct content_format {
     octet_stream    = 42,   // application/octet-stream
     exi             = 47,   // application/exi
     json            = 50,   // application/json
-#if COAP_TE_FETCH_PATCH == 1
+#if COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1
     // https://tools.ietf.org/html/rfc8132#section-6
     json_patch_json = 51,   // application/json-patch+json
     merge_patch_json = 52   // application/merge-patch+json
-#endif /* COAP_TE_FETCH_PATCH == 1 */
+#endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
   };
 };
 

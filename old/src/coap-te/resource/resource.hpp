@@ -83,7 +83,7 @@ class resource
 			return *this;
 		}
 
-#if COAP_TE_FETCH_PATCH == 1
+#if COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1
 		resource& fetch(callback_t cb = nullptr) noexcept
 		{
 			static_assert(UseExtraMethods, "Disabled extra methods");
@@ -104,16 +104,16 @@ class resource
 			ipatch_ = cb;
 			return *this;
 		}
-#endif /* COAP_TE_FETCH_PATCH == 1 */
+#endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
 		bool has_callback() const noexcept
 		{
 			if constexpr(!UseExtraMethods)
 				return get_ != nullptr || post_ != nullptr || del_ != nullptr || put_ != nullptr;
-#if COAP_TE_FETCH_PATCH == 1
+#if COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1
 			else
 				return get_ != nullptr || post_ != nullptr || del_ != nullptr || put_ != nullptr
 						|| fetch_ != nullptr || patch_ != nullptr || ipatch_ != nullptr;
-#endif /* COAP_TE_FETCH_PATCH == 1 */
+#endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
 		}
 
 		template<typename Message,
@@ -139,7 +139,7 @@ class resource
 					return del_ ? del_(request, response, engine), true : false;
 					break;
 				default:
-#if COAP_TE_FETCH_PATCH == 1
+#if COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1
 					if constexpr(UseExtraMethods)
 					{
 						switch(code)
@@ -154,7 +154,7 @@ class resource
 								break;
 						}
 					}
-#endif /* COAP_TE_FETCH_PATCH == 1 */
+#endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
 					break;
 			}
 			return false;
@@ -193,11 +193,11 @@ class resource
 		callback_ptr_t		put_;
 		callback_ptr_t		del_;
 
-#if COAP_TE_FETCH_PATCH == 1
+#if COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1
 		callback_ex_ptr_t	fetch_;
 		callback_ex_ptr_t	patch_;
 		callback_ex_ptr_t	ipatch_;
-#endif /* COAP_TE_FETCH_PATCH == 1 */
+#endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
 
 		description_type	desc_;
 };

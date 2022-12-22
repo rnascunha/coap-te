@@ -8,7 +8,7 @@ namespace CoAP{
 namespace Transmission{
 namespace Reliable{
 
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 
 template<typename Handler>
 class connection_list_empty{
@@ -30,7 +30,7 @@ class connection_list_empty{
 		constexpr unsigned size() const noexcept { return 0; }
 };
 
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 
 }//CoAP
 }//Transmission

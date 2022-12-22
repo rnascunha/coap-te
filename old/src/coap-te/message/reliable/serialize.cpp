@@ -6,7 +6,7 @@ namespace CoAP{
 namespace Message{
 namespace Reliable{
 
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 
 unsigned make_header(std::uint8_t* buffer, std::size_t buffer_len,
 		code mcode,
@@ -93,4 +93,4 @@ std::size_t set_message_length(std::uint8_t* buffer,
 }//CoAP
 
 
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */

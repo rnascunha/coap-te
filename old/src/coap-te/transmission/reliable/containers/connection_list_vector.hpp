@@ -8,7 +8,7 @@ namespace CoAP{
 namespace Transmission{
 namespace Reliable{
 
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 
 template<typename Connection>
 class connection_list_vector{
@@ -32,7 +32,7 @@ class connection_list_vector{
 		std::vector<Connection>	nodes_;
 };
 
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 
 }//CoAP
 }//Transmission

@@ -21,9 +21,9 @@ enum cclass : std::uint8_t {
   success       = 2,
   client_error  = 4,
   server_error  = 5,
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
   signaling      = 7
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 };
 
 constexpr std::uint8_t
@@ -38,12 +38,12 @@ enum class code : std::uint8_t {
   post        = mcode(cclass::request, 2),  // 0.02 POST
   put         = mcode(cclass::request, 3),  // 0.03 PUT
   cdelete     = mcode(cclass::request, 4),  // 0.04 DELETE
-  #if COAP_TE_FETCH_PATCH == 1
+  #if COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1
   // https://tools.ietf.org/html/rfc8132#section-6
   fetch       = mcode(cclass::request, 5),  // 0.05 FETCH
   patch       = mcode(cclass::request, 6),  // 0.06 PATCH
   ipatch      = mcode(cclass::request, 7),  // 0.07 PATCH
-  #endif /* COAP_TE_FETCH_PATCH == 1 */
+  #endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
   // response - https://tools.ietf.org/html/rfc7252#section-12.1.2
   // success
   success     = mcode(cclass::success, 0),  // 2.00 Success
@@ -52,9 +52,9 @@ enum class code : std::uint8_t {
   valid       = mcode(cclass::success, 3),  // 2.03 Valid
   changed     = mcode(cclass::success, 4),  // 2.04 Changed
   content     = mcode(cclass::success, 5),  // 2.05 Content
-  #if COAP_TE_BLOCKWISE_TRANSFER == 1
+  #if COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
   ccontinue   = mcode(cclass::success, 31),  // 2.31 Continue
-  #endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
+  #endif /* COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1 */
   // Client Error
   bad_request = mcode(cclass::client_error, 0),  // 4.00 Bad Request
   unauthorized = mcode(cclass::client_error, 1),  // 4.01 Unauthorized
@@ -65,15 +65,15 @@ enum class code : std::uint8_t {
               = mcode(cclass::client_error, 5),  // 4.05 Method Not Allowed
   not_accpetable
               = mcode(cclass::client_error, 6),  // 4.06 Not Acceptable
-  #if COAP_TE_BLOCKWISE_TRANSFER == 1
+  #if COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1
   // 4.08 Request Entity Incomplete
   request_entity_incomplete
               = mcode(cclass::client_error, 8),
-  #endif /* COAP_TE_BLOCKWISE_TRANSFER == 1 */
-  #if COAP_TE_FETCH_PATCH == 1
+  #endif /* COAP_TE_MESSAGE_OPTION_BLOCKWISE_TRANSFER == 1 */
+  #if COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1
   // https://tools.ietf.org/html/rfc8132#section-6
   conflict    = mcode(cclass::client_error, 9),  // 4.09 Conflict
-  #endif /* COAP_TE_FETCH_PATCH == 1 */
+  #endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
   precondition_failed
               = mcode(cclass::client_error, 12),  // 4.12 Precondition Failed
   // 4.13 Request Entity Too Large
@@ -82,11 +82,11 @@ enum class code : std::uint8_t {
   // 4.15 Unsupported Content-Format
   unsupported_content_format
               = mcode(cclass::client_error, 15),
-  #if COAP_TE_FETCH_PATCH == 1
+  #if COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1
   // https://tools.ietf.org/html/rfc8132#section-6
   unprocessable_entity
               = mcode(cclass::client_error, 22),  //  4.22 Unprocessable Entity
-  #endif /* COAP_TE_FETCH_PATCH == 1 */
+  #endif /* COAP_TE_ENABLE_FETCH_PATCH_VERBS == 1 */
   // Server Error
   internal_server_error
               = mcode(cclass::server_error, 0),  // 5.00 Internal Server Error
@@ -103,13 +103,13 @@ enum class code : std::uint8_t {
   hop_limit_reached
               = mcode(cclass::server_error, 8),  // 5.08 Hop Limit Reached
   #endif /* COAP_TE_OPTION_HOP_LIMIT == 1 */
-  #if COAP_TE_RELIABLE_CONNECTION == 1
+  #if COAP_TE_ENABLE_STREAM_CONNECTION == 1
   csm         = mcode(cclass::signaling, 1),  // 7.01 CSM
   ping        = mcode(cclass::signaling, 2),  // 7.02 Ping
   pong        = mcode(cclass::signaling, 3),  // 7.03 Pong
   release     = mcode(cclass::signaling, 4),  // 7.04 Release
   abort       = mcode(cclass::signaling, 5),  // 7.05 Abort
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 };
 
 [[nodiscard]] constexpr bool
@@ -126,10 +126,10 @@ is_client_error(code) noexcept;
 is_server_error(code) noexcept;
 [[nodiscard]] constexpr bool
 is_error(code) noexcept;
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 [[nodiscard]] constexpr bool
 is_signaling(code) noexcept;
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 
 [[nodiscard]] constexpr bool
 check_code(code) noexcept;

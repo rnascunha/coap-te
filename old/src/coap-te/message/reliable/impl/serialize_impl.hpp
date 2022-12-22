@@ -12,7 +12,7 @@ namespace CoAP{
 namespace Message{
 namespace Reliable{
 
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 
 template<bool SetLength /* = true */,
 		typename OptionCode /* = Option::code */,
@@ -98,7 +98,7 @@ std::size_t serialize(std::uint8_t* buffer, std::size_t buffer_len,
 	return SetLength ? set_message_length(buffer, buffer_len, offset, offset - 2 - token_len, ec) : offset;
 }
 
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 
 }//Reliable
 }//Message

@@ -41,12 +41,12 @@ int main(int argc, char** argv)
 		std::printf("Examples:\n");
 		std::printf("\t%s coap://[::1]:5683/path/to/resource?query=key\n", argv[0]);
 		std::printf("\t%s 'coaps://127.0.0.1:5683?value1=key&value2'\n", argv[0]);
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 		std::printf("\t%s 'coap+tcp://127.0.0.1:5683?value1=key&value2'\n", argv[0]);
 		std::printf("\t%s 'coaps+tcp://127.0.0.1:5683?value1=key&value2'\n", argv[0]);
 		std::printf("\t%s 'coap+ws://127.0.0.1:5683?value1=key&value2'\n", argv[0]);
 		std::printf("\t%s 'coaps+ws://127.0.0.1:5683?value1=key&value2'\n", argv[0]);
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 		return EXIT_FAILURE;
 	}
 
@@ -60,7 +60,7 @@ int main(int argc, char** argv)
 	 *
 	 * The template parameter of function decompose (true by default) is to accept
 	 * reliable connections, as defined at RFC8323. If you don't want to accept
-	 * this kind scheme, set it to false (COAP_TE_RELIABLE_CONNECTION macro must
+	 * this kind scheme, set it to false (COAP_TE_ENABLE_STREAM_CONNECTION macro must
 	 * also be == 1, the default)
 	 */
 	CoAP::URI::uri<CoAP::URI::ip_type> uri;

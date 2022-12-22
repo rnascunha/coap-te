@@ -21,11 +21,11 @@
 #include "coap-te/message/factory.hpp"
 #include "coap-te/message/parser.hpp"
 #include "coap-te/message/message_id.hpp"
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 #include "coap-te/message/reliable/serialize.hpp"
 #include "coap-te/message/reliable/factory.hpp"
 #include "coap-te/message/reliable/parser.hpp"
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 #if COAP_TE_OPTION_NO_RESPONSE == 1
 #include "coap-te/message/options/no_response.hpp"
 #endif /* COAP_TE_OPTION_NO_RESPONSE == 1 */
@@ -49,7 +49,7 @@
 #include "coap-te/transmission/transaction_list.hpp"
 #include "coap-te/transmission/transaction.hpp"
 #include "coap-te/transmission/engine.hpp"
-#if COAP_TE_RELIABLE_CONNECTION == 1
+#if COAP_TE_ENABLE_STREAM_CONNECTION == 1
 #include "coap-te/transmission/reliable/types.hpp"
 #include "coap-te/transmission/reliable/functions.hpp"
 #include "coap-te/transmission/reliable/request.hpp"
@@ -62,7 +62,7 @@
 #include "coap-te/transmission/reliable/containers/connection_list.hpp"
 #include "coap-te/transmission/reliable/engine_client.hpp"
 #include "coap-te/transmission/reliable/engine_server.hpp"
-#endif /* COAP_TE_RELIABLE_CONNECTION == 1 */
+#endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 
 #if COAP_TE_OBSERVABLE_RESOURCE == 1
 #include "coap-te/observe/types.hpp"

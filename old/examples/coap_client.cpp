@@ -489,7 +489,7 @@ int main(int argc, char** argv)
 	 *
 	 * The template parameter of function decompose (true by default) is to accept
 	 * reliable connections, as defined at RFC8323. If you don't want to accept
-	 * this kind scheme, set it to false (COAP_TE_RELIABLE_CONNECTION macro must
+	 * this kind scheme, set it to false (COAP_TE_ENABLE_STREAM_CONNECTION) macro must
 	 * also be == 1, the default)
 	 */
 	CoAP::URI::uri<CoAP::URI::ip_type> uri;
