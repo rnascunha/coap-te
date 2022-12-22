@@ -32,7 +32,7 @@ void test_option_list_success(Container& list) {    // NOLINT
 
   std::uint8_t data[100];
   coap_te::mutable_buffer buf(data);
-  std::error_code ec;
+  coap_te::error_code ec;
   std::size_t size = opt::serialize<opt::check_none>(list, buf, ec);
   EXPECT_FALSE(ec);
 

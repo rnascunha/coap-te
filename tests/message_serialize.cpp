@@ -12,12 +12,12 @@
 #include <gtest/gtest.h>
 
 #include <cstdint>
-#include <system_error>     // NOLINT
 #include <vector>
 #include <list>
 #include <set>
 #include <map>
 
+#include "coap-te/core/error.hpp"
 #include "coap-te/core/utility.hpp"
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/mutable_buffer.hpp"
@@ -98,7 +98,7 @@ void serialize_parse_header_success_impl(
             msg::message_id mid,
             const coap_te::const_buffer& tk,
             std::size_t expected_size) noexcept {
-  std::error_code ec;
+  coap_te::error_code ec;
   std::uint8_t data[msg::minimum_header_size + msg::max_token_size];    // NOLINT
   coap_te::mutable_buffer buf(data);
   auto size = msg::serialize_header(
@@ -109,7 +109,7 @@ void serialize_parse_header_success_impl(
   // Parsing
   if constexpr (Parse) {
     coap_te::const_buffer buf_p(data, size);
-    std::error_code ecp;
+    coap_te::error_code ecp;
     Message resp;
     auto size_p = msg::parse(buf_p, resp, ec);
     EXPECT_FALSE(ec);
@@ -169,7 +169,7 @@ TEST(CoAPMessage, SerializeParseHeaderSuccess) {
 TEST(CoAPMessage, SerializeHeaderFail) {
   {
     SCOPED_TRACE("Header = Buffer to small");
-    std::error_code ec;
+    coap_te::error_code ec;
     std::uint8_t data[msg::minimum_header_size - 1];    // NOLINT
     coap_te::mutable_buffer buf(data);
     auto size = msg::serialize_header(
@@ -180,12 +180,12 @@ TEST(CoAPMessage, SerializeHeaderFail) {
                   buf,
                   ec);
     EXPECT_TRUE(ec);
-    EXPECT_EQ(ec, std::errc::no_buffer_space);
+    EXPECT_EQ(ec, coap_te::errc::no_buffer_space);
     EXPECT_EQ(size, 0);
   }
   {
     SCOPED_TRACE("Header + token = Buffer to small");
-    std::error_code ec;
+    coap_te::error_code ec;
     std::uint8_t data[msg::minimum_header_size + 3];    // NOLINT
     coap_te::mutable_buffer buf(data);
     auto size = msg::serialize_header(
@@ -196,7 +196,7 @@ TEST(CoAPMessage, SerializeHeaderFail) {
                   buf,
                   ec);
     EXPECT_TRUE(ec);
-    EXPECT_EQ(ec, std::errc::no_buffer_space);
+    EXPECT_EQ(ec, coap_te::errc::no_buffer_space);
     EXPECT_EQ(size, 0);
   }
 }
@@ -218,7 +218,7 @@ void serialize_parse_success_impl(
   std::vector<Option> storage(opt_list);
 
   // Serialzing
-  std::error_code ecs;
+  coap_te::error_code ecs;
   coap_te::mutable_buffer buf(data);
 
   MessageSerialize req{tp, co, tk};
@@ -236,7 +236,7 @@ void serialize_parse_success_impl(
 
   // Parsing
   coap_te::const_buffer buf_p(data, size_s);
-  std::error_code ecp;
+  coap_te::error_code ecp;
   MessageParse resp;
   auto size_p = msg::parse(buf_p, resp, ecp);
   EXPECT_FALSE(ecp);

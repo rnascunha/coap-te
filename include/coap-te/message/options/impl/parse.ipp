@@ -12,8 +12,8 @@
 #define COAP_TE_MESSAGE_OPTIONS_IMPL_PARSE_IPP_
 
 #include <cstdint>
-#include <system_error>   // NOLINT
 
+#include "coap-te/core/error.hpp"
 #include "coap-te/core/traits.hpp"
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/options/config.hpp"
@@ -54,35 +54,36 @@ parse_option_header(std::uint8_t op,
 
 template<typename CheckOptions /* = check_all */,
          typename ConstBuffer>
-std::size_t parse(number_type before,
-                  ConstBuffer& input,                // NOLINT
-                  number_type& current,              // NOLINT
-                  ConstBuffer& output,               // NOLINT
-                  std::error_code& ec) noexcept {    // NOLINT
+constexpr std::size_t
+parse(number_type before,
+      ConstBuffer& input,                // NOLINT
+      number_type& current,              // NOLINT
+      ConstBuffer& output,               // NOLINT
+      coap_te::error_code& ec) noexcept {    // NOLINT
   static_assert(core::is_const_buffer_v<ConstBuffer>, "Must be const buffer");
 
   if (input.size() == 0) {
-    ec = std::make_error_code(std::errc::no_buffer_space);
+    ec = coap_te::errc::no_buffer_space;
     return 0;
   }
 
   header_parse delta;
   parse_option_header(input[0] >> 4, delta);
   if (delta.byte_op == extend::error) {
-    ec = std::make_error_code(std::errc::invalid_argument);
+    ec = coap_te::errc::invalid_option_header;
     return 0;
   }
 
   header_parse length;
   parse_option_header(input[0] & 0x0F, length);
   if (length.byte_op == extend::error) {
-    ec = std::make_error_code(std::errc::invalid_argument);
+    ec = coap_te::errc::invalid_option_header;
     return 0;
   }
 
   std::size_t size = 1 + delta.size + length.size;
   if (input.size() < size) {
-    ec = std::make_error_code(std::errc::no_buffer_space);
+    ec = coap_te::errc::no_buffer_space;
     return 0;
   }
 
@@ -106,7 +107,7 @@ std::size_t parse(number_type before,
   current = before + delta.data_extend;
 
   if (input.size() < length.data_extend) {
-    ec = std::make_error_code(std::errc::no_buffer_space);
+    ec = coap_te::errc::no_buffer_space;
     return size;
   }
   
@@ -126,10 +127,11 @@ std::size_t parse(number_type before,
 
 template<typename CheckOptions /* = check_all */,
          typename ConstBuffer>
-std::size_t parse(number_type before,
-                  ConstBuffer& input,                // NOLINT
-                  option& output,                    // NOLINT
-                  std::error_code& ec) noexcept {    // NOLINT
+constexpr std::size_t
+parse(number_type before,
+      ConstBuffer& input,                // NOLINT
+      option& output,                    // NOLINT
+      coap_te::error_code& ec) noexcept {    // NOLINT
   number_type current = invalid;
   coap_te::const_buffer buf;
   auto size = parse<CheckOptions>(before, input, current, buf, ec);

@@ -18,11 +18,12 @@ env:
   BUILD_TYPE: Release
 jobs:
   build:
-    name: ${{ matrix.config.name }}
+    name: ${{ matrix.config.name }} EX=${{ matrix.exception }}
     runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
+        exception: ['ON', 'OFF']
         config:
           - name: Ubuntu GCC
             os: ubuntu-latest
@@ -102,6 +103,7 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} 
           -DCOAP_TE_WITH_EXAMPLES=${{env.WITH_EXAMPLES}}
           -DCOAP_TE_WITH_TESTS=${{env.WITH_TESTS}}
+          -DCOAP_TE_ENABLE_EXCEPTIONS=${{matrix.exception}}
           -B ${{github.workspace}}/build
                 
       - name: Build library

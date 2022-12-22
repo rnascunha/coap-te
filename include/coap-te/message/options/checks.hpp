@@ -12,8 +12,8 @@
 #define COAP_TE_MESSAGE_OPTIONS_CHECKS_HPP_
 
 #include <initializer_list>
-#include <system_error> //NOLINT
 
+#include "coap-te/core/error.hpp"
 #include "coap-te/message/options/config.hpp"
 
 namespace coap_te {
@@ -73,14 +73,14 @@ using check_length = check_type<false, false, true>;
  * @param op The current option to be checked
  * @param type The type that was passed
  * @param opt_length The length of the option passed
- * @return std::error_code error code returned
- * @retval std::errc::no_protocol_option Invalid option (not found)
- * @retval std::errc::protocol_error Sequence option error
- * @retval std::errc::wrong_protocol_type Wrong type sent with option
- * @retval std::errc::argument_out_of_domain Argument length out of bound
+ * @return coap_te::error_code error code returned
+ * @retval coap_te::errc::no_protocol_option Invalid option (not found)
+ * @retval coap_te::errc::protocol_error Sequence option error
+ * @retval coap_te::errc::wrong_protocol_type Wrong type sent with option
+ * @retval coap_te::errc::argument_out_of_domain Argument length out of bound
  */
 template<typename CheckOptions>
-std::error_code
+coap_te::error_code
 check(number_type before,
       number_type op,
       format type,
@@ -94,7 +94,7 @@ check(number_type before,
  * @param types list of types to be checked
  */
 template<typename CheckOptions>
-std::error_code
+coap_te::error_code
 check(number_type before,
       number_type op,
       const std::initializer_list<format>& types,

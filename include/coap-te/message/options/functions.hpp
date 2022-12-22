@@ -11,8 +11,6 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_FUNCTIONS_HPP_
 #define COAP_TE_MESSAGE_OPTIONS_FUNCTIONS_HPP_
 
-#include <system_error>   // NOLINT
-
 #include "coap-te/message/options/config.hpp"
 
 namespace coap_te {

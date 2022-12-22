@@ -28,7 +28,7 @@ TEST(System, ErrorCode) {
     coap_te::error_code ec = coap_te::no_buffer_space;
     EXPECT_TRUE(ec);
     EXPECT_EQ(ec, coap_te::errc::no_buffer_space);
-    EXPECT_NE(ec, coap_te::errc::option_type);
+    EXPECT_NE(ec, coap_te::errc::option_format);
   }
 
 #if COAP_TE_ENABLE_STD_ERROR_CODE == 1
@@ -46,7 +46,7 @@ TEST(System, ErrorCode) {
     std::error_code ec = coap_te::no_buffer_space;
     EXPECT_TRUE(ec);
     EXPECT_EQ(ec, coap_te::errc::no_buffer_space);
-    EXPECT_NE(ec, coap_te::errc::option_type);
+    EXPECT_NE(ec, coap_te::errc::option_format);
   }
   {
     SCOPED_TRACE("convert coap_te::error_code to std::error_code");
@@ -54,7 +54,7 @@ TEST(System, ErrorCode) {
     std::error_code stdec = ec.error();
     EXPECT_TRUE(stdec);
     EXPECT_EQ(stdec, coap_te::errc::no_buffer_space);
-    EXPECT_NE(stdec, coap_te::errc::option_type);
+    EXPECT_NE(stdec, coap_te::errc::option_format);
   }
 #endif  // COAP_TE_ENABLE_STD_ERROR_CODE == 1
 #if COAP_TE_ENABLE_EXCEPTIONS == 1
@@ -62,7 +62,7 @@ TEST(System, ErrorCode) {
     EXPECT_THROW({
       throw coap_te::exception(
           coap_te::error_code{coap_te::errc::no_buffer_space});
-    }, coap_te::exception)
+    }, coap_te::exception);
   }
 #endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
 }

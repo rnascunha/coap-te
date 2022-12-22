@@ -11,9 +11,9 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_VECTOR_OPTIONS_HPP_
 #define COAP_TE_MESSAGE_OPTIONS_VECTOR_OPTIONS_HPP_
 
-#include <system_error>   // NOLINT
 #include <iostream>
 
+#include "coap-te/core/error.hpp"
 #include "coap-te/core/traits.hpp"
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/message/config.hpp"
@@ -44,17 +44,17 @@ class vector_options {
     const_iterator(number_type prev, const const_buffer& buf) noexcept
       : prev_(prev), buf_(buf) {}
 
-    const_iterator&
+    constexpr const_iterator&
     operator++() noexcept {
       value_type op;
-      std::error_code ec;
+      coap_te::error_code ec;
       parse(prev_, buf_, op, ec);
       prev_ = static_cast<number_type>(op.option_number());
 
       return *this;
     }
 
-    const_iterator
+    constexpr const_iterator
     operator++(int) noexcept {
       const_iterator temp(*this);
       this->operator++();
@@ -72,10 +72,10 @@ class vector_options {
       return is_end();
     }
 
-    [[nodiscard]] value_type
+    [[nodiscard]] constexpr value_type
     operator*() noexcept {
       value_type op;
-      std::error_code ec;
+      coap_te::error_code ec;
       coap_te::const_buffer copy_buf(buf_);
       parse(prev_, copy_buf, op, ec);
 
@@ -130,7 +130,7 @@ class vector_options {
     return buf_.size() == 0;
   }
 
-  [[nodiscard]] option
+  [[nodiscard]] constexpr option
   front() const noexcept {
     return *begin();
   }

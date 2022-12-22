@@ -12,8 +12,8 @@
 #define COAP_TE_MESSAGE_IMPL_PARSE_IPP_
 
 #include <cstdint>
-#include <system_error>     // NOLINT
 
+#include "coap-te/core/error.hpp"
 #include "coap-te/core/traits.hpp"
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/code.hpp"
@@ -28,32 +28,32 @@ template<typename ConstBuffer,
          typename Message>
 std::size_t parse_header(ConstBuffer& input,          // NOLINT
                   Message& message,                   // NOLINT
-                  std::error_code& ec) noexcept {     // NOLINT
+                  coap_te::error_code& ec) noexcept {     // NOLINT
   static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
                 "Must be of ype message");
   static_assert(is_message_v<Message>,
                 "Must be of type message");
 
   if (input.size() < minimum_header_size) {
-    ec = std::make_error_code(std::errc::no_buffer_space);
+    ec = coap_te::errc::no_buffer_space;
     return 0;
   }
 
   // byte 0
   std::uint8_t byte0 = input[0];
   if (byte0 >> 6 != version) {
-    ec = std::make_error_code(std::errc::protocol_not_supported);
+    ec = coap_te::errc::invalid_version;
     return 0;
   }
 
   std::size_t token_len = byte0 & 0xF;
   if (token_len > max_token_size) {
-    ec = std::make_error_code(std::errc::protocol_error);
+    ec = coap_te::errc::token_length;
     return 0;
   }
 
   if (input.size() < minimum_header_size + token_len) {
-    ec = std::make_error_code(std::errc::no_buffer_space);
+    ec = coap_te::errc::no_buffer_space;
     return 0;
   }
 
@@ -84,7 +84,7 @@ template<typename ConstBuffer,
          typename Message>
 std::size_t parse(ConstBuffer& input,               // NOLINT
                   Message& message,                 // NOLINT
-                  std::error_code& ec) noexcept {   // NOLINT
+                  coap_te::error_code& ec) noexcept {   // NOLINT
   static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
                 "Must be of ype message");
   static_assert(is_message_v<Message>,

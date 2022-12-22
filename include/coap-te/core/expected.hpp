@@ -14,11 +14,12 @@
 #define COAP_TE_CORE_EXPECTED_HPP_
 
 #include <variant>
-#include <system_error>   // NOLINT
+
+#include "coap-te/error.hpp"
 
 namespace coap_te {
 
-template<typename T, typename E = std::error_code>
+template<typename T, typename E = coap_te::error_code>
 class expected {
  public:
   constexpr

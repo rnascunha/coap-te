@@ -27,7 +27,7 @@ template<>
 std::size_t
 parse_options(const coap_te::const_buffer& buf,
               vector_options& list,               // NOLINT
-              std::error_code& ec) noexcept {     // NOLINT
+              coap_te::error_code& ec) noexcept {     // NOLINT
   auto [size, ecs] = option_list_size(buf);
   if (ecs) {
     ec = ecs;
@@ -43,7 +43,7 @@ template<typename OptionList>
 std::size_t
 parse_options(const coap_te::const_buffer& buf,
               OptionList& list,   // NOLINT
-              std::error_code& ec) noexcept {             // NOLINT
+              coap_te::error_code& ec) noexcept {             // NOLINT
   vector_options list_v;
   auto size = parse_options(buf, list_v, ec);
   if (ec) {

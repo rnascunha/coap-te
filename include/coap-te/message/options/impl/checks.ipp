@@ -12,9 +12,9 @@
 #define COAP_TE_MESSAGE_OPTIONS_IMPL_CHECKS_IPP_
 
 #include <type_traits>
-#include <system_error> //NOLINT
 #include <algorithm>
 
+#include "coap-te/core/error.hpp"
 #include "coap-te/core/traits.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/definitions.hpp"
@@ -28,51 +28,51 @@ namespace detail {
 template <class ...Ts>
 struct is_check_type : coap_te::core::is_instance<Ts..., check_type>{};
 
-std::error_code
+coap_te::error_code
 check_sequence(number_type before,
                number_type op,
                const definition& def) noexcept {
   if (before > op ||
       (before == op &&
        !def.repeatable)) {
-    return std::make_error_code(std::errc::protocol_error);
+    return coap_te::errc::option_sequence;
   }
-  return std::error_code{};
+  return coap_te::error_code{};
 }
 
-std::error_code
+coap_te::error_code
 check_format(format type,
              const definition& def) noexcept {
   if (def.type != type) {
-    return std::make_error_code(std::errc::wrong_protocol_type);
+    return coap_te::errc::option_format;
   }
-  return std::error_code{};
+  return coap_te::error_code{};
 }
 
-std::error_code
+coap_te::error_code
 check_format(const std::initializer_list<format>& types,
              const definition& def) noexcept {
   if (std::find(std::begin(types), std::end(types), def.type)
             == std::end(types)) {
-    return std::make_error_code(std::errc::wrong_protocol_type);
+    return coap_te::errc::option_format;
   }
-  return std::error_code{};
+  return coap_te::error_code{};
 }
 
-std::error_code
+coap_te::error_code
 check_length(std::size_t length,
              const definition& def) noexcept {
   if (length < def.length_min ||
       length > def.length_max) {
-    return std::make_error_code(std::errc::argument_out_of_domain);
+    return coap_te::errc::option_length;
   }
-  return std::error_code{};
+  return coap_te::error_code{};
 }
 
 }  // namespace detail
 
 template<typename CheckOptions>
-std::error_code
+coap_te::error_code
 check([[maybe_unused]] number_type before,
       [[maybe_unused]] number_type op,
       [[maybe_unused]] format type,
@@ -83,7 +83,7 @@ check([[maybe_unused]] number_type before,
   if constexpr (CheckOptions::check_any()) {
     const auto& def = get_definition(static_cast<number>(op));
     if (!def)
-      return std::make_error_code(std::errc::no_protocol_option);
+      return coap_te::errc::invalid_option;
     if constexpr (CheckOptions::sequence) {
       if (auto ec = detail::check_sequence(before, op, def))
         return ec;
@@ -105,7 +105,7 @@ check([[maybe_unused]] number_type before,
 }
 
 template<typename CheckOptions>
-std::error_code
+coap_te::error_code
 check([[maybe_unused]] number_type before,
       [[maybe_unused]] number_type op,
       [[maybe_unused]] const std::initializer_list<format>& types,
@@ -116,7 +116,7 @@ check([[maybe_unused]] number_type before,
   if constexpr (CheckOptions::check_any()) {
     const auto& def = get_definition(static_cast<number>(op));
     if (!def)
-      return std::make_error_code(std::errc::no_protocol_option);
+      return coap_te::errc::invalid_option;
     if constexpr (CheckOptions::sequence) {
       if (auto ec = detail::check_sequence(before, op, def))
         return ec;

@@ -18,6 +18,7 @@
 #include <list>
 #include <map>
 
+#include "coap-te/core/error.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/parse.hpp"
 #include "coap-te/message/options/option.hpp"
@@ -47,12 +48,12 @@ size(const OptionList& list) noexcept {
   return s;
 }
 
-[[nodiscard]] std::pair<std::size_t, std::error_code>
+[[nodiscard]] std::pair<std::size_t, coap_te::error_code>
 option_list_size(
   const coap_te::const_buffer& buf) noexcept {   // NOLINT
   coap_te::const_buffer cbuf(buf);
   number_type prev = invalid;
-  std::error_code ec;
+  coap_te::error_code ec;
 
   while (cbuf.size() != 0 && cbuf[0] != coap_te::message::payload_marker) {
     option op;

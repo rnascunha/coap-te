@@ -11,12 +11,12 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_IMPL_SERIALIZE_IPP_
 #define COAP_TE_MESSAGE_OPTIONS_IMPL_SERIALIZE_IPP_
 
-#include <system_error>   //NOLINT
 #include <string_view>
 #include <utility>
 #include <cstring>        // std::memcpy
 #include <cstdint>
 
+#include "coap-te/core/error.hpp"
 #include "coap-te/core/utility.hpp"
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/byte_order.hpp"
@@ -63,7 +63,7 @@ serialize(number_type before,
           number_type op,
           const ConstBuffer& input,
           MutableBuffer& output,              // NOLINT
-          std::error_code& ec) noexcept {     // NOLINT
+          coap_te::error_code& ec) noexcept {     // NOLINT
   static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
                 "Must be const_buffer type");
   static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
@@ -77,7 +77,7 @@ serialize(number_type before,
 
   std::size_t size = 1 + delta.size + length.size + input.size();
   if (size > output.size()) {
-    ec = std::make_error_code(std::errc::no_buffer_space);
+    ec = coap_te::errc::no_buffer_space;
     return 0;
   }
 
@@ -118,7 +118,7 @@ serialize(number_type before,
           number_type op,
           const ConstBuffer& input,
           MutableBuffer& output,              // NOLINT
-          std::error_code& ec) noexcept {     // NOLINT
+          coap_te::error_code& ec) noexcept {     // NOLINT
   if constexpr (CheckOptions::check_any()) {
     ec = check<CheckOptions>(before, op,
                     {format::opaque, format::string}, input.size());
@@ -140,7 +140,7 @@ serialize(number_type before,
           number_type op,
           UnsignedType input,
           MutableBuffer& output,              // NOLINT
-          std::error_code& ec) noexcept {     // NOLINT
+          coap_te::error_code& ec) noexcept {     // NOLINT
   static_assert(std::is_unsigned_v<UnsignedType>, "Must be unsigned");
 
   auto [value, size] = ::coap_te::core::to_small_big_endian(input);
@@ -163,7 +163,7 @@ template<typename CheckOptions /* = check_all */,
 serialize(number_type before,
           number_type op,
           MutableBuffer& output,              // NOLINT
-          std::error_code& ec) noexcept {     // NOLINT
+          coap_te::error_code& ec) noexcept {     // NOLINT
   if constexpr (CheckOptions::check_any()) {
     ec = check<CheckOptions>(before, op, format::empty, 0u);
     if (ec)
@@ -182,7 +182,7 @@ template<typename CheckOptions /* = check_all */,
 serialize(ForwardIt begin,
           ForwardIt end,
           MutableBuffer& output,               // NOLINT
-          std::error_code& ec) noexcept {      // NOLINT
+          coap_te::error_code& ec) noexcept {      // NOLINT
   static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer");
   std::size_t size = 0;
@@ -206,7 +206,7 @@ template<typename CheckOptions /* = check_all */,
 [[nodiscard]] constexpr std::size_t
 serialize(const Container& option_list,
           MutableBuffer& output,              // NOLINT
-          std::error_code& ec) noexcept {      // NOLINT
+          coap_te::error_code& ec) noexcept {      // NOLINT
   static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer");
   return serialize(option_list.begin(),

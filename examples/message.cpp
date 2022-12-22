@@ -42,7 +42,7 @@ int main() {
   std::cout << "Serializing... ";
   std::uint8_t data[100];
   mutable_buffer buf(data, 100);
-  std::error_code ecs;
+  coap_te::error_code ecs;
   auto size_s = req.serialize(0x1234, buf, ecs);
   if (ecs) {
     std::cerr << "Fail["
@@ -59,7 +59,7 @@ int main() {
    */
   std::cout << "-----------------\nParsing... ";
   const_buffer buf_p(data, size_s);
-  std::error_code ecp;
+  coap_te::error_code ecp;
   response resp;
   auto size_p = message::parse(buf_p, resp, ecp);
   if (ecp) {

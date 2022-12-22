@@ -57,8 +57,8 @@ TEST(CoAPMessage, OptionConstructor) {
     EXPECT_EQ(opaque_op.data_size(), 5);
     EXPECT_TRUE(opaque_op.is_valid());
   }
-  // Faling constructor - NOT throwing!
   {
+    SCOPED_TRACE("Faling constructor - NOT throwing!");
     {
       // Empty option not empty
       opt::option empty_op = opt::create<
@@ -94,28 +94,30 @@ TEST(CoAPMessage, OptionConstructor) {
       EXPECT_FALSE(opaque_op.is_valid());
     }
   }
-  // Faling constructor - throwing!
+#if COAP_TE_ENABLE_EXCEPTIONS == 1
   {
+    SCOPED_TRACE("Faling constructor - throwing!");
     {
       // Empty option not empty
-      EXPECT_THROW(::create(opt::number::if_none_match, 1), std::system_error);
+      EXPECT_THROW(::create(opt::number::if_none_match, 1), coap_te::exception);
     }
     {
       // Unsigned option empty
-      EXPECT_THROW(::create(opt::number::uri_port), std::system_error);
+      EXPECT_THROW(::create(opt::number::uri_port), coap_te::exception);
     }
     {
       // String option opaque
       unsigned char arr[] = {1, 2, 3, 4, 5};
       EXPECT_THROW(::create(opt::number::uri_host, coap_te::const_buffer(arr)),
-                   std::system_error);
+                   coap_te::exception);
     }
     {
       // Opaque option string
       EXPECT_THROW(::create(opt::number::if_match, "myoption"),
-                   std::system_error);
+                   coap_te::exception);
     }
   }
+#endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
 }
 
 std::size_t calc_options_size(
@@ -139,7 +141,7 @@ void test_serialize_parse_success(
                   const coap_te::const_buffer& buf_in) {
   std::uint8_t data[256];
   coap_te::mutable_buffer buf(data);
-  std::error_code ecs;
+  coap_te::error_code ecs;
 
   opt::option ops = opt::create
                   <opt::check_type<true, false, true>>
@@ -151,7 +153,7 @@ void test_serialize_parse_success(
                         static_cast<opt::number_type>(current),
                         buf_in.size()));
 
-  std::error_code ecp;
+  coap_te::error_code ecp;
   opt::option opp;
   coap_te::const_buffer input(data, size_s);
   auto size_p = opt::parse(static_cast<opt::number_type>(before),

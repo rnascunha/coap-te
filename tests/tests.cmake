@@ -44,7 +44,7 @@ foreach(TEST ${TESTS})
         CXX_EXTENSIONS OFF
         RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_TEST})
 
-    if (NOT MSVC)
+    if (NOT MSVC AND COAP_TE_ENABLE_EXCEPTIONS)
       target_compile_options(${TEST} PUBLIC -fexceptions)
     endif()
 

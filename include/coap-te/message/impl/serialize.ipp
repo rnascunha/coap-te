@@ -11,8 +11,7 @@
 #ifndef COAP_TE_MESSAGE_IMPL_SERIALIZE_IPP_
 #define COAP_TE_MESSAGE_IMPL_SERIALIZE_IPP_
 
-#include <system_error>     // NOLINT
-
+#include "coap-te/core/error.hpp"
 #include "coap-te/core/traits.hpp"
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/message/config.hpp"
@@ -30,7 +29,7 @@ std::size_t
 serialize_header(type tp, code co, message_id mid,
                 const ConstBuffer& token,
                 MutableBuffer& output,          //NOLINT
-                std::error_code& ec) noexcept { // NOLINT
+                coap_te::error_code& ec) noexcept { // NOLINT
   static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
                 "Must be const buffer type");
   static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
@@ -40,7 +39,7 @@ serialize_header(type tp, code co, message_id mid,
                 static_cast<std::uint8_t>(clamp_token_size(token.size()));
   std::size_t size = minimum_header_size + token_len;
   if (output.size() < size) {
-    ec = std::make_error_code(std::errc::no_buffer_space);
+    ec = coap_te::errc::no_buffer_space;
     return 0;
   }
 
@@ -57,25 +56,6 @@ serialize_header(type tp, code co, message_id mid,
   return size;
 }
 
-template<typename ConstBuffer,
-         typename MutableBuffer>
-std::size_t
-serialize_header(type tp, code co, message_id mid,
-                const ConstBuffer& token,
-                MutableBuffer& output) {         //NOLINT
-  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
-                "Must be const buffer type");
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
-                "Must be mutable buffer type");
-
-  std::error_code ec;
-  auto size = serialize_header(tp, co, mid, token, output, ec);
-  if (ec) {
-    throw std::system_error{ec};
-  }
-  return size;
-}
-
 template<typename CheckOptions /* = coap_te::message::options::check_none */,
          typename ConstBufferToken,
          typename ConstBufferPayload,
@@ -87,7 +67,7 @@ serialize(type tp, code co, message_id mid,
           const OptionList& opt_list,
           const ConstBufferPayload& payload,
           MutableBuffer& output,          //NOLINT
-          std::error_code& ec) noexcept { // NOLINT
+          coap_te::error_code& ec) noexcept { // NOLINT
   static_assert(coap_te::core::is_const_buffer_v<ConstBufferToken>,
                 "Must be const buffer type");
   static_assert(coap_te::core::is_const_buffer_v<ConstBufferPayload>,
@@ -111,7 +91,7 @@ serialize(type tp, code co, message_id mid,
     return size;
 
   if (output.size() < 1 + payload.size()) {
-    ec = std::make_error_code(std::errc::no_buffer_space);
+    ec = coap_te::errc::no_buffer_space;
     return size;
   }
   size += 1 + payload.size();
@@ -120,6 +100,27 @@ serialize(type tp, code co, message_id mid,
   std::memcpy(output.data(), payload.data(), payload.size());
   output += payload.size();
 
+  return size;
+}
+
+#if COAP_TE_ENABLE_EXCEPTIONS == 1
+
+template<typename ConstBuffer,
+         typename MutableBuffer>
+std::size_t
+serialize_header(type tp, code co, message_id mid,
+                const ConstBuffer& token,
+                MutableBuffer& output) {         //NOLINT
+  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
+                "Must be const buffer type");
+  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+                "Must be mutable buffer type");
+
+  coap_te::error_code ec;
+  auto size = serialize_header(tp, co, mid, token, output, ec);
+  if (ec) {
+    throw coap_te::exception{ec};
+  }
   return size;
 }
 
@@ -143,16 +144,18 @@ serialize(type tp, code co, message_id mid,
   static_assert(options::is_option_list_v<OptionList>,
                 "Must be option list type");
 
-  std::error_code ec;
+  coap_te::error_code ec;
   auto size = serialize<CheckOptions>(tp, co, mid,
                                       token, opt_list,
                                       payload, output,
                                       ec);
   if (ec) {
-    throw std::system_error{ec};
+    throw coap_te::exception{ec};
   }
   return size;
 }
+
+#endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
 
 }  // namespace message
 }  // namespace coap_te

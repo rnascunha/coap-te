@@ -11,8 +11,7 @@
 #ifndef COAP_TE_MESSAGE_PARSE_HPP_
 #define COAP_TE_MESSAGE_PARSE_HPP_
 
-#include <system_error>   // NOLINT
-
+#include "coap-te/core/error.hpp"
 #include "coap-te/message/message.hpp"
 
 namespace coap_te {
@@ -22,13 +21,13 @@ template<typename ConstBuffer,
          typename Message>
 std::size_t parse_header(ConstBuffer&,
                   Message&,
-                  std::error_code&) noexcept;
+                  coap_te::error_code&) noexcept;
 
 template<typename ConstBuffer,
          typename Message>
 std::size_t parse(ConstBuffer&,
                   Message&,
-                  std::error_code&) noexcept;
+                  coap_te::error_code&) noexcept;
 
 }  // namespace message
 }  // namespace coap_te

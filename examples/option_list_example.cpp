@@ -49,7 +49,7 @@ int main() {
 
   std::uint8_t data_s[100];
   coap_te::mutable_buffer buf_s(data_s);
-  std::error_code ec;
+  coap_te::error_code ec;
   auto size_s = opt::serialize(list.begin(), list.end(), buf_s, ec);
   if (ec) {
     std::cerr << "Error! [" << ec.value() << "] " << ec.message() << '\n';

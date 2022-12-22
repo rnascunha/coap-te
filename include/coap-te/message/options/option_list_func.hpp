@@ -12,7 +12,6 @@
 #define COAP_TE_MESSAGE_OPTIONS_OPTION_LIST_FUNC_HPP_
 
 #include <utility>
-#include <system_error>   // NOLINT
 
 #include "coap-te/core/const_buffer.hpp"
 
@@ -49,10 +48,10 @@ size(const OptionList& list) noexcept;
  * options list
  * 
  * @param buf buffer to calculate
- * @return std::pair<std::size_t, std::error_code> the size calcuated 
+ * @return std::pair<std::size_t, coap_te::error_code> the size calcuated 
  * or a error
  */
-[[nodiscard]] std::pair<std::size_t, std::error_code>
+[[nodiscard]] std::pair<std::size_t, coap_te::error_code>
 option_list_size(const coap_te::const_buffer& buf) noexcept;
 
 /**

@@ -189,7 +189,7 @@ class option {
            typename MutableBuffer>
   std::size_t serialize(number before,
                         MutableBuffer& output,                  //NOLINT
-                        std::error_code& ec) const noexcept {   //NOLINT
+                        coap_te::error_code& ec) const noexcept {   //NOLINT
     static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
                   "Must be mutable buffer type");
     using n_check = check_type<CheckOptions::sequence, false, false>;
@@ -208,17 +208,19 @@ class option {
     }, data_);
   }
 
+#if COAP_TE_ENABLE_EXCEPTIONS == 1
   template<typename CheckOptions = check_sequence,
            typename MutableBuffer>
   std::size_t serialize(number before,
                         MutableBuffer& output) const {   //NOLINT
-    std::error_code ec;
+    coap_te::error_code ec;
     auto size = serialize<CheckOptions>(before, output, ec);
     if (ec) {
-      throw std::system_error{ec};
+      throw coap_te::exception{ec};
     }
     return size;
   }
+#endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
 
  private:
   value_type  data_;

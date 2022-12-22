@@ -11,8 +11,7 @@
 #ifndef COAP_TE_MESSAGE_SERIALIZE_HPP_
 #define COAP_TE_MESSAGE_SERIALIZE_HPP_
 
-#include <system_error>     // NOLINT
-
+#include "coap-te/core/error.hpp"
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/code.hpp"
@@ -27,7 +26,22 @@ std::size_t
 serialize_header(type, code, message_id,
                 const ConstBuffer& token,
                 MutableBuffer&,         //NOLINT
-                std::error_code&) noexcept;
+                coap_te::error_code&) noexcept;
+
+template<typename CheckOptions = coap_te::message::options::check_none,
+         typename ConstBufferToken,
+         typename ConstBufferPayload,
+         typename MutableBuffer,
+         typename OptionList>
+std::size_t
+serialize(type, code, message_id,
+          const ConstBufferToken& token,
+          const OptionList& opt_list,
+          const ConstBufferPayload& payload,
+          MutableBuffer&,         //NOLINT
+          coap_te::error_code&) noexcept;
+
+#if COAP_TE_ENABLE_EXCEPTIONS == 1
 
 template<typename ConstBuffer,
          typename MutableBuffer>
@@ -46,20 +60,9 @@ serialize(type, code, message_id,
           const ConstBufferToken& token,
           const OptionList& opt_list,
           const ConstBufferPayload& payload,
-          MutableBuffer&,         //NOLINT
-          std::error_code&) noexcept;
-
-template<typename CheckOptions = coap_te::message::options::check_none,
-         typename ConstBufferToken,
-         typename ConstBufferPayload,
-         typename MutableBuffer,
-         typename OptionList>
-std::size_t
-serialize(type, code, message_id,
-          const ConstBufferToken& token,
-          const OptionList& opt_list,
-          const ConstBufferPayload& payload,
           MutableBuffer&);         //NOLINT
+
+#endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
 
 }  // namespace message
 }  // namespace coap_te

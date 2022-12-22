@@ -11,8 +11,7 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_PARSE_OPTIONS_HPP_
 #define COAP_TE_MESSAGE_OPTIONS_PARSE_OPTIONS_HPP_
 
-#include <system_error>     // NOLINT
-
+#include "coap-te/core/error.hpp"
 #include "coap-te/core/const_buffer.hpp"
 
 namespace coap_te {
@@ -32,7 +31,7 @@ template<typename OptionList>
 std::size_t
 parse_options(const coap_te::const_buffer& buf,
               OptionList& list,               // NOLINT
-              std::error_code& ec) noexcept;  // NOLINT
+              coap_te::error_code& ec) noexcept;  // NOLINT
 
 }  // namespace options
 }  // namespace message

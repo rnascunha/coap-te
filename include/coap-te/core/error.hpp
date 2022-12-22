@@ -12,6 +12,7 @@
 #define COAP_TE_CORE_ERROR_HPP_
 
 #include <string_view>
+
 #if COAP_TE_ENABLE_STD_ERROR_CODE == 1
 #include <system_error>     // NOLINT
 #include <string>
@@ -30,11 +31,15 @@ category_name = "coap-te";
 enum errc {
   // system
   no_buffer_space = 10,
-  // options
-  invalid_option = 20,
-  option_repeated,
-  option_type,
+  // message
+  invalid_version = 20,
+  token_length,
+  // message/options
+  invalid_option = 30,
+  option_sequence,
+  option_format,
   option_length,
+  invalid_option_header
 };
 
 [[nodiscard]] constexpr std::string_view
@@ -43,14 +48,20 @@ error_message(errc ec) noexcept {
   switch (ec) {
     case errc::no_buffer_space:
       return "no buffer space";
+    case errc::invalid_version:
+      return "invalid version";
+    case errc::token_length:
+      return "token length error";
     case errc::invalid_option:
       return "invalid option";
-    case errc::option_repeated:
-      return "option repeated error";
-    case errc::option_type:
-      return "option type error";
+    case errc::option_sequence:
+      return "option sequence error";
+    case errc::option_format:
+      return "option format error";
     case errc::option_length:
       return "option length error";
+    case errc::invalid_option_header:
+      return "invalid option header";
     default:
       break;
   }
@@ -178,7 +189,7 @@ class exception : std::exception {
 
   const char*
   what() const noexcept {
-    return ec_.message();
+    return ec_.message().data();
   }
 
  private:

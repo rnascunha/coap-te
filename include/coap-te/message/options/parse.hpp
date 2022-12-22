@@ -12,9 +12,9 @@
 #define COAP_TE_MESSAGE_OPTIONS_PARSE_HPP_
 
 #include <cstdint>
-#include <system_error>   // NOLINT
 #include <utility>
 
+#include "coap-te/core/error.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/checks.hpp"
 #include "coap-te/message/options/option.hpp"
@@ -25,20 +25,20 @@ namespace options {
 
 template<typename CheckOptions = check_all,
          typename ConstBuffer>
-std::size_t parse(number_type before,
-                  ConstBuffer& input,                // NOLINT
-                  number_type& current,              // NOLINT
-                  ConstBuffer& output,               // NOLINT
-                  std::error_code& ec) noexcept;     // NOLINT
+constexpr std::size_t
+parse(number_type before,
+      ConstBuffer& input,                // NOLINT
+      number_type& current,              // NOLINT
+      ConstBuffer& output,               // NOLINT
+      coap_te::error_code& ec) noexcept;     // NOLINT
 
 template<typename CheckOptions = check_all,
          typename ConstBuffer>
-std::size_t parse(number_type before,
-                  ConstBuffer& input,                // NOLINT
-                  option& output,                    // NOLINT
-                  std::error_code& ec) noexcept;     // NOLINT
-
-
+constexpr std::size_t
+parse(number_type before,
+      ConstBuffer& input,                // NOLINT
+      option& output,                    // NOLINT
+      coap_te::error_code& ec) noexcept;     // NOLINT
 
 }  // namespace options
 }  // namespace message
