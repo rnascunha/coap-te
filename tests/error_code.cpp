@@ -57,4 +57,12 @@ TEST(System, ErrorCode) {
     EXPECT_NE(stdec, coap_te::errc::option_type);
   }
 #endif  // COAP_TE_ENABLE_STD_ERROR_CODE == 1
+#if COAP_TE_ENABLE_EXCEPTIONS == 1
+  {
+    EXPECT_THROW({
+      throw coap_te::exception(
+          coap_te::error_code{coap_te::errc::no_buffer_space});
+    }, coap_te::exception)
+  }
+#endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
 }

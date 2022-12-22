@@ -18,6 +18,10 @@
 #include <type_traits>
 #endif  // COAP_TE_ENABLE_STD_ERROR_CODE == 1
 
+#if COAP_TE_ENABLE_EXCEPTIONS == 1
+#include <exception>
+#endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
+
 namespace coap_te {
 
 static constexpr const char*
@@ -157,5 +161,32 @@ namespace std {
 }  // namespace std
 
 #endif  // COAP_TE_ENABLE_STD_ERROR_CODE == 1
+
+#if COAP_TE_ENABLE_EXCEPTIONS == 1
+
+namespace coap_te {
+
+class exception : std::exception {
+ public:
+  exception(const error_code& ec) noexcept    // NOLINT
+    : ec_(ec) {}
+
+  const error_code&
+  code() const noexcept {
+    return ec_;
+  }
+
+  const char*
+  what() const noexcept {
+    return ec_.message();
+  }
+
+ private:
+  coap_te::error_code ec_;
+};
+
+}  // namespace coap_te
+
+#endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
 
 #endif  // COAP_TE_CORE_ERROR_HPP_
