@@ -134,7 +134,7 @@ receive(void* buffer, std::size_t buffer_len, endpoint& ep, CoAP::Error& ec) noe
 	/**
 	 * sockaddr_storage fits both IPv4 and IPv6
 	 */
-	unsigned addr_len = sizeof(struct sockaddr_storage);
+	socklen_t addr_len = sizeof(struct sockaddr_storage);
 	int recv = ::recvfrom(socket_,
 			buffer, buffer_len, 0,
 			reinterpret_cast<struct sockaddr*>(ep.native()), &addr_len);

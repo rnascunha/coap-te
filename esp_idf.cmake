@@ -4,7 +4,7 @@ list(APPEND MAIN_SRC ${SRC_DIR_PORT}/c_standard_port.cpp)
 
 idf_component_register(SRCS ${MAIN_SRC} ${SRC_PORT_POSIX} ${SRC_PORT_ESP_MESH}
                        INCLUDE_DIRS ${MAIN_INCLUDE_DIRS}
-                       REQUIRES esp_timer)
+                       REQUIRES esp_timer esp_wifi)
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/third/tree_trunks")
 target_link_libraries(${COMPONENT_LIB} PUBLIC tree_trunks)
