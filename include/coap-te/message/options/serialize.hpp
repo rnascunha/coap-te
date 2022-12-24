@@ -14,7 +14,7 @@
 #include <type_traits>
 
 #include "coap-te/core/error.hpp"
-#include "coap-te/message/options/checks.hpp" 
+#include "coap-te/message/options/checks.hpp"
 
 namespace coap_te {
 namespace message {

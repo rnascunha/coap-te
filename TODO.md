@@ -106,4 +106,6 @@ At the end, remember:
 * 'options list' types use 'count_options' to return the number of options and 'size' to return the serilized size of the message. Is this confusining?
 * Also, equality (==) and less operator (<) just compare the option number, not the data. Is this also confusing?
 * The iterator interface at const_buffer and mutable_buffer necessary?
-* Generalize more 'is_option' trait
+* Generalize more 'is_option' trait;
+* 'option' is inherent from 'option_base'. Is this a good solution? Dificults to remove:
+* * Declare the operator '==' and '<' in a generic way, not needing in every option-like class;

@@ -23,7 +23,7 @@ namespace message {
 namespace options {
 
 template<typename Option,
-         typename std::enable_if_t<is_option_v<Option>, int> = 0>
+         typename = std::enable_if_t<is_option_v<Option>>>
 [[nodiscard]] constexpr bool
 is_valid(Option const& op) noexcept {
   return op.option_number() != number::invalid;
@@ -31,7 +31,7 @@ is_valid(Option const& op) noexcept {
 
 template<typename Unsigned = unsigned,
          typename Option,
-         typename std::enable_if_t<is_option_v<Option>, int> = 0>
+         typename = std::enable_if_t<is_option_v<Option>>>
 constexpr Unsigned
 unsigned_option(const Option& op) noexcept {
   return unsigned_option<Unsigned>(
@@ -41,7 +41,7 @@ unsigned_option(const Option& op) noexcept {
 
 
 template<typename Option,
-         typename std::enable_if_t<is_option_v<Option>, int> = 0>
+        typename = std::enable_if_t<is_option_v<Option>>>
 [[nodiscard]] constexpr std::size_t
 header_size(const Option& op, number previous) noexcept {
   std::size_t size = 1;
@@ -58,39 +58,11 @@ header_size(const Option& op, number previous) noexcept {
 }
 
 template<typename Option,
-         typename std::enable_if_t<is_option_v<Option>, int> = 0>
+         typename = std::enable_if_t<is_option_v<Option>>>
 [[nodiscard]] constexpr std::size_t
 size(const Option& op, number previous) noexcept {
   return header_size(op, previous) + op.data_size();
 }
-
-// template<typename Option,
-//          typename std::enable_if_t<is_option_v<Option>, int> = 0>
-// [[nodiscard]] constexpr bool
-// operator==(const Option& lhs, const Option& rhs) noexcept {
-//   return lhs.option_number() == rhs.option_number();
-// }
-
-// template<typename Option,
-//          typename std::enable_if_t<is_option_v<Option>, int> = 0>
-// [[nodiscard]] constexpr bool
-// operator<(const Option& lhs, const Option& rhs) noexcept {
-//   return lhs.option_number() < rhs.option_number();
-// }
-
-// template<typename Option,
-//          typename std::enable_if_t<is_option_v<Option>, int> = 0>
-// [[nodiscard]] constexpr bool
-// operator==(const Option& op, number num) noexcept {
-//   return op.option_number() == num;
-// }
-
-// template<typename Option,
-//          typename std::enable_if_t<is_option_v<Option>, int> = 0>
-// [[nodiscard]] constexpr bool
-// operator<(const Option& op, number num) noexcept {
-//   return op.option_number() < num;
-// }
 
 }  // namespace options
 }  // namespace message

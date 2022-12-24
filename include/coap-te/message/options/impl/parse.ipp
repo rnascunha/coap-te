@@ -111,7 +111,7 @@ parse(number_type before,
     ec = coap_te::errc::no_buffer_space;
     return size;
   }
-  
+
   output = {input.data(), length.data_extend};
   input += length.data_extend;
 

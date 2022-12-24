@@ -1,7 +1,18 @@
-#ifndef COAP_TE_CORE_IMPL_TRAIT_IPP_
-#define COAP_TE_CORE_IMPL_TRAIT_IPP_
+/**
+ * @file traits.ipp
+ * @author Rafael Cunha (rnascunha@gmail.com)
+ * @brief 
+ * @version 0.1
+ * @date 2022-12-24
+ * 
+ * @copyright Copyright (c) 2022
+ * 
+ */
+#ifndef COAP_TE_CORE_IMPL_TRAITS_IPP_
+#define COAP_TE_CORE_IMPL_TRAITS_IPP_
 
 #include <utility>
+#include <tuple>
 
 namespace coap_te {
 namespace core {
@@ -36,25 +47,24 @@ struct is_less_comparable_impl {
 };
 
 template<class T, class R>
-struct is_buffer_impl
-{
+struct is_buffer_impl {
     template<class U, class V>
-    static auto test(U*) 
+    static auto test(U*)    // NOLINT
       -> std::tuple<
           decltype(static_cast<V>(
-            std::declval<U&>().data())), 
+            std::declval<U&>().data())),
             decltype(std::declval<U&>().size())
           >;
     template<typename, typename>
     static auto test(...) -> std::false_type;
 
     using type = typename std::is_same<
-                            std::tuple<R, std::size_t>, 
+                            std::tuple<R, std::size_t>,
                             decltype(test<T, R>(0))>::type;
 };
 
-}  // namespace detail 
-}  // namespace cre
+}  // namespace detail
+}  // namespace core
 }  // namespace coap_te
 
-#endif  // COAP_TE_CORE_IMPL_TRAIT_IPP_
+#endif  // COAP_TE_CORE_IMPL_TRAITS_IPP_

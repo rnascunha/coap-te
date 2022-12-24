@@ -174,7 +174,7 @@ serialize(number_type before,
   return detail::serialize(before, op, ::coap_te::const_buffer{}, output, ec);
 }
 
-template<typename CheckOptions = check_sequence,
+template<typename CheckOptions /* = check_sequence */,
          typename Option,
          typename MutableBuffer>
 std::size_t serialize(number before,
@@ -188,7 +188,8 @@ std::size_t serialize(number before,
   return coap_te::message::options::serialize<n_check>(
                           coap_te::core::to_underlying(before),
                           coap_te::core::to_underlying(option.option_number()),
-                          coap_te::const_buffer{option.data(), option.data_size()},
+                          coap_te::const_buffer{option.data(),
+                                                option.data_size()},
                           output,
                           ec);
 }
@@ -211,7 +212,7 @@ serialize(ForwardIt begin,
   while (begin != end) {
     // the use of @ref forward_second_if_pair is because the container may
     // be a associative container
-    size += serialize(prev, 
+    size += serialize(prev,
                       coap_te::core::forward_second_if_pair(*begin),
                       output,
                       ec);

@@ -35,18 +35,44 @@ class option_base {
   using unsigned_type = unsigned;
   static constexpr unsigned_type
   invalid_unsigned = std::numeric_limits<unsigned_type>::max();
+
+  virtual number
+  option_number() const noexcept = 0;
+
+  virtual std::size_t
+  data_size() const noexcept = 0;
+
+  virtual const void*
+  data() const noexcept = 0;
+
+  [[nodiscard]] friend bool
+  operator==(const option_base& lhs, const option_base& rhs) noexcept {
+    return lhs.option_number() == rhs.option_number();
+  }
+
+  [[nodiscard]] friend bool
+  operator<(const option_base& lhs, const option_base& rhs) noexcept {
+    return lhs.option_number() < rhs.option_number();
+  }
+
+  [[nodiscard]] friend bool
+  operator==(const option_base& op, number num) noexcept {
+    return op.option_number() == num;
+  }
+
+  [[nodiscard]] friend bool
+  operator<(const option_base& op, number num) noexcept {
+    return op.option_number() < num;
+  }
 };
 
-class option {
+class option : public option_base {
  public:
-  using unsigned_type = unsigned;
   using value_type = std::variant<
                       std::monostate,
                       empty_format,
                       unsigned_type,
                       coap_te::const_buffer>;
-  static constexpr unsigned_type
-  invalid_unsigned = std::numeric_limits<unsigned_type>::max();
 
   constexpr
   option() noexcept = default;
@@ -79,12 +105,12 @@ class option {
       op_(number::accept) {}
 
   [[nodiscard]] constexpr number
-  option_number() const noexcept {
+  option_number() const noexcept override {
     return op_;
   }
 
   [[nodiscard]] constexpr std::size_t
-  data_size() const noexcept {
+  data_size() const noexcept override {
     return std::visit(coap_te::core::overloaded {
       [](std::monostate) { return std::size_t(0); },
       [](empty_format) { return std::size_t(0); },
@@ -96,7 +122,7 @@ class option {
   }
 
   [[nodiscard]] constexpr const void*
-  data() const noexcept {
+  data() const noexcept override {
     return std::visit(coap_te::core::overloaded {
       [](auto) -> const void* { return nullptr; },
       [](const unsigned_type& data) {
@@ -108,31 +134,6 @@ class option {
     }, data_);
   }
 
-  [[nodiscard]] constexpr const value_type&
-  raw_data() const noexcept {
-    return data_;
-  }
-
-  [[nodiscard]] constexpr bool
-  operator==(const option& op) const noexcept {
-    return op_ == op.op_;
-  }
-
-  [[nodiscard]] constexpr bool
-  operator<(const option& op) const noexcept {
-    return op_ < op.op_;
-  }
-
-  [[nodiscard]] friend constexpr bool
-  operator==(const option& op, number num) noexcept {
-    return op.op_ == num;
-  }
-
-  [[nodiscard]] friend constexpr bool
-  operator<(const option& op, number num) noexcept {
-    return op.op_ < num;
-  }
-
  private:
   value_type  data_;
   number      op_  = number::invalid;
@@ -142,13 +143,9 @@ class option {
  * @brief 
  * 
  */
-class option_view {
+class option_view : public option_base {
  public:
-  using unsigned_type = unsigned;
   using value_type = coap_te::const_buffer;
-
-  static constexpr unsigned_type
-  invalid_unsigned = std::numeric_limits<unsigned_type>::max();
 
   constexpr
   option_view() noexcept = default;
@@ -192,43 +189,18 @@ class option_view {
   }
 
   [[nodiscard]] constexpr number
-  option_number() const noexcept {
+  option_number() const noexcept override {
     return op_;
   }
 
   [[nodiscard]] constexpr std::size_t
-  data_size() const noexcept {
+  data_size() const noexcept override {
     return data_.size();
   }
 
   [[nodiscard]] constexpr const void*
-  data() const noexcept {
+  data() const noexcept override {
     return data_.data();
-  }
-
-  [[nodiscard]] constexpr const value_type&
-  raw_data() const noexcept {
-    return data_;
-  }
-
-  [[nodiscard]] constexpr bool
-  operator==(const option_view& op) const noexcept {
-    return op_ == op.op_;
-  }
-
-  [[nodiscard]] constexpr bool
-  operator<(const option_view& op) const noexcept {
-    return op_ < op.op_;
-  }
-
-  [[nodiscard]] friend constexpr bool
-  operator==(const option_view& op, number num) noexcept {
-    return op.op_ == num;
-  }
-
-  [[nodiscard]] friend constexpr bool
-  operator<(const option_view& op, number num) noexcept {
-    return op.op_ < num;
   }
 
  private:
