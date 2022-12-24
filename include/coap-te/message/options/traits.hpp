@@ -15,10 +15,36 @@
 
 #include "coap-te/core/traits.hpp"
 #include "coap-te/core/utility.hpp"
+#include "coap-te/core/sorted_no_alloc_list.hpp"
+#include "coap-te/message/options/option.hpp"
 
 namespace coap_te {
 namespace message {
 namespace options {
+
+template<typename Option>
+struct is_raw_option : std::bool_constant<
+    std::is_same_v<option, coap_te::core::remove_cvref_t<Option>> ||
+    std::is_same_v<option_view, coap_te::core::remove_cvref_t<Option>>>{};
+
+template<typename Option>
+static constexpr bool
+is_raw_option_v = is_raw_option<Option>::value;
+
+template<typename NodeOption>
+struct is_node_option : std::bool_constant<
+  std::is_same_v<
+    coap_te::core::sorted_no_alloc_list
+      <options::option>::node,
+      coap_te::core::remove_cvref_t<NodeOption>> ||
+  std::is_same_v<
+    coap_te::core::sorted_no_alloc_list
+      <options::option_view>::node,
+      coap_te::core::remove_cvref_t<NodeOption>>>{};
+
+template<typename NodeOption>
+static constexpr bool
+is_node_option_v = is_node_option<NodeOption>::value;
 
 /**
  * @brief Checks if a type is a option
@@ -27,11 +53,8 @@ namespace options {
 template<typename Option>
 struct is_option
   : std::bool_constant<
-    std::is_same_v<options::option, coap_te::core::remove_cvref_t<Option>> ||
-    std::is_same_v<
-      coap_te::core::sorted_no_alloc_list
-        <options::option>::node,
-        coap_te::core::remove_cvref_t<Option>>>{};
+    is_raw_option_v<Option> ||
+    is_node_option_v<Option>>{};
 
 template<typename Option>
 static constexpr bool

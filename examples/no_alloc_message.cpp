@@ -49,7 +49,7 @@ int main() {
   std::uint8_t data[100];
   mutable_buffer buf(data, 100);
   coap_te::error_code ecs;
-  auto size_s = req.serialize(0x1234, buf, ecs);
+  auto size_s = serialize(req, 0x1234, buf, ecs);
   if (ecs) {
     std::cerr << "Fail["
               << ecs.value() << "]: "

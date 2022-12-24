@@ -22,6 +22,8 @@
 #include "coap-te/core/byte_order.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/checks.hpp"
+#include "coap-te/message/options/traits.hpp"
+#include "coap-te/message/options/option_func.hpp"
 
 namespace coap_te {
 namespace message {
@@ -172,6 +174,25 @@ serialize(number_type before,
   return detail::serialize(before, op, ::coap_te::const_buffer{}, output, ec);
 }
 
+template<typename CheckOptions = check_sequence,
+         typename Option,
+         typename MutableBuffer>
+std::size_t serialize(number before,
+                      const Option& option,
+                      MutableBuffer& output,                //NOLINT
+                      coap_te::error_code& ec) noexcept {    //NOLINT
+  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+              "Must be mutable buffer type");
+  static_assert(is_option_v<Option>, "Must be a option");
+  using n_check = check_type<CheckOptions::sequence, false, false>;
+  return coap_te::message::options::serialize<n_check>(
+                          coap_te::core::to_underlying(before),
+                          coap_te::core::to_underlying(option.option_number()),
+                          coap_te::const_buffer{option.data(), option.data_size()},
+                          output,
+                          ec);
+}
+
 /**
  * Serialize list
  */
@@ -190,8 +211,10 @@ serialize(ForwardIt begin,
   while (begin != end) {
     // the use of @ref forward_second_if_pair is because the container may
     // be a associative container
-    size += coap_te::core::forward_second_if_pair(*begin)
-                            .serialize(prev, output, ec);
+    size += serialize(prev, 
+                      coap_te::core::forward_second_if_pair(*begin),
+                      output,
+                      ec);
     if (ec)
       break;
     prev = coap_te::core::forward_second_if_pair(*begin).option_number();

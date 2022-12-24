@@ -41,6 +41,13 @@ serialize(type, code, message_id,
           MutableBuffer&,         //NOLINT
           coap_te::error_code&) noexcept;
 
+template<typename Message,
+         typename MutableBuffer>
+std::size_t serialize(const Message& msg,
+            message_id mid,
+            MutableBuffer& output,              // NOLINT
+            coap_te::error_code& ec) noexcept;  // NOLINT
+
 #if COAP_TE_ENABLE_EXCEPTIONS == 1
 
 template<typename ConstBuffer,
@@ -61,6 +68,12 @@ serialize(type, code, message_id,
           const OptionList& opt_list,
           const ConstBufferPayload& payload,
           MutableBuffer&);         //NOLINT
+
+template<typename Message,
+         typename MutableBuffer>
+std::size_t serialize(const Message& msg,
+            message_id mid,
+            MutableBuffer& output);  // NOLINT
 
 #endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
 

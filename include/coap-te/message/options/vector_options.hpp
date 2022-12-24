@@ -20,6 +20,7 @@
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/parse.hpp"
 #include "coap-te/message/options/option_list_func.hpp"
+#include "coap-te/message/options/option_func.hpp"
 
 namespace coap_te {
 namespace message {

@@ -17,6 +17,7 @@
 #include "coap-te/core/traits.hpp"
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/options/config.hpp"
+#include "coap-te/message/options/traits.hpp"
 #include "coap-te/message/options/checks.hpp"
 
 namespace coap_te {
@@ -126,18 +127,22 @@ parse(number_type before,
 }
 
 template<typename CheckOptions /* = check_all */,
-         typename ConstBuffer>
+         typename ConstBuffer,
+         typename Option>
 constexpr std::size_t
 parse(number_type before,
-      ConstBuffer& input,                // NOLINT
-      option& output,                    // NOLINT
-      coap_te::error_code& ec) noexcept {    // NOLINT
+      ConstBuffer& input,                   // NOLINT
+      Option& output,                       // NOLINT
+      coap_te::error_code& ec) noexcept {   // NOLINT
+  static_assert(is_option_v<Option>, 
+                "Must be a option type");
+  
   number_type current = invalid;
   coap_te::const_buffer buf;
   auto size = parse<CheckOptions>(before, input, current, buf, ec);
 
   if (!ec) {
-    output = create<check_none, false>(static_cast<number>(current), buf);
+    output = {static_cast<number>(current), buf};
   }
   return size;
 }

@@ -21,6 +21,7 @@
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/checks.hpp"
 #include "coap-te/message/options/vector_options.hpp"
+#include "coap-te/message/options/serialize.hpp"
 
 namespace opt = coap_te::message::options;
 

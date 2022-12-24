@@ -163,26 +163,6 @@ class message {
     return *this;
   }
 
-  template<typename MutableBuffer>
-  std::size_t serialize(message_id mid,
-              MutableBuffer& output,      // NOLINT
-              coap_te::error_code& ec) const noexcept {   // NOLINT
-    return coap_te::message::serialize(
-                    type_, code_, mid, token_,
-                    opt_list_, payload_, output,
-                    ec);
-  }
-
-#if COAP_TE_ENABLE_EXCEPTIONS == 1
-  template<typename MutableBuffer>
-  std::size_t serialize(message_id mid,
-                        MutableBuffer& output) const {  // NOLINT
-    return coap_te::message::serialize(
-                    type_, code_, mid, token_,
-                    opt_list_, payload_, output);
-  }
-#endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
-
  private:
   type              type_ = type::reset;
   code              code_ = code::empty;

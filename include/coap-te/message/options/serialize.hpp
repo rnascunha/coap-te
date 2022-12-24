@@ -14,7 +14,7 @@
 #include <type_traits>
 
 #include "coap-te/core/error.hpp"
-#include "coap-te/message/options/checks.hpp"
+#include "coap-te/message/options/checks.hpp" 
 
 namespace coap_te {
 namespace message {
@@ -48,8 +48,16 @@ template<typename CheckOptions = check_all,
 [[nodiscard]] constexpr std::size_t
 serialize(number_type before,
           number_type op,
-          MutableBuffer& output,              // NOLINT
-          coap_te::error_code& ec) noexcept;      // NOLINT
+          MutableBuffer& output,                   // NOLINT
+          coap_te::error_code& ec) noexcept;       // NOLINT
+
+template<typename CheckOptions = check_sequence,
+         typename Option,
+         typename MutableBuffer>
+std::size_t serialize(number before,
+                      const Option& option,
+                      MutableBuffer& output,                //NOLINT
+                      coap_te::error_code& ec) noexcept;    //NOLINT
 
 /**
  * Serialize list

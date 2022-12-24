@@ -15,14 +15,13 @@
 #include <variant>
 #include <utility>
 #include <string_view>
-#include <system_error>   // NOLINT
 
+#include "coap-te/core/error.hpp"
 #include "coap-te/core/utility.hpp"
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/byte_order.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/checks.hpp"
-#include "coap-te/message/options/serialize.hpp"
 
 namespace coap_te {
 namespace message {
@@ -71,14 +70,9 @@ class option {
     : data_(static_cast<unsigned_type>(value)),
       op_(number::accept) {}
 
-  constexpr number
+  [[nodiscard]] constexpr number
   option_number() const noexcept {
     return op_;
-  }
-
-  constexpr const value_type&
-  value() const noexcept {
-    return data_;
   }
 
   [[nodiscard]] constexpr std::size_t
@@ -156,10 +150,10 @@ class option {
    * @return true Is in a valid state
    * @return false Is not in a not valid
    */
-  [[nodiscard]] constexpr bool
-  is_valid() const noexcept {
-    return op_ != number::invalid;
-  }
+  // [[nodiscard]] constexpr bool
+  // is_valid() const noexcept {
+  //   return op_ != number::invalid;
+  // }
 
   [[nodiscard]] constexpr bool
   operator==(const option& op) const noexcept {
@@ -181,46 +175,141 @@ class option {
     return op.op_ < num;
   }
 
-  /**
-   * Serialize functions
-   * 
-   */
-  template<typename CheckOptions = check_sequence,
-           typename MutableBuffer>
-  std::size_t serialize(number before,
-                        MutableBuffer& output,                  //NOLINT
-                        coap_te::error_code& ec) const noexcept {   //NOLINT
-    static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
-                  "Must be mutable buffer type");
-    using n_check = check_type<CheckOptions::sequence, false, false>;
+ private:
+  value_type  data_;
+  number      op_  = number::invalid;
+};
 
-    return std::visit(coap_te::core::overloaded {
-      [](std::monostate) {
-        return std::size_t(0);
-      },
-      [&, this](auto) {
-        return coap_te::message::options::serialize<n_check>(
-                                  coap_te::core::to_underlying(before),
-                                  coap_te::core::to_underlying(op_),
-                                  coap_te::const_buffer{data(), data_size()},
-                                  output, ec);
-      }
-    }, data_);
+/**
+ * @brief 
+ * 
+ */
+class option_view {
+ public:
+  using unsigned_type = unsigned;
+  using value_type = coap_te::const_buffer;
+
+  static constexpr unsigned_type
+  invalid_unsigned = std::numeric_limits<unsigned_type>::max();
+
+  constexpr
+  option_view() noexcept = default;
+
+  constexpr
+  explicit option_view(number op) noexcept
+    : op_(op) {}
+
+  constexpr
+  option_view(number op, unsigned_type& value) noexcept
+    : op_(op) {
+    auto [v, size] = coap_te::core::to_small_big_endian(value);
+    value = v;
+    data_ = {&value, size};
   }
 
-#if COAP_TE_ENABLE_EXCEPTIONS == 1
-  template<typename CheckOptions = check_sequence,
-           typename MutableBuffer>
-  std::size_t serialize(number before,
-                        MutableBuffer& output) const {   //NOLINT
-    coap_te::error_code ec;
-    auto size = serialize<CheckOptions>(before, output, ec);
-    if (ec) {
-      throw coap_te::exception{ec};
+  constexpr
+  option_view(number op, std::string_view str) noexcept
+    : data_{str}, op_(op) {}
+
+  constexpr
+  option_view(number op, const const_buffer& value) noexcept
+    : data_{value}, op_(op) {}
+
+  constexpr
+  explicit option_view(content& value) noexcept
+    : op_{number::content_format} {
+      auto [v, size] = coap_te::core::to_small_big_endian(coap_te::core::to_underlying(value));
+      value = static_cast<content>(v);
+      data_ = {&value, size};
+  }
+
+  constexpr
+  explicit option_view(accept& value) noexcept
+    : op_{number::accept} {
+    auto [v, size] = coap_te::core::to_small_big_endian(coap_te::core::to_underlying(value));
+    value = static_cast<accept>(v);
+    data_ = {&value, size};
+  }
+
+  [[nodiscard]] constexpr number
+  option_number() const noexcept {
+    return op_;
+  }
+
+  [[nodiscard]] constexpr std::size_t
+  header_size(number previous) const noexcept {
+    std::size_t size = 1;
+    std::size_t diff = coap_te::core::to_underlying(op_) -
+                coap_te::core::to_underlying(previous);
+
+    for (std::size_t s : {diff, data_size()}) {
+      if (s >= 269)
+        size +=  2;
+      else if (s >= 13)
+        size += 1;
     }
     return size;
   }
-#endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
+
+  [[nodiscard]] constexpr std::size_t
+  data_size() const noexcept {
+    return data_.size();
+  }
+
+  [[nodiscard]] constexpr std::size_t
+  size(number previous) const noexcept {
+    return header_size(previous) + data_size();
+  }
+
+  [[nodiscard]] constexpr unsigned_type
+  get_unsigned() const noexcept {
+    return coap_te::core::from_small_big_endian<unsigned_type>(
+                            static_cast<const std::uint8_t*>(data_.data()),
+                            data_.size());
+  }
+
+  [[nodiscard]] constexpr const void*
+  data() const noexcept {
+    return data_.data();
+  }
+
+  [[nodiscard]] constexpr const value_type&
+  raw_data() const noexcept {
+    return data_;
+  }
+
+  /**
+   * @brief Check if options is valid
+   * 
+   * @note Not the best API, but for now necessary for no-throw code
+   * 
+   * @return true Is in a valid state
+   * @return false Is not in a not valid
+   */
+  // [[nodiscard]] constexpr bool
+  // is_valid() const noexcept {
+  //   return op_ != number::invalid;
+  // }
+
+  [[nodiscard]] constexpr bool
+  operator==(const option_view& op) const noexcept {
+    return op_ == op.op_;
+  }
+
+  [[nodiscard]] constexpr bool
+  operator<(const option_view& op) const noexcept {
+    return op_ < op.op_;
+  }
+
+  [[nodiscard]] friend constexpr bool
+  operator==(const option_view& op, number num) noexcept {
+    return op.op_ == num;
+  }
+
+  [[nodiscard]] friend constexpr bool
+  operator<(const option_view& op, number num) noexcept {
+    return op.op_ < num;
+  }
 
  private:
   value_type  data_;

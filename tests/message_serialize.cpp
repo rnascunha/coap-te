@@ -29,6 +29,7 @@
 #include "coap-te/message/serialize.hpp"
 #include "coap-te/message/parse.hpp"
 #include "coap-te/message/options/option.hpp"
+#include "coap-te/message/options/option_func.hpp"
 
 namespace msg = coap_te::message;
 // options
@@ -228,7 +229,7 @@ void serialize_parse_success_impl(
 
   req.payload(payload);
 
-  size_s = req.serialize(mid, buf, ecs);
+  size_s = serialize(req, mid, buf, ecs);
   EXPECT_FALSE(ecs);
   if (expected_size > 0) {
     EXPECT_EQ(size_s, expected_size);

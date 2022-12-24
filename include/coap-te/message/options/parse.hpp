@@ -33,11 +33,12 @@ parse(number_type before,
       coap_te::error_code& ec) noexcept;     // NOLINT
 
 template<typename CheckOptions = check_all,
-         typename ConstBuffer>
+         typename ConstBuffer,
+         typename Option>
 constexpr std::size_t
 parse(number_type before,
       ConstBuffer& input,                // NOLINT
-      option& output,                    // NOLINT
+      Option& output,                    // NOLINT
       coap_te::error_code& ec) noexcept;     // NOLINT
 
 }  // namespace options

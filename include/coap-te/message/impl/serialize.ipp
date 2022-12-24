@@ -17,8 +17,10 @@
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/code.hpp"
 #include "coap-te/message/token.hpp"
+#include "coap-te/message/traits.hpp"
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/traits.hpp"
+#include "coap-te/message/options/serialize.hpp"
 
 namespace coap_te {
 namespace message {
@@ -103,6 +105,23 @@ serialize(type tp, code co, message_id mid,
   return size;
 }
 
+template<typename Message,
+         typename MutableBuffer>
+std::size_t serialize(const Message& msg,
+            message_id mid,
+            MutableBuffer& output,      // NOLINT
+            coap_te::error_code& ec) noexcept {   // NOLINT
+  static_assert(is_message_v<Message>, "Must be a message type");
+  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+                "Must be mutable buffer type");
+  return coap_te::message::serialize(
+                  msg.get_type(), msg.get_code(), 
+                  mid, msg.token(),
+                  msg.option_list(), msg.payload(), 
+                  output,
+                  ec);
+}
+
 #if COAP_TE_ENABLE_EXCEPTIONS == 1
 
 template<typename ConstBuffer,
@@ -153,6 +172,21 @@ serialize(type tp, code co, message_id mid,
     throw coap_te::exception{ec};
   }
   return size;
+}
+
+template<typename Message,
+         typename MutableBuffer>
+std::size_t serialize(const Message& msg,
+            message_id mid,
+            MutableBuffer& output) {  // NOLINT
+  static_assert(is_message_v<Message>, "Must be a message type");
+  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+                "Must be mutable buffer type");
+  return coap_te::message::serialize(
+                  msg.get_type(), msg.get_code(), 
+                  mid, msg.token(),
+                  msg.option_list(), msg.payload(), 
+                  output);
 }
 
 #endif  // COAP_TE_ENABLE_EXCEPTIONS == 1

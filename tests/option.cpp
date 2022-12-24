@@ -15,6 +15,8 @@
 #include "coap-te/message/options/definitions.hpp"
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/parse.hpp"
+#include "coap-te/message/options/serialize.hpp"
+#include "coap-te/message/options/option_func.hpp"
 
 namespace opt = coap_te::message::options;
 
@@ -26,36 +28,48 @@ create(opt::number op, Args&& ... args)  {
 }
 
 TEST(CoAPMessage, OptionConstructor) {
-  // Testing constructors
   {
-    opt::option invalid_op;
-    EXPECT_EQ(invalid_op.data_size(), 0);
-    EXPECT_FALSE(invalid_op.is_valid());
-  }
-  {
-    opt::option empty_op = opt::create(opt::number::if_none_match);
-    EXPECT_EQ(empty_op.data_size(), 0);
-    EXPECT_TRUE(empty_op.is_valid());
-  }
-  {
-    opt::option uint_op = opt::create(opt::number::uri_port, 10);
-    EXPECT_EQ(uint_op.data_size(), 1);
-    EXPECT_TRUE(uint_op.is_valid());
-  }
-  {
-    opt::option string_op =
-                  opt::create(opt::number::uri_host, "myhost");
-    EXPECT_EQ(string_op.data_size(), 6);
-    EXPECT_TRUE(string_op.is_valid());
-  }
-  {
-    unsigned char arr[] = {1, 2, 3, 4, 5};
-    opt::option opaque_op =
-                  opt::create(
-                    opt::number::if_match,
-                    coap_te::const_buffer(arr));
-    EXPECT_EQ(opaque_op.data_size(), 5);
-    EXPECT_TRUE(opaque_op.is_valid());
+    SCOPED_TRACE("Option constructor tests");
+    {
+      opt::option invalid_op;
+      EXPECT_EQ(invalid_op.data_size(), 0);
+      EXPECT_FALSE(opt::is_valid(invalid_op));
+    }
+    {
+      opt::option empty_op = opt::create(opt::number::if_none_match);
+      EXPECT_EQ(empty_op.data_size(), 0);
+      EXPECT_TRUE(opt::is_valid(empty_op));
+    }
+    {
+      opt::option uint_op = opt::create(opt::number::uri_port, 10);
+      EXPECT_EQ(uint_op.data_size(), 1);
+      EXPECT_TRUE(opt::is_valid(uint_op));
+    }
+    {
+      opt::option string_op =
+                    opt::create(opt::number::uri_host, "myhost");
+      EXPECT_EQ(string_op.data_size(), 6);
+      EXPECT_TRUE(opt::is_valid(string_op));
+    }
+    {
+      unsigned char arr[] = {1, 2, 3, 4, 5};
+      opt::option opaque_op =
+                    opt::create(
+                      opt::number::if_match,
+                      coap_te::const_buffer(arr));
+      EXPECT_EQ(opaque_op.data_size(), 5);
+      EXPECT_TRUE(opt::is_valid(opaque_op));
+    }
+    {
+      opt::option accept(opt::accept::text_plain);
+      EXPECT_EQ(accept.data_size(), 0);
+      EXPECT_TRUE(opt::is_valid(accept));
+    }
+    {
+      opt::option content(opt::content::octet_stream);
+      EXPECT_EQ(content.data_size(), 1);
+      EXPECT_TRUE(opt::is_valid(content));
+    }
   }
   {
     SCOPED_TRACE("Faling constructor - NOT throwing!");
@@ -65,7 +79,7 @@ TEST(CoAPMessage, OptionConstructor) {
                                     opt::check_all,
                                     false>(opt::number::if_none_match, 1);
       EXPECT_EQ(empty_op.data_size(), 0);
-      EXPECT_FALSE(empty_op.is_valid());
+      EXPECT_FALSE(opt::is_valid(empty_op));
     }
     {
       // Unsigned option empty
@@ -73,7 +87,7 @@ TEST(CoAPMessage, OptionConstructor) {
                                     opt::check_all,
                                     false>(opt::number::uri_port);
       EXPECT_EQ(uint_op.data_size(), 0);
-      EXPECT_FALSE(uint_op.is_valid());
+      EXPECT_FALSE(opt::is_valid(uint_op));
     }
     {
       // String option opaque
@@ -83,7 +97,7 @@ TEST(CoAPMessage, OptionConstructor) {
                                     false>(opt::number::uri_host,
                                      coap_te::const_buffer(arr));
       EXPECT_EQ(string_op.data_size(), 0);
-      EXPECT_FALSE(string_op.is_valid());
+      EXPECT_FALSE(opt::is_valid(string_op));
     }
     {
       // Opaque option string
@@ -91,7 +105,7 @@ TEST(CoAPMessage, OptionConstructor) {
                                     opt::check_all,
                                     false>(opt::number::if_match, "myoption");
       EXPECT_EQ(opaque_op.data_size(), 0);
-      EXPECT_FALSE(opaque_op.is_valid());
+      EXPECT_FALSE(opt::is_valid(opaque_op));
     }
   }
 #if COAP_TE_ENABLE_EXCEPTIONS == 1
@@ -120,6 +134,119 @@ TEST(CoAPMessage, OptionConstructor) {
 #endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
 }
 
+TEST(CoAPMessage, OptionViewConstructor) {
+  {
+    SCOPED_TRACE("Option View constructor tests");
+    {
+      opt::option_view invalid_op;
+      EXPECT_EQ(invalid_op.data_size(), 0);
+      EXPECT_FALSE(opt::is_valid(invalid_op));
+    }
+    {
+      opt::option_view empty_op{opt::number::if_none_match};
+      EXPECT_EQ(empty_op.data_size(), 0);
+      EXPECT_TRUE(opt::is_valid(empty_op));
+    }
+    {
+      unsigned port = 10;
+      opt::option_view uint_op{opt::number::uri_port, port};
+      EXPECT_EQ(uint_op.data_size(), 1);
+      EXPECT_TRUE(opt::is_valid(uint_op));
+    }
+    {
+      unsigned port = 0;
+      opt::option_view uint_op{opt::number::uri_port, port};
+      EXPECT_EQ(uint_op.data_size(), 0);
+      EXPECT_TRUE(opt::is_valid(uint_op));
+    }
+    {
+      opt::option_view string_op{opt::number::uri_host, "myhost"};
+      EXPECT_EQ(string_op.data_size(), 6);
+      EXPECT_TRUE(opt::is_valid(string_op));
+    }
+    {
+      unsigned char arr[] = {1, 2, 3, 4, 5};
+      opt::option_view opaque_op{opt::number::if_match,
+                                 coap_te::const_buffer(arr)};
+      EXPECT_EQ(opaque_op.data_size(), 5);
+      EXPECT_TRUE(opt::is_valid(opaque_op));
+    }
+    {
+      auto acc = opt::accept::text_plain;
+      opt::option accept(acc);
+      EXPECT_EQ(accept.data_size(), 0);
+      EXPECT_TRUE(opt::is_valid(accept));
+    }
+    {
+      auto con = opt::content::octet_stream;
+      opt::option content(con);
+      EXPECT_EQ(content.data_size(), 1);
+      EXPECT_TRUE(opt::is_valid(content));
+    }
+  }
+//   {
+//     SCOPED_TRACE("Faling constructor - NOT throwing!");
+//     {
+//       // Empty option not empty
+//       opt::option_view empty_op = opt::create<
+//                                     opt::check_all,
+//                                     false>(opt::number::if_none_match, 1);
+//       EXPECT_EQ(empty_op.data_size(), 0);
+//       EXPECT_FALSE(empty_op.is_valid());
+//     }
+//     {
+//       // Unsigned option empty
+//       opt::option_view uint_op = opt::create<
+//                                     opt::check_all,
+//                                     false>(opt::number::uri_port);
+//       EXPECT_EQ(uint_op.data_size(), 0);
+//       EXPECT_FALSE(uint_op.is_valid());
+//     }
+//     {
+//       // String option opaque
+//       unsigned char arr[] = {1, 2, 3, 4, 5};
+//       opt::option_view string_op = opt::create<
+//                                     opt::check_all,
+//                                     false>(opt::number::uri_host,
+//                                      coap_te::const_buffer(arr));
+//       EXPECT_EQ(string_op.data_size(), 0);
+//       EXPECT_FALSE(string_op.is_valid());
+//     }
+//     {
+//       // Opaque option string
+//       opt::option_view opaque_op = opt::create<
+//                                     opt::check_all,
+//                                     false>(opt::number::if_match, "myoption");
+//       EXPECT_EQ(opaque_op.data_size(), 0);
+//       EXPECT_FALSE(opaque_op.is_valid());
+//     }
+//   }
+// #if COAP_TE_ENABLE_EXCEPTIONS == 1
+//   {
+//     SCOPED_TRACE("Faling constructor - throwing!");
+//     {
+//       // Empty option not empty
+//       EXPECT_THROW(::create(opt::number::if_none_match, 1), coap_te::exception);
+//     }
+//     {
+//       // Unsigned option empty
+//       EXPECT_THROW(::create(opt::number::uri_port), coap_te::exception);
+//     }
+//     {
+//       // String option opaque
+//       unsigned char arr[] = {1, 2, 3, 4, 5};
+//       EXPECT_THROW(::create(opt::number::uri_host, coap_te::const_buffer(arr)),
+//                    coap_te::exception);
+//     }
+//     {
+//       // Opaque option string
+//       EXPECT_THROW(::create(opt::number::if_match, "myoption"),
+//                    coap_te::exception);
+//     }
+//   }
+// #endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
+}
+
 std::size_t calc_options_size(
               opt::number_type before,
               opt::number_type current,
@@ -135,6 +262,7 @@ std::size_t calc_options_size(
   return size;
 }
 
+template<typename Option>
 void test_serialize_parse_success(
                   opt::number before,
                   opt::number current,
@@ -143,10 +271,8 @@ void test_serialize_parse_success(
   coap_te::mutable_buffer buf(data);
   coap_te::error_code ecs;
 
-  opt::option ops = opt::create
-                  <opt::check_type<true, false, true>>
-                  (current, buf_in);
-  auto size_s = ops.serialize<opt::check_none>(before, buf, ecs);
+  Option ops(current, buf_in);
+  auto size_s = opt::serialize<opt::check_none>(before, ops, buf, ecs);
   EXPECT_FALSE(ecs);
   EXPECT_EQ(size_s, calc_options_size(
                         static_cast<opt::number_type>(before),
@@ -154,7 +280,7 @@ void test_serialize_parse_success(
                         buf_in.size()));
 
   coap_te::error_code ecp;
-  opt::option opp;
+  Option opp;
   coap_te::const_buffer input(data, size_s);
   auto size_p = opt::parse(static_cast<opt::number_type>(before),
                           input,
@@ -169,51 +295,68 @@ void test_serialize_parse_success(
                            buf_in.data(), opp.data_size()));
 }
 
+template<typename Option>
 void test_serialize_parse_success(
                   opt::number before,
                   opt::number current,
                   unsigned value) {
   auto [data, size] = coap_te::core::to_small_big_endian(value);
-  test_serialize_parse_success(before,
+  test_serialize_parse_success<Option>(before,
                                current,
                                coap_te::const_buffer(&data, size));
 }
 
+template<typename Option>
 void test_serialize_parse_success(
                   opt::number before,
                   opt::number current) {
-  test_serialize_parse_success(before,
+  test_serialize_parse_success<Option>(before,
                                current,
                                coap_te::const_buffer{});
+}
+
+template<typename ...Args>
+void test_serialize_parse_all(
+  opt::number before,
+  opt::number current,
+  Args&& ...args) {
+  {
+    SCOPED_TRACE("Option");
+    test_serialize_parse_success<opt::option>(before, current, std::forward<Args>(args)...);
+  }
+  {
+    SCOPED_TRACE("Option View");
+    test_serialize_parse_success<opt::option_view>(before, current, std::forward<Args>(args)...);
+  }
 }
 
 TEST(CoAPMessage, OptionSerializeParse) {
   {
     SCOPED_TRACE("Serialize parse string uri-host");
-    test_serialize_parse_success(opt::number::invalid,
+    test_serialize_parse_all(opt::number::invalid,
                                opt::number::uri_host,
                                coap_te::const_buffer("192.168.0.1"));
   }
   {
     SCOPED_TRACE("Serialize parse big string uri-host");
-    test_serialize_parse_success(opt::number::invalid,
+    test_serialize_parse_all(opt::number::invalid,
                                opt::number::uri_host,
                                coap_te::const_buffer("192.168.111.111"));
   }
   {
     SCOPED_TRACE("Serialize parse number max-age");
-    test_serialize_parse_success(opt::number::invalid,
+    test_serialize_parse_all(opt::number::invalid,
                                opt::number::max_age,
                                60);
   }
   {
     SCOPED_TRACE("Serialize parse empty if_none_match");
-    test_serialize_parse_success(opt::number::invalid,
+    test_serialize_parse_all(opt::number::invalid,
                                opt::number::if_none_match);
   }
   {
     SCOPED_TRACE("Serialize parse big string uri-host");
-    test_serialize_parse_success(opt::number::uri_path,
+    test_serialize_parse_all(opt::number::uri_path,
                                opt::number::uri_path,
                                coap_te::const_buffer(
                                 "testedeumpathgrandemasmuito"

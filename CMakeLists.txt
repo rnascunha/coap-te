@@ -19,7 +19,7 @@ option(COAP_TE_MESSAGE_OPTION_NO_RESPONSE 			    "add no_response option" 	  ON)
 option(COAP_TE_ENABLE_FETCH_PATCH_VERBS             "add fetch/patch verbs"     ON)
 option(COAP_TE_ENABLE_STREAM_CONNECTION             "enable TCP/Websocket conn" ON)
 
-option(COAP_TE_ENABLE_EXCEPTIONS                    "enable exceptions"         OFF)
+option(COAP_TE_ENABLE_EXCEPTIONS                    "enable exceptions"         ON)
 option(COAP_TE_ERROR_SHOW_MESSAGE                   "add error messages"        ON)
 option(COAP_TE_ENABLE_STD_ERROR_CODE                "enable std::error_code"    ON)
 
