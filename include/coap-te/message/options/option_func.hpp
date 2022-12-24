@@ -12,50 +12,87 @@
 #define COAP_TE_MESSAGE_OPTIONS_OPTION_FUNC_HPP_
 
 #include <type_traits>
+#include <cstdint>
 
 #include "coap-te/message/options/config.hpp"
+#include "coap-te/message/options/functions.hpp"
 #include "coap-te/message/options/traits.hpp"
 
 namespace coap_te {
 namespace message {
 namespace options {
 
-template<typename Option, 
+template<typename Option,
          typename std::enable_if_t<is_option_v<Option>, int> = 0>
 [[nodiscard]] constexpr bool
 is_valid(Option const& op) noexcept {
   return op.option_number() != number::invalid;
 }
 
-// template<typename Option, 
+template<typename Unsigned = unsigned,
+         typename Option,
+         typename std::enable_if_t<is_option_v<Option>, int> = 0>
+constexpr Unsigned
+unsigned_option(const Option& op) noexcept {
+  return unsigned_option<Unsigned>(
+              static_cast<const std::uint8_t*>(op.data()),
+              op.data_size());
+}
+
+
+template<typename Option,
+         typename std::enable_if_t<is_option_v<Option>, int> = 0>
+[[nodiscard]] constexpr std::size_t
+header_size(const Option& op, number previous) noexcept {
+  std::size_t size = 1;
+  std::size_t diff = coap_te::core::to_underlying(op.option_number()) -
+                     coap_te::core::to_underlying(previous);
+
+  for (std::size_t s : {diff, op.data_size()}) {
+    if (s >= 269)
+      size +=  2;
+    else if (s >= 13)
+      size += 1;
+  }
+  return size;
+}
+
+template<typename Option,
+         typename std::enable_if_t<is_option_v<Option>, int> = 0>
+[[nodiscard]] constexpr std::size_t
+size(const Option& op, number previous) noexcept {
+  return header_size(op, previous) + op.data_size();
+}
+
+// template<typename Option,
 //          typename std::enable_if_t<is_option_v<Option>, int> = 0>
 // [[nodiscard]] constexpr bool
 // operator==(const Option& lhs, const Option& rhs) noexcept {
 //   return lhs.option_number() == rhs.option_number();
 // }
 
-// template<typename Option, 
+// template<typename Option,
 //          typename std::enable_if_t<is_option_v<Option>, int> = 0>
 // [[nodiscard]] constexpr bool
 // operator<(const Option& lhs, const Option& rhs) noexcept {
 //   return lhs.option_number() < rhs.option_number();
 // }
 
-// template<typename Option, 
+// template<typename Option,
 //          typename std::enable_if_t<is_option_v<Option>, int> = 0>
 // [[nodiscard]] constexpr bool
 // operator==(const Option& op, number num) noexcept {
 //   return op.option_number() == num;
 // }
 
-// template<typename Option, 
+// template<typename Option,
 //          typename std::enable_if_t<is_option_v<Option>, int> = 0>
 // [[nodiscard]] constexpr bool
 // operator<(const Option& op, number num) noexcept {
 //   return op.option_number() < num;
 // }
 
-}  // namespace options 
+}  // namespace options
 }  // namespace message
 }  // namespace coap_te
 

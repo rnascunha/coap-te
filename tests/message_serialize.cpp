@@ -259,8 +259,8 @@ void serialize_parse_success_impl(
     EXPECT_EQ(op, op2);
     EXPECT_EQ(op.option_number(), op2.option_number());
     EXPECT_EQ(op.data_size(), op2.data_size());
-    EXPECT_EQ(op.header_size(prev), op2.header_size(prev));
-    EXPECT_EQ(op.size(prev), op2.size(prev));
+    EXPECT_EQ(header_size(op, prev), header_size(op2, prev));
+    EXPECT_EQ(size(op, prev), size(op2, prev));
     EXPECT_EQ(0, std::memcmp(op.data(), op2.data(), op.data_size()));
     prev = op.option_number();
   }

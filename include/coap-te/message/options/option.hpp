@@ -20,6 +20,7 @@
 #include "coap-te/core/utility.hpp"
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/byte_order.hpp"
+#include "coap-te/core/sorted_no_alloc_list.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/checks.hpp"
 
@@ -28,6 +29,13 @@ namespace message {
 namespace options {
 
 struct empty_format{};
+
+class option_base {
+ public:
+  using unsigned_type = unsigned;
+  static constexpr unsigned_type
+  invalid_unsigned = std::numeric_limits<unsigned_type>::max();
+};
 
 class option {
  public:
@@ -76,21 +84,6 @@ class option {
   }
 
   [[nodiscard]] constexpr std::size_t
-  header_size(number previous) const noexcept {
-    std::size_t size = 1;
-    std::size_t diff = coap_te::core::to_underlying(op_) -
-                coap_te::core::to_underlying(previous);
-
-    for (std::size_t s : {diff, data_size()}) {
-      if (s >= 269)
-        size +=  2;
-      else if (s >= 13)
-        size += 1;
-    }
-    return size;
-  }
-
-  [[nodiscard]] constexpr std::size_t
   data_size() const noexcept {
     return std::visit(coap_te::core::overloaded {
       [](std::monostate) { return std::size_t(0); },
@@ -99,28 +92,6 @@ class option {
         return coap_te::core::small_big_endian_size(data);
       },
       [](const coap_te::const_buffer&  data) { return data.size(); }
-    }, data_);
-  }
-
-  [[nodiscard]] constexpr std::size_t
-  size(number previous) const noexcept {
-    return header_size(previous) + data_size();
-  }
-
-  [[nodiscard]] constexpr unsigned_type
-  get_unsigned() const noexcept {
-    return std::visit(coap_te::core::overloaded {
-      [](auto) { return invalid_unsigned; },
-      [](unsigned_type data) {
-        return coap_te::core::from_small_big_endian<unsigned_type>(
-                          reinterpret_cast<const std::uint8_t*>(&data),
-                          coap_te::core::small_big_endian_size(data));
-      },
-      [](const const_buffer& data) {
-        return coap_te::core::from_small_big_endian<unsigned_type>(
-                            reinterpret_cast<const std::uint8_t*>(data.data()),
-                            data.size());
-      }
     }, data_);
   }
 
@@ -141,19 +112,6 @@ class option {
   raw_data() const noexcept {
     return data_;
   }
-
-  /**
-   * @brief Check if options is valid
-   * 
-   * @note Not the best API, but for now necessary for no-throw code
-   * 
-   * @return true Is in a valid state
-   * @return false Is not in a not valid
-   */
-  // [[nodiscard]] constexpr bool
-  // is_valid() const noexcept {
-  //   return op_ != number::invalid;
-  // }
 
   [[nodiscard]] constexpr bool
   operator==(const option& op) const noexcept {
@@ -216,17 +174,19 @@ class option_view {
     : data_{value}, op_(op) {}
 
   constexpr
-  explicit option_view(content& value) noexcept
+  explicit option_view(content& value) noexcept   // NOLINT
     : op_{number::content_format} {
-      auto [v, size] = coap_te::core::to_small_big_endian(coap_te::core::to_underlying(value));
+      auto [v, size] = coap_te::core::to_small_big_endian(
+                        coap_te::core::to_underlying(value));
       value = static_cast<content>(v);
       data_ = {&value, size};
   }
 
   constexpr
-  explicit option_view(accept& value) noexcept
+  explicit option_view(accept& value) noexcept    // NOLINT
     : op_{number::accept} {
-    auto [v, size] = coap_te::core::to_small_big_endian(coap_te::core::to_underlying(value));
+    auto [v, size] = coap_te::core::to_small_big_endian(
+                          coap_te::core::to_underlying(value));
     value = static_cast<accept>(v);
     data_ = {&value, size};
   }
@@ -237,35 +197,8 @@ class option_view {
   }
 
   [[nodiscard]] constexpr std::size_t
-  header_size(number previous) const noexcept {
-    std::size_t size = 1;
-    std::size_t diff = coap_te::core::to_underlying(op_) -
-                coap_te::core::to_underlying(previous);
-
-    for (std::size_t s : {diff, data_size()}) {
-      if (s >= 269)
-        size +=  2;
-      else if (s >= 13)
-        size += 1;
-    }
-    return size;
-  }
-
-  [[nodiscard]] constexpr std::size_t
   data_size() const noexcept {
     return data_.size();
-  }
-
-  [[nodiscard]] constexpr std::size_t
-  size(number previous) const noexcept {
-    return header_size(previous) + data_size();
-  }
-
-  [[nodiscard]] constexpr unsigned_type
-  get_unsigned() const noexcept {
-    return coap_te::core::from_small_big_endian<unsigned_type>(
-                            static_cast<const std::uint8_t*>(data_.data()),
-                            data_.size());
   }
 
   [[nodiscard]] constexpr const void*
@@ -277,19 +210,6 @@ class option_view {
   raw_data() const noexcept {
     return data_;
   }
-
-  /**
-   * @brief Check if options is valid
-   * 
-   * @note Not the best API, but for now necessary for no-throw code
-   * 
-   * @return true Is in a valid state
-   * @return false Is not in a not valid
-   */
-  // [[nodiscard]] constexpr bool
-  // is_valid() const noexcept {
-  //   return op_ != number::invalid;
-  // }
 
   [[nodiscard]] constexpr bool
   operator==(const option_view& op) const noexcept {

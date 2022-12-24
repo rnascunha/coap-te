@@ -44,6 +44,7 @@ TEST(CoAPMessage, OptionConstructor) {
       opt::option uint_op = opt::create(opt::number::uri_port, 10);
       EXPECT_EQ(uint_op.data_size(), 1);
       EXPECT_TRUE(opt::is_valid(uint_op));
+      EXPECT_EQ(unsigned_option(uint_op), 10);
     }
     {
       opt::option string_op =
@@ -64,11 +65,15 @@ TEST(CoAPMessage, OptionConstructor) {
       opt::option accept(opt::accept::text_plain);
       EXPECT_EQ(accept.data_size(), 0);
       EXPECT_TRUE(opt::is_valid(accept));
+      EXPECT_EQ(unsigned_option(accept),
+                static_cast<unsigned>(opt::content::text_plain));
     }
     {
       opt::option content(opt::content::octet_stream);
       EXPECT_EQ(content.data_size(), 1);
       EXPECT_TRUE(opt::is_valid(content));
+      EXPECT_EQ(unsigned_option(content),
+                static_cast<unsigned>(opt::content::octet_stream));
     }
   }
   {
@@ -152,6 +157,7 @@ TEST(CoAPMessage, OptionViewConstructor) {
       opt::option_view uint_op{opt::number::uri_port, port};
       EXPECT_EQ(uint_op.data_size(), 1);
       EXPECT_TRUE(opt::is_valid(uint_op));
+      EXPECT_EQ(unsigned_option(uint_op), 10);
     }
     {
       unsigned port = 0;
@@ -176,12 +182,16 @@ TEST(CoAPMessage, OptionViewConstructor) {
       opt::option accept(acc);
       EXPECT_EQ(accept.data_size(), 0);
       EXPECT_TRUE(opt::is_valid(accept));
+      EXPECT_EQ(unsigned_option(accept),
+                static_cast<unsigned>(opt::content::text_plain));
     }
     {
       auto con = opt::content::octet_stream;
       opt::option content(con);
       EXPECT_EQ(content.data_size(), 1);
       EXPECT_TRUE(opt::is_valid(content));
+      EXPECT_EQ(unsigned_option(content),
+                static_cast<unsigned>(opt::content::octet_stream));
     }
   }
 //   {

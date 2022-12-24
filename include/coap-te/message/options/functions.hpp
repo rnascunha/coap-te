@@ -11,6 +11,8 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_FUNCTIONS_HPP_
 #define COAP_TE_MESSAGE_OPTIONS_FUNCTIONS_HPP_
 
+#include "coap-te/core/utility.hpp"
+#include "coap-te/core/byte_order.hpp"
 #include "coap-te/message/options/config.hpp"
 
 namespace coap_te {
@@ -40,6 +42,30 @@ is_safe_to_forward(number op) noexcept {
 [[nodiscard]] constexpr bool
 is_no_cache_key(number op) noexcept {
   return (static_cast<number_type>(op) & no_cache_key) == no_cache_key;
+}
+
+[[nodiscard]] constexpr std::size_t
+header_size(number previous,
+            number current,
+            std::size_t data_size) noexcept {
+  std::size_t size = 1;
+  std::size_t diff = coap_te::core::to_underlying(current) -
+              coap_te::core::to_underlying(previous);
+
+  for (std::size_t s : {diff, data_size}) {
+    if (s >= 269)
+      size +=  2;
+    else if (s >= 13)
+      size += 1;
+  }
+  return size;
+}
+
+template<typename Unsigned = unsigned>
+constexpr Unsigned
+unsigned_option(const std::uint8_t* data,
+                std::size_t size) noexcept {
+  return coap_te::core::from_small_big_endian<Unsigned>(data, size);
 }
 
 }  // namespace options

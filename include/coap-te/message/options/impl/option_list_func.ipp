@@ -23,6 +23,7 @@
 #include "coap-te/message/options/parse.hpp"
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/traits.hpp"
+#include "coap-te/message/options/option_func.hpp"
 
 namespace coap_te {
 namespace message {
@@ -42,7 +43,7 @@ size(const OptionList& list) noexcept {
   std::size_t s = 0;
   number prev = number::invalid;
   for (auto const& op : list) {
-    s += coap_te::core::forward_second_if_pair(op).size(prev);
+    s += size(coap_te::core::forward_second_if_pair(op), prev);
     prev = coap_te::core::forward_second_if_pair(op).option_number();
   }
   return s;
