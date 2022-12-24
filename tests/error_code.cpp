@@ -22,6 +22,8 @@ TEST(System, ErrorCode) {
     EXPECT_TRUE(ec);
     EXPECT_EQ(ec, coap_te::errc::invalid_option);
     EXPECT_NE(ec, coap_te::errc::option_length);
+    ec.clear();
+    EXPECT_FALSE(ec);
   }
   {
     SCOPED_TRACE("coap_te::error_code errc construct");
@@ -29,6 +31,8 @@ TEST(System, ErrorCode) {
     EXPECT_TRUE(ec);
     EXPECT_EQ(ec, coap_te::errc::no_buffer_space);
     EXPECT_NE(ec, coap_te::errc::option_format);
+    ec.clear();
+    EXPECT_FALSE(ec);
   }
 
 #if COAP_TE_ENABLE_STD_ERROR_CODE == 1
@@ -40,6 +44,8 @@ TEST(System, ErrorCode) {
     EXPECT_TRUE(ec);
     EXPECT_EQ(ec, coap_te::errc::invalid_option);
     EXPECT_NE(ec, coap_te::errc::option_length);
+    ec.clear();
+    EXPECT_FALSE(ec);
   }
   {
     SCOPED_TRACE("std::error_code errc construct");
@@ -47,6 +53,8 @@ TEST(System, ErrorCode) {
     EXPECT_TRUE(ec);
     EXPECT_EQ(ec, coap_te::errc::no_buffer_space);
     EXPECT_NE(ec, coap_te::errc::option_format);
+    ec.clear();
+    EXPECT_FALSE(ec);
   }
   {
     SCOPED_TRACE("convert coap_te::error_code to std::error_code");
@@ -55,6 +63,8 @@ TEST(System, ErrorCode) {
     EXPECT_TRUE(stdec);
     EXPECT_EQ(stdec, coap_te::errc::no_buffer_space);
     EXPECT_NE(stdec, coap_te::errc::option_format);
+    ec.clear();
+    EXPECT_FALSE(ec);
   }
 #endif  // COAP_TE_ENABLE_STD_ERROR_CODE == 1
 #if COAP_TE_ENABLE_EXCEPTIONS == 1

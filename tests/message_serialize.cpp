@@ -112,8 +112,8 @@ void serialize_parse_header_success_impl(
     coap_te::const_buffer buf_p(data, size);
     coap_te::error_code ecp;
     Message resp;
-    auto size_p = msg::parse(buf_p, resp, ec);
-    EXPECT_FALSE(ec);
+    auto size_p = msg::parse(buf_p, resp, ecp);
+    EXPECT_FALSE(ecp);
     EXPECT_EQ(size, size_p);
     EXPECT_EQ(tp, resp.get_type());
     EXPECT_EQ(co, resp.get_code());

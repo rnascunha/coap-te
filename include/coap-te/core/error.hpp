@@ -98,6 +98,11 @@ class error_code {
     return ec_;
   }
 
+  constexpr void
+  clear() noexcept {
+    ec_ = static_cast<errc>(0);
+  }
+
   [[nodiscard]] constexpr std::string_view
   message() const noexcept {
     return error_message(ec_);

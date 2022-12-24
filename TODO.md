@@ -107,5 +107,6 @@ At the end, remember:
 * Also, equality (==) and less operator (<) just compare the option number, not the data. Is this also confusing?
 * The iterator interface at const_buffer and mutable_buffer necessary?
 * Generalize more 'is_option' trait;
-* 'option' is inherent from 'option_base'. Is this a good solution? Dificults to remove:
-* * Declare the operator '==' and '<' in a generic way, not needing in every option-like class;
+* 'option' is inherent from 'option_base'. Is this a good solution?
+* * Need to declare the operator '==' and '<' in all class;
+* * if declare virtual functions at base, it can't be constexpr, this also prevent the declaration of operator '=='  and '<' at base;
