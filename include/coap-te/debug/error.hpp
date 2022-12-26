@@ -11,12 +11,13 @@
 #ifndef COAP_TE_DEBUG_ERROR_HPP_
 #define COAP_TE_DEBUG_ERROR_HPP_
 
+#include <iostream>
 #include "coap-te/core/error.hpp"
 
 std::ostream&
 operator<<(std::ostream& os,
            const coap_te::error_code& op) noexcept {
-  os << op.name() << ':' << static_cast<int>(op.value());
+  os << op.name() << ':' << op.value();
   return os;
 }
 
