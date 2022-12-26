@@ -14,11 +14,9 @@
 #include <algorithm>
 #include <type_traits>
 #include <utility>
-#include <vector>
-#include <list>
-#include <map>
 
 #include "coap-te/core/error.hpp"
+#include "coap-te/core/traits.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/parse.hpp"
 #include "coap-te/message/options/option.hpp"
@@ -81,15 +79,23 @@ template<typename OptionList,
          typename Option>
 void
 insert(OptionList& list, Option&& op) noexcept {      // NOLINT
-  if constexpr (std::is_same_v<std::vector<option>, OptionList> ||
-                std::is_same_v<std::list<option>, OptionList>) {
-    auto it = std::upper_bound(list.begin(), list.end(), op);
-    list.insert(it, std::forward<Option>(op));
-  } else if constexpr (std::is_same_v<std::multimap<number, option>,      // NOLINT
-                                      OptionList>) {
+  static_assert(coap_te::core::is_container_v<OptionList>,
+                "Must be a container");
+  static_assert(is_option_v<Option>,
+                "Must be a option");
+
+  using OptionListComp = coap_te::core::remove_cvref_t<OptionList>;
+
+  if constexpr (coap_te::core::is_map_v<OptionListComp>) {
     list.insert({op.option_number(), std::forward<Option>(op)});
-  } else {
+  } else if constexpr (coap_te::core::is_set_v<OptionListComp> ||       // NOLINT
+                       coap_te::core::is_sorted_list<OptionListComp>::value) {
     list.insert(std::forward<Option>(op));
+  } else {
+    // inserting in a ordered way
+    auto it = std::upper_bound(list.begin(), list.end(), op);
+    list.insert(it,
+                std::forward<Option>(op));
   }
 }
 

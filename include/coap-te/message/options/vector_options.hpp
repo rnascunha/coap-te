@@ -11,8 +11,6 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_VECTOR_OPTIONS_HPP_
 #define COAP_TE_MESSAGE_OPTIONS_VECTOR_OPTIONS_HPP_
 
-#include <iostream>
-
 #include "coap-te/core/error.hpp"
 #include "coap-te/core/traits.hpp"
 #include "coap-te/core/const_buffer.hpp"

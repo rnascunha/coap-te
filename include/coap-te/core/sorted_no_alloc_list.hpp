@@ -51,6 +51,9 @@ class sorted_no_alloc_list {
   using const_pointer = const T*;
   using reference = T&;
 
+  static constexpr bool
+  is_sorted_list = true;
+
   /**
    * @brief Type node that holds the value and the
    * pointer to the next element.

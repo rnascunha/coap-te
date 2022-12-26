@@ -110,3 +110,6 @@ At the end, remember:
 * 'option' is inherent from 'option_base'. Is this a good solution?
 * * Need to declare the operator '==' and '<' in all class;
 * * if declare virtual functions at base, it can't be constexpr, this also prevent the declaration of operator '=='  and '<' at base;
+* 'option_list_size' does not forbids the use of 'unordered_set/unordered_map' or 'map/set', unsuttable for the use as option container:
+* * Document it;
+* * Should it explicity forbid (make a type trait)?

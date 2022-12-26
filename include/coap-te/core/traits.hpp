@@ -62,6 +62,27 @@ is_iterator_type_v = is_iterator_type<Iter, IterCategory>::value;
  * @tparam Iter iterator to check
  */
 template<typename Iter>
+struct is_forward_iterator :
+    is_iterator_type<
+        Iter,
+        std::forward_iterator_tag>
+{};
+
+/**
+ * @brief Helper template of @ref is_bidirectional_iterator
+ * 
+ * @tparam Iter 
+ */
+template<typename Iter>
+static constexpr bool
+is_forward_iterator_v = is_forward_iterator<Iter>::value;
+
+/**
+ * @brief Checks if a iterator is bidirectional
+ * 
+ * @tparam Iter iterator to check
+ */
+template<typename Iter>
 struct is_bidirectional_iterator :
     is_iterator_type<
         Iter,
@@ -263,6 +284,69 @@ struct is_container<
 template<typename T>
 static constexpr bool
 is_container_v = is_container<T>::value;
+
+/**
+ * @brief Checks if mapped_type is defined at class
+ */
+template<typename, typename = void>
+struct has_mapped_type : std::false_type{};
+
+template<typename T>
+struct has_mapped_type<T, std::void_t<typename T::mapped_type>> :
+      std::true_type{};
+
+template<typename T>
+static constexpr bool
+has_mapped_type_v = has_mapped_type<T>::value;
+
+/**
+ * @brief Checks if key_type is defined at class
+ */
+template<typename, typename = void>
+struct has_key_type : std::false_type{};
+
+template<typename T>
+struct has_key_type<T, std::void_t<typename T::key_type>> : std::true_type{};
+
+template<typename T>
+static constexpr bool
+has_key_type_v = has_key_type<T>::value;
+
+/**
+ * @brief Check if is a container of map type
+ */
+template<typename C>
+struct is_map : std::bool_constant<
+    is_container_v<C> &&
+    has_key_type_v<C> &&
+    has_mapped_type_v<C>>{};
+
+template<typename T>
+static constexpr bool
+is_map_v = is_map<T>::value;
+
+/**
+ * @brief Check if is a container of set type
+ */
+template<typename C>
+struct is_set : std::bool_constant<
+    is_container_v<C> &&
+    has_key_type_v<C> &&
+    !has_mapped_type_v<C>>{};
+
+template<typename T>
+static constexpr bool
+is_set_v = is_set<T>::value;
+
+/**
+ * @brief Checks if a type is sorted list
+ */
+template<typename, typename = void>
+struct is_sorted_list : std::false_type{};
+
+template<typename T>
+struct is_sorted_list<T, std::void_t<decltype(T::is_sorted_list)>> :
+        std::bool_constant<T::is_sorted_list>{};
 
 /**
  * @brief If T is a pair, forward the second value, otherwise foward T

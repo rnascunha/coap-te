@@ -32,6 +32,9 @@ class sorted_list {
   using iterator = typename Container::iterator;
   using const_iterator = typename Container::const_iterator;
 
+  static constexpr bool
+  is_sorted_list = true;
+
   sorted_list() = default;
   sorted_list(std::initializer_list<T> list) {
     for (auto& t : list) {
