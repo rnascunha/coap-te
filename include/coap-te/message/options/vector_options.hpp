@@ -28,7 +28,7 @@ namespace options {
 
 class vector_options {
  public:
-  using value_type = option;
+  using value_type = option_view;
 
   class const_iterator {
    public:
@@ -131,7 +131,7 @@ class vector_options {
     return buf_.size() == 0;
   }
 
-  [[nodiscard]] constexpr option
+  [[nodiscard]] constexpr value_type
   front() const noexcept {
     return *begin();
   }

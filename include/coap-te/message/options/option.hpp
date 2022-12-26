@@ -104,6 +104,14 @@ class option : public option_base {
     : data_(static_cast<unsigned_type>(value)),
       op_(number::accept) {}
 
+  template<typename Op,
+           typename = std::enable_if_t<!std::is_same_v<Op, option> &&
+                                        std::is_base_of_v<option_base, Op>>>
+  option(const Op& op) noexcept       // NOLINT
+    : data_{coap_te::const_buffer{op.data(), op.data_size()}},
+      op_{op.option_number()}
+  {}
+
   [[nodiscard]] constexpr number
   option_number() const noexcept {
     return op_;
@@ -207,6 +215,13 @@ class option_view : public option_base {
     value = static_cast<accept>(v);
     data_ = {&value, size};
   }
+
+  template<typename Op,
+           typename = std::enable_if_t<!std::is_same_v<Op, option_view> &&
+                                        std::is_base_of_v<option_base, Op>>>
+  explicit option_view(const Op& op) noexcept
+    : data_{op.data(), op.data_size()}, op_{op.option_number()}
+  {}
 
   [[nodiscard]] constexpr number
   option_number() const noexcept {
