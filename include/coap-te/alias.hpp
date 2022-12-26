@@ -36,7 +36,7 @@ using option_list =
           coap_te::core::sorted_list<option>;
 using request = coap_te::message::message<option_list>;
 
-using option_list_response = coap_te::message::options::vector_options;
+using option_list_response = coap_te::message::options::vector_options<>;
 using response = coap_te::message::message<option_list_response>;
 
 namespace no_alloc {

@@ -19,16 +19,19 @@
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/parse.hpp"
-#include "coap-te/message/options/option_list_func.hpp"
 #include "coap-te/message/options/option_func.hpp"
+#include "coap-te/message/options/traits.hpp"
 
 namespace coap_te {
 namespace message {
 namespace options {
 
+template<typename Option = option_view>
 class vector_options {
  public:
-  using value_type = option_view;
+  static_assert(is_raw_option_v<Option>, "Must be option type");
+
+  using value_type = Option;
 
   class const_iterator {
    public:
@@ -92,14 +95,6 @@ class vector_options {
     number_type prev_ = invalid;
     coap_te::const_buffer buf_;
   };
-
-  explicit vector_options(const const_buffer& buf) noexcept {
-    auto [size, ec] = option_list_size(buf);
-    if (ec) {
-      return;
-    }
-    buf_ = {buf.data(), size};
-  }
 
   constexpr
   vector_options() noexcept = default;
@@ -169,17 +164,18 @@ class vector_options {
   coap_te::const_buffer buf_;
 };
 
-template<>
-[[nodiscard]] constexpr std::size_t
-size(const vector_options& list) noexcept {
-  return list.size();
-}
+/**
+ * @brief Checks if a type is a vector_options type
+ */
+template<typename>
+struct is_option_vector : std::false_type{};
 
-template<>
-[[nodiscard]] constexpr std::size_t
-count(const vector_options& list) noexcept {
-  return list.count();
-}
+template<typename Option>
+struct is_option_vector<vector_options<Option>> : std::true_type{};
+
+template<typename T>
+static constexpr bool
+is_option_vector_v = is_option_vector<T>::value;
 
 }  // namespace options
 }  // namespace message

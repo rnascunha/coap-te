@@ -134,9 +134,9 @@ parse(number_type before,
       ConstBuffer& input,                   // NOLINT
       Option& output,                       // NOLINT
       coap_te::error_code& ec) noexcept {   // NOLINT
-  static_assert(is_option_v<Option>, 
+  static_assert(is_option_v<Option>,
                 "Must be a option type");
-  
+
   number_type current = invalid;
   coap_te::const_buffer buf;
   auto size = parse<CheckOptions>(before, input, current, buf, ec);

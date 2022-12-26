@@ -24,6 +24,7 @@
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/traits.hpp"
 #include "coap-te/message/options/option_func.hpp"
+#include "coap-te/message/options/vector_options.hpp"
 
 namespace coap_te {
 namespace message {
@@ -33,23 +34,32 @@ template<typename OptionList>
 [[nodiscard]] constexpr std::size_t
 count(const OptionList& list) noexcept {
   static_assert(is_option_list_v<OptionList>, "Must be a option list");
-  return list.size();
+  if constexpr (is_option_vector_v<OptionList>) {
+    return list.count();
+  } else {
+    return list.size();
+  }
 }
 
 template<typename OptionList>
 [[nodiscard]] constexpr std::size_t
 size(const OptionList& list) noexcept {
   static_assert(is_option_list_v<OptionList>, "Must be a option list");
-  std::size_t s = 0;
-  number prev = number::invalid;
-  for (auto const& op : list) {
-    s += size(coap_te::core::forward_second_if_pair(op), prev);
-    prev = coap_te::core::forward_second_if_pair(op).option_number();
+
+  if constexpr (is_option_vector_v<OptionList>) {
+    return list.size();
+  } else {
+    std::size_t s = 0;
+    number prev = number::invalid;
+    for (auto const& op : list) {
+      s += size(coap_te::core::forward_second_if_pair(op), prev);
+      prev = coap_te::core::forward_second_if_pair(op).option_number();
+    }
+    return s;
   }
-  return s;
 }
 
-[[nodiscard]] std::pair<std::size_t, coap_te::error_code>
+[[nodiscard]] constexpr std::pair<std::size_t, coap_te::error_code>
 option_list_size(
   const coap_te::const_buffer& buf) noexcept {   // NOLINT
   coap_te::const_buffer cbuf(buf);
@@ -75,7 +85,7 @@ insert(OptionList& list, Option&& op) noexcept {      // NOLINT
                 std::is_same_v<std::list<option>, OptionList>) {
     auto it = std::upper_bound(list.begin(), list.end(), op);
     list.insert(it, std::forward<Option>(op));
-  } else if constexpr (std::is_same_v<std::multimap<number, option>,    // NOLINT
+  } else if constexpr (std::is_same_v<std::multimap<number, option>,      // NOLINT
                                       OptionList>) {
     list.insert({op.option_number(), std::forward<Option>(op)});
   } else {

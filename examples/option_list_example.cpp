@@ -58,7 +58,7 @@ int main() {
 
   std::cout << "Serialized! [" << size_s << "]\n";
 
-  opt::vector_options opt_vec(coap_te::const_buffer{data_s, size_s});
+  opt::vector_options opt_vec(data_s, size_s);
 
   // for (auto it = opt_vec.begin(); !it.is_end(); ++it) {
   //   std::cout << *it << "\n";

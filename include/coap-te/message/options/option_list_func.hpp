@@ -51,7 +51,7 @@ size(const OptionList& list) noexcept;
  * @return std::pair<std::size_t, coap_te::error_code> the size calcuated 
  * or a error
  */
-[[nodiscard]] std::pair<std::size_t, coap_te::error_code>
+[[nodiscard]] constexpr std::pair<std::size_t, coap_te::error_code>
 option_list_size(const coap_te::const_buffer& buf) noexcept;
 
 /**

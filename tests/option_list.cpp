@@ -37,7 +37,7 @@ void test_option_list_success(Container& list) {    // NOLINT
   std::size_t size = opt::serialize<opt::check_none>(list, buf, ec);
   EXPECT_FALSE(ec);
 
-  opt::vector_options list_s(coap_te::const_buffer(data, size));
+  opt::vector_options list_s(data, size);
   {
     auto i = list.begin();
     for (auto it = list_s.begin(); !it.is_end(); ++i, ++it) {

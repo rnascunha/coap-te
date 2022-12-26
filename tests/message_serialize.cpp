@@ -36,7 +36,7 @@ namespace msg = coap_te::message;
 using opt = msg::options::option;
 using opt_node = coap_te::core::sorted_no_alloc_list<opt>::node;
 // requests
-using resp = msg::message<msg::options::vector_options>;
+using resp = msg::message<msg::options::vector_options<>>;
 using msg_sort = msg::message<coap_te::core::sorted_list<opt>>;
 using msg_vector = msg::message<std::vector<opt>>;
 using msg_list = msg::message<std::list<opt>>;
