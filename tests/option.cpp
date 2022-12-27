@@ -179,7 +179,7 @@ TEST(CoAPMessage, OptionViewConstructor) {
     }
     {
       auto acc = opt::accept::text_plain;
-      opt::option accept(acc);
+      opt::option_view accept(acc);
       EXPECT_EQ(accept.data_size(), 0);
       EXPECT_TRUE(opt::is_valid(accept));
       EXPECT_EQ(unsigned_option(accept),
@@ -187,7 +187,121 @@ TEST(CoAPMessage, OptionViewConstructor) {
     }
     {
       auto con = opt::content::octet_stream;
-      opt::option content(con);
+      opt::option_view content(con);
+      EXPECT_EQ(content.data_size(), 1);
+      EXPECT_TRUE(opt::is_valid(content));
+      EXPECT_EQ(unsigned_option(content),
+                static_cast<unsigned>(opt::content::octet_stream));
+    }
+  }
+//   {
+//     SCOPED_TRACE("Faling constructor - NOT throwing!");
+//     {
+//       // Empty option not empty
+//       opt::option_view empty_op = opt::create<
+//                                     opt::check_all,
+//                                     false>(opt::number::if_none_match, 1);
+//       EXPECT_EQ(empty_op.data_size(), 0);
+//       EXPECT_FALSE(empty_op.is_valid());
+//     }
+//     {
+//       // Unsigned option empty
+//       opt::option_view uint_op = opt::create<
+//                                     opt::check_all,
+//                                     false>(opt::number::uri_port);
+//       EXPECT_EQ(uint_op.data_size(), 0);
+//       EXPECT_FALSE(uint_op.is_valid());
+//     }
+//     {
+//       // String option opaque
+//       unsigned char arr[] = {1, 2, 3, 4, 5};
+//       opt::option_view string_op = opt::create<
+//                                     opt::check_all,
+//                                     false>(opt::number::uri_host,
+//                                      coap_te::const_buffer(arr));
+//       EXPECT_EQ(string_op.data_size(), 0);
+//       EXPECT_FALSE(string_op.is_valid());
+//     }
+//     {
+//       // Opaque option string
+//       opt::option_view opaque_op = opt::create<
+//                                     opt::check_all,
+//                                     false>(opt::number::if_match, "myoption");
+//       EXPECT_EQ(opaque_op.data_size(), 0);
+//       EXPECT_FALSE(opaque_op.is_valid());
+//     }
+//   }
+// #if COAP_TE_ENABLE_EXCEPTIONS == 1
+//   {
+//     SCOPED_TRACE("Faling constructor - throwing!");
+//     {
+//       // Empty option not empty
+//       EXPECT_THROW(::create(opt::number::if_none_match, 1), coap_te::exception);
+//     }
+//     {
+//       // Unsigned option empty
+//       EXPECT_THROW(::create(opt::number::uri_port), coap_te::exception);
+//     }
+//     {
+//       // String option opaque
+//       unsigned char arr[] = {1, 2, 3, 4, 5};
+//       EXPECT_THROW(::create(opt::number::uri_host, coap_te::const_buffer(arr)),
+//                    coap_te::exception);
+//     }
+//     {
+//       // Opaque option string
+//       EXPECT_THROW(::create(opt::number::if_match, "myoption"),
+//                    coap_te::exception);
+//     }
+//   }
+// #endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
+}
+
+TEST(CoAPMessage, OptionContainerConstructor) {
+  {
+    SCOPED_TRACE("Option View constructor tests");
+    {
+      opt::option_container invalid_op;
+      EXPECT_EQ(invalid_op.data_size(), 0);
+      EXPECT_FALSE(opt::is_valid(invalid_op));
+    }
+    {
+      opt::option_container empty_op{opt::number::if_none_match};
+      EXPECT_EQ(empty_op.data_size(), 0);
+      EXPECT_TRUE(opt::is_valid(empty_op));
+    }
+    {
+      opt::option_container uint_op{opt::number::uri_port, 10};
+      EXPECT_EQ(uint_op.data_size(), 1);
+      EXPECT_TRUE(opt::is_valid(uint_op));
+      EXPECT_EQ(unsigned_option(uint_op), 10);
+    }
+    {
+      opt::option_container uint_op{opt::number::uri_port, 0};
+      EXPECT_EQ(uint_op.data_size(), 0);
+      EXPECT_TRUE(opt::is_valid(uint_op));
+    }
+    {
+      opt::option_container string_op{opt::number::uri_host, "myhost"};
+      EXPECT_EQ(string_op.data_size(), 6);
+      EXPECT_TRUE(opt::is_valid(string_op));
+    }
+    {
+      unsigned char arr[] = {1, 2, 3, 4, 5};
+      opt::option_container opaque_op{opt::number::if_match,
+                                 coap_te::const_buffer(arr)};
+      EXPECT_EQ(opaque_op.data_size(), 5);
+      EXPECT_TRUE(opt::is_valid(opaque_op));
+    }
+    {
+      opt::option_container accept(opt::accept::text_plain);
+      EXPECT_EQ(accept.data_size(), 0);
+      EXPECT_TRUE(opt::is_valid(accept));
+      EXPECT_EQ(unsigned_option(accept),
+                static_cast<unsigned>(opt::content::text_plain));
+    }
+    {
+      opt::option_container content(opt::content::octet_stream);
       EXPECT_EQ(content.data_size(), 1);
       EXPECT_TRUE(opt::is_valid(content));
       EXPECT_EQ(unsigned_option(content),
@@ -332,11 +446,18 @@ void test_serialize_parse_all(
   Args&& ...args) {
   {
     SCOPED_TRACE("Option");
-    test_serialize_parse_success<opt::option>(before, current, std::forward<Args>(args)...);
+    test_serialize_parse_success<opt::option>(
+                    before, current, std::forward<Args>(args)...);
   }
   {
     SCOPED_TRACE("Option View");
-    test_serialize_parse_success<opt::option_view>(before, current, std::forward<Args>(args)...);
+    test_serialize_parse_success<opt::option_view>(
+                    before, current, std::forward<Args>(args)...);
+  }
+  {
+    SCOPED_TRACE("Option Container");
+    test_serialize_parse_success<opt::option_container>(
+                    before, current, std::forward<Args>(args)...);
   }
 }
 

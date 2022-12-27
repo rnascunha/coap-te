@@ -263,6 +263,97 @@ class option_view : public option_base {
   number      op_  = number::invalid;
 };
 
+/**
+ * @brief 
+ * 
+ */
+class option_container : public option_base {
+ public:
+  using value_type = std::vector<std::uint8_t>;
+
+  option_container() noexcept = default;
+
+  explicit option_container(number op) noexcept
+    : op_(op) {}
+
+  option_container(number op, unsigned_type value) noexcept
+    : op_(op) {
+    auto [v, size] = coap_te::core::to_small_big_endian(value);
+    std::uint8_t* ptr = reinterpret_cast<uint8_t*>(&v);
+    data_ = {ptr, ptr + size};
+  }
+
+  option_container(number op, std::string_view str) noexcept
+    : data_{str.begin(), str.end()}, op_(op) {}
+
+  option_container(number op, const const_buffer& value) noexcept
+    : data_{reinterpret_cast<const std::uint8_t*>(value.data()),
+            reinterpret_cast<const std::uint8_t*>(value.data()) + value.size()},
+            op_(op) {}
+
+  explicit option_container(content value) noexcept   // NOLINT
+    : op_{number::content_format} {
+      auto [v, size] = coap_te::core::to_small_big_endian(
+                        coap_te::core::to_underlying(value));
+      std::uint8_t* ptr = reinterpret_cast<uint8_t*>(&v);
+      data_ = {ptr, ptr + size};
+  }
+
+  explicit option_container(accept value) noexcept    // NOLINT
+    : op_{number::accept} {
+    auto [v, size] = coap_te::core::to_small_big_endian(
+                          coap_te::core::to_underlying(value));
+    std::uint8_t* ptr = reinterpret_cast<uint8_t*>(&v);
+    data_ = {ptr, ptr + size};
+  }
+
+  template<typename Op,
+           typename = std::enable_if_t<!std::is_same_v<Op, option_container> &&
+                                        std::is_base_of_v<option_base, Op>>>
+  explicit option_container(const Op& op) noexcept
+    : data_{op.data(), op.data_size()}, op_{op.option_number()}
+  {}
+
+  [[nodiscard]] constexpr number
+  option_number() const noexcept {
+    return op_;
+  }
+
+  [[nodiscard]] constexpr std::size_t
+  data_size() const noexcept {
+    return data_.size();
+  }
+
+  [[nodiscard]] constexpr const void*
+  data() const noexcept {
+    return data_.data();
+  }
+
+  [[nodiscard]] friend constexpr bool
+  operator==(const option_container& lhs, const option_view& rhs) noexcept {
+    return lhs.option_number() == rhs.option_number();
+  }
+
+  [[nodiscard]] friend constexpr bool
+  operator<(const option_container& lhs, const option_view& rhs) noexcept {
+    return lhs.option_number() < rhs.option_number();
+  }
+
+  [[nodiscard]] friend constexpr bool
+  operator==(const option_container& op, number num) noexcept {
+    return op.option_number() == num;
+  }
+
+  [[nodiscard]] friend constexpr bool
+  operator<(const option_container& op, number num) noexcept {
+    return op.option_number() < num;
+  }
+
+ private:
+  value_type  data_;
+  number      op_  = number::invalid;
+};
+
 /*
  * The functions above are a way to create options
  * in a more checkable way. You can check if the options
