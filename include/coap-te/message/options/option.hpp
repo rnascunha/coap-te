@@ -16,6 +16,10 @@
 #include <utility>
 #include <string_view>
 
+#if COAP_TE_ENABLE_DYNAMIC_ALLOC_SUPPORT == 1
+#include <vector>
+#endif  // COAP_TE_ENABLE_DYNAMIC_ALLOC_SUPPORT = 1
+
 #include "coap-te/core/error.hpp"
 #include "coap-te/core/utility.hpp"
 #include "coap-te/core/const_buffer.hpp"
@@ -263,6 +267,9 @@ class option_view : public option_base {
   number      op_  = number::invalid;
 };
 
+
+#if COAP_TE_ENABLE_DYNAMIC_ALLOC_SUPPORT == 1
+
 /**
  * @brief 
  * 
@@ -353,6 +360,8 @@ class option_container : public option_base {
   value_type  data_;
   number      op_  = number::invalid;
 };
+
+#endif  // COAP_TE_ENABLE_DYNAMIC_ALLOC_SUPPORT == 1
 
 /*
  * The functions above are a way to create options

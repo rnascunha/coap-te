@@ -23,6 +23,8 @@ option(COAP_TE_ENABLE_EXCEPTIONS                    "enable exceptions"         
 option(COAP_TE_ERROR_SHOW_MESSAGE                   "add error messages"        ON)
 option(COAP_TE_ENABLE_STD_ERROR_CODE                "enable std::error_code"    ON)
 
+option(COAP_TE_ENABLE_DYNAMIC_ALLOC_SUPPORT         "dynamic alloc support"     ON)
+
 add_compile_definitions(
         COAP_TE_MESSAGE_OPTION_OBSERVABLE_RESOURCE=$<BOOL:${COAP_TE_MESSAGE_OPTION_OBSERVABLE_RESOURCE}>
 				COAP_TE_MESSAGE_OPTION_HOP_LIMIT=$<BOOL:${COAP_TE_MESSAGE_OPTION_HOP_LIMIT}>

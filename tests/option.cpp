@@ -257,6 +257,8 @@ TEST(CoAPMessage, OptionViewConstructor) {
 // #endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
 }
 
+#if COAP_TE_ENABLE_DYNAMIC_ALLOC_SUPPORT == 1
+
 TEST(CoAPMessage, OptionContainerConstructor) {
   {
     SCOPED_TRACE("Option View constructor tests");
@@ -370,6 +372,7 @@ TEST(CoAPMessage, OptionContainerConstructor) {
 //   }
 // #endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
 }
+#endif  // COAP_TE_ENABLE_DYNAMIC_ALLOC_SUPPORT == 1
 
 std::size_t calc_options_size(
               opt::number_type before,
@@ -454,11 +457,13 @@ void test_serialize_parse_all(
     test_serialize_parse_success<opt::option_view>(
                     before, current, std::forward<Args>(args)...);
   }
+#if COAP_TE_ENABLE_DYNAMIC_ALLOC_SUPPORT == 1
   {
     SCOPED_TRACE("Option Container");
     test_serialize_parse_success<opt::option_container>(
                     before, current, std::forward<Args>(args)...);
   }
+#endif  // COAP_TE_ENABLE_DYNAMIC_ALLOC_SUPPORT == 1
 }
 
 TEST(CoAPMessage, OptionSerializeParse) {
