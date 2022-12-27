@@ -22,14 +22,6 @@ namespace coap_te {
 namespace message {
 namespace options {
 
-template<typename Option>
-struct is_raw_option : std::bool_constant<
-    std::is_base_of_v<option_base, coap_te::core::remove_cvref_t<Option>>>{};
-
-template<typename Option>
-static constexpr bool
-is_raw_option_v = is_raw_option<Option>::value;
-
 template<typename NodeOption>
 struct is_node_option : std::bool_constant<
   std::is_same_v<

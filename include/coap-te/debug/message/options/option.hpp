@@ -17,20 +17,24 @@
 #include "coap-te/core/utility.hpp"
 #include "coap-te/core/const_buffer.hpp"
 #include "coap-te/debug/to_string.hpp"
+#include "coap-te/debug/message/options/to_string.hpp"
 
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/option_func.hpp"
-#include "coap-te/debug/message/options/to_string.hpp"
+#include "coap-te/message/options/traits.hpp"
 
 namespace coap_te {
 namespace debug {
 
+template<typename Option>
 void
 print_option_data(std::ostream& os,
-                  const coap_te::message::options::option& op,
+                  const Option& op,
                   coap_te::message::options::format f) noexcept {
   namespace opt = coap_te::message::options;
+  static_assert(opt::is_option_v<Option>,
+                "Must be option type");
 
   switch (f) {
     case opt::format::empty:
@@ -61,25 +65,13 @@ print_option_data(std::ostream& os,
   }
 }
 
-void
-print_option_data(std::ostream& os,
-  const coap_te::message::options::option::value_type& var) noexcept {
-  namespace opt = coap_te::message::options;
-
-  std::visit(coap_te::core::overloaded{
-    [&](std::monostate){ os << "<no value>"; },
-    [&](opt::empty_format){ os << "<empty>"; },
-    [&](opt::option::unsigned_type data) { os << data; },
-    [&](const coap_te::const_buffer& data) {
-      os << to_hex(data);
-    }
-  }, var);
-}
-
+template<typename Option>
 void
 print_option(std::ostream& os,
-             const coap_te::message::options::option& op) noexcept {
+             const Option& op) noexcept {
   namespace opt = coap_te::message::options;
+  static_assert(opt::is_option_v<Option>,
+                "Must be option type");
 
   auto& def = opt::get_definition(op.option_number());
   os << static_cast<opt::number_type>(op.option_number()) << '|'
@@ -91,16 +83,13 @@ print_option(std::ostream& os,
 }  // namespace debug
 }  // namespace coap_te
 
+template<typename Option,
+         typename =
+          std::enable_if_t<
+            coap_te::message::options::is_option_v<Option>>>
 std::ostream&
 operator<<(std::ostream& os,
-          const coap_te::message::options::option::value_type& var) noexcept {
-  coap_te::debug::print_option_data(os, var);
-  return os;
-}
-
-std::ostream&
-operator<<(std::ostream& os,
-           const coap_te::message::options::option& op) noexcept {
+           const Option& op) noexcept {
   coap_te::debug::print_option(os, op);
   return os;
 }

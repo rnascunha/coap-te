@@ -18,7 +18,7 @@
 
 #if COAP_TE_ENABLE_DYNAMIC_ALLOC_SUPPORT == 1
 #include <vector>
-#endif  // COAP_TE_ENABLE_DYNAMIC_ALLOC_SUPPORT = 1
+#endif  // COAP_TE_ENABLE_DYNAMIC_ALLOC_SUPPORT == 1
 
 #include "coap-te/core/error.hpp"
 #include "coap-te/core/utility.hpp"
@@ -34,43 +34,67 @@ namespace options {
 
 struct empty_format{};
 
+template<typename Derived>
 class option_base {
  public:
   using unsigned_type = unsigned;
-  static constexpr unsigned_type
-  invalid_unsigned = std::numeric_limits<unsigned_type>::max();
 
-  // virtual number
-  // option_number() const noexcept = 0;
+  constexpr
+  option_base() noexcept = default;
 
-  // virtual std::size_t
-  // data_size() const noexcept = 0;
+  constexpr
+  explicit option_base(number op) noexcept
+    : op_{op} {}
 
-  // virtual const void*
-  // data() const noexcept = 0;
+  [[nodiscard]] constexpr number
+  option_number() const noexcept {
+    return op_;
+  }
 
-  // [[nodiscard]] friend bool
-  // operator==(const option_base& lhs, const option_base& rhs) noexcept {
-  //   return lhs.option_number() == rhs.option_number();
-  // }
+  [[nodiscard]] constexpr friend bool
+  operator==(const option_base& lhs, const option_base& rhs) noexcept {
+    return lhs.op_ == rhs.op_;
+  }
 
-  // [[nodiscard]] friend bool
-  // operator<(const option_base& lhs, const option_base& rhs) noexcept {
-  //   return lhs.option_number() < rhs.option_number();
-  // }
+  [[nodiscard]] constexpr friend bool
+  operator<(const option_base& lhs, const option_base& rhs) noexcept {
+    return lhs.op_ < rhs.op_;
+  }
 
-  // [[nodiscard]] friend bool
-  // operator==(const option_base& op, number num) noexcept {
-  //   return op.option_number() == num;
-  // }
+  [[nodiscard]] constexpr friend bool
+  operator==(const option_base& op, number num) noexcept {
+    return op.op_ == num;
+  }
 
-  // [[nodiscard]] friend bool
-  // operator<(const option_base& op, number num) noexcept {
-  //   return op.option_number() < num;
-  // }
+  [[nodiscard]] constexpr friend bool
+  operator<(const option_base& op, number num) noexcept {
+    return op.op_ < num;
+  }
+
+ private:
+  number op_ = number::invalid;
 };
 
-class option : public option_base {
+/**
+ * @brief Checks if a type is of type option
+ */
+template<typename, typename = void>
+struct is_raw_option : std::false_type{};
+
+template<typename T>
+struct is_raw_option<T> : std::bool_constant<
+    std::is_base_of<option_base<coap_te::core::remove_cvref_t<T>>,
+                    coap_te::core::remove_cvref_t<T>>::value>{};
+
+template<typename Option>
+static constexpr bool
+is_raw_option_v = is_raw_option<Option>::value;
+
+/**
+ * @brief 
+ * 
+ */
+class option : public option_base<option> {
  public:
   using value_type = std::variant<
                       std::monostate,
@@ -83,43 +107,38 @@ class option : public option_base {
 
   constexpr
   explicit option(number op) noexcept
-    : data_(empty_format{}), op_(op) {}
+    : option_base{op}, data_(empty_format{}) {}
 
   constexpr
   option(number op, unsigned_type value) noexcept
-    : data_(coap_te::core::to_small_big_endian(value).first),
-      op_(op) {}
+    : option_base{op},
+      data_(coap_te::core::to_small_big_endian(value).first)
+  {}
 
   constexpr
   option(number op, std::string_view str) noexcept
-    : data_(const_buffer{str}), op_(op) {}
+    : option_base{op}, data_(const_buffer{str}) {}
 
   constexpr
   option(number op, const const_buffer& value) noexcept
-    : data_(const_buffer{value}), op_(op) {}
+    : option_base{op}, data_(const_buffer{value}) {}
 
   constexpr
   explicit option(content value) noexcept
-    : data_(static_cast<unsigned_type>(value)),
-      op_(number::content_format) {}
+    : option_base{number::content_format},
+      data_(static_cast<unsigned_type>(value)) {}
 
   constexpr
   explicit option(accept value) noexcept
-    : data_(static_cast<unsigned_type>(value)),
-      op_(number::accept) {}
+    : option_base{number::accept},
+      data_(static_cast<unsigned_type>(value)) {}
 
   template<typename Op,
            typename = std::enable_if_t<!std::is_same_v<Op, option> &&
-                                        std::is_base_of_v<option_base, Op>>>
+                                        is_raw_option_v<Op>>>
   option(const Op& op) noexcept       // NOLINT
-    : data_{coap_te::const_buffer{op.data(), op.data_size()}},
-      op_{op.option_number()}
-  {}
-
-  [[nodiscard]] constexpr number
-  option_number() const noexcept {
-    return op_;
-  }
+    : option_base{op.option_number()},
+      data_{coap_te::const_buffer{op.data(), op.data_size()}} {}
 
   [[nodiscard]] constexpr std::size_t
   data_size() const noexcept {
@@ -146,36 +165,14 @@ class option : public option_base {
     }, data_);
   }
 
-  [[nodiscard]] friend constexpr bool
-  operator==(const option& lhs, const option& rhs) noexcept {
-    return lhs.option_number() == rhs.option_number();
-  }
-
-  [[nodiscard]] friend constexpr bool
-  operator<(const option& lhs, const option& rhs) noexcept {
-    return lhs.option_number() < rhs.option_number();
-  }
-
-  [[nodiscard]] friend constexpr bool
-  operator==(const option& op, number num) noexcept {
-    return op.option_number() == num;
-  }
-
-  [[nodiscard]] friend constexpr bool
-  operator<(const option& op, number num) noexcept {
-    return op.option_number() < num;
-  }
-
  private:
   value_type  data_;
-  number      op_  = number::invalid;
 };
 
 /**
  * @brief 
- * 
  */
-class option_view : public option_base {
+class option_view : public option_base<option_view> {
  public:
   using value_type = coap_te::const_buffer;
 
@@ -184,11 +181,11 @@ class option_view : public option_base {
 
   constexpr
   explicit option_view(number op) noexcept
-    : op_(op) {}
+    : option_base{op} {}
 
   constexpr
   option_view(number op, unsigned_type& value) noexcept
-    : op_(op) {
+    : option_base{op} {
     auto [v, size] = coap_te::core::to_small_big_endian(value);
     value = v;
     data_ = {&value, size};
@@ -196,15 +193,15 @@ class option_view : public option_base {
 
   constexpr
   option_view(number op, std::string_view str) noexcept
-    : data_{str}, op_(op) {}
+    : option_base{op}, data_{str} {}
 
   constexpr
   option_view(number op, const const_buffer& value) noexcept
-    : data_{value}, op_(op) {}
+    : option_base{op}, data_{value} {}
 
   constexpr
   explicit option_view(content& value) noexcept   // NOLINT
-    : op_{number::content_format} {
+    : option_base{number::content_format} {
       auto [v, size] = coap_te::core::to_small_big_endian(
                         coap_te::core::to_underlying(value));
       value = static_cast<content>(v);
@@ -213,7 +210,7 @@ class option_view : public option_base {
 
   constexpr
   explicit option_view(accept& value) noexcept    // NOLINT
-    : op_{number::accept} {
+    : option_base{number::accept} {
     auto [v, size] = coap_te::core::to_small_big_endian(
                           coap_te::core::to_underlying(value));
     value = static_cast<accept>(v);
@@ -221,16 +218,11 @@ class option_view : public option_base {
   }
 
   template<typename Op,
-           typename = std::enable_if_t<!std::is_same_v<Op, option_view> &&
-                                        std::is_base_of_v<option_base, Op>>>
+           typename = std::enable_if_t<!std::is_same_v<Op, option> &&
+                                        is_raw_option_v<Op>>>
   explicit option_view(const Op& op) noexcept
-    : data_{op.data(), op.data_size()}, op_{op.option_number()}
+    : option_base{op.option_number()}, data_{op.data(), op.data_size()}
   {}
-
-  [[nodiscard]] constexpr number
-  option_number() const noexcept {
-    return op_;
-  }
 
   [[nodiscard]] constexpr std::size_t
   data_size() const noexcept {
@@ -242,64 +234,42 @@ class option_view : public option_base {
     return data_.data();
   }
 
-  [[nodiscard]] friend constexpr bool
-  operator==(const option_view& lhs, const option_view& rhs) noexcept {
-    return lhs.option_number() == rhs.option_number();
-  }
-
-  [[nodiscard]] friend constexpr bool
-  operator<(const option_view& lhs, const option_view& rhs) noexcept {
-    return lhs.option_number() < rhs.option_number();
-  }
-
-  [[nodiscard]] friend constexpr bool
-  operator==(const option_view& op, number num) noexcept {
-    return op.option_number() == num;
-  }
-
-  [[nodiscard]] friend constexpr bool
-  operator<(const option_view& op, number num) noexcept {
-    return op.option_number() < num;
-  }
-
  private:
   value_type  data_;
-  number      op_  = number::invalid;
 };
 
-
 #if COAP_TE_ENABLE_DYNAMIC_ALLOC_SUPPORT == 1
-
 /**
  * @brief 
  * 
  */
-class option_container : public option_base {
+class option_container : public option_base<option_container> {
  public:
   using value_type = std::vector<std::uint8_t>;
 
   option_container() noexcept = default;
 
   explicit option_container(number op) noexcept
-    : op_(op) {}
+    : option_base{op} {}
 
   option_container(number op, unsigned_type value) noexcept
-    : op_(op) {
+    : option_base{op} {
     auto [v, size] = coap_te::core::to_small_big_endian(value);
     std::uint8_t* ptr = reinterpret_cast<uint8_t*>(&v);
     data_ = {ptr, ptr + size};
   }
 
   option_container(number op, std::string_view str) noexcept
-    : data_{str.begin(), str.end()}, op_(op) {}
+    : option_base{op}, data_{str.begin(), str.end()} {}
 
   option_container(number op, const const_buffer& value) noexcept
-    : data_{reinterpret_cast<const std::uint8_t*>(value.data()),
+    : option_base{op},
+      data_{reinterpret_cast<const std::uint8_t*>(value.data()),
             reinterpret_cast<const std::uint8_t*>(value.data()) + value.size()},
-            op_(op) {}
+  {}
 
   explicit option_container(content value) noexcept   // NOLINT
-    : op_{number::content_format} {
+    : option_base{number::content_format} {
       auto [v, size] = coap_te::core::to_small_big_endian(
                         coap_te::core::to_underlying(value));
       std::uint8_t* ptr = reinterpret_cast<uint8_t*>(&v);
@@ -307,7 +277,7 @@ class option_container : public option_base {
   }
 
   explicit option_container(accept value) noexcept    // NOLINT
-    : op_{number::accept} {
+    : option_base{number::accept} {
     auto [v, size] = coap_te::core::to_small_big_endian(
                           coap_te::core::to_underlying(value));
     std::uint8_t* ptr = reinterpret_cast<uint8_t*>(&v);
@@ -315,16 +285,13 @@ class option_container : public option_base {
   }
 
   template<typename Op,
-           typename = std::enable_if_t<!std::is_same_v<Op, option_container> &&
-                                        std::is_base_of_v<option_base, Op>>>
+           typename = std::enable_if_t<!std::is_same_v<Op, option> &&
+                                        is_raw_option_v<Op>>>
   explicit option_container(const Op& op) noexcept
-    : data_{op.data(), op.data_size()}, op_{op.option_number()}
+    : option_base{op.option_number()},
+      data_{reinterpret_cast<const std::uint8_t*>(op.data()),
+            reinterpret_cast<const std::uint8_t*>(op.data()) + op.data_size()}
   {}
-
-  [[nodiscard]] constexpr number
-  option_number() const noexcept {
-    return op_;
-  }
 
   [[nodiscard]] std::size_t
   data_size() const noexcept {
@@ -336,32 +303,33 @@ class option_container : public option_base {
     return data_.data();
   }
 
-  [[nodiscard]] friend constexpr bool
-  operator==(const option_container& lhs, const option_view& rhs) noexcept {
-    return lhs.option_number() == rhs.option_number();
-  }
-
-  [[nodiscard]] friend constexpr bool
-  operator<(const option_container& lhs, const option_view& rhs) noexcept {
-    return lhs.option_number() < rhs.option_number();
-  }
-
-  [[nodiscard]] friend constexpr bool
-  operator==(const option_container& op, number num) noexcept {
-    return op.option_number() == num;
-  }
-
-  [[nodiscard]] friend constexpr bool
-  operator<(const option_container& op, number num) noexcept {
-    return op.option_number() < num;
-  }
-
  private:
   value_type  data_;
-  number      op_  = number::invalid;
 };
 
 #endif  // COAP_TE_ENABLE_DYNAMIC_ALLOC_SUPPORT == 1
+
+/**
+ * @brief Comparsion funtions between different options
+ * 
+ */
+template<typename Option1,
+         typename Option2,
+         typename = std::enable_if_t<is_raw_option_v<Option1> &&
+                                     is_raw_option_v<Option2>>>
+[[nodiscard]] constexpr bool
+operator==(const Option1& lhs, const Option2& rhs) noexcept {
+  return lhs.option_number() == rhs.option_number();
+}
+
+template<typename Option1,
+         typename Option2,
+         typename = std::enable_if_t<is_raw_option_v<Option1> &&
+                                     is_raw_option_v<Option2>>>
+[[nodiscard]] constexpr bool
+operator<(const Option1& lhs, const Option2& rhs) noexcept {
+  return lhs.option_number() < rhs.option_number();
+}
 
 /*
  * The functions above are a way to create options
@@ -372,7 +340,6 @@ class option_container : public option_base {
  * There is also the possibility to throw a exception when
  * the requiriments are not met.
  */
-
 
 template<typename CheckOptions = check_all,
          bool ToThrow = false>
