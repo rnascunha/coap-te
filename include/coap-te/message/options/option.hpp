@@ -319,12 +319,12 @@ class option_container : public option_base {
     return op_;
   }
 
-  [[nodiscard]] constexpr std::size_t
+  [[nodiscard]] std::size_t
   data_size() const noexcept {
     return data_.size();
   }
 
-  [[nodiscard]] constexpr const void*
+  [[nodiscard]] const void*
   data() const noexcept {
     return data_.data();
   }
