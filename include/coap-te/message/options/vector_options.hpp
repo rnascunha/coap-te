@@ -13,7 +13,7 @@
 
 #include "coap-te/core/error.hpp"
 #include "coap-te/core/traits.hpp"
-#include "coap-te/core/const_buffer.hpp"
+#include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/parse.hpp"

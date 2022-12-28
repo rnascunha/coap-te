@@ -21,7 +21,7 @@ namespace debug {
 
 template<typename ConstBuffer>
 std::string_view to_string(const ConstBuffer& buffer) noexcept {
-  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
+  static_assert(coap_te::is_const_buffer_v<ConstBuffer>,
                 "Must be const buffer type");
 
   return std::string_view{static_cast<const char*>(buffer.data()),
@@ -31,7 +31,7 @@ std::string_view to_string(const ConstBuffer& buffer) noexcept {
 template<typename ConstBuffer>
 std::string to_hex(const ConstBuffer& buffer,
                    const std::string_view& separator = " ") noexcept {
-  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
+  static_assert(coap_te::is_const_buffer_v<ConstBuffer>,
                 "Must be const buffer type");
 
   if (buffer.size() == 0)

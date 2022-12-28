@@ -12,8 +12,8 @@
 
 #include <cstdint>
 
-#include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/byte_order.hpp"    // NOLINT
+#include "coap-te/buffer/const_buffer.hpp"
 
 #ifdef _MSC_VER
 // False positive warning.

@@ -164,48 +164,6 @@ static constexpr bool
 is_less_comparable_v = is_less_comparable<T, LessTo>::value;
 
 /**
- * @brief Checks if T is of buffer type
- * 
- * Here, buffer type is defined as class that have defined the
- * _data_ and _size_ method.
- * 
- * @tparam T type to check if is buffer
- */
-template<typename T>
-struct is_const_buffer :
-  detail::is_buffer_impl<T, const void*>::type{};
-
-/**
- * @brief Helper template of @ref is_buffer_type
- * 
- * @tparam T type to check if is buffer
- */
-template<typename T>
-static constexpr bool
-is_const_buffer_v = is_const_buffer<T>::value;
-
-/**
- * @brief Checks if T is of buffer type
- * 
- * Here, buffer type is defined as class that have defined the
- * _data_ and _size_ method.
- * 
- * @tparam T type to check if is buffer
- */
-template<typename T>
-struct is_mutable_buffer :
-  detail::is_buffer_impl<T, void*>::type{};
-
-/**
- * @brief Helper template of @ref is_buffer_type
- * 
- * @tparam T type to check if is buffer
- */
-template<typename T>
-static constexpr bool
-is_mutable_buffer_v = is_mutable_buffer<T>::value;
-
-/**
  * @brief Checks if a type is instantiated from a specific template
  * 
  * The template arguments must be all bools.

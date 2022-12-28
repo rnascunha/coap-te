@@ -25,7 +25,7 @@ template<typename CheckOptions = check_all,
          typename MutableBuffer>
 [[nodiscard]] constexpr
 std::enable_if_t<
-  coap_te::core::is_const_buffer_v<ConstBuffer>, std::size_t>
+  coap_te::is_const_buffer_v<ConstBuffer>, std::size_t>
 serialize(number_type before,
           number_type op,
           const ConstBuffer& input,

@@ -22,9 +22,9 @@
 
 #include "coap-te/core/error.hpp"
 #include "coap-te/core/utility.hpp"
-#include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/byte_order.hpp"
 #include "coap-te/core/sorted_no_alloc_list.hpp"
+#include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/checks.hpp"
 

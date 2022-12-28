@@ -14,7 +14,7 @@
 #include <utility>
 
 #include "coap-te/core/traits.hpp"
-#include "coap-te/core/const_buffer.hpp"
+#include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/code.hpp"
 #include "coap-te/message/serialize.hpp"
@@ -31,9 +31,9 @@ template<typename OptionList,
          typename ConstBufferPayload = coap_te::const_buffer>
 class message {
  public:
-  static_assert(coap_te::core::is_const_buffer_v<ConstBufferToken>,
+  static_assert(coap_te::is_const_buffer_v<ConstBufferToken>,
                 "Must be const buffer type");
-  static_assert(coap_te::core::is_const_buffer_v<ConstBufferPayload>,
+  static_assert(coap_te::is_const_buffer_v<ConstBufferPayload>,
                 "Must be const buffer type");
   static_assert(options::is_option_list_v<OptionList>,
                "Must be option list type");

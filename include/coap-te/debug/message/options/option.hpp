@@ -15,7 +15,7 @@
 #include <variant>
 
 #include "coap-te/core/utility.hpp"
-#include "coap-te/core/const_buffer.hpp"
+#include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/debug/to_string.hpp"
 #include "coap-te/debug/message/options/to_string.hpp"
 

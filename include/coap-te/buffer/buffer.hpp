@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2022
  * 
  */
-#ifndef COAP_TE_CORE_BUFFER_HPP_
-#define COAP_TE_CORE_BUFFER_HPP_
+#ifndef COAP_TE_BUFFER_BUFFER_HPP_
+#define COAP_TE_BUFFER_BUFFER_HPP_
 
 #include <algorithm>    // std::min
 #include <type_traits>
@@ -17,8 +17,8 @@
 #include <cstring>
 
 #include "coap-te/core/traits.hpp"
-#include "coap-te/core/mutable_buffer.hpp"
-#include "coap-te/core/const_buffer.hpp"
+#include "coap-te/buffer/mutable_buffer.hpp"
+#include "coap-te/buffer/const_buffer.hpp"
 
 namespace coap_te {
 
@@ -447,4 +447,4 @@ buffer_copy(const MutableBufferSequence& target,
 
 }  // namespace coap_te
 
-#endif  // COAP_TE_CORE_BUFFER_HPP_
+#endif  // COAP_TE_BUFFER_BUFFER_HPP_

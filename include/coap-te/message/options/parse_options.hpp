@@ -12,7 +12,7 @@
 #define COAP_TE_MESSAGE_OPTIONS_PARSE_OPTIONS_HPP_
 
 #include "coap-te/core/error.hpp"
-#include "coap-te/core/const_buffer.hpp"
+#include "coap-te/buffer/const_buffer.hpp"
 
 namespace coap_te {
 namespace message {

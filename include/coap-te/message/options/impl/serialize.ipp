@@ -18,8 +18,8 @@
 
 #include "coap-te/core/error.hpp"
 #include "coap-te/core/utility.hpp"
-#include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/byte_order.hpp"
+#include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/checks.hpp"
 #include "coap-te/message/options/traits.hpp"
@@ -66,9 +66,9 @@ serialize(number_type before,
           const ConstBuffer& input,
           MutableBuffer& output,              // NOLINT
           coap_te::error_code& ec) noexcept {     // NOLINT
-  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
+  static_assert(coap_te::is_const_buffer_v<ConstBuffer>,
                 "Must be const_buffer type");
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+  static_assert(coap_te::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable_buffer type");
 
   header delta{};
@@ -115,7 +115,7 @@ template<typename CheckOptions,
          typename MutableBuffer>
 [[nodiscard]] constexpr
 std::enable_if_t<
-  coap_te::core::is_const_buffer_v<ConstBuffer>, std::size_t>
+  coap_te::is_const_buffer_v<ConstBuffer>, std::size_t>
 serialize(number_type before,
           number_type op,
           const ConstBuffer& input,
@@ -181,7 +181,7 @@ std::size_t serialize(number before,
                       const Option& option,
                       MutableBuffer& output,                //NOLINT
                       coap_te::error_code& ec) noexcept {    //NOLINT
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+  static_assert(coap_te::is_mutable_buffer_v<MutableBuffer>,
               "Must be mutable buffer type");
   static_assert(is_option_v<Option>, "Must be a option");
   using n_check = check_type<CheckOptions::sequence, false, false>;
@@ -205,7 +205,7 @@ serialize(ForwardIt begin,
           ForwardIt end,
           MutableBuffer& output,               // NOLINT
           coap_te::error_code& ec) noexcept {      // NOLINT
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+  static_assert(coap_te::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer");
   std::size_t size = 0;
   number prev = number::invalid;
@@ -231,7 +231,7 @@ template<typename CheckOptions /* = check_all */,
 serialize(const Container& option_list,
           MutableBuffer& output,              // NOLINT
           coap_te::error_code& ec) noexcept {      // NOLINT
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+  static_assert(coap_te::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer");
   return serialize(option_list.begin(),
                    option_list.end(),

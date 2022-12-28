@@ -8,15 +8,15 @@
  * @copyright Copyright (c) 2022
  * 
  */
-#ifndef COAP_TE_CORE_CONST_BUFFER_HPP_
-#define COAP_TE_CORE_CONST_BUFFER_HPP_
+#ifndef COAP_TE_BUFFER_CONST_BUFFER_HPP_
+#define COAP_TE_BUFFER_CONST_BUFFER_HPP_
 
 #include <cstdint>
 #include <iterator>
 #include <string_view>
 
-#include "coap-te/core/traits.hpp"
-#include "coap-te/core/mutable_buffer.hpp"
+#include "coap-te/buffer/traits.hpp"
+#include "coap-te/buffer/mutable_buffer.hpp"
 
 namespace coap_te {
 
@@ -142,7 +142,7 @@ class const_buffer {
     : const_buffer(container.data(),
                    container.size(),
                    sizeof(typename T::value_type)) {
-    static_assert(core::is_const_buffer_v<T>, "Is not buffer type");
+    static_assert(is_const_buffer_v<T>, "Is not buffer type");
   }
 
   constexpr
@@ -229,4 +229,4 @@ class const_buffer {
 
 }  // namespace coap_te
 
-#endif  // COAP_TE_CORE_CONST_BUFFER_HPP_
+#endif  // COAP_TE_BUFFER_CONST_BUFFER_HPP_

@@ -12,7 +12,6 @@
 #define COAP_TE_CORE_IMPL_TRAITS_IPP_
 
 #include <utility>
-#include <tuple>
 
 namespace coap_te {
 namespace core {
@@ -44,23 +43,6 @@ struct is_less_comparable_impl {
   static auto test(...) -> std::false_type;
 
   using type = typename std::is_same<bool, decltype(test<T, LessTo>(0))>::type;
-};
-
-template<class T, class R>
-struct is_buffer_impl {
-    template<class U, class V>
-    static auto test(U*)    // NOLINT
-      -> std::tuple<
-          decltype(static_cast<V>(
-            std::declval<U&>().data())),
-            decltype(std::declval<U&>().size())
-          >;
-    template<typename, typename>
-    static auto test(...) -> std::false_type;
-
-    using type = typename std::is_same<
-                            std::tuple<R, std::size_t>,
-                            decltype(test<T, R>(0))>::type;
 };
 
 }  // namespace detail

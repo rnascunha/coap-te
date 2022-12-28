@@ -14,8 +14,8 @@
 #include <utility>      // std::move
 
 #include "coap-te/core/traits.hpp"
-#include "coap-te/core/const_buffer.hpp"
 #include "coap-te/core/sorted_list.hpp"
+#include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/option_list_func.hpp"
 #include "coap-te/message/options/vector_options.hpp"

@@ -16,9 +16,106 @@
 #include <string>
 #include <string_view>
 
-#include "coap-te/core/mutable_buffer.hpp"
-#include "coap-te/core/const_buffer.hpp"
-#include "coap-te/core/buffer.hpp"
+#include "coap-te/buffer/mutable_buffer.hpp"
+#include "coap-te/buffer/const_buffer.hpp"
+#include "coap-te/buffer/buffer.hpp"
+#include "coap-te/buffer/buffers_iterator.hpp"
+#include "coap-te/buffer/traits.hpp"
+
+TEST(BufferTraits, IsConstBufferTrait) {
+  // Check if class can be used as buffer type
+  {
+    auto vv = coap_te::is_const_buffer_v<std::array<int, 4>>;
+    EXPECT_TRUE(vv);
+  }
+  EXPECT_TRUE(coap_te::is_const_buffer_v<std::vector<int>>);
+  EXPECT_TRUE(coap_te::is_const_buffer_v<std::string>);
+  EXPECT_TRUE(coap_te::is_const_buffer_v<std::string_view>);
+
+  struct A{};
+  struct B {
+    const void* data() { return nullptr; }
+  };
+  struct C {
+    std::size_t size() { return 0; }
+  };
+  struct D {
+    const void* data() { return nullptr; }
+    std::size_t size() { return 0; }
+  };
+  struct E {
+    int* data() { return nullptr; }
+    std::size_t size() { return 0; }
+  };
+  struct F {
+    char data() { return '0'; }
+    std::size_t size() { return 0; }
+  };
+  struct G {
+    const char* data() { return nullptr; }
+    int size() { return 0; }
+  };
+
+  EXPECT_FALSE(coap_te::is_const_buffer_v<A>);
+  EXPECT_FALSE(coap_te::is_const_buffer_v<B>);
+  EXPECT_FALSE(coap_te::is_const_buffer_v<C>);
+  EXPECT_TRUE(coap_te::is_const_buffer_v<D>);
+  EXPECT_TRUE(coap_te::is_const_buffer_v<E>);
+  EXPECT_FALSE(coap_te::is_const_buffer_v<F>);
+  EXPECT_FALSE(coap_te::is_const_buffer_v<G>);
+}
+
+TEST(BufferTraits, IsMutableBufferTrait) {
+  // Check if class can be used as buffer type
+  {
+    auto vv = coap_te::is_mutable_buffer_v<std::array<int, 4>>;
+    EXPECT_TRUE(vv);
+  }
+  EXPECT_TRUE(coap_te::is_mutable_buffer_v<std::vector<int>>);
+  EXPECT_TRUE(coap_te::is_mutable_buffer_v<std::string>);
+  EXPECT_FALSE(coap_te::is_mutable_buffer_v<std::string_view>);
+
+  struct A{};
+  struct B {
+    const void* data() { return nullptr; }
+  };
+  struct C {
+    std::size_t size() { return 0; }
+  };
+  struct D {
+    const void* data() { return nullptr; }
+    std::size_t size() { return 0; }
+  };
+  struct E {
+    int* data() { return nullptr; }
+    std::size_t size() { return 0; }
+  };
+  struct F {
+    char data() { return '0'; }
+    std::size_t size() { return 0; }
+  };
+  struct G {
+    const char* data() { return nullptr; }
+    int size() { return 0; }
+  };
+
+  EXPECT_FALSE(coap_te::is_mutable_buffer_v<A>);
+  EXPECT_FALSE(coap_te::is_mutable_buffer_v<B>);
+  EXPECT_FALSE(coap_te::is_mutable_buffer_v<C>);
+  EXPECT_FALSE(coap_te::is_mutable_buffer_v<D>);
+  EXPECT_TRUE(coap_te::is_mutable_buffer_v<E>);
+  EXPECT_FALSE(coap_te::is_mutable_buffer_v<F>);
+  EXPECT_FALSE(coap_te::is_mutable_buffer_v<G>);
+
+  // // Must fail because const
+  {
+    auto vv = coap_te::is_mutable_buffer_v<const std::array<int, 4>>;
+    EXPECT_FALSE(vv);
+  }
+  EXPECT_FALSE(coap_te::is_mutable_buffer_v<const std::vector<int>>);
+  EXPECT_FALSE(coap_te::is_mutable_buffer_v<const std::string>);
+  EXPECT_FALSE(coap_te::is_mutable_buffer_v<const E>);
+}
 
 void test_const_buffer_12345(const coap_te::const_buffer& buf) noexcept {
   EXPECT_EQ(buf.size(), 5);
@@ -59,7 +156,7 @@ void test_const_buffer_12345(const coap_te::const_buffer& buf) noexcept {
   }
 }
 
-TEST(CoreBuffer, ConstBufferChar) {
+TEST(Buffer, ConstBufferChar) {
   {
     // const char* constructor
     coap_te::const_buffer buf("12345");
@@ -118,7 +215,7 @@ void test_const_buffer_int_12345(const coap_te::const_buffer& buf) {
   }
 }
 
-TEST(CoreBuffer, ConstBufferInt) {
+TEST(Buffer, ConstBufferInt) {
   {
     int data[]{1, 2, 3, 4, 5};
     coap_te::const_buffer buf(data);
@@ -136,7 +233,7 @@ TEST(CoreBuffer, ConstBufferInt) {
   }
 }
 
-TEST(CoreBuffer, Const2MutableBufferChar) {
+TEST(Buffer, Const2MutableBufferChar) {
   {
     char data[] = {'1', '2', '3', '4', '5'};
     coap_te::mutable_buffer buf(data, 5);
@@ -159,7 +256,7 @@ TEST(CoreBuffer, Const2MutableBufferChar) {
   }
 }
 
-TEST(CoreBuffer, Const2MutableBufferInt) {
+TEST(Buffer, Const2MutableBufferInt) {
   {
     int data[]{1, 2, 3, 4, 5};
     coap_te::mutable_buffer buf(data);
@@ -183,7 +280,7 @@ void test_change_mutable_buffer(coap_te::mutable_buffer& buf) noexcept {  // NOL
   test_const_buffer_12345(buf);
 }
 
-TEST(CoreBuffer, ChangingMutableBufferChar) {
+TEST(Buffer, ChangingMutableBufferChar) {
   {
     char data[5];
     coap_te::mutable_buffer buf(data, 5);
@@ -206,7 +303,7 @@ TEST(CoreBuffer, ChangingMutableBufferChar) {
   }
 }
 
-TEST(CoreBuffer, BufferSequenece) {
+TEST(Buffer, BufferSequenece) {
   {
     std::vector<coap_te::const_buffer> v;
     char d1[5], d2[6], d3[7];
@@ -226,5 +323,35 @@ TEST(CoreBuffer, BufferSequenece) {
     EXPECT_EQ(coap_te::buffer_size(m), 12);
     EXPECT_EQ(coap_te::buffer_copy(m, v), 12);
     EXPECT_EQ(0, std::memcmp(c, "12345\0" "67890\0", 12));
+  }
+}
+
+TEST(Buffer, BufferIterator) {
+  {
+    SCOPED_TRACE("Buffer iterator increment and deference");
+    unsigned char d1[] = {0, 1, 2, 3, 4, 5},
+                  d2[] = {6, 7, 8, 9, 10};
+    std::vector<coap_te::const_buffer> v{coap_te::buffer(d1),
+                                         coap_te::buffer(d2)};
+
+    auto b = coap_te::buffers_begin(v);
+    auto e = coap_te::buffers_end(v);
+    for (char i = 0; b != e; ++i, ++b) {
+      EXPECT_EQ(*b, i);
+    }
+  }
+  {
+    SCOPED_TRACE("Buffer iterator decrement and deference");
+    unsigned char d1[] = {0, 1, 2, 3, 4, 5},
+                  d2[] = {6, 7, 8, 9, 10};
+    std::vector<coap_te::const_buffer> v;
+    v.push_back(coap_te::buffer(d1));
+    v.push_back(coap_te::buffer(d2));
+
+    auto b = coap_te::buffers_begin(v);
+    auto e = coap_te::buffers_end(v) - 1;
+    for (char i = 10; e >= b; --i, --e) {
+      EXPECT_EQ(*e, i);
+    }
   }
 }

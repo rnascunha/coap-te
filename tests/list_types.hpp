@@ -17,8 +17,8 @@
 #include <set>
 #include <map>
 
-#include "coap-te/core/mutable_buffer.hpp"
-#include "coap-te/core/const_buffer.hpp"
+#include "coap-te/buffer/mutable_buffer.hpp"
+#include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/core/sorted_list.hpp"
 #include "coap-te/core/sorted_no_alloc_list.hpp"
 

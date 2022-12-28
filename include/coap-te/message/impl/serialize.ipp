@@ -13,7 +13,7 @@
 
 #include "coap-te/core/error.hpp"
 #include "coap-te/core/traits.hpp"
-#include "coap-te/core/const_buffer.hpp"
+#include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/code.hpp"
 #include "coap-te/message/token.hpp"
@@ -32,9 +32,9 @@ serialize_header(type tp, code co, message_id mid,
                 const ConstBuffer& token,
                 MutableBuffer& output,          //NOLINT
                 coap_te::error_code& ec) noexcept { // NOLINT
-  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
+  static_assert(coap_te::is_const_buffer_v<ConstBuffer>,
                 "Must be const buffer type");
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+  static_assert(coap_te::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer type");
 
   std::uint8_t token_len =
@@ -70,11 +70,11 @@ serialize(type tp, code co, message_id mid,
           const ConstBufferPayload& payload,
           MutableBuffer& output,          //NOLINT
           coap_te::error_code& ec) noexcept { // NOLINT
-  static_assert(coap_te::core::is_const_buffer_v<ConstBufferToken>,
+  static_assert(coap_te::is_const_buffer_v<ConstBufferToken>,
                 "Must be const buffer type");
-  static_assert(coap_te::core::is_const_buffer_v<ConstBufferPayload>,
+  static_assert(coap_te::is_const_buffer_v<ConstBufferPayload>,
                 "Must be const buffer type");
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+  static_assert(coap_te::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer type");
   static_assert(options::is_option_list_v<OptionList>,
                 "Must be option list type");
@@ -112,12 +112,12 @@ std::size_t serialize(const Message& msg,
             MutableBuffer& output,      // NOLINT
             coap_te::error_code& ec) noexcept {   // NOLINT
   static_assert(is_message_v<Message>, "Must be a message type");
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+  static_assert(coap_te::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer type");
   return coap_te::message::serialize(
-                  msg.get_type(), msg.get_code(), 
+                  msg.get_type(), msg.get_code(),
                   mid, msg.token(),
-                  msg.option_list(), msg.payload(), 
+                  msg.option_list(), msg.payload(),
                   output,
                   ec);
 }
@@ -130,9 +130,9 @@ std::size_t
 serialize_header(type tp, code co, message_id mid,
                 const ConstBuffer& token,
                 MutableBuffer& output) {         //NOLINT
-  static_assert(coap_te::core::is_const_buffer_v<ConstBuffer>,
+  static_assert(coap_te::is_const_buffer_v<ConstBuffer>,
                 "Must be const buffer type");
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+  static_assert(coap_te::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer type");
 
   coap_te::error_code ec;
@@ -154,11 +154,11 @@ serialize(type tp, code co, message_id mid,
           const OptionList& opt_list,
           const ConstBufferPayload& payload,
           MutableBuffer& output) {        // NOLINT
-  static_assert(coap_te::core::is_const_buffer_v<ConstBufferToken>,
+  static_assert(coap_te::is_const_buffer_v<ConstBufferToken>,
                 "Must be const buffer type");
-  static_assert(coap_te::core::is_const_buffer_v<ConstBufferPayload>,
+  static_assert(coap_te::is_const_buffer_v<ConstBufferPayload>,
                 "Must be const buffer type");
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+  static_assert(coap_te::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer type");
   static_assert(options::is_option_list_v<OptionList>,
                 "Must be option list type");
@@ -180,7 +180,7 @@ std::size_t serialize(const Message& msg,
             message_id mid,
             MutableBuffer& output) {  // NOLINT
   static_assert(is_message_v<Message>, "Must be a message type");
-  static_assert(coap_te::core::is_mutable_buffer_v<MutableBuffer>,
+  static_assert(coap_te::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer type");
   return coap_te::message::serialize(
                   msg.get_type(), msg.get_code(), 

@@ -61,7 +61,7 @@ parse(number_type before,
       number_type& current,              // NOLINT
       ConstBuffer& output,               // NOLINT
       coap_te::error_code& ec) noexcept {    // NOLINT
-  static_assert(core::is_const_buffer_v<ConstBuffer>, "Must be const buffer");
+  static_assert(is_const_buffer_v<ConstBuffer>, "Must be const buffer");
 
   if (input.size() == 0) {
     ec = coap_te::errc::no_buffer_space;

@@ -16,9 +16,9 @@
 #include <system_error>   // NOLINT
 #include <vector>
 
-#include "coap-te/core/mutable_buffer.hpp"
 #include "coap-te/core/utility.hpp"
 #include "coap-te/core/byte_order.hpp"
+#include "coap-te/buffer/mutable_buffer.hpp"
 #include "coap-te/message/options/definitions.hpp"
 #include "coap-te/message/options/serialize.hpp"
 #include "coap-te/message/options/parse.hpp"

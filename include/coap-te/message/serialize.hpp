@@ -12,7 +12,7 @@
 #define COAP_TE_MESSAGE_SERIALIZE_HPP_
 
 #include "coap-te/core/error.hpp"
-#include "coap-te/core/const_buffer.hpp"
+#include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/code.hpp"
 #include "coap-te/message/options/checks.hpp"

@@ -17,7 +17,7 @@
 #include <string_view>
 #include <array>
 
-#include "coap-te.hpp"  //NOLINT
+#include "coap-te/core/traits.hpp"  //NOLINT
 
 TEST(CoreTraits, Container) {
   // iterator category trait
@@ -194,99 +194,4 @@ TEST(CoreTraits, CheckOperator) {
       }
     }
   }
-}
-
-TEST(CoreTraits, IsConstBufferTrait) {
-  // Check if class can be used as buffer type
-  {
-    auto vv = coap_te::core::is_const_buffer_v<std::array<int, 4>>;
-    EXPECT_TRUE(vv);
-  }
-  EXPECT_TRUE(coap_te::core::is_const_buffer_v<std::vector<int>>);
-  EXPECT_TRUE(coap_te::core::is_const_buffer_v<std::string>);
-  EXPECT_TRUE(coap_te::core::is_const_buffer_v<std::string_view>);
-
-  struct A{};
-  struct B {
-    const void* data() { return nullptr; }
-  };
-  struct C {
-    std::size_t size() { return 0; }
-  };
-  struct D {
-    const void* data() { return nullptr; }
-    std::size_t size() { return 0; }
-  };
-  struct E {
-    int* data() { return nullptr; }
-    std::size_t size() { return 0; }
-  };
-  struct F {
-    char data() { return '0'; }
-    std::size_t size() { return 0; }
-  };
-  struct G {
-    const char* data() { return nullptr; }
-    int size() { return 0; }
-  };
-
-  EXPECT_FALSE(coap_te::core::is_const_buffer_v<A>);
-  EXPECT_FALSE(coap_te::core::is_const_buffer_v<B>);
-  EXPECT_FALSE(coap_te::core::is_const_buffer_v<C>);
-  EXPECT_TRUE(coap_te::core::is_const_buffer_v<D>);
-  EXPECT_TRUE(coap_te::core::is_const_buffer_v<E>);
-  EXPECT_FALSE(coap_te::core::is_const_buffer_v<F>);
-  EXPECT_FALSE(coap_te::core::is_const_buffer_v<G>);
-}
-
-TEST(CoreTraits, IsMutableBufferTrait) {
-  // Check if class can be used as buffer type
-  {
-    auto vv = coap_te::core::is_mutable_buffer_v<std::array<int, 4>>;
-    EXPECT_TRUE(vv);
-  }
-  EXPECT_TRUE(coap_te::core::is_mutable_buffer_v<std::vector<int>>);
-  EXPECT_TRUE(coap_te::core::is_mutable_buffer_v<std::string>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<std::string_view>);
-
-  struct A{};
-  struct B {
-    const void* data() { return nullptr; }
-  };
-  struct C {
-    std::size_t size() { return 0; }
-  };
-  struct D {
-    const void* data() { return nullptr; }
-    std::size_t size() { return 0; }
-  };
-  struct E {
-    int* data() { return nullptr; }
-    std::size_t size() { return 0; }
-  };
-  struct F {
-    char data() { return '0'; }
-    std::size_t size() { return 0; }
-  };
-  struct G {
-    const char* data() { return nullptr; }
-    int size() { return 0; }
-  };
-
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<A>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<B>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<C>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<D>);
-  EXPECT_TRUE(coap_te::core::is_mutable_buffer_v<E>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<F>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<G>);
-
-  // // Must fail because const
-  {
-    auto vv = coap_te::core::is_mutable_buffer_v<const std::array<int, 4>>;
-    EXPECT_FALSE(vv);
-  }
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<const std::vector<int>>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<const std::string>);
-  EXPECT_FALSE(coap_te::core::is_mutable_buffer_v<const E>);
 }

@@ -14,9 +14,9 @@
 #include <set>
 #include <cstdint>
 
-#include "coap-te/core/mutable_buffer.hpp"
 #include "coap-te/core/sorted_no_alloc_list.hpp"
 #include "coap-te/core/sorted_list.hpp"
+#include "coap-te/buffer/mutable_buffer.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/checks.hpp"

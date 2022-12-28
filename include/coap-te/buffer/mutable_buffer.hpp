@@ -8,13 +8,13 @@
  * @copyright Copyright (c) 2022
  * 
  */
-#ifndef COAP_TE_CORE_MUTABLE_BUFFER_HPP_
-#define COAP_TE_CORE_MUTABLE_BUFFER_HPP_
+#ifndef COAP_TE_BUFFER_MUTABLE_BUFFER_HPP_
+#define COAP_TE_BUFFER_MUTABLE_BUFFER_HPP_
 
 #include <cstdint>
 #include <iterator>
 
-#include "coap-te/core/traits.hpp"
+#include "coap-te/buffer/traits.hpp"
 
 namespace coap_te {
 
@@ -130,7 +130,7 @@ class mutable_buffer {
     : mutable_buffer(container.data(),
                    container.size(),
                    sizeof(typename T::value_type)) {
-    static_assert(core::is_mutable_buffer_v<T>, "Is not buffer type");
+    static_assert(is_mutable_buffer_v<T>, "Is not buffer type");
   }
 
   template<std::size_t N, typename T>
@@ -219,4 +219,4 @@ class mutable_buffer {
 
 }  // namespace coap_te
 
-#endif  // COAP_TE_CORE_MUTABLE_BUFFER_HPP_
+#endif  // COAP_TE_BUFFER_MUTABLE_BUFFER_HPP_

@@ -13,7 +13,7 @@
 
 #include <utility>
 
-#include "coap-te/core/const_buffer.hpp"
+#include "coap-te/buffer/const_buffer.hpp"
 
 namespace coap_te {
 namespace message {
