@@ -89,7 +89,7 @@ buffer(const T (&data)[N], std::size_t max_size) noexcept {
  * std::basic_string_view, std::span...
  */
 template<typename T,
-         typename = std::enable_if_t<core::is_container_v<T>>>
+        typename = std::enable_if_t<is_mutable_buffer_v<T>>>
 [[nodiscard]] constexpr mutable_buffer
 buffer(T& container) noexcept {     // NOLINT
   return mutable_buffer{container.data(),
@@ -97,7 +97,7 @@ buffer(T& container) noexcept {     // NOLINT
 }
 
 template<typename T,
-         typename = std::enable_if_t<core::is_container_v<T>>>
+            typename = std::enable_if_t<is_const_buffer_v<T>>>
 [[nodiscard]] constexpr const_buffer
 buffer(const T& container) noexcept {     // NOLINT
   return const_buffer{container.data(),
@@ -106,7 +106,7 @@ buffer(const T& container) noexcept {     // NOLINT
 
 /// From container types and clamp
 template<typename T,
-         typename = std::enable_if_t<core::is_container_v<T>>>
+        typename = std::enable_if_t<is_mutable_buffer_v<T>>>
 [[nodiscard]] constexpr mutable_buffer
 buffer(T& container, std::size_t max_size) noexcept {     // NOLINT
   return mutable_buffer{container.data(),
@@ -116,7 +116,7 @@ buffer(T& container, std::size_t max_size) noexcept {     // NOLINT
 }
 
 template<typename T,
-         typename = std::enable_if_t<core::is_container_v<T>>>
+        typename = std::enable_if_t<is_const_buffer_v<T>>>
 [[nodiscard]] constexpr const_buffer
 buffer(const T& container, std::size_t max_size) noexcept {     // NOLINT
   return const_buffer{container.data(),
