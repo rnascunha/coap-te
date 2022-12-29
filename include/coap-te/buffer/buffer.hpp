@@ -127,4 +127,7 @@ buffer(const T& container, std::size_t max_size) noexcept {     // NOLINT
 
 }  // namespace coap_te
 
+#include "coap-te/buffer/buffer_sequence.hpp"
+#include "coap-te/buffer/is_buffer_sequence.hpp"
+
 #endif  // COAP_TE_BUFFER_BUFFER_HPP_

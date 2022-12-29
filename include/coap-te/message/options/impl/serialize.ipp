@@ -59,8 +59,7 @@ serialize_option_header(std::size_t size,
 
 template<typename ConstBuffer,
          typename MutableBuffer>
-[[nodiscard]] constexpr
-std::size_t
+[[nodiscard]] constexpr std::size_t
 serialize(number_type before,
           number_type op,
           const ConstBuffer& input,
@@ -177,10 +176,11 @@ serialize(number_type before,
 template<typename CheckOptions /* = check_sequence */,
          typename Option,
          typename MutableBuffer>
-std::size_t serialize(number before,
-                      const Option& option,
-                      MutableBuffer& output,                //NOLINT
-                      coap_te::error_code& ec) noexcept {    //NOLINT
+[[nodiscard]] constexpr std::size_t
+serialize(number before,
+          const Option& option,
+          MutableBuffer& output,                //NOLINT
+          coap_te::error_code& ec) noexcept {    //NOLINT
   static_assert(coap_te::is_mutable_buffer_v<MutableBuffer>,
               "Must be mutable buffer type");
   static_assert(is_option_v<Option>, "Must be a option");

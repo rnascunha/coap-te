@@ -28,7 +28,7 @@ namespace options {
 namespace detail {
 
 template<typename Option>
-std::size_t
+constexpr std::size_t
 parse_options(const coap_te::const_buffer& buf,
               vector_options<Option>& list,               // NOLINT
               coap_te::error_code& ec) noexcept {     // NOLINT
@@ -46,7 +46,7 @@ parse_options(const coap_te::const_buffer& buf,
 }  // namespace detail
 
 template<typename OptionList>
-std::size_t
+constexpr std::size_t
 parse_options(const coap_te::const_buffer& buf,
               OptionList& list,                           // NOLINT
               coap_te::error_code& ec) noexcept {         // NOLINT

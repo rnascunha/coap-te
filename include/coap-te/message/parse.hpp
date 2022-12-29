@@ -19,15 +19,17 @@ namespace message {
 
 template<typename ConstBuffer,
          typename Message>
-std::size_t parse_header(ConstBuffer&,
-                  Message&,
-                  coap_te::error_code&) noexcept;
+constexpr std::size_t
+parse_header(ConstBuffer&,
+             Message&,
+             coap_te::error_code&) noexcept;
 
 template<typename ConstBuffer,
          typename Message>
-std::size_t parse(ConstBuffer&,
-                  Message&,
-                  coap_te::error_code&) noexcept;
+constexpr std::size_t
+parse(ConstBuffer&,
+      Message&,
+      coap_te::error_code&) noexcept;
 
 }  // namespace message
 }  // namespace coap_te

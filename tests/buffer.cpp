@@ -16,13 +16,8 @@
 #include <string>
 #include <string_view>
 
-#include "coap-te/buffer/mutable_buffer.hpp"
-#include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/buffer/buffer.hpp"
-#include "coap-te/buffer/buffer_sequence.hpp"
-#include "coap-te/buffer/is_buffer_sequence.hpp"
 #include "coap-te/buffer/buffers_iterator.hpp"
-#include "coap-te/buffer/traits.hpp"
 
 TEST(BufferTraits, IsConstBufferTrait) {
   // Check if class can be used as buffer type
@@ -117,6 +112,40 @@ TEST(BufferTraits, IsMutableBufferTrait) {
   EXPECT_FALSE(coap_te::is_mutable_buffer_v<const std::vector<int>>);
   EXPECT_FALSE(coap_te::is_mutable_buffer_v<const std::string>);
   EXPECT_FALSE(coap_te::is_mutable_buffer_v<const E>);
+}
+
+TEST(Buffer, BufferSequenceTrait) {
+  {
+    char d[5];
+    auto buf = coap_te::buffer(d);
+    EXPECT_TRUE(coap_te::is_mutable_buffer_sequence_v<decltype(buf)>);
+    EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
+  }
+  {
+    const char d[5]{};
+    auto buf = coap_te::buffer(d);
+    EXPECT_FALSE(coap_te::is_mutable_buffer_sequence_v<decltype(buf)>);
+    EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
+  }
+  {
+    char d1[5]{}, d2[5]{};
+    std::vector<coap_te::mutable_buffer> v{coap_te::buffer(d1),
+                                         coap_te::buffer(d2)};
+    EXPECT_TRUE(coap_te::is_mutable_buffer_sequence_v<decltype(v)>);
+    EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(v)>);
+  }
+  {
+    const char d1[5]{}, d2[5]{};
+    std::vector<coap_te::const_buffer> v{coap_te::buffer(d1),
+                                         coap_te::buffer(d2)};
+    EXPECT_FALSE(coap_te::is_mutable_buffer_sequence_v<decltype(v)>);
+    EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(v)>);
+  }
+  {
+    std::vector<char> v{};
+    EXPECT_FALSE(coap_te::is_mutable_buffer_sequence_v<decltype(v)>);
+    EXPECT_FALSE(coap_te::is_const_buffer_sequence_v<decltype(v)>);
+  }
 }
 
 void test_const_buffer_12345(const coap_te::const_buffer& buf) noexcept {
@@ -398,6 +427,8 @@ TEST(Buffer, BufferSequenece) {
     EXPECT_EQ(0, std::memcmp(c, "12345\0" "67890\0", 12));
   }
 }
+
+#include <iostream>
 
 TEST(Buffer, BufferIterator) {
   {

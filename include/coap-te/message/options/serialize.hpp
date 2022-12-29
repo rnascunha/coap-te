@@ -54,10 +54,11 @@ serialize(number_type before,
 template<typename CheckOptions = check_sequence,
          typename Option,
          typename MutableBuffer>
-std::size_t serialize(number before,
-                      const Option& option,
-                      MutableBuffer& output,                //NOLINT
-                      coap_te::error_code& ec) noexcept;    //NOLINT
+[[nodiscard]] constexpr std::size_t
+serialize(number before,
+          const Option& option,
+          MutableBuffer& output,                //NOLINT
+          coap_te::error_code& ec) noexcept;    //NOLINT
 
 /**
  * Serialize list

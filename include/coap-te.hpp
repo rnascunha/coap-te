@@ -23,10 +23,7 @@
 
 // buffers
 #include "coap-te/buffer/traits.hpp"
-#include "coap-te/buffer/mutable_buffer.hpp"
-#include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/buffer/buffer.hpp"
-#include "coap-te/buffer/buffer_sequence.hpp"
 #include "coap-te/buffer/buffers_iterator.hpp"
 
 // message

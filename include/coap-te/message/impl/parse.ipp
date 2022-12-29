@@ -15,6 +15,7 @@
 
 #include "coap-te/core/error.hpp"
 #include "coap-te/core/traits.hpp"
+#include "coap-te/buffer/buffer.hpp"
 #include "coap-te/message/config.hpp"
 #include "coap-te/message/code.hpp"
 #include "coap-te/message/traits.hpp"
@@ -26,15 +27,17 @@ namespace message {
 
 template<typename ConstBuffer,
          typename Message>
-std::size_t parse_header(ConstBuffer& input,          // NOLINT
-                  Message& message,                   // NOLINT
-                  coap_te::error_code& ec) noexcept {     // NOLINT
+constexpr std::size_t
+parse_header(ConstBuffer& input,        // NOLINT
+             Message& message,                               // NOLINT
+             coap_te::error_code& ec) noexcept {             // NOLINT
   static_assert(coap_te::is_const_buffer_v<ConstBuffer>,
-                "Must be of ype message");
+                "ConstBuffer requirements not met");
   static_assert(is_message_v<Message>,
                 "Must be of type message");
+  auto size_buffer = buffer_size(input);
 
-  if (input.size() < minimum_header_size) {
+  if (size_buffer < minimum_header_size) {
     ec = coap_te::errc::no_buffer_space;
     return 0;
   }
@@ -52,7 +55,7 @@ std::size_t parse_header(ConstBuffer& input,          // NOLINT
     return 0;
   }
 
-  if (input.size() < minimum_header_size + token_len) {
+  if (size_buffer < minimum_header_size + token_len) {
     ec = coap_te::errc::no_buffer_space;
     return 0;
   }
@@ -82,9 +85,10 @@ std::size_t parse_header(ConstBuffer& input,          // NOLINT
 
 template<typename ConstBuffer,
          typename Message>
-std::size_t parse(ConstBuffer& input,               // NOLINT
-                  Message& message,                 // NOLINT
-                  coap_te::error_code& ec) noexcept {   // NOLINT
+constexpr std::size_t
+parse(ConstBuffer& input,               // NOLINT
+      Message& message,                 // NOLINT
+      coap_te::error_code& ec) noexcept {   // NOLINT
   static_assert(coap_te::is_const_buffer_v<ConstBuffer>,
                 "Must be of ype message");
   static_assert(is_message_v<Message>,

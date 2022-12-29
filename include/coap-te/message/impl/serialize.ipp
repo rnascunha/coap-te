@@ -27,7 +27,7 @@ namespace message {
 
 template<typename ConstBuffer,
          typename MutableBuffer>
-std::size_t
+constexpr std::size_t
 serialize_header(type tp, code co, message_id mid,
                 const ConstBuffer& token,
                 MutableBuffer& output,          //NOLINT
@@ -63,7 +63,7 @@ template<typename CheckOptions /* = coap_te::message::options::check_none */,
          typename ConstBufferPayload,
          typename MutableBuffer,
          typename OptionList>
-std::size_t
+constexpr std::size_t
 serialize(type tp, code co, message_id mid,
           const ConstBufferToken& token,
           const OptionList& opt_list,
@@ -107,10 +107,11 @@ serialize(type tp, code co, message_id mid,
 
 template<typename Message,
          typename MutableBuffer>
-std::size_t serialize(const Message& msg,
-            message_id mid,
-            MutableBuffer& output,      // NOLINT
-            coap_te::error_code& ec) noexcept {   // NOLINT
+constexpr std::size_t
+serialize(const Message& msg,
+           message_id mid,
+           MutableBuffer& output,      // NOLINT
+           coap_te::error_code& ec) noexcept {   // NOLINT
   static_assert(is_message_v<Message>, "Must be a message type");
   static_assert(coap_te::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer type");
@@ -126,7 +127,7 @@ std::size_t serialize(const Message& msg,
 
 template<typename ConstBuffer,
          typename MutableBuffer>
-std::size_t
+constexpr std::size_t
 serialize_header(type tp, code co, message_id mid,
                 const ConstBuffer& token,
                 MutableBuffer& output) {         //NOLINT
@@ -148,7 +149,7 @@ template<typename CheckOptions /* = coap_te::message::options::check_none */,
          typename ConstBufferPayload,
          typename MutableBuffer,
          typename OptionList>
-std::size_t
+constexpr std::size_t
 serialize(type tp, code co, message_id mid,
           const ConstBufferToken& token,
           const OptionList& opt_list,
@@ -176,16 +177,17 @@ serialize(type tp, code co, message_id mid,
 
 template<typename Message,
          typename MutableBuffer>
-std::size_t serialize(const Message& msg,
+constexpr std::size_t
+serialize(const Message& msg,
             message_id mid,
             MutableBuffer& output) {  // NOLINT
   static_assert(is_message_v<Message>, "Must be a message type");
   static_assert(coap_te::is_mutable_buffer_v<MutableBuffer>,
                 "Must be mutable buffer type");
   return coap_te::message::serialize(
-                  msg.get_type(), msg.get_code(), 
+                  msg.get_type(), msg.get_code(),
                   mid, msg.token(),
-                  msg.option_list(), msg.payload(), 
+                  msg.option_list(), msg.payload(),
                   output);
 }
 

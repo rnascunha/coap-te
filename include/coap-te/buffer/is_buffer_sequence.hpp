@@ -81,8 +81,16 @@ struct is_mutable_buffer_sequence
   : detail::is_buffer_sequence<T, mutable_buffer>{};
 
 template<typename T>
+static constexpr bool
+is_mutable_buffer_sequence_v = is_mutable_buffer_sequence<T>::value;
+
+template<typename T>
 struct is_const_buffer_sequence
   : detail::is_buffer_sequence<T, const_buffer>{};
+
+template<typename T>
+static constexpr bool
+is_const_buffer_sequence_v = is_const_buffer_sequence<T>::value;
 
 }  // namespace coap_te
 

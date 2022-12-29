@@ -96,20 +96,13 @@ At the end, remember:
 # Know issues
 
 * At debug mode at MSVC, the checks in iterators at the binary_search asserts a error. This is a false error, as de bound is checked after.
-* Clang is giving error when not compiling with '-fexception', even if no function that throws exceptions is called.
-* Some functions could not be used as 'constexpr' (serialize/parse kind) because of std::error_code that is not constexpr. Something can be done?
 * message/option uses create static function to create a option. This was necessary to make a compile options like checks/thorw avaiable (contructors can't explicitly set template options). Is options check really necessary?
 * Some libraries are been added that may not be used/necessary/avaialble for embemded development, like containers/strings/ostream. Functions mostly used for development/debbugging.
+* * Check the use of others library containers like ETL and EASTL (no heap container options);
 * Test/use expected class (core/expected.hpp) or remove it;
-* Isolate code that use standard containers (option_list codes).
-* Generalize requiriments of standard containers codes (option_list codes) to accept other containers like this;
 * 'options list' types use 'count_options' to return the number of options and 'size' to return the serilized size of the message. Is this confusining?
 * Also, equality (==) and less operator (<) just compare the option number, not the data. Is this also confusing?
 * The iterator interface at const_buffer and mutable_buffer necessary?
-* Generalize more 'is_option' trait;
-* 'option' is inherent from 'option_base'. Is this a good solution?
-* * Need to declare the operator '==' and '<' in all class;
-* * if declare virtual functions at base, it can't be constexpr, this also prevent the declaration of operator '=='  and '<' at base;
 * 'option_list_size' does not forbids the use of 'unordered_set/unordered_map' or 'map/set', unsuttable for the use as option container:
 * * Document it;
 * * Should it explicity forbid (make a type trait)?

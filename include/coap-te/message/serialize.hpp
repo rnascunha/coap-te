@@ -22,7 +22,7 @@ namespace message {
 
 template<typename ConstBuffer,
          typename MutableBuffer>
-std::size_t
+constexpr std::size_t
 serialize_header(type, code, message_id,
                 const ConstBuffer& token,
                 MutableBuffer&,         //NOLINT
@@ -33,7 +33,7 @@ template<typename CheckOptions = coap_te::message::options::check_none,
          typename ConstBufferPayload,
          typename MutableBuffer,
          typename OptionList>
-std::size_t
+constexpr std::size_t
 serialize(type, code, message_id,
           const ConstBufferToken& token,
           const OptionList& opt_list,
@@ -43,7 +43,8 @@ serialize(type, code, message_id,
 
 template<typename Message,
          typename MutableBuffer>
-std::size_t serialize(const Message& msg,
+constexpr std::size_t
+serialize(const Message& msg,
             message_id mid,
             MutableBuffer& output,              // NOLINT
             coap_te::error_code& ec) noexcept;  // NOLINT
@@ -52,7 +53,7 @@ std::size_t serialize(const Message& msg,
 
 template<typename ConstBuffer,
          typename MutableBuffer>
-std::size_t
+constexpr std::size_t
 serialize_header(type, code, message_id,
                 const ConstBuffer& token,
                 MutableBuffer&);         //NOLINT
@@ -62,7 +63,7 @@ template<typename CheckOptions = coap_te::message::options::check_none,
          typename ConstBufferPayload,
          typename MutableBuffer,
          typename OptionList>
-std::size_t
+constexpr std::size_t
 serialize(type, code, message_id,
           const ConstBufferToken& token,
           const OptionList& opt_list,
@@ -71,9 +72,10 @@ serialize(type, code, message_id,
 
 template<typename Message,
          typename MutableBuffer>
-std::size_t serialize(const Message& msg,
-            message_id mid,
-            MutableBuffer& output);  // NOLINT
+constexpr std::size_t
+serialize(const Message& msg,
+          message_id mid,
+          MutableBuffer& output);  // NOLINT
 
 #endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
 
