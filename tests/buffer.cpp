@@ -19,6 +19,8 @@
 #include "coap-te/buffer/mutable_buffer.hpp"
 #include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/buffer/buffer.hpp"
+#include "coap-te/buffer/buffer_sequence.hpp"
+#include "coap-te/buffer/is_buffer_sequence.hpp"
 #include "coap-te/buffer/buffers_iterator.hpp"
 #include "coap-te/buffer/traits.hpp"
 
@@ -300,6 +302,77 @@ TEST(Buffer, ChangingMutableBufferChar) {
     std::string data{"12345"};
     coap_te::mutable_buffer buf(data);
     test_change_mutable_buffer(buf);
+  }
+}
+
+TEST(Buffer, BufferFunctions) {
+  {
+    SCOPED_TRACE("Mutable buffer constructor");
+    {
+      SCOPED_TRACE("Buffer std::vector overload");
+      std::vector<char> v{1, 2, 3, 4, 5};
+      auto buf = coap_te::buffer(v);
+      EXPECT_EQ(buf.size(), v.size());
+      EXPECT_TRUE(coap_te::is_mutable_buffer_v<decltype(buf)>);
+    }
+    {
+      SCOPED_TRACE("Buffer std::array overload");
+      std::array<char, 5> v{1, 2, 3, 4, 5};
+      auto buf = coap_te::buffer(v);
+      EXPECT_EQ(buf.size(), v.size());
+      EXPECT_TRUE(coap_te::is_mutable_buffer_v<decltype(buf)>);
+    }
+    {
+      SCOPED_TRACE("Buffer array overload");
+      char v[]{1, 2, 3, 4, 5};
+      auto buf = coap_te::buffer(v);
+      EXPECT_EQ(buf.size(), sizeof(v) / sizeof(v[0]));
+      EXPECT_TRUE(coap_te::is_mutable_buffer_v<decltype(buf)>);
+    }
+    {
+      SCOPED_TRACE("Buffer std::string overload");
+      std::string v = "12345";
+      auto buf = coap_te::buffer(v);
+      EXPECT_EQ(buf.size(), v.size());
+      EXPECT_TRUE(coap_te::is_mutable_buffer_v<decltype(buf)>);
+    }
+  }
+  {
+    SCOPED_TRACE("Const buffer constructor");
+    {
+      SCOPED_TRACE("Buffer std::vector overload");
+      const std::vector<char> v{1, 2, 3, 4, 5};
+      auto buf = coap_te::buffer(v);
+      EXPECT_EQ(buf.size(), v.size());
+      EXPECT_TRUE(coap_te::is_const_buffer_v<decltype(buf)>);
+    }
+    {
+      SCOPED_TRACE("Buffer std::array overload");
+      const std::array<char, 5> v{1, 2, 3, 4, 5};
+      auto buf = coap_te::buffer(v);
+      EXPECT_EQ(buf.size(), v.size());
+      EXPECT_TRUE(coap_te::is_const_buffer_v<decltype(buf)>);
+    }
+    {
+      SCOPED_TRACE("Buffer array overload");
+      const char v[]{1, 2, 3, 4, 5};
+      auto buf = coap_te::buffer(v);
+      EXPECT_EQ(buf.size(), sizeof(v) / sizeof(v[0]));
+      EXPECT_TRUE(coap_te::is_const_buffer_v<decltype(buf)>);
+    }
+    {
+      SCOPED_TRACE("Buffer std::string overload");
+      const std::string v = "12345";
+      auto buf = coap_te::buffer(v);
+      EXPECT_EQ(buf.size(), v.size());
+      EXPECT_TRUE(coap_te::is_const_buffer_v<decltype(buf)>);
+    }
+    {
+      const std::string_view v = "12345";
+      auto buf = coap_te::buffer(v);
+      EXPECT_EQ(buf.size(), v.size());
+      EXPECT_TRUE(coap_te::is_const_buffer_v<decltype(buf)>);
+    }
   }
 }
 
