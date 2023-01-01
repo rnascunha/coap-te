@@ -201,6 +201,13 @@ class exception : std::exception {
   coap_te::error_code ec_;
 };
 
+constexpr void
+throw_if_error(const error_code& ec) {
+  if (ec) {
+    throw exception{ec};
+  }
+}
+
 }  // namespace coap_te
 
 #endif  // COAP_TE_ENABLE_EXCEPTIONS == 1

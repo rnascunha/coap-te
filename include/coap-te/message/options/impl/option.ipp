@@ -34,19 +34,17 @@ check_constructor([[maybe_unused]] number op,
                       coap_te::core::to_underlying(number::invalid),
                       coap_te::core::to_underlying(op),
                       type, size);
-    if (ec) {
 #if COAP_TE_ENABLE_EXCEPTIONS == 1
-      if constexpr (ToThrow) {
-        throw coap_te::exception{ec};
-      } else {
-        return false;
-      }
-#else   // COAP_TE_ENABLE_EXCEPTIONS == 1
-      return false;
-#endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
+    if constexpr (ToThrow) {
+      coap_te::throw_if_error(ec);
+      return true;
+    } else {
+      return ec ? false : true;
     }
+#else   // COAP_TE_ENABLE_EXCEPTIONS == 1
+    return ec ? false : true;
+#endif  // COAP_TE_ENABLE_EXCEPTIONS == 1
   }
-  return true;
 }
 
 }  // namespace detail

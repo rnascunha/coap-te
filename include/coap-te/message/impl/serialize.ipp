@@ -138,9 +138,7 @@ serialize_header(type tp, code co, message_id mid,
 
   coap_te::error_code ec;
   auto size = serialize_header(tp, co, mid, token, output, ec);
-  if (ec) {
-    throw coap_te::exception{ec};
-  }
+  coap_te::throw_if_error(ec);
   return size;
 }
 
@@ -169,9 +167,7 @@ serialize(type tp, code co, message_id mid,
                                       token, opt_list,
                                       payload, output,
                                       ec);
-  if (ec) {
-    throw coap_te::exception{ec};
-  }
+  coap_te::throw_if_error(ec);
   return size;
 }
 
