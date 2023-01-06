@@ -902,25 +902,42 @@ TEST(Buffer, IteratorContainer) {
     EXPECT_FALSE(decltype(ic)::is_multiple);
   }
   {
-    // coap_te::const_buffer buf[] = {coap_te::buffer(data1),
-    //                                coap_te::buffer(data2)};
-    // EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
-    // coap_te::iterator_container ic(coap_te::buffers_begin(buf),
-    //                               coap_te::buffers_end(buf));
-    // EXPECT_EQ(sizeof(data1) + sizeof(data2), ic.size());
-    // EXPECT_EQ(sizeof(data1) + sizeof(data2), coap_te::buffer_size(ic));
-  }
-  {
     coap_te::const_buffer buf[] = {coap_te::buffer(data1),
                                    coap_te::buffer(data2)};
-    std::uint8_t data3[sizeof(data1) + sizeof(data2)];
-    coap_te::buffer_copy(coap_te::buffer(data3), buf);
-    // EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
-    // auto init = coap_te::buffer_sequence_begin(buf);
-    // auto end = coap_te::buffer_sequence_end(buf);
-    EXPECT_EQ(sizeof(data1) + sizeof(data2), coap_te::buffer_size(buf));
-    EXPECT_EQ(0, std::memcmp(data1, data3, sizeof(data1)));
-    EXPECT_EQ(0, std::memcmp(data2, data3 + sizeof(data1), sizeof(data2)));
-    // EXPECT_EQ(0, coap_te::buffer_compare(coap_te::buffer(data3), buf));
+    EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
+    coap_te::iterator_container ic(coap_te::buffers_begin(buf),
+                                  coap_te::buffers_end(buf));
+    EXPECT_EQ(sizeof(data1) + sizeof(data2), ic.size());
+    EXPECT_EQ(sizeof(data1) + sizeof(data2), coap_te::buffer_size(ic));
+    {
+      int c = 0;
+      for (auto i = ic.begin(); i != ic.end(); ++i) {
+        EXPECT_EQ(*i, c++);
+      }
+    }
+    {
+      for (std::size_t c = 0; c < ic.size(); ++c) {
+        EXPECT_EQ(c, ic[c]);
+      }
+    }
+  }
+  {
+    std::vector<coap_te::const_buffer> buf{coap_te::buffer(data1),
+                                            coap_te::buffer(data2)};
+    EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
+    coap_te::iterator_container ic(buf);
+    EXPECT_EQ(sizeof(data1) + sizeof(data2), ic.size());
+    EXPECT_EQ(sizeof(data1) + sizeof(data2), coap_te::buffer_size(ic));
+    {
+      int c = 0;
+      for (auto i = ic.begin(); i != ic.end(); ++i) {
+        EXPECT_EQ(*i, c++);
+      }
+    }
+    {
+      for (std::size_t c = 0; c < ic.size(); ++c) {
+        EXPECT_EQ(c, ic[c]);
+      }
+    }
   }
 }

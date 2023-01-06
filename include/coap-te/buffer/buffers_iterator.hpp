@@ -23,6 +23,53 @@ namespace coap_te {
 
 namespace detail {
 
+/*******************************/
+
+template<typename T>
+struct is_mutable_buffer : std::bool_constant<
+  std::is_convertible_v<
+        typename T::value_type,
+        mutable_buffer>
+  >{};
+
+template<typename T>
+struct is_mutable_buffer<T[]> : std::bool_constant<
+  std::is_convertible_v<
+        std::remove_all_extents_t<T>,
+        mutable_buffer>
+  >{};
+
+template<typename T, std::size_t N>
+struct is_mutable_buffer<T[N]> : std::bool_constant<
+  std::is_convertible_v<
+        std::remove_all_extents_t<T>,
+        mutable_buffer>
+  >{};
+
+template<typename T>
+static constexpr bool
+is_mutable_buffer_v = is_mutable_buffer<T>::value;
+
+template<typename T>
+struct get_const_iterator {
+    using type = typename T::const_iterator;
+};
+
+template<typename T>
+struct get_const_iterator<T[]> {
+    using type = const std::remove_all_extents_t<T>*;
+};
+
+template<typename T, std::size_t N>
+struct get_const_iterator<T[N]> {
+    using type = const std::remove_all_extents_t<T>*;
+};
+
+template<typename T>
+using get_const_iterator_t = typename get_const_iterator<T>::type;
+
+/*******************************/
+
 template<bool IsMutable>
 struct buffers_iterator_types_helper;
 
@@ -47,13 +94,15 @@ struct buffers_iterator_types_helper<true> {
 template<typename BufferSequence, typename ByteType>
 struct buffers_iterator_types {
   static constexpr bool
-  is_mutable = std::is_convertible_v<
-                typename BufferSequence::value_type,
-                mutable_buffer>;
+  // is_mutable = std::is_convertible_v<
+  //               typename BufferSequence::value_type,
+  //               mutable_buffer>;
+  is_mutable = is_mutable_buffer_v<BufferSequence>;
   using helper = buffers_iterator_types_helper<is_mutable>;
   using buffer_type = typename helper::buffer_type;
   using byte_type = typename helper::template byte_type<ByteType>::type;
-  using const_iterator = typename BufferSequence::const_iterator;
+  // using const_iterator = typename BufferSequence::const_iterator;
+  using const_iterator = get_const_iterator_t<BufferSequence>;
 };
 
 template<typename ByteType>
@@ -537,15 +586,15 @@ class buffers_iterator<mutable_buffer, std::uint8_t> {
 template<>
 class buffers_iterator<const_buffer, std::uint8_t> {
  private:
-  using byte_type = std::uint8_t;
+  using byte_type = const std::uint8_t;
   using buffer_type = const_buffer;
   using buffer_sequence_iterator_type = const const_buffer*;
 
  public:
   using difference_type = std::ptrdiff_t;
   using value_type = byte_type;
-  using pointer = const byte_type*;
-  using reference = const byte_type&;
+  using pointer = byte_type*;
+  using reference = byte_type&;
 
   using iterator_category = std::random_access_iterator_tag;
 

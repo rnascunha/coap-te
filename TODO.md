@@ -108,6 +108,8 @@ At the end, remember:
 * * Document it;
 * * Should it explicity forbid (make a type trait)?
 
-# Improvements from ASIO (really??)
+# Improvements from ASIO Buffers (really??)
 
+* is_*_buffer_sequence accepts arrays;
+* buffers_iterator accepts array;
 * Buffer iterator has a specialization to mutable_buffer and const_buffer. This makes reduce the class size and the processing needed.

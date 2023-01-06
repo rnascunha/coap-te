@@ -105,5 +105,6 @@ buffer_sequence_end(const C& c,
 
 #include "coap-te/buffer/buffer_size.hpp"
 #include "coap-te/buffer/buffer_copy.hpp"
+#include "coap-te/buffer/buffer_compare.hpp"
 
 #endif  // COAP_TE_BUFFER_BUFFER_SEQUENCE_HPP_

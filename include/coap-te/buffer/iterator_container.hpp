@@ -25,6 +25,8 @@ class iterator_container {
 
   using const_iterator = Iterator;
   using value_type = typename Iterator::value_type;
+  using pointer = typename Iterator::pointer;
+  using reference = typename Iterator::reference;
 
   static constexpr bool
   is_multiple = coap_te::is_multiple_buffer_iterator_v<Iterator>;
@@ -33,10 +35,24 @@ class iterator_container {
   iterator_container(Iterator begin, Iterator end) noexcept
     : begin_(begin), end_(end) {}
 
+  template<typename BufferSequence>
+  constexpr
+  explicit iterator_container(const BufferSequence& buf) noexcept
+    : begin_(buffers_begin(buf)), end_(buffers_end(buf)) {}
+
   [[nodiscard]] constexpr std::size_t
   size() const noexcept {
     return end_ - begin_;
   }
+
+  [[nodiscard]] constexpr reference
+  operator[](std::size_t n) const noexcept {
+    return begin_[n];
+  }
+
+  /**
+   * Iterator interface
+   */
 
   [[nodiscard]] constexpr const_iterator
   begin() noexcept {
@@ -62,6 +78,11 @@ class iterator_container {
   const_iterator begin_;
   const_iterator end_;
 };
+
+/// constructor deduction guide
+template<class BufferSequence>
+iterator_container(BufferSequence buf) ->
+  iterator_container<decltype(buffers_begin(buf))>;
 
 template<typename T>
 struct is_iterator_container : std::false_type{};

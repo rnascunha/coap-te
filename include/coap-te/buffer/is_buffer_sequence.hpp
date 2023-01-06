@@ -52,9 +52,10 @@ struct is_buffer_sequence_class : std::bool_constant<
   sizeof(buffer_sequence_element_type_helper<T, Buffer>(0, 0)) == 1>
 {};
 
+
 template<typename T, typename Buffer>
 struct is_buffer_sequence : std::conditional_t<
-  std::is_class_v<T>,
+  std::is_class_v<T> || std::is_array_v<T>,     // is_array_v added by me
   is_buffer_sequence_class<T, Buffer>,
   std::false_type>{};
 
