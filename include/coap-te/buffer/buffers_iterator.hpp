@@ -31,7 +31,7 @@ struct buffers_iterator_types_helper<false> {
   using buffer_type = const_buffer;
   template<typename ByteType>
   struct byte_type {
-    using type = typename std::add_const<ByteType>::type;
+    using type = typename std::add_const_t<ByteType>;
   };
 };
 
@@ -66,7 +66,7 @@ struct buffers_iterator_types<mutable_buffer, ByteType> {
 template<typename ByteType>
 struct buffers_iterator_types<const_buffer, ByteType> {
   using buffer_type = const_buffer;
-  using byte_type = ByteType;
+  using byte_type = std::add_const_t<ByteType>;
   using const_iterator = const const_buffer*;
 };
 
@@ -145,7 +145,7 @@ class buffers_iterator {
   operator[](difference_type difference) const noexcept {
     buffers_iterator tmp(*this);
     tmp.advance(difference);
-    return *this;
+    return *tmp;
   }
 
   constexpr buffers_iterator&
@@ -321,7 +321,7 @@ class buffers_iterator {
         n -= current_buffer_balance;
         position_ += current_buffer_balance;
         if (++current_ == end_) {
-          current_buffer_ = buffer_type();
+          current_buffer_ = buffer_type{};
           current_buffer_position_ = 0;
           return;
         }
@@ -374,6 +374,331 @@ class buffers_iterator {
   std::size_t position_;
 };
 
+/**
+ * Added by me [init]
+ */
+template<>
+class buffers_iterator<mutable_buffer, std::uint8_t> {
+ private:
+  using byte_type = std::uint8_t;
+  using buffer_type = mutable_buffer;
+  using buffer_sequence_iterator_type = const mutable_buffer*;
+
+ public:
+  using difference_type = std::ptrdiff_t;
+  using value_type = byte_type;
+  using pointer = byte_type*;
+  using reference = byte_type&;
+
+  using iterator_category = std::random_access_iterator_tag;
+
+  constexpr
+  buffers_iterator() noexcept = default;
+
+  constexpr
+  explicit buffers_iterator(const buffer_type& buf) noexcept
+    : ptr_{static_cast<pointer>(buf.data())} {}
+
+  [[nodiscard]] static constexpr buffers_iterator
+  begin(const buffer_type& buffers) noexcept {
+    return buffers_iterator{buffers};
+  }
+
+  [[nodiscard]] static constexpr buffers_iterator
+  end(const buffer_type& buffers) noexcept {
+    return buffers_iterator{buffer_type{static_cast<pointer>(buffers.data()) +
+                            buffers.size(),
+                            0}};
+  }
+
+  [[nodiscard]] constexpr reference
+  operator*() const noexcept {
+    return *ptr_;
+  }
+
+  [[nodiscard]] constexpr pointer
+  operator->() const noexcept {
+    return ptr_;
+  }
+
+  [[nodiscard]] constexpr reference
+  operator[](difference_type difference) const noexcept {
+    return *(ptr_ + difference);
+  }
+
+  constexpr buffers_iterator&
+  operator++() noexcept {
+    ptr_ += 1;
+    return *this;
+  }
+
+  constexpr buffers_iterator
+  operator++(int) noexcept {
+    buffers_iterator tmp(*this);
+    ++*this;
+    return tmp;
+  }
+
+  constexpr buffers_iterator&
+  operator--() noexcept {
+    ptr_ -= 1;
+    return *this;
+  }
+
+  constexpr buffers_iterator
+  operator--(int) noexcept {
+    buffers_iterator tmp(*this);
+    --*this;
+    return tmp;
+  }
+
+  constexpr buffers_iterator&
+  operator+=(difference_type difference) noexcept {
+    ptr_ += difference;
+    return *this;
+  }
+
+  constexpr buffers_iterator&
+  operator-=(difference_type difference) noexcept {
+    ptr_ -= difference;
+    return *this;
+  }
+
+  [[nodiscard]] constexpr friend buffers_iterator
+  operator+(const buffers_iterator& iter,
+            difference_type difference) noexcept {
+    buffers_iterator tmp(iter);
+    tmp += difference;
+    return tmp;
+  }
+
+  [[nodiscard]] constexpr friend buffers_iterator
+  operator+(difference_type difference,
+            const buffers_iterator& iter) noexcept {
+    buffers_iterator tmp(iter);
+    tmp += difference;
+    return tmp;
+  }
+
+  [[nodiscard]] friend constexpr buffers_iterator
+  operator-(const buffers_iterator& iter,
+            difference_type difference) noexcept {
+    buffers_iterator tmp(iter);
+    tmp -= difference;
+    return tmp;
+  }
+
+  [[nodiscard]] constexpr friend difference_type
+  operator-(const buffers_iterator& a,
+            const buffers_iterator& b) noexcept {
+    return a.ptr_ - b.ptr_;
+  }
+
+  [[nodiscard]] constexpr friend bool
+  operator==(const buffers_iterator& a,
+             const buffers_iterator& b) noexcept {
+    return a.ptr_ == b.ptr_;
+  }
+
+  [[nodiscard]] constexpr friend bool
+  operator!=(const buffers_iterator& a,
+             const buffers_iterator& b) noexcept {
+    return !(a == b);
+  }
+
+  [[nodiscard]] constexpr friend bool
+  operator<(const buffers_iterator& a,
+             const buffers_iterator& b) noexcept {
+    return a < b;
+  }
+
+  [[nodiscard]] constexpr friend bool
+  operator<=(const buffers_iterator& a,
+             const buffers_iterator& b) noexcept {
+    return !(b < a);
+  }
+
+  [[nodiscard]] constexpr friend bool
+  operator>(const buffers_iterator& a,
+            const buffers_iterator& b) noexcept {
+    return a > b;
+  }
+
+  [[nodiscard]] constexpr friend bool
+  operator>=(const buffers_iterator& a,
+             const buffers_iterator& b) noexcept {
+    return !(a < b);
+  }
+
+ private:
+  pointer ptr_ = nullptr;
+};
+
+template<>
+class buffers_iterator<const_buffer, std::uint8_t> {
+ private:
+  using byte_type = std::uint8_t;
+  using buffer_type = const_buffer;
+  using buffer_sequence_iterator_type = const const_buffer*;
+
+ public:
+  using difference_type = std::ptrdiff_t;
+  using value_type = byte_type;
+  using pointer = const byte_type*;
+  using reference = const byte_type&;
+
+  using iterator_category = std::random_access_iterator_tag;
+
+  constexpr
+  buffers_iterator() noexcept = default;
+
+  constexpr
+  explicit buffers_iterator(const buffer_type& buf) noexcept
+    : ptr_{static_cast<pointer>(buf.data())} {}
+
+  constexpr
+  explicit buffers_iterator(const mutable_buffer& buf) noexcept
+    : ptr_{static_cast<pointer>(buf.data())} {}
+
+  [[nodiscard]] static constexpr buffers_iterator
+  begin(const buffer_type& buffers) noexcept {
+    return buffers_iterator{buffers};
+  }
+
+  [[nodiscard]] static constexpr buffers_iterator
+  end(const buffer_type& buffers) noexcept {
+    return buffers_iterator{buffer_type{static_cast<pointer>(buffers.data()) +
+                            buffers.size(),
+                            0}};
+  }
+
+  [[nodiscard]] constexpr reference
+  operator*() const noexcept {
+    return *ptr_;
+  }
+
+  [[nodiscard]] constexpr pointer
+  operator->() const noexcept {
+    return ptr_;
+  }
+
+  [[nodiscard]] constexpr reference
+  operator[](difference_type difference) const noexcept {
+    return *(ptr_ + difference);
+  }
+
+  constexpr buffers_iterator&
+  operator++() noexcept {
+    ptr_ += 1;
+    return *this;
+  }
+
+  constexpr buffers_iterator
+  operator++(int) noexcept {
+    buffers_iterator tmp(*this);
+    ++*this;
+    return tmp;
+  }
+
+  constexpr buffers_iterator&
+  operator--() noexcept {
+    ptr_ -= 1;
+    return *this;
+  }
+
+  constexpr buffers_iterator
+  operator--(int) noexcept {
+    buffers_iterator tmp(*this);
+    --*this;
+    return tmp;
+  }
+
+  constexpr buffers_iterator&
+  operator+=(difference_type difference) noexcept {
+    ptr_ += difference;
+    return *this;
+  }
+
+  constexpr buffers_iterator&
+  operator-=(difference_type difference) noexcept {
+    ptr_ -= difference;
+    return *this;
+  }
+
+  [[nodiscard]] constexpr friend buffers_iterator
+  operator+(const buffers_iterator& iter,
+            difference_type difference) noexcept {
+    buffers_iterator tmp(iter);
+    tmp += difference;
+    return tmp;
+  }
+
+  [[nodiscard]] constexpr friend buffers_iterator
+  operator+(difference_type difference,
+            const buffers_iterator& iter) noexcept {
+    buffers_iterator tmp(iter);
+    tmp += difference;
+    return tmp;
+  }
+
+  [[nodiscard]] friend constexpr buffers_iterator
+  operator-(const buffers_iterator& iter,
+            difference_type difference) noexcept {
+    buffers_iterator tmp(iter);
+    tmp -= difference;
+    return tmp;
+  }
+
+  [[nodiscard]] constexpr friend difference_type
+  operator-(const buffers_iterator& a,
+            const buffers_iterator& b) noexcept {
+    return a.ptr_ - b.ptr_;
+  }
+
+  [[nodiscard]] constexpr friend bool
+  operator==(const buffers_iterator& a,
+             const buffers_iterator& b) noexcept {
+    return a.ptr_ == b.ptr_;
+  }
+
+  [[nodiscard]] constexpr friend bool
+  operator!=(const buffers_iterator& a,
+             const buffers_iterator& b) noexcept {
+    return !(a == b);
+  }
+
+  [[nodiscard]] constexpr friend bool
+  operator<(const buffers_iterator& a,
+             const buffers_iterator& b) noexcept {
+    return a < b;
+  }
+
+  [[nodiscard]] constexpr friend bool
+  operator<=(const buffers_iterator& a,
+             const buffers_iterator& b) noexcept {
+    return !(b < a);
+  }
+
+  [[nodiscard]] constexpr friend bool
+  operator>(const buffers_iterator& a,
+            const buffers_iterator& b) noexcept {
+    return a > b;
+  }
+
+  [[nodiscard]] constexpr friend bool
+  operator>=(const buffers_iterator& a,
+             const buffers_iterator& b) noexcept {
+    return !(a < b);
+  }
+
+ private:
+  pointer ptr_ = nullptr;
+};
+
+/**
+ * Added by me [end]
+ */
+
 template<typename BufferSequence>
 [[nodiscard]] constexpr buffers_iterator<BufferSequence>
 buffers_begin(const BufferSequence& buffers) noexcept {
@@ -385,6 +710,31 @@ template<typename BufferSequence>
 buffers_end(const BufferSequence& buffers) noexcept {
   return buffers_iterator<BufferSequence>::end(buffers);
 }
+
+template<typename>
+struct is_buffer_iterator : std::false_type{};
+
+template<typename BufferSequence, typename ByteType>
+struct is_buffer_iterator<
+  buffers_iterator<BufferSequence, ByteType>>
+    : std::true_type{};
+
+template<typename T>
+static constexpr bool
+is_buffers_iterator_v = is_buffer_iterator<T>::value;
+
+template<typename BufferIterator>
+struct is_multiple_buffer_iterator : std::true_type{};
+
+template<typename BS, typename BT>
+struct is_multiple_buffer_iterator<
+  buffers_iterator<BS, BT>> : std::bool_constant<
+    !(std::is_convertible_v<std::decay_t<BS>, const_buffer> ||
+    std::is_convertible_v<std::decay_t<BS>, mutable_buffer>)>{};
+
+template<typename T>
+static constexpr bool
+is_multiple_buffer_iterator_v = is_multiple_buffer_iterator<T>::value;
 
 }  // namespace coap_te
 

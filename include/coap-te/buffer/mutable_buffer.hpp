@@ -113,6 +113,9 @@ class mutable_buffer {
   };
 
   constexpr
+  mutable_buffer() noexcept = default;
+
+  constexpr
   mutable_buffer(void* data, std::size_t size) noexcept
     : data_(data), size_(size)
   {}

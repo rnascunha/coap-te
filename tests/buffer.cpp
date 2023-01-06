@@ -17,7 +17,9 @@
 #include <string_view>
 
 #include "coap-te/buffer/buffer.hpp"
+#include "coap-te/buffer/buffer_compare.hpp"
 #include "coap-te/buffer/buffers_iterator.hpp"
+#include "coap-te/buffer/iterator_container.hpp"
 
 TEST(BufferTraits, IsConstBufferTrait) {
   // Check if class can be used as buffer type
@@ -426,9 +428,351 @@ TEST(Buffer, BufferSequenece) {
     EXPECT_EQ(coap_te::buffer_copy(m, v), 12);
     EXPECT_EQ(0, std::memcmp(c, "12345\0" "67890\0", 12));
   }
+  {
+    char a[] = "12345", b[] = "67890";
+    char c[12];
+    coap_te::const_buffer v[] = {coap_te::buffer(a),
+                                 coap_te::buffer(b)};
+    auto m = coap_te::buffer(c);
+    EXPECT_EQ(coap_te::buffer_size(v), 12);
+    EXPECT_EQ(coap_te::buffer_size(m), 12);
+    EXPECT_EQ(coap_te::buffer_copy(m, v), 12);
+    EXPECT_EQ(0, std::memcmp(c, "12345\0" "67890\0", 12));
+  }
 }
 
-#include <iostream>
+TEST(Buffer, BufferCompare) {
+  {
+    SCOPED_TRACE("Compare both single buffers");
+    {
+      SCOPED_TRACE("Equal buffers same size");
+      std::uint8_t data1[]{1, 2, 3, 4, 5};
+      std::uint8_t data2[]{1, 2, 3, 4, 5};
+      EXPECT_EQ(0, coap_te::buffer_compare(coap_te::buffer(data1),
+                                          coap_te::buffer(data2)));
+    }
+    {
+      SCOPED_TRACE("Equal buffers max size");
+      std::uint8_t data1[]{1, 2, 3, 4, 6};
+      std::uint8_t data2[]{1, 2, 3, 4, 5};
+      EXPECT_EQ(0, coap_te::buffer_compare(coap_te::buffer(data1),
+                                          coap_te::buffer(data2),
+                                          sizeof(data1) - 1));
+    }
+    {
+      SCOPED_TRACE("Equal buffers different size 1");
+      std::uint8_t data1[]{1, 2, 3, 4};
+      std::uint8_t data2[]{1, 2, 3, 4, 5};
+      EXPECT_EQ(0, coap_te::buffer_compare(coap_te::buffer(data1),
+                                          coap_te::buffer(data2)));
+    }
+    {
+      SCOPED_TRACE("Equal buffers different size 2");
+      std::uint8_t data1[]{1, 2, 3, 4, 5};
+      std::uint8_t data2[]{1, 2, 3, 4};
+      EXPECT_EQ(0, coap_te::buffer_compare(coap_te::buffer(data1),
+                                          coap_te::buffer(data2)));
+    }
+    {
+      SCOPED_TRACE("Different buffers same sizes (1 > 2)");
+      std::uint8_t data1[]{1, 2, 4, 4, 5};
+      std::uint8_t data2[]{1, 2, 3, 4, 5};
+      EXPECT_EQ(1, coap_te::buffer_compare(coap_te::buffer(data1),
+                                          coap_te::buffer(data2)));
+    }
+    {
+      SCOPED_TRACE("Different buffers same sizes (1 < 2)");
+      std::uint8_t data1[]{1, 2, 2, 4, 5};
+      std::uint8_t data2[]{1, 2, 3, 4, 5};
+      EXPECT_EQ(-1, coap_te::buffer_compare(coap_te::buffer(data1),
+                                          coap_te::buffer(data2)));
+    }
+  }
+  {
+    SCOPED_TRACE("Compare single buffers + multiple buffer");
+    {
+      SCOPED_TRACE("Equal buffers same size");
+      std::uint8_t data1[]{1, 2, 3, 4, 5};
+      std::uint8_t data2[]{1, 2, 3};
+      std::uint8_t data3[]{4, 5};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(0, coap_te::buffer_compare(coap_te::buffer(data1),
+                                           buf));
+    }
+    {
+      SCOPED_TRACE("Equal buffers max size");
+      std::uint8_t data1[]{1, 2, 3, 4, 6};
+      std::uint8_t data2[]{1, 2, 3};
+      std::uint8_t data3[]{4, 5};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(0, coap_te::buffer_compare(coap_te::buffer(data1),
+                                           buf,
+                                           sizeof(data1) - 1));
+    }
+    {
+      SCOPED_TRACE("Equal buffers different size 1");
+      std::uint8_t data1[]{1, 2, 3, 4};
+      std::uint8_t data2[]{1, 2, 3};
+      std::uint8_t data3[]{4, 5};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(0, coap_te::buffer_compare(coap_te::buffer(data1),
+                                           buf));
+    }
+    {
+      SCOPED_TRACE("Equal buffers different size 2");
+      std::uint8_t data1[]{1, 2, 3, 4, 5};
+      std::uint8_t data2[]{1, 2, 3};
+      std::uint8_t data3[]{4};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(0, coap_te::buffer_compare(coap_te::buffer(data1),
+                                           buf));
+    }
+    {
+      SCOPED_TRACE("Different buffers same sizes (1 > 2)");
+      std::uint8_t data1[]{1, 2, 4, 4, 5};
+      std::uint8_t data2[]{1, 2, 3};
+      std::uint8_t data3[]{4};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(1, coap_te::buffer_compare(coap_te::buffer(data1),
+                                           buf));
+    }
+    {
+      SCOPED_TRACE("Different buffers same sizes (1 < 2)");
+      std::uint8_t data1[]{1, 2, 2, 4, 5};
+      std::uint8_t data2[]{1, 2, 3};
+      std::uint8_t data3[]{4};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(-1, coap_te::buffer_compare(coap_te::buffer(data1),
+                                           buf));
+    }
+    {
+      SCOPED_TRACE("Different buffers same sizes (1 > 2) 2");
+      std::uint8_t data1[]{1, 2, 3, 4, 5};
+      std::uint8_t data2[]{1, 2, 2};
+      std::uint8_t data3[]{4};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(1, coap_te::buffer_compare(coap_te::buffer(data1),
+                                           buf));
+    }
+    {
+      SCOPED_TRACE("Different buffers same sizes (1 < 2) 2");
+      std::uint8_t data1[]{1, 2, 3, 4, 5};
+      std::uint8_t data2[]{1, 2, 4};
+      std::uint8_t data3[]{4};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(-1, coap_te::buffer_compare(coap_te::buffer(data1),
+                                           buf));
+    }
+  }
+  {
+    SCOPED_TRACE("Compare multiple buffers + single buffer");
+    {
+      SCOPED_TRACE("Equal buffers same size");
+      std::uint8_t data1[]{1, 2, 3, 4, 5};
+      std::uint8_t data2[]{1, 2, 3};
+      std::uint8_t data3[]{4, 5};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(0, coap_te::buffer_compare(buf,
+                                           coap_te::buffer(data1)));
+    }
+    {
+      SCOPED_TRACE("Equal buffers same size");
+      std::uint8_t data1[]{1, 2, 3, 4, 6};
+      std::uint8_t data2[]{1, 2, 3};
+      std::uint8_t data3[]{4, 5};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(0, coap_te::buffer_compare(buf,
+                                           coap_te::buffer(data1),
+                                           sizeof(data1) - 1));
+    }
+    {
+      SCOPED_TRACE("Equal buffers different size 1");
+      std::uint8_t data1[]{1, 2, 3, 4};
+      std::uint8_t data2[]{1, 2, 3};
+      std::uint8_t data3[]{4, 5};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(0, coap_te::buffer_compare(buf,
+                                           coap_te::buffer(data1)));
+    }
+    {
+      SCOPED_TRACE("Equal buffers different size 2");
+      std::uint8_t data1[]{1, 2, 3, 4, 5};
+      std::uint8_t data2[]{1, 2, 3};
+      std::uint8_t data3[]{4};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(0, coap_te::buffer_compare(buf,
+                                           coap_te::buffer(data1)));
+    }
+    {
+      SCOPED_TRACE("Different buffers same sizes (1 < 2)");
+      std::uint8_t data1[]{1, 2, 4, 4, 5};
+      std::uint8_t data2[]{1, 2, 3};
+      std::uint8_t data3[]{4};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(-1, coap_te::buffer_compare(buf,
+                                           coap_te::buffer(data1)));
+    }
+    {
+      SCOPED_TRACE("Different buffers same sizes (1 > 2)");
+      std::uint8_t data1[]{1, 2, 2, 4, 5};
+      std::uint8_t data2[]{1, 2, 3};
+      std::uint8_t data3[]{4};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(1, coap_te::buffer_compare(buf,
+                                           coap_te::buffer(data1)));
+    }
+    {
+      SCOPED_TRACE("Different buffers same sizes (1 < 2) 2");
+      std::uint8_t data1[]{1, 2, 3, 4, 5};
+      std::uint8_t data2[]{1, 2, 2};
+      std::uint8_t data3[]{4};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(-1, coap_te::buffer_compare(buf,
+                                            coap_te::buffer(data1)));
+    }
+    {
+      SCOPED_TRACE("Different buffers same sizes (1 > 2) 2");
+      std::uint8_t data1[]{1, 2, 3, 4, 5};
+      std::uint8_t data2[]{1, 2, 4};
+      std::uint8_t data3[]{4};
+      coap_te::const_buffer buf[] = {coap_te::buffer(data2),
+                                     coap_te::buffer(data3)};
+      EXPECT_EQ(1, coap_te::buffer_compare(buf,
+                                            coap_te::buffer(data1)));
+    }
+  }
+  {
+    SCOPED_TRACE("Compare multiple buffers + multiple buffer");
+    {
+      SCOPED_TRACE("Equal buffers same size");
+      std::uint8_t data1[]{1};
+      std::uint8_t data2[]{2, 3};
+      std::uint8_t data3[]{4, 5};
+      std::uint8_t data4[]{1, 2, 3};
+      std::uint8_t data5[]{4, 5};
+      coap_te::const_buffer buf1[] = {coap_te::buffer(data1),
+                                      coap_te::buffer(data2),
+                                      coap_te::buffer(data3)};
+      coap_te::const_buffer buf2[] = {coap_te::buffer(data4),
+                                      coap_te::buffer(data5)};
+      EXPECT_EQ(0, coap_te::buffer_compare(buf1, buf2));
+    }
+    {
+      SCOPED_TRACE("Equal buffers max size");
+      std::uint8_t data1[]{1};
+      std::uint8_t data2[]{2, 3};
+      std::uint8_t data3[]{4, 6};
+      std::uint8_t data4[]{1, 2, 3};
+      std::uint8_t data5[]{4, 5};
+      coap_te::const_buffer buf1[] = {coap_te::buffer(data1),
+                                      coap_te::buffer(data2),
+                                      coap_te::buffer(data3)};
+      coap_te::const_buffer buf2[] = {coap_te::buffer(data4),
+                                      coap_te::buffer(data5)};
+      EXPECT_EQ(0, coap_te::buffer_compare(buf1, buf2,
+                                           coap_te::buffer_size(buf1) - 1));
+    }
+    {
+      SCOPED_TRACE("Equal buffers different size 1");
+      std::uint8_t data1[]{1};
+      std::uint8_t data2[]{2, 3};
+      std::uint8_t data3[]{4};
+      std::uint8_t data4[]{1, 2, 3};
+      std::uint8_t data5[]{4, 5};
+      coap_te::const_buffer buf1[] = {coap_te::buffer(data1),
+                                      coap_te::buffer(data2),
+                                      coap_te::buffer(data3)};
+      coap_te::const_buffer buf2[] = {coap_te::buffer(data4),
+                                      coap_te::buffer(data5)};
+      EXPECT_EQ(0, coap_te::buffer_compare(buf1, buf2));
+    }
+    {
+      SCOPED_TRACE("Equal buffers different size 2");
+      std::uint8_t data1[]{1};
+      std::uint8_t data2[]{2, 3};
+      std::uint8_t data3[]{4, 5};
+      std::uint8_t data4[]{1, 2, 3};
+      std::uint8_t data5[]{4};
+      coap_te::const_buffer buf1[] = {coap_te::buffer(data1),
+                                      coap_te::buffer(data2),
+                                      coap_te::buffer(data3)};
+      coap_te::const_buffer buf2[] = {coap_te::buffer(data4),
+                                      coap_te::buffer(data5)};
+      EXPECT_EQ(0, coap_te::buffer_compare(buf1, buf2));
+    }
+    {
+      SCOPED_TRACE("Different buffers same sizes (1 < 2)");
+      std::uint8_t data1[]{1};
+      std::uint8_t data2[]{2, 2};
+      std::uint8_t data3[]{4, 5};
+      std::uint8_t data4[]{1, 2, 3};
+      std::uint8_t data5[]{4, 5};
+      coap_te::const_buffer buf1[] = {coap_te::buffer(data1),
+                                      coap_te::buffer(data2),
+                                      coap_te::buffer(data3)};
+      coap_te::const_buffer buf2[] = {coap_te::buffer(data4),
+                                      coap_te::buffer(data5)};
+      EXPECT_GT(0, coap_te::buffer_compare(buf1, buf2));
+    }
+    {
+      SCOPED_TRACE("Different buffers same sizes (1 > 2)");
+      std::uint8_t data1[]{1};
+      std::uint8_t data2[]{2, 4};
+      std::uint8_t data3[]{4, 5};
+      std::uint8_t data4[]{1, 2, 3};
+      std::uint8_t data5[]{4, 5};
+      coap_te::const_buffer buf1[] = {coap_te::buffer(data1),
+                                      coap_te::buffer(data2),
+                                      coap_te::buffer(data3)};
+      coap_te::const_buffer buf2[] = {coap_te::buffer(data4),
+                                      coap_te::buffer(data5)};
+      EXPECT_LT(0, coap_te::buffer_compare(buf1, buf2));
+    }
+    {
+      SCOPED_TRACE("Different buffers same sizes (1 < 2) 2");
+      std::uint8_t data1[]{1};
+      std::uint8_t data2[]{2, 3};
+      std::uint8_t data3[]{4, 5};
+      std::uint8_t data4[]{1, 2, 4};
+      std::uint8_t data5[]{4, 5};
+      coap_te::const_buffer buf1[] = {coap_te::buffer(data1),
+                                      coap_te::buffer(data2),
+                                      coap_te::buffer(data3)};
+      coap_te::const_buffer buf2[] = {coap_te::buffer(data4),
+                                      coap_te::buffer(data5)};
+      EXPECT_GT(0, coap_te::buffer_compare(buf1, buf2));
+    }
+    {
+      SCOPED_TRACE("Different buffers same sizes (1 > 2) 2");
+      std::uint8_t data1[]{1};
+      std::uint8_t data2[]{2, 3};
+      std::uint8_t data3[]{4, 5};
+      std::uint8_t data4[]{1, 2, 2};
+      std::uint8_t data5[]{4, 5};
+      coap_te::const_buffer buf1[] = {coap_te::buffer(data1),
+                                      coap_te::buffer(data2),
+                                      coap_te::buffer(data3)};
+      coap_te::const_buffer buf2[] = {coap_te::buffer(data4),
+                                      coap_te::buffer(data5)};
+      EXPECT_LT(0, coap_te::buffer_compare(buf1, buf2));
+    }
+  }
+}
 
 TEST(Buffer, BufferIterator) {
   {
@@ -457,5 +801,126 @@ TEST(Buffer, BufferIterator) {
     for (char i = 10; e >= b; --i, --e) {
       EXPECT_EQ(*e, i);
     }
+  }
+  {
+    SCOPED_TRACE("Testing iterator data updates");
+    unsigned char d1[5],
+                  d2[5] = {5, 6, 7, 8, 9};
+    std::vector<coap_te::mutable_buffer> v;
+    v.push_back(coap_te::buffer(d1));
+    v.push_back(coap_te::buffer(d2));
+
+    auto b = coap_te::buffers_begin(v);
+    *b = 0;
+    b[1] = 1;
+    *(b + 2) = 2;
+    {
+      auto b2 = b + 3;
+      *b2 = 3;
+      b2 += 1;
+      b2[0] = 4;
+    }
+    auto e = coap_te::buffers_end(v);
+
+    for (char i = 0; b != e; ++i, ++b) {
+      EXPECT_EQ(*b, i);
+    }
+  }
+}
+
+TEST(Buffer, SingleBufferIterator) {
+  {
+    SCOPED_TRACE("Single buffer");
+    unsigned char d1[] = {0, 1, 2, 3, 4, 5};
+
+    auto b = coap_te::buffers_begin(coap_te::buffer(d1));
+    auto e = coap_te::buffers_end(coap_te::buffer(d1));
+    for (char i = 0; b != e; ++i, ++b) {
+      EXPECT_EQ(*b, i);
+    }
+  }
+  {
+    SCOPED_TRACE("Constant single buffer");
+    const unsigned char d1[] = {0, 1, 2, 3, 4, 5};
+
+    auto b = coap_te::buffers_begin(coap_te::buffer(d1));
+    auto e = coap_te::buffers_end(coap_te::buffer(d1));
+    for (char i = 0; b != e; ++i, ++b) {
+      EXPECT_EQ(*b, i);
+    }
+  }
+  {
+    SCOPED_TRACE("Testing iterator data updates");
+    unsigned char d[5];
+    auto b = coap_te::buffers_begin(coap_te::buffer(d));
+    *b = 0;
+    b[1] = 1;
+    *(b + 2) = 2;
+    {
+      auto b2 = b + 3;
+      *b2 = 3;
+      b2 += 1;
+      b2[0] = 4;
+    }
+    auto e = coap_te::buffers_end(coap_te::buffer(d));
+
+    for (char i = 0; b != e; ++i, ++b) {
+      EXPECT_EQ(*b, i);
+    }
+  }
+}
+
+TEST(Buffer, IteratorContainer) {
+  std::uint8_t data1[]{0, 1, 2, 3, 4};
+  std::uint8_t data2[]{5, 6, 7, 8, 9};
+  {
+    auto buf = coap_te::buffer(data1);
+    EXPECT_TRUE(coap_te::is_mutable_buffer_sequence_v<decltype(buf)>);
+    coap_te::iterator_container ic(coap_te::buffers_begin(buf),
+                                   coap_te::buffers_end(buf));
+    EXPECT_EQ(sizeof(data1), ic.size());
+    EXPECT_EQ(sizeof(data1), coap_te::buffer_size(ic));
+    EXPECT_FALSE(decltype(ic)::is_multiple);
+  }
+  {
+    std::vector<coap_te::const_buffer> v{coap_te::buffer(data1),
+                                         coap_te::buffer(data2)};
+    EXPECT_FALSE(coap_te::is_mutable_buffer_sequence_v<decltype(v)>);
+    EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(v)>);
+    coap_te::iterator_container ic(coap_te::buffers_begin(v),
+                                 coap_te::buffers_end(v));
+    EXPECT_EQ(sizeof(data1) + sizeof(data2), ic.size());
+    EXPECT_EQ(sizeof(data1) + sizeof(data2), coap_te::buffer_size(ic));
+    EXPECT_TRUE(decltype(ic)::is_multiple);
+  }
+  {
+    auto buf = coap_te::buffer(data1);
+    coap_te::iterator_container ic(coap_te::buffers_begin(buf),
+                                  coap_te::buffers_end(buf));
+    EXPECT_EQ(sizeof(data1), ic.size());
+    EXPECT_EQ(coap_te::buffer_size(ic), ic.size());
+    EXPECT_FALSE(decltype(ic)::is_multiple);
+  }
+  {
+    // coap_te::const_buffer buf[] = {coap_te::buffer(data1),
+    //                                coap_te::buffer(data2)};
+    // EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
+    // coap_te::iterator_container ic(coap_te::buffers_begin(buf),
+    //                               coap_te::buffers_end(buf));
+    // EXPECT_EQ(sizeof(data1) + sizeof(data2), ic.size());
+    // EXPECT_EQ(sizeof(data1) + sizeof(data2), coap_te::buffer_size(ic));
+  }
+  {
+    coap_te::const_buffer buf[] = {coap_te::buffer(data1),
+                                   coap_te::buffer(data2)};
+    std::uint8_t data3[sizeof(data1) + sizeof(data2)];
+    coap_te::buffer_copy(coap_te::buffer(data3), buf);
+    // EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
+    // auto init = coap_te::buffer_sequence_begin(buf);
+    // auto end = coap_te::buffer_sequence_end(buf);
+    EXPECT_EQ(sizeof(data1) + sizeof(data2), coap_te::buffer_size(buf));
+    EXPECT_EQ(0, std::memcmp(data1, data3, sizeof(data1)));
+    EXPECT_EQ(0, std::memcmp(data2, data3 + sizeof(data1), sizeof(data2)));
+    // EXPECT_EQ(0, coap_te::buffer_compare(coap_te::buffer(data3), buf));
   }
 }
