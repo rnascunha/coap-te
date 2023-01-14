@@ -13,8 +13,11 @@
 
 #include <string>
 #include <string_view>
+#include <limits>
 
 #include "coap-te/core/traits.hpp"
+#include "coap-te/buffer/buffer.hpp"
+#include "coap-te/buffer/buffers_iterator.hpp"
 
 namespace coap_te {
 namespace debug {
@@ -28,21 +31,24 @@ std::string_view to_string(const ConstBuffer& buffer) noexcept {
                           buffer.size()};
 }
 
-template<typename ConstBuffer>
-std::string to_hex(const ConstBuffer& buffer,
-                   const std::string_view& separator = " ") noexcept {
-  static_assert(coap_te::is_const_buffer_v<ConstBuffer>,
-                "Must be const buffer type");
-
-  if (buffer.size() == 0)
+template<typename ConstBufferSequence>
+std::string to_hex(const ConstBufferSequence& buffer,
+                   const std::string_view& separator = " ",
+                   std::size_t max_size
+                    = std::numeric_limits<std::size_t>::max()) noexcept {
+  static_assert(coap_te::is_const_buffer_sequence_v<ConstBufferSequence> ||
+                coap_te::is_iterator_container_v<ConstBufferSequence>,
+                "Must be const buffer sequence type");
+  auto size = (std::min)(coap_te::buffer_size(buffer), max_size);
+  if (size == 0)
     return "";
 
   static constexpr const char* hex = "0123456789ABCDEF";
   std::string s;
-  s.reserve(buffer.size() * 2 + buffer.size() - 1);
+  s.reserve(size * 2 + size - 1);
 
-  auto* b = reinterpret_cast<const std::uint8_t*>(buffer.data());
-  for (auto i = buffer.size() - 1; i != 0; --i, ++b) {
+  auto b = coap_te::buffers_begin(buffer);
+  for (auto i = size - 1; i != 0; --i, ++b) {
     s.push_back(hex[(*b) >> 4]);
     s.push_back(hex[(*b) & 0x0F]);
     s.append(separator);

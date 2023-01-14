@@ -112,4 +112,6 @@ At the end, remember:
 
 * is_*_buffer_sequence accepts arrays;
 * buffers_iterator accepts array;
-* Buffer iterator has a specialization to mutable_buffer and const_buffer. This makes reduce the class size and the processing needed.
+* Buffer iterator has a specialization to mutable_buffer and const_buffer. This makes reduce the class size and the processing needed;
+* buffer_copy working with iterator_contaienr;
+* buffer_compare implemented;

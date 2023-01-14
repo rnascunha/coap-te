@@ -16,6 +16,8 @@
 #include <string>
 #include <string_view>
 
+#include <iostream>
+
 #include "coap-te/buffer/buffer.hpp"
 #include "coap-te/buffer/buffer_compare.hpp"
 #include "coap-te/buffer/buffers_iterator.hpp"
@@ -938,6 +940,67 @@ TEST(Buffer, IteratorContainer) {
       for (std::size_t c = 0; c < ic.size(); ++c) {
         EXPECT_EQ(c, ic[c]);
       }
+    }
+  }
+  {
+    auto buf1 = coap_te::buffer(data1);
+    buf1 += 2;
+    std::vector<coap_te::const_buffer> buf{buf1,
+                                            coap_te::buffer(data2)};
+    EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
+    coap_te::iterator_container ic(buf);
+    EXPECT_EQ(sizeof(data1) + sizeof(data2) - 2, ic.size());
+    EXPECT_EQ(sizeof(data1) + sizeof(data2) - 2, coap_te::buffer_size(ic));
+    {
+      int c = 2;
+      for (auto i = ic.begin(); i != ic.end(); ++i) {
+        EXPECT_EQ(*i, c++);
+      }
+    }
+    {
+      for (std::size_t c = 2; c < ic.size(); ++c) {
+        EXPECT_EQ(c, ic[c - 2]);
+      }
+    }
+    //////////////////////////////////////////////
+    // {
+    //   auto buf1 = coap_te::buffer(data1);
+    //   buf1 += 2;
+    //   std::vector<coap_te::const_buffer> buf{buf1,
+    //                                           coap_te::buffer(data2)};
+    //   EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
+    //   coap_te::iterator_container ic(buf);
+    //   coap_te::iterator_container ic2(buf);
+    //   coap_te::buffer_copy(ic, ic2);
+    // }
+    // {
+    //   auto buf1 = coap_te::buffer(data1);
+    //   std::vector<coap_te::const_buffer> buf{buf1,
+    //                                           coap_te::buffer(data2)};
+    //   EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
+    //   coap_te::iterator_container ic(buf);
+    //   coap_te::iterator_container ic2(buf1);
+    //   coap_te::buffer_copy(ic, ic2);
+    // }
+    {
+      std::uint8_t dataa[]{0, 1, 2, 3, 4};
+      std::uint8_t datab[]{5, 6, 7, 8, 9};
+      std::uint8_t datac[5];
+      std::uint8_t datad[5];
+
+      std::vector<coap_te::const_buffer> ssource{
+        coap_te::buffer(dataa),
+        coap_te::buffer(datab)
+      };
+      std::vector<coap_te::mutable_buffer> starget{
+        coap_te::buffer(datac),
+        coap_te::buffer(datad)
+      };
+      coap_te::iterator_container source(ssource);
+      coap_te::iterator_container target(starget);
+      auto size = coap_te::buffer_copy(target, source);
+      EXPECT_EQ(size, 10);
+      EXPECT_EQ(0, coap_te::buffer_compare(starget, ssource));
     }
   }
 }

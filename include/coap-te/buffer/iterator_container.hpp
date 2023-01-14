@@ -90,6 +90,22 @@ struct is_iterator_container : std::false_type{};
 template<typename T>
 struct is_iterator_container<iterator_container<T>> : std::true_type{};
 
+template<typename T>
+static constexpr bool
+is_iterator_container_v = is_iterator_container<T>::value;
+
+template<typename Iterator>
+[[nodiscard]] constexpr Iterator
+buffers_begin(const iterator_container<Iterator>& buffers) noexcept {
+  return buffers.begin();
+}
+
+template<typename Iterator>
+[[nodiscard]] constexpr Iterator
+buffers_end(const iterator_container<Iterator>& buffers) noexcept {
+  return buffers.end();
+}
+
 }  // namespace coap_te
 
 #endif  // COAP_TE_BUFFER_ITERATOR_CONTAINER_HPP_
