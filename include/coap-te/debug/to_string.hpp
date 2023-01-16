@@ -37,7 +37,7 @@ std::string to_hex(const ConstBufferSequence& buffer,
                    std::size_t max_size
                     = std::numeric_limits<std::size_t>::max()) noexcept {
   static_assert(coap_te::is_const_buffer_sequence_v<ConstBufferSequence> ||
-                coap_te::is_iterator_container_v<ConstBufferSequence>,
+                coap_te::is_buffer_range_v<ConstBufferSequence>,
                 "Must be const buffer sequence type");
   auto size = (std::min)(coap_te::buffer_size(buffer), max_size);
   if (size == 0)

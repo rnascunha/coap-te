@@ -1,5 +1,5 @@
 /**
- * @file iterator_container.hpp
+ * @file buffer_range.hpp
  * @author Rafael Cunha (rnascunha@gmail.com)
  * @brief 
  * @version 0.1
@@ -8,8 +8,8 @@
  * @copyright Copyright (c) 2023
  * 
  */
-#ifndef COAP_TE_BUFFER_ITERATOR_CONTAINER_HPP_
-#define COAP_TE_BUFFER_ITERATOR_CONTAINER_HPP_
+#ifndef COAP_TE_BUFFER_BUFFER_RANGE_HPP_
+#define COAP_TE_BUFFER_BUFFER_RANGE_HPP_
 
 #include <cstdint>
 #include <type_traits>
@@ -19,7 +19,7 @@
 namespace coap_te {
 
 template<typename Iterator>
-class iterator_container {
+class buffer_range {
  public:
   static_assert(is_buffers_iterator_v<Iterator>, "Is not buffer_iterator");
 
@@ -32,12 +32,12 @@ class iterator_container {
   is_multiple = coap_te::is_multiple_buffer_iterator_v<Iterator>;
 
   constexpr
-  iterator_container(Iterator begin, Iterator end) noexcept
+  buffer_range(Iterator begin, Iterator end) noexcept
     : begin_(begin), end_(end) {}
 
   template<typename BufferSequence>
   constexpr
-  explicit iterator_container(const BufferSequence& buf) noexcept
+  explicit buffer_range(const BufferSequence& buf) noexcept
     : begin_(buffers_begin(buf)), end_(buffers_end(buf)) {}
 
   [[nodiscard]] constexpr std::size_t
@@ -81,31 +81,31 @@ class iterator_container {
 
 /// constructor deduction guide
 template<class BufferSequence>
-iterator_container(BufferSequence buf) ->
-  iterator_container<decltype(buffers_begin(buf))>;
+buffer_range(BufferSequence buf) ->
+  buffer_range<decltype(buffers_begin(buf))>;
 
 template<typename T>
-struct is_iterator_container : std::false_type{};
+struct is_buffer_range : std::false_type{};
 
 template<typename T>
-struct is_iterator_container<iterator_container<T>> : std::true_type{};
+struct is_buffer_range<buffer_range<T>> : std::true_type{};
 
 template<typename T>
 static constexpr bool
-is_iterator_container_v = is_iterator_container<T>::value;
+is_buffer_range_v = is_buffer_range<T>::value;
 
 template<typename Iterator>
 [[nodiscard]] constexpr Iterator
-buffers_begin(const iterator_container<Iterator>& buffers) noexcept {
+buffers_begin(const buffer_range<Iterator>& buffers) noexcept {
   return buffers.begin();
 }
 
 template<typename Iterator>
 [[nodiscard]] constexpr Iterator
-buffers_end(const iterator_container<Iterator>& buffers) noexcept {
+buffers_end(const buffer_range<Iterator>& buffers) noexcept {
   return buffers.end();
 }
 
 }  // namespace coap_te
 
-#endif  // COAP_TE_BUFFER_ITERATOR_CONTAINER_HPP_
+#endif  // COAP_TE_BUFFER_BUFFER_RANGE_HPP_

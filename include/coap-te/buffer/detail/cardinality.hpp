@@ -12,7 +12,7 @@
 #define COAP_TE_BUFFER_DETAIL_CARDINALITY_HPP_
 
 #include <type_traits>
-#include "coap-te/buffer/iterator_container.hpp"
+#include "coap-te/buffer/buffer_range.hpp"
 
 namespace coap_te {
 
@@ -34,14 +34,8 @@ struct buffer_sequence_cardinality :
     one_buffer, multiple_buffers> {};
 
 template<typename Iterator>
-struct buffer_sequence_cardinality<iterator_container<Iterator>>
+struct buffer_sequence_cardinality<buffer_range<Iterator>>
   : multiple_buffers {};
-
-// template<typename Iterator>
-// struct buffer_sequence_cardinality<iterator_container<Iterator>> :
-//   std::conditional_t<
-//     is_multiple_buffer_iterator_v<Iterator>,
-//     multiple_buffers, one_buffer>{};
 
 }  // namespace detail
 }  // namespace coap_te

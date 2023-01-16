@@ -16,7 +16,7 @@
 
 #include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/buffer/mutable_buffer.hpp"
-#include "coap-te/buffer/iterator_container.hpp"
+#include "coap-te/buffer/buffer_range.hpp"
 #include "coap-te/buffer/detail/cardinality.hpp"
 #include "coap-te/buffer/detail/iterator.hpp"
 
@@ -189,11 +189,11 @@ template<typename ConstBufferSequence1,
 constexpr int
 buffer_compare(const ConstBufferSequence1& buf1,
                const ConstBufferSequence2& buf2) noexcept {
-  if constexpr (is_iterator_container_v<ConstBufferSequence1> ||
-              is_iterator_container_v<ConstBufferSequence2>) {
+  if constexpr (is_buffer_range_v<ConstBufferSequence1> ||
+              is_buffer_range_v<ConstBufferSequence2>) {
     return buffer_compare(
       buf1, buf2,
-      detail::buffer_max_size(buf1, buf2));
+      std::numeric_limits<std::size_t>::max());
   } else {
     return detail::buffer_compare(
       detail::buffer_sequence_cardinality<ConstBufferSequence1>(),
@@ -222,7 +222,7 @@ buffer_compare(const ConstBufferSequence1& buf1,
     detail::buffer_iterator_begin(buf2),
     detail::buffer_iterator_end(buf2),
     detail::buffer_offset(buf2),
-    max_size);
+    detail::buffer_max_size(buf1, buf2, max_size));
 }
 
 }  // namespace coap_te

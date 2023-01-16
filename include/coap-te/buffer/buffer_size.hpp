@@ -13,7 +13,7 @@
 
 #include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/buffer/mutable_buffer.hpp"
-#include "coap-te/buffer/iterator_container.hpp"
+#include "coap-te/buffer/buffer_range.hpp"
 #include "coap-te/buffer/detail/cardinality.hpp"
 
 namespace coap_te {
@@ -52,7 +52,7 @@ buffer_size(const BufferSequence& b) noexcept {
 
 template<typename Iterator>
 [[nodiscard]] constexpr std::size_t
-buffer_size(const iterator_container<Iterator>& b) noexcept {
+buffer_size(const buffer_range<Iterator>& b) noexcept {
   return b.size();
 }
 

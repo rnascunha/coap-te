@@ -15,7 +15,7 @@
 
 #include "coap-te/buffer/const_buffer.hpp"
 #include "coap-te/buffer/mutable_buffer.hpp"
-#include "coap-te/buffer/iterator_container.hpp"
+#include "coap-te/buffer/buffer_range.hpp"
 
 namespace coap_te {
 namespace detail {
@@ -29,7 +29,7 @@ buffer_offset(const BufferSequence&) noexcept {
 
 template<typename Iterator>
 [[nodiscard]] constexpr std::size_t
-buffer_offset(const iterator_container<Iterator>& ic) noexcept {
+buffer_offset(const buffer_range<Iterator>& ic) noexcept {
   return ic.begin().current_position();
 }
 
@@ -43,7 +43,7 @@ buffer_iterator_begin(const BufferSequence& b) noexcept
 
 template<typename Iterator>
 [[nodiscard]] constexpr auto
-buffer_iterator_begin(const iterator_container<Iterator>& b) noexcept
+buffer_iterator_begin(const buffer_range<Iterator>& b) noexcept
   -> decltype(b.begin().current()) {
   return b.begin().current();
 }
@@ -58,7 +58,7 @@ buffer_iterator_end(const BufferSequence& b) noexcept
 
 template<typename Iterator>
 [[nodiscard]] constexpr auto
-buffer_iterator_end(const iterator_container<Iterator>& b) noexcept
+buffer_iterator_end(const buffer_range<Iterator>& b) noexcept
   -> decltype(b.end().end()) {
   return b.end().end();
 }
@@ -69,13 +69,13 @@ template<typename It1, typename It2>
 buffer_max_size(const It1& it1, const It2& it2,
                 std::size_t max_size
                   = std::numeric_limits<std::size_t>::max()) noexcept {
-  if constexpr (is_iterator_container_v<It1> &&
-                is_iterator_container_v<It2>) {
-    return (std::max)({max_size, it1.size(), it2.size()});
-  } else if constexpr (is_iterator_container_v<It1>) {
-    return (std::max)(max_size, it1.size());
-  } else if constexpr (is_iterator_container_v<It2>) {
-    return (std::max)(max_size, it2.size());
+  if constexpr (is_buffer_range_v<It1> &&
+                is_buffer_range_v<It2>) {
+    return (std::min)({max_size, it1.size(), it2.size()});
+  } else if constexpr (is_buffer_range_v<It1>) {
+    return (std::min)(max_size, it1.size());
+  } else if constexpr (is_buffer_range_v<It2>) {
+    return (std::min)(max_size, it2.size());
   } else {
     return max_size;
   }
