@@ -11,7 +11,6 @@
 #ifndef COAP_TE_BUFFER_BUFFER_RANGE_HPP_
 #define COAP_TE_BUFFER_BUFFER_RANGE_HPP_
 
-#include <cstdint>
 #include <type_traits>
 
 #include "coap-te/buffer/buffers_iterator.hpp"
@@ -81,9 +80,10 @@ class buffer_range {
 
 /// constructor deduction guide
 template<class BufferSequence>
-buffer_range(BufferSequence buf) ->
+buffer_range(const BufferSequence& buf) ->
   buffer_range<decltype(buffers_begin(buf))>;
 
+// buffer_range type traits
 template<typename T>
 struct is_buffer_range : std::false_type{};
 
@@ -94,6 +94,7 @@ template<typename T>
 static constexpr bool
 is_buffer_range_v = is_buffer_range<T>::value;
 
+// Overload of buffers_[begin, end]
 template<typename Iterator>
 [[nodiscard]] constexpr Iterator
 buffers_begin(const buffer_range<Iterator>& buffers) noexcept {

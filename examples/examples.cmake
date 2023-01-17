@@ -1,8 +1,9 @@
 set(EXAMPLES_DIR    "examples")
-set(EXAMPLES        "option_table"
-                    "option_list_example"
+set(EXAMPLES        option_table
+                    option_list_example
                     "message"
-                    "no_alloc_message"
+                    no_alloc_message
+                    size_of
                     buffer_ex)
 set(OUTPUT_EXAMPLE	${CMAKE_BINARY_DIR}/examples)
 

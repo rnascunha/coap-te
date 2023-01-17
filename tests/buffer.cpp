@@ -872,17 +872,17 @@ TEST(Buffer, SingleBufferIterator) {
   }
 }
 
-TEST(Buffer, IteratorContainer) {
+TEST(Buffer, BufferRange) {
   std::uint8_t data1[]{0, 1, 2, 3, 4};
   std::uint8_t data2[]{5, 6, 7, 8, 9};
   {
     auto buf = coap_te::buffer(data1);
     EXPECT_TRUE(coap_te::is_mutable_buffer_sequence_v<decltype(buf)>);
     coap_te::buffer_range ic(coap_te::buffers_begin(buf),
-                                   coap_te::buffers_end(buf));
+                             coap_te::buffers_end(buf));
+    EXPECT_FALSE(decltype(ic)::is_multiple);
     EXPECT_EQ(sizeof(data1), ic.size());
     EXPECT_EQ(sizeof(data1), coap_te::buffer_size(ic));
-    EXPECT_FALSE(decltype(ic)::is_multiple);
   }
   {
     std::vector<coap_te::const_buffer> v{coap_te::buffer(data1),
@@ -891,17 +891,17 @@ TEST(Buffer, IteratorContainer) {
     EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(v)>);
     coap_te::buffer_range ic(coap_te::buffers_begin(v),
                                  coap_te::buffers_end(v));
+    EXPECT_TRUE(decltype(ic)::is_multiple);
     EXPECT_EQ(sizeof(data1) + sizeof(data2), ic.size());
     EXPECT_EQ(sizeof(data1) + sizeof(data2), coap_te::buffer_size(ic));
-    EXPECT_TRUE(decltype(ic)::is_multiple);
   }
   {
     auto buf = coap_te::buffer(data1);
     coap_te::buffer_range ic(coap_te::buffers_begin(buf),
                                   coap_te::buffers_end(buf));
+    EXPECT_FALSE(decltype(ic)::is_multiple);
     EXPECT_EQ(sizeof(data1), ic.size());
     EXPECT_EQ(coap_te::buffer_size(ic), ic.size());
-    EXPECT_FALSE(decltype(ic)::is_multiple);
   }
   {
     coap_te::const_buffer buf[] = {coap_te::buffer(data1),
@@ -909,6 +909,7 @@ TEST(Buffer, IteratorContainer) {
     EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
     coap_te::buffer_range ic(coap_te::buffers_begin(buf),
                                   coap_te::buffers_end(buf));
+    EXPECT_TRUE(decltype(ic)::is_multiple);
     EXPECT_EQ(sizeof(data1) + sizeof(data2), ic.size());
     EXPECT_EQ(sizeof(data1) + sizeof(data2), coap_te::buffer_size(ic));
     {
@@ -928,6 +929,7 @@ TEST(Buffer, IteratorContainer) {
                                             coap_te::buffer(data2)};
     EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
     coap_te::buffer_range ic(buf);
+    EXPECT_TRUE(decltype(ic)::is_multiple);
     EXPECT_EQ(sizeof(data1) + sizeof(data2), ic.size());
     EXPECT_EQ(sizeof(data1) + sizeof(data2), coap_te::buffer_size(ic));
     {
@@ -946,9 +948,10 @@ TEST(Buffer, IteratorContainer) {
     auto buf1 = coap_te::buffer(data1);
     buf1 += 2;
     std::vector<coap_te::const_buffer> buf{buf1,
-                                            coap_te::buffer(data2)};
+                                          coap_te::buffer(data2)};
     EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
     coap_te::buffer_range ic(buf);
+    EXPECT_TRUE(decltype(ic)::is_multiple);
     EXPECT_EQ(sizeof(data1) + sizeof(data2) - 2, ic.size());
     EXPECT_EQ(sizeof(data1) + sizeof(data2) - 2, coap_te::buffer_size(ic));
     {
@@ -971,6 +974,8 @@ TEST(Buffer, IteratorContainer) {
       EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
       coap_te::buffer_range ic(buf);
       coap_te::buffer_range ic2(buf);
+      EXPECT_TRUE(decltype(ic)::is_multiple);
+      EXPECT_TRUE(decltype(ic2)::is_multiple);
       coap_te::buffer_copy(ic, ic2);
     }
     {
@@ -980,6 +985,8 @@ TEST(Buffer, IteratorContainer) {
       EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
       coap_te::buffer_range ic(buf);
       coap_te::buffer_range ic2(buf1);
+      EXPECT_TRUE(decltype(ic)::is_multiple);
+      EXPECT_FALSE(decltype(ic2)::is_multiple);
       coap_te::buffer_copy(ic, ic2);
     }
     {
@@ -998,6 +1005,8 @@ TEST(Buffer, IteratorContainer) {
       };
       coap_te::buffer_range source(ssource);
       coap_te::buffer_range target(starget);
+      EXPECT_TRUE(decltype(source)::is_multiple);
+      EXPECT_TRUE(decltype(target)::is_multiple);
       auto size = coap_te::buffer_copy(target, source);
       EXPECT_EQ(size, 10);
       EXPECT_EQ(0, coap_te::buffer_compare(starget, ssource));
@@ -1092,6 +1101,10 @@ TEST(Buffer, BufferExample) {
                                   coap_te::buffers_end(buf01) - 2);
   coap_te::buffer_range ic3(coap_te::buffers_begin(buf0123456) + 5,
                                   coap_te::buffers_end(buf0123456) - 10);
+  EXPECT_TRUE(decltype(ic0)::is_multiple);
+  EXPECT_TRUE(decltype(ic1)::is_multiple);
+  EXPECT_TRUE(decltype(ic2)::is_multiple);
+  EXPECT_TRUE(decltype(ic3)::is_multiple);
 
   {
     SCOPED_TRACE("Single buffers");
@@ -1125,17 +1138,17 @@ TEST(Buffer, BufferExample) {
     {
       SCOPED_TRACE("multiple source, single target");
       {
-        // same size
+        SCOPED_TRACE("same size");
         std::array<std::uint8_t, 10> arr;
         copy_buffer_check(coap_te::buffer(arr), mbuffers[1]);
       }
       {
-        // source bigger size
+        SCOPED_TRACE("source bigger size");
         std::vector<std::uint8_t> arr(8);
         copy_buffer_check(coap_te::buffer(arr), mbuffers[2]);
       }
       {
-        // target bigger size
+        SCOPED_TRACE("target bigger size");
         std::uint8_t arr[12];
         copy_buffer_check(coap_te::buffer(arr), mbuffers[3]);
       }
@@ -1143,7 +1156,7 @@ TEST(Buffer, BufferExample) {
     {
       SCOPED_TRACE("single source, multiple target");
       {
-        // same size
+        SCOPED_TRACE("same size");
         std::array<std::uint8_t, 3> arr0;
         std::uint8_t arr1[2];
         std::vector<coap_te::mutable_buffer> data_buf{coap_te::buffer(arr0),
@@ -1151,7 +1164,7 @@ TEST(Buffer, BufferExample) {
         copy_buffer_check(data_buf, sbuffers[1]);
       }
       {
-        // source bigger
+        SCOPED_TRACE("source bigger");
         std::array<std::uint8_t, 1> arr0;
         std::uint8_t arr1[2];
         std::array<coap_te::mutable_buffer, 2> data_buf{coap_te::buffer(arr0),
@@ -1159,7 +1172,7 @@ TEST(Buffer, BufferExample) {
         copy_buffer_check(data_buf, sbuffers[2]);
       }
       {
-        // target bigger
+        SCOPED_TRACE("target bigger");
         std::vector<std::uint8_t> arr0(3);
         std::uint8_t arr1[2];
         std::array<std::uint8_t, 4> arr2;
@@ -1172,7 +1185,7 @@ TEST(Buffer, BufferExample) {
     {
       SCOPED_TRACE("multiple buffers, multiple sources");
       {
-        // same size
+        SCOPED_TRACE("same size");
         std::array<std::uint8_t, 6> arr0;
         std::uint8_t arr1[7];
         std::vector<std::uint8_t> arr2(2);
@@ -1184,7 +1197,7 @@ TEST(Buffer, BufferExample) {
         copy_buffer_check(coap_te::buffer(arr), mbuffers[4]);
       }
       {
-        // bigger source
+        SCOPED_TRACE("bigger source");
         std::array<std::uint8_t, 3> arr0;
         std::uint8_t arr1[10];
         std::vector<std::uint8_t> arr2(8);
@@ -1196,7 +1209,7 @@ TEST(Buffer, BufferExample) {
         copy_buffer_check(arr, mbuffers[8]);
       }
       {
-        // bigger target
+        SCOPED_TRACE("bigger target");
         std::array<std::uint8_t, 4> arr0;
         std::uint8_t arr1[10];
         std::vector<std::uint8_t> arr2(12);
@@ -1221,22 +1234,22 @@ TEST(Buffer, BufferExample) {
     {
       SCOPED_TRACE("From iterator container");
       {
-        // single buffer, same size
+        SCOPED_TRACE("single buffer, same size");
         std::uint8_t data[6];
         copy_buffer_check(coap_te::buffer(data), ic2);
       }
       {
-        // single buffer, buffer small
+        SCOPED_TRACE("single buffer, buffer small");
         std::uint8_t data[7];
         copy_buffer_check(coap_te::buffer(data), ic0);
       }
       {
-        // single buffer, buffer big
+        SCOPED_TRACE("single buffer, buffer big");
         std::uint8_t data[12];
         copy_buffer_check(coap_te::buffer(data), ic3);
       }
       {
-        // multiple buffer, small buffer
+        SCOPED_TRACE("multiple buffer, small buffer");
         std::uint8_t data1[3];
         std::uint8_t data2[2];
         std::uint8_t data3[2];
@@ -1246,7 +1259,7 @@ TEST(Buffer, BufferExample) {
         copy_buffer_check(buf, ic1);
       }
       {
-        // multiple buffer, big buffer
+        SCOPED_TRACE("multiple buffer, big buffer");
         std::uint8_t data1[3];
         std::uint8_t data2[3];
         std::uint8_t data3[5];
@@ -1259,7 +1272,7 @@ TEST(Buffer, BufferExample) {
     {
       SCOPED_TRACE("To iterator container");
       {
-        // single buffer, same size
+        SCOPED_TRACE("single buffer, same size");
         std::uint8_t data1[3];
         std::uint8_t data2[2];
         std::vector<coap_te::mutable_buffer> buf{coap_te::buffer(data1),
@@ -1268,7 +1281,7 @@ TEST(Buffer, BufferExample) {
                           buf0);
       }
       {
-        // single buffer, buffer small
+        SCOPED_TRACE("single buffer, buffer small");
         std::uint8_t data1[2];
         std::uint8_t data2[1];
         std::uint8_t data3[4];
@@ -1279,7 +1292,7 @@ TEST(Buffer, BufferExample) {
                           buf1);
       }
       {
-        // single buffer, buffer big
+        SCOPED_TRACE("single buffer, buffer big");
         std::uint8_t data1[2];
         std::uint8_t data2[1];
         std::array<coap_te::mutable_buffer, 3> buf{coap_te::buffer(data1),
@@ -1288,18 +1301,18 @@ TEST(Buffer, BufferExample) {
                           buf5);
       }
       {
-        // multiple buffer, same size
+        SCOPED_TRACE("multiple buffer, same size");
         std::uint8_t data1[2];
         std::uint8_t data2[4];
         std::uint8_t data3[4];
-        std::array<coap_te::mutable_buffer, 3> buf{coap_te::buffer(data1),
-                                                  coap_te::buffer(data2),
-                                                  coap_te::buffer(data3)};
+        coap_te::mutable_buffer buf[]{coap_te::buffer(data1),
+                                      coap_te::buffer(data2),
+                                      coap_te::buffer(data3)};
         copy_buffer_check(coap_te::buffer_range(buf),
                           buf01);
       }
       {
-        // multiple buffer, buffer small
+        SCOPED_TRACE("multiple buffer, buffer small");
         std::uint8_t data1[2];
         std::uint8_t data2[4];
         std::array<coap_te::mutable_buffer, 2> buf{coap_te::buffer(data1),
@@ -1308,7 +1321,7 @@ TEST(Buffer, BufferExample) {
                           buf00);
       }
       {
-        // multiple buffer, buffer big
+        SCOPED_TRACE("multiple buffer, buffer big");
         std::uint8_t data1[6];
         std::uint8_t data2[4];
         std::uint8_t data3[7];
@@ -1322,7 +1335,7 @@ TEST(Buffer, BufferExample) {
     {
       SCOPED_TRACE("From iterator container to iterator container");
       {
-        // same size
+        SCOPED_TRACE("same size");
         std::uint8_t data0[3];
         std::array<std::uint8_t, 5> data1;
         std::vector<std::uint8_t> data2(2);
@@ -1335,7 +1348,7 @@ TEST(Buffer, BufferExample) {
         copy_buffer_check(icm, ic3);
       }
       {
-        // small target
+        SCOPED_TRACE("small target");
         std::uint8_t data0[2];
         std::array<std::uint8_t, 3> data1;
         std::vector<std::uint8_t> data2(2);
@@ -1348,11 +1361,11 @@ TEST(Buffer, BufferExample) {
         copy_buffer_check(icm, ic1);
       }
       {
-        // bigger target
+        SCOPED_TRACE("bigger target");
         std::uint8_t data0[5];
         std::array<std::uint8_t, 3> data1;
         std::vector<std::uint8_t> data2(7);
-        std::vector<coap_te::mutable_buffer> buf{
+        coap_te::mutable_buffer buf[]{
           coap_te::buffer(data0),
           coap_te::buffer(data1),
           coap_te::buffer(data2)
