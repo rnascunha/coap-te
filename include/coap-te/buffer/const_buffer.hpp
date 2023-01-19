@@ -12,10 +12,7 @@
 #define COAP_TE_BUFFER_CONST_BUFFER_HPP_
 
 #include <cstdint>
-#include <iterator>
-#include <string_view>
 
-#include "coap-te/buffer/traits.hpp"
 #include "coap-te/buffer/mutable_buffer.hpp"
 
 namespace coap_te {
@@ -30,150 +27,24 @@ namespace coap_te {
 
 class const_buffer {
  public:
-  using value_type = std::uint8_t;
-  using pointer = const value_type*;
-  using reference = const value_type&;
   using size_type = std::size_t;
-
-  class const_iterator {
-   public:
-    using value_type = const_buffer::value_type;
-    using reference = const_buffer::reference;
-    using pointer = const_buffer::pointer;
-    using iterator_category = std::random_access_iterator_tag;
-
-    constexpr
-    explicit const_iterator(pointer ptr) noexcept
-      : ptr_(ptr)
-    {}
-
-    constexpr
-    explicit const_iterator(const const_iterator& other) noexcept = default;
-
-    [[nodiscard]] constexpr bool
-    operator==(const const_iterator& rhs) const noexcept {
-      return ptr_ == rhs.ptr_;
-    }
-
-    [[nodiscard]] constexpr bool
-    operator!=(const const_iterator& rhs) const noexcept {
-      return !(ptr_ == rhs.ptr_);
-    }
-
-    constexpr const_iterator&
-    operator+=(int n) noexcept {
-      ptr_ += n;
-      return *this;
-    }
-
-    constexpr const_iterator
-    operator+(int n) const noexcept {
-      return const_iterator(ptr_ + n);
-    }
-
-    constexpr const_iterator&
-    operator=(const const_iterator& rhs) noexcept {
-      ptr_ = rhs.ptr_;
-      return *this;
-    }
-
-    constexpr const_iterator&
-    operator++() noexcept {
-      ++ptr_;
-      return *this;
-    }
-
-    constexpr const_iterator&
-    operator--() noexcept {
-      --ptr_;
-      return *this;
-    }
-
-    constexpr const_iterator
-    operator++(int) noexcept {
-      pointer temp = ptr_;
-      ++ptr_;
-      return const_iterator(temp);
-    }
-
-    constexpr const_iterator
-    operator--(int) noexcept {
-      pointer temp = ptr_;
-      --ptr_;
-      return const_iterator(temp);
-    }
-
-    constexpr reference
-    operator*() const noexcept {
-      return *ptr_;
-    }
-
-   private:
-    pointer ptr_;
-  };
-  using iterator = const_iterator;
 
   constexpr
   const_buffer() noexcept = default;
 
   constexpr
-  const_buffer(const const_buffer& buf) = default;
-
-  constexpr
-  const_buffer(const void* data, std::size_t size) noexcept
-    : data_(data), size_(size)
-  {}
-
-  constexpr
-  const_buffer(const void* data,
-               std::size_t size,
-               std::size_t type_size) noexcept
-    : const_buffer(data, size * type_size)
-  {}
+  const_buffer(const void* data, size_type size) noexcept
+    : data_(data), size_(size) {}
 
   constexpr
   const_buffer(const mutable_buffer& buf) noexcept   //NOLINT
-    : const_buffer(buf.data(), buf.size())
-  {}
-
-  template<typename T>
-  constexpr
-  explicit const_buffer(const T& container) noexcept
-    : const_buffer(container.data(),
-                   container.size(),
-                   sizeof(typename T::value_type)) {
-    static_assert(is_const_buffer_v<T>, "Is not buffer type");
-  }
-
-  constexpr
-  explicit const_buffer(const char* data) noexcept
-    : const_buffer(std::string_view(data))
-  {}
-
-  template<std::size_t N, typename T>
-  constexpr
-  explicit const_buffer(const T (&arr)[N]) noexcept
-    : const_buffer(arr, N, sizeof(T))
-  {}
-
-  [[nodiscard]] constexpr value_type
-  operator[](std::size_t n) const noexcept {
-    return static_cast<pointer>(data_)[n];
-  }
+    : const_buffer(buf.data(), buf.size()) {}
 
   constexpr const_buffer&
-  operator+=(std::size_t n) noexcept {
-    data_ = static_cast<pointer>(data_) + n;
-    size_ -= n;
-    return *this;
-  }
-
-  // copy assignment
-  constexpr const_buffer&
-  operator=(const const_buffer& other) noexcept {
-    data_ = other.data_;
-    size_ = other.size_;
-
+  operator+=(size_type n) noexcept {
+    size_type offset = n < size_ ? n : size_;
+    data_ = static_cast<const std::uint8_t*>(data_) + offset;
+    size_ -= offset;
     return *this;
   }
 
@@ -187,36 +58,16 @@ class const_buffer {
     return size_;
   }
 
-  [[nodiscard]] constexpr const_iterator
-  begin() const noexcept {
-    return const_iterator(static_cast<pointer>(data_));
-  }
-
-  [[nodiscard]] constexpr const_iterator
-  end() const noexcept {
-    return const_iterator(static_cast<pointer>(data_) + size_);
-  }
-
-  [[nodiscard]] constexpr const_iterator
-  cbegin() const noexcept {
-    return const_iterator(static_cast<pointer>(data_));
-  }
-
-  [[nodiscard]] constexpr const_iterator
-  cend() const noexcept {
-    return const_iterator(static_cast<pointer>(data_) + size_);
-  }
-
   // friends
   [[nodiscard]] friend constexpr const_buffer
-  operator+(const const_buffer& buf, std::size_t n) noexcept {
+  operator+(const const_buffer& buf, size_type n) noexcept {
     const_buffer b{buf};
     b += n;
     return b;
   }
 
   [[nodiscard]] friend constexpr const_buffer
-  operator+(std::size_t n, const const_buffer& buf) noexcept {
+  operator+(size_type n, const const_buffer& buf) noexcept {
     return buf + n;
   }
 

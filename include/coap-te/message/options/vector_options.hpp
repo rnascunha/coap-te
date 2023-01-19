@@ -66,7 +66,8 @@ class vector_options {
     [[nodiscard]] constexpr bool
     is_end() noexcept {
       return buf_.size() == 0 ||
-             buf_[0] == coap_te::message::payload_marker;
+             *static_cast<const std::uint8_t*>(buf_.data()) ==
+             coap_te::message::payload_marker;
     }
 
     [[nodiscard]] constexpr

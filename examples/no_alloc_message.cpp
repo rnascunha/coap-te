@@ -23,7 +23,7 @@ int main() {
    */
   std::cout << "Creating a request message\n-----------------\n";
 
-  no_alloc::request req{type::confirmable, code::get, const_buffer("token")};
+  no_alloc::request req{type::confirmable, code::get, coap_te::buffer("token")};
   no_alloc::option accept_op{accept::text_plain};
   no_alloc::option content_op{content::json};
   no_alloc::option if_none_op{number::if_none_match};
@@ -36,7 +36,7 @@ int main() {
     .add_option(if_none_op)
     .add_option(path1_op)
     .add_option(path2_op)
-    .payload(const_buffer{"my payload"});
+    .payload(coap_te::buffer("my payload"));
 
   std::cout << "Request";
   debug::print_message<true>(req);
@@ -47,9 +47,8 @@ int main() {
    */
   std::cout << "Serializing... ";
   std::uint8_t data[100];
-  mutable_buffer buf(data, 100);
   coap_te::error_code ecs;
-  auto size_s = serialize(req, 0x1234, buf, ecs);
+  auto size_s = serialize(req, 0x1234, coap_te::buffer(data), ecs);
   if (ecs) {
     std::cerr << "Fail["
               << ecs.value() << "]: "

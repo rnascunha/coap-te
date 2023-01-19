@@ -11,6 +11,7 @@
 #ifndef COAP_TE_MESSAGE_OPTIONS_CHECKS_HPP_
 #define COAP_TE_MESSAGE_OPTIONS_CHECKS_HPP_
 
+#include <type_traits>
 #include <initializer_list>
 
 #include "coap-te/core/error.hpp"
@@ -99,6 +100,19 @@ check(number_type before,
       number_type op,
       const std::initializer_list<format>& types,
       std::size_t opt_length) noexcept;
+
+
+// Trait to check if is check_type class  
+template<typename>
+struct is_check_option : std::false_type{};
+
+template<bool S, bool F, bool L>
+struct is_check_option<check_type<S, F, L>> : std::true_type{};
+
+template<typename T>
+static constexpr bool
+is_check_option_v = is_check_option<T>::value;
+
 
 }  // namespace options
 }  // namespace message

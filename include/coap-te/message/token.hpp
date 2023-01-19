@@ -16,7 +16,7 @@
 #include <cstring>
 #include <cstdint>
 
-#include "coap-te/core/traits.hpp"
+#include "coap-te/buffer/traits.hpp"
 #include "coap-te/message/config.hpp"
 
 namespace coap_te {

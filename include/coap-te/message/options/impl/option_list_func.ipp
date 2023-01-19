@@ -64,7 +64,9 @@ option_list_size(
   number_type prev = invalid;
   coap_te::error_code ec;
 
-  while (cbuf.size() != 0 && cbuf[0] != coap_te::message::payload_marker) {
+  while (cbuf.size() != 0 &&
+         *static_cast<const uint8_t*>(cbuf.data()) !=
+         coap_te::message::payload_marker) {
     option op;
     parse(prev, cbuf, op, ec);
     if (ec) {

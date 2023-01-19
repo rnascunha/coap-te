@@ -25,25 +25,25 @@
 namespace coap_te {
 namespace message {
 
-template<typename ConstBuffer,
-         typename Message>
+template<typename Message>
 constexpr std::size_t
-parse_header(ConstBuffer& input,        // NOLINT
+parse_header(const const_buffer& data,
              Message& message,                               // NOLINT
              coap_te::error_code& ec) noexcept {             // NOLINT
-  static_assert(coap_te::is_const_buffer_v<ConstBuffer>,
-                "ConstBuffer requirements not met");
   static_assert(is_message_v<Message>,
-                "Must be of type message");
-  auto size_buffer = buffer_size(input);
+                "CoAPMessage requirements not met");
+  const_buffer input(data);
 
-  if (size_buffer < minimum_header_size) {
+  if (input.size() < minimum_header_size) {
     ec = coap_te::errc::no_buffer_space;
     return 0;
   }
 
+  std::uint8_t header[minimum_header_size];   // NOLINT
+  buffer_copy(coap_te::buffer(header), input);
+
   // byte 0
-  std::uint8_t byte0 = input[0];
+  std::uint8_t byte0 = header[0];
   if (byte0 >> 6 != version) {
     ec = coap_te::errc::invalid_version;
     return 0;
@@ -55,49 +55,45 @@ parse_header(ConstBuffer& input,        // NOLINT
     return 0;
   }
 
-  if (size_buffer < minimum_header_size + token_len) {
+  if (input.size() < minimum_header_size + token_len) {
     ec = coap_te::errc::no_buffer_space;
     return 0;
   }
 
   message.set(static_cast<type>((byte0 >> 4) & 0b11));
   std::size_t size = 1;
-  input += 1;
 
   // byte 1;
-  message.set(static_cast<code>(input[0]));
+  message.set(static_cast<code>(header[1]));
   size += 1;
-  input += 1;
 
   // byte 2-3
-  std::uint16_t mid = static_cast<std::uint16_t>(input[0] << 8) | input[1];
+  std::uint16_t mid = static_cast<std::uint16_t>(header[2] << 8) | header[3];
   message.mid(mid);
   size += 2;
-  input += 2;
+  input += 4;
 
   // byte 4-4+token_len
   message.token({input.data(), token_len});
   size += token_len;
-  input += token_len;
 
   return size;
 }
 
-template<typename ConstBuffer,
-         typename Message>
+template<typename Message>
 constexpr std::size_t
-parse(ConstBuffer& input,               // NOLINT
-      Message& message,                 // NOLINT
+parse(const const_buffer& data,
+      Message& message,                     // NOLINT
       coap_te::error_code& ec) noexcept {   // NOLINT
-  static_assert(coap_te::is_const_buffer_v<ConstBuffer>,
-                "Must be of ype message");
   static_assert(is_message_v<Message>,
                 "Must be of type message");
+  const_buffer input(data);
 
   auto size = parse_header(input, message, ec);
   if (ec) {
     return size;
   }
+  input += size;
 
   auto size_opt = parse_options(input, message.option_list(), ec);
   if (ec) {
@@ -112,10 +108,8 @@ parse(ConstBuffer& input,               // NOLINT
     size += 1;
   }
   message.payload(input);
-  size += input.size();
-  input += input.size();
 
-  return size;
+  return size + input.size();
 }
 
 }  // namespace message

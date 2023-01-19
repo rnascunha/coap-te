@@ -16,6 +16,7 @@
 #include <limits>
 
 #include "coap-te/core/traits.hpp"
+#include "coap-te/buffer/traits.hpp"
 #include "coap-te/buffer/buffer.hpp"
 #include "coap-te/buffer/buffers_iterator.hpp"
 

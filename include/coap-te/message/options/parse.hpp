@@ -23,23 +23,21 @@ namespace coap_te {
 namespace message {
 namespace options {
 
-template<typename CheckOptions = check_all,
-         typename ConstBuffer>
+template<typename CheckOptions = check_all>
 constexpr std::size_t
 parse(number_type before,
-      ConstBuffer& input,                // NOLINT
-      number_type& current,              // NOLINT
-      ConstBuffer& output,               // NOLINT
-      coap_te::error_code& ec) noexcept;     // NOLINT
+      const const_buffer& data,
+      number_type& current,                 // NOLINT
+      const_buffer& output,                 // NOLINT
+      coap_te::error_code& ec) noexcept;    // NOLINT
 
 template<typename CheckOptions = check_all,
-         typename ConstBuffer,
          typename Option>
 constexpr std::size_t
 parse(number_type before,
-      ConstBuffer& input,                // NOLINT
-      Option& output,                    // NOLINT
-      coap_te::error_code& ec) noexcept;     // NOLINT
+      const const_buffer& input,
+      Option& output,                       // NOLINT
+      coap_te::error_code& ec) noexcept;    // NOLINT
 
 }  // namespace options
 }  // namespace message

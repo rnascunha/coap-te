@@ -167,7 +167,6 @@ void test_serialize_parse_success(
                   opt::number current_n,
                   const coap_te::const_buffer& buf_in) {
   std::uint8_t data[256];
-  coap_te::mutable_buffer buf(data);
   opt::number_type before = core::to_underlying(before_n);
   opt::number_type current = core::to_underlying(current_n);
   coap_te::error_code ecs;
@@ -176,7 +175,7 @@ void test_serialize_parse_success(
                 before,
                 current,
                 buf_in,
-                buf,
+                coap_te::buffer(data),
                 ecs);
   EXPECT_FALSE(ecs);
   EXPECT_EQ(size_s, calc_options_size(before, current, buf_in.size()));
@@ -222,13 +221,13 @@ TEST(Options, SerializeParse) {
     SCOPED_TRACE("Serialize parse string uri-host");
     test_serialize_parse_success(opt::number::invalid,
                                opt::number::uri_host,
-                               coap_te::const_buffer("192.168.0.1"));
+                               coap_te::buffer("192.168.0.1"));
   }
   {
     SCOPED_TRACE("Serialize parse big string uri-host");
     test_serialize_parse_success(opt::number::invalid,
                                opt::number::uri_host,
-                               coap_te::const_buffer("192.168.111.111"));
+                               coap_te::buffer("192.168.111.111"));
   }
   {
     SCOPED_TRACE("Serialize parse number max-age");
@@ -245,7 +244,7 @@ TEST(Options, SerializeParse) {
     SCOPED_TRACE("Serialize parse big string uri-host");
     test_serialize_parse_success(opt::number::uri_path,
                                opt::number::uri_path,
-                               coap_te::const_buffer(
+                               coap_te::buffer(
                                 "testedeumpathgrandemasmuito"
                                 "grandemesmoqueatepergoacont"
                                 "adequaograndeelaemasegrande"

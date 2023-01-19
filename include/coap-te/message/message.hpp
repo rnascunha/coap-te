@@ -138,7 +138,7 @@ class message {
 
   constexpr message&
   token(const token_type& tk) noexcept {
-    token_ = {tk.data(), clamp_token_size(tk.size())};
+    token_ = tk;
     return *this;
   }
 

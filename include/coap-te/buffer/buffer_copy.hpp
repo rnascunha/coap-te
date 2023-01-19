@@ -69,7 +69,7 @@ buffer_copy(one_buffer, multiple_buffers,
 
   mutable_buffer target_buffer(buffer(*target_begin, max_size));
   for (const_buffer source_buffer =
-        const_buffer(*source_iter) + source_offset;
+       const_buffer(*source_iter) + source_offset;
        target_buffer.size() != 0 && source_iter != source_end;
        source_buffer = *++source_iter) {
     std::size_t bytes_copied = (buffer_copy_1)(target_buffer, source_buffer);

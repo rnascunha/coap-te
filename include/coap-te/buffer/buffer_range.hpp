@@ -26,9 +26,13 @@ class buffer_range {
   using value_type = typename Iterator::value_type;
   using pointer = typename Iterator::pointer;
   using reference = typename Iterator::reference;
+  using buffer_type = typename std::conditional_t<
+                          is_mutable_buffers_iterator_v<Iterator>,
+                          mutable_buffer,
+                          const_buffer>;
 
   static constexpr bool
-  is_multiple = coap_te::is_multiple_buffer_iterator_v<Iterator>;
+  is_multiple = is_multiple_buffers_iterator_v<Iterator>;
 
   constexpr
   buffer_range(Iterator begin, Iterator end) noexcept
@@ -47,6 +51,24 @@ class buffer_range {
   [[nodiscard]] constexpr reference
   operator[](std::size_t n) const noexcept {
     return begin_[n];
+  }
+
+  constexpr reference
+  operator+=(std::size_t n) noexcept {
+    std::size_t offset = n > size() ? size() : n;
+    begin_ += offset;
+    return *this;
+  }
+
+  [[nodiscard]] friend constexpr buffer_range
+  operator+(const buffer_range& buf, std::size_t n) noexcept {
+    std::size_t offset = n > size() ? size() : n;
+    return buffer_range{buf.begin_ + offset, buf.end_};
+  }
+
+  [[nodiscard]] friend constexpr buffer_range
+  operator+(std::size_t n, const buffer_range& buf) noexcept {
+    return buf.begin_ + n;
   }
 
   /**
@@ -93,6 +115,32 @@ struct is_buffer_range<buffer_range<T>> : std::true_type{};
 template<typename T>
 static constexpr bool
 is_buffer_range_v = is_buffer_range<T>::value;
+
+//
+template<typename>
+struct is_mutable_buffer_range : std::false_type{};
+
+template<typename Iterator>
+struct is_mutable_buffer_range<buffer_range<Iterator>> :
+  std::bool_constant<
+    is_mutable_buffers_iterator_v<Iterator>>{};
+
+template<typename T>
+static constexpr bool
+is_mutable_buffer_range_v = is_mutable_buffer_range<T>::value;
+
+//
+template<typename>
+struct is_const_buffer_range : std::false_type{};
+
+template<typename Iterator>
+struct is_const_buffer_range<buffer_range<Iterator>> :
+  std::bool_constant<
+    is_const_buffers_iterator_v<Iterator>>{};
+
+template<typename T>
+static constexpr bool
+is_const_buffer_range_v = is_const_buffer_range<T>::value;
 
 // Overload of buffers_[begin, end]
 template<typename Iterator>

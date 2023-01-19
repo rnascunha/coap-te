@@ -57,7 +57,7 @@ TEST(CoAPMessage, OptionConstructor) {
       opt::option opaque_op =
                     opt::create(
                       opt::number::if_match,
-                      coap_te::const_buffer(arr));
+                      coap_te::buffer(arr));
       EXPECT_EQ(opaque_op.data_size(), 5);
       EXPECT_TRUE(opt::is_valid(opaque_op));
     }
@@ -100,7 +100,7 @@ TEST(CoAPMessage, OptionConstructor) {
       opt::option string_op = opt::create<
                                     opt::check_all,
                                     false>(opt::number::uri_host,
-                                     coap_te::const_buffer(arr));
+                                     coap_te::buffer(arr));
       EXPECT_EQ(string_op.data_size(), 0);
       EXPECT_FALSE(opt::is_valid(string_op));
     }
@@ -127,7 +127,7 @@ TEST(CoAPMessage, OptionConstructor) {
     {
       // String option opaque
       unsigned char arr[] = {1, 2, 3, 4, 5};
-      EXPECT_THROW(::create(opt::number::uri_host, coap_te::const_buffer(arr)),
+      EXPECT_THROW(::create(opt::number::uri_host, coap_te::buffer(arr)),
                    coap_te::exception);
     }
     {
@@ -173,7 +173,7 @@ TEST(CoAPMessage, OptionViewConstructor) {
     {
       unsigned char arr[] = {1, 2, 3, 4, 5};
       opt::option_view opaque_op{opt::number::if_match,
-                                 coap_te::const_buffer(arr)};
+                                 coap_te::buffer(arr)};
       EXPECT_EQ(opaque_op.data_size(), 5);
       EXPECT_TRUE(opt::is_valid(opaque_op));
     }
@@ -395,11 +395,11 @@ void test_serialize_parse_success(
                   opt::number current,
                   const coap_te::const_buffer& buf_in) {
   std::uint8_t data[256];
-  coap_te::mutable_buffer buf(data);
   coap_te::error_code ecs;
 
   Option ops(current, buf_in);
-  auto size_s = opt::serialize<opt::check_none>(before, ops, buf, ecs);
+  auto size_s = opt::serialize<opt::check_none>(
+                    before, ops, coap_te::buffer(data), ecs);
   EXPECT_FALSE(ecs);
   EXPECT_EQ(size_s, calc_options_size(
                         static_cast<opt::number_type>(before),
@@ -471,13 +471,13 @@ TEST(CoAPMessage, OptionSerializeParse) {
     SCOPED_TRACE("Serialize parse string uri-host");
     test_serialize_parse_all(opt::number::invalid,
                                opt::number::uri_host,
-                               coap_te::const_buffer("192.168.0.1"));
+                               coap_te::buffer("192.168.0.1"));
   }
   {
     SCOPED_TRACE("Serialize parse big string uri-host");
     test_serialize_parse_all(opt::number::invalid,
                                opt::number::uri_host,
-                               coap_te::const_buffer("192.168.111.111"));
+                               coap_te::buffer("192.168.111.111"));
   }
   {
     SCOPED_TRACE("Serialize parse number max-age");
@@ -494,7 +494,7 @@ TEST(CoAPMessage, OptionSerializeParse) {
     SCOPED_TRACE("Serialize parse big string uri-host");
     test_serialize_parse_all(opt::number::uri_path,
                                opt::number::uri_path,
-                               coap_te::const_buffer(
+                               coap_te::buffer(
                                 "testedeumpathgrandemasmuito"
                                 "grandemesmoqueatepergoacont"
                                 "adequaograndeelaemasegrande"

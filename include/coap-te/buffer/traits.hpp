@@ -15,7 +15,6 @@
 #include <type_traits>
 
 namespace coap_te {
-
 namespace detail {
 
 template<class T, class R>

@@ -16,7 +16,7 @@
 
 #include "coap-te/core/sorted_no_alloc_list.hpp"
 #include "coap-te/core/sorted_list.hpp"
-#include "coap-te/buffer/mutable_buffer.hpp"
+#include "coap-te/buffer/buffer.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/option.hpp"
 #include "coap-te/message/options/checks.hpp"
@@ -32,9 +32,9 @@ void test_option_list_success(Container& list) {    // NOLINT
   }
 
   std::uint8_t data[100];
-  coap_te::mutable_buffer buf(data);
   coap_te::error_code ec;
-  std::size_t size = opt::serialize<opt::check_none>(list, buf, ec);
+  std::size_t size = opt::serialize<opt::check_none>(
+                        list, coap_te::buffer(data), ec);
   EXPECT_FALSE(ec);
 
   opt::vector_options list_s(data, size);

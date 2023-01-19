@@ -102,6 +102,8 @@ struct buffers_iterator_types {
 
 template<typename ByteType>
 struct buffers_iterator_types<mutable_buffer, ByteType> {
+  static constexpr bool
+  is_mutable = true;                   // added by me
   using buffer_type = mutable_buffer;
   using byte_type = ByteType;
   using const_iterator = const mutable_buffer*;
@@ -109,6 +111,8 @@ struct buffers_iterator_types<mutable_buffer, ByteType> {
 
 template<typename ByteType>
 struct buffers_iterator_types<const_buffer, ByteType> {
+  static constexpr bool
+  is_mutable = false;                   // added by me
   using buffer_type = const_buffer;
   using byte_type = std::add_const_t<ByteType>;
   using const_iterator = const const_buffer*;
@@ -655,31 +659,76 @@ buffers_end(const BufferSequence& buffers) noexcept {
   return buffers_iterator<BufferSequence>::end(buffers);
 }
 
+/**
+ * @brief 
+ * 
+ * @tparam ypename 
+ */
 template<typename>
-struct is_buffer_iterator : std::false_type{};
+struct is_buffers_iterator : std::false_type{};
 
 template<typename BufferSequence, typename ByteType>
-struct is_buffer_iterator<
+struct is_buffers_iterator<
   buffers_iterator<BufferSequence, ByteType>>
     : std::true_type{};
 
 template<typename T>
 static constexpr bool
-is_buffers_iterator_v = is_buffer_iterator<T>::value;
+is_buffers_iterator_v = is_buffers_iterator<T>::value;
 
+/**
+ * @brief 
+ * 
+ * @tparam ypename 
+ */
+template<typename>
+struct is_mutable_buffers_iterator : std::false_type{};
+
+template<typename BufferSequence, typename ByteType>
+struct is_mutable_buffers_iterator<buffers_iterator<BufferSequence, ByteType>>
+    : std::bool_constant<
+        detail::buffers_iterator_types<BufferSequence, ByteType>::is_mutable>{};
+
+template<typename T>
+static constexpr bool
+is_mutable_buffers_iterator_v = is_mutable_buffers_iterator<T>::value;
+
+/**
+ * @brief 
+ * 
+ * @tparam ypename 
+ */
+template<typename>
+struct is_const_buffers_iterator : std::false_type{};
+
+template<typename BufferSequence, typename ByteType>
+struct is_const_buffers_iterator<buffers_iterator<BufferSequence, ByteType>>
+    : std::bool_constant<
+        !detail::buffers_iterator_types<
+          BufferSequence, ByteType>::is_mutable>{};
+
+template<typename T>
+static constexpr bool
+is_const_buffers_iterator_v = is_const_buffers_iterator<T>::value;
+
+/**
+ * @brief 
+ * 
+ * @tparam BufferIterator 
+ */
 template<typename BufferIterator>
-struct is_multiple_buffer_iterator : std::bool_constant<
+struct is_multiple_buffers_iterator : std::bool_constant<
   is_buffers_iterator_v<BufferIterator>>{};
 
 template<typename BS, typename BT>
-struct is_multiple_buffer_iterator<
+struct is_multiple_buffers_iterator<
   buffers_iterator<BS, BT>> : std::bool_constant<
     !(std::is_convertible_v<std::decay_t<BS>, const_buffer> ||
     std::is_convertible_v<std::decay_t<BS>, mutable_buffer>)>{};
 
 template<typename T>
 static constexpr bool
-is_multiple_buffer_iterator_v = is_multiple_buffer_iterator<T>::value;
+is_multiple_buffers_iterator_v = is_multiple_buffers_iterator<T>::value;
 
 }  // namespace coap_te
 

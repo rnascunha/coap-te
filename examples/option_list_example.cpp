@@ -33,7 +33,7 @@ int main() {
                             (opt::number::uri_port, 5683),
       opt::create<opt::check_all, false>
                             (opt::number::if_match,
-                            coap_te::const_buffer(data)),
+                            coap_te::buffer(data)),
       opt::option(opt::content::text_plain),
       opt::option(opt::accept::json)};
 
@@ -48,9 +48,9 @@ int main() {
   std::cout << "\n";
 
   std::uint8_t data_s[100];
-  coap_te::mutable_buffer buf_s(data_s);
   coap_te::error_code ec;
-  auto size_s = opt::serialize(list.begin(), list.end(), buf_s, ec);
+  auto size_s = opt::serialize(list.begin(), list.end(),
+                               coap_te::buffer(data_s), ec);
   if (ec) {
     std::cerr << "Error! [" << ec.value() << "] " << ec.message() << '\n';
     return EXIT_FAILURE;

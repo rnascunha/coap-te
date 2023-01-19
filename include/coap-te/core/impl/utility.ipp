@@ -1,3 +1,13 @@
+/**
+ * @file utility.ipp
+ * @author Rafael Cunha (rnascunha@gmail.com)
+ * @brief 
+ * @version 0.1
+ * @date 2023-01-19
+ * 
+ * @copyright Copyright (c) 2023
+ * 
+ */
 #ifndef COAP_TE_CORE_IMPL_UTILITY_IPP_
 #define COAP_TE_CORE_IMPL_UTILITY_IPP_
 
@@ -12,9 +22,11 @@ binary_search(RandomAccessIt begin, RandomAccessIt end,
               T const& value) noexcept {
   static_assert(is_random_access_iterator_v<RandomAccessIt>,
                 "Wrong iterator type. Must be random access");
-  //https://stackoverflow.com/a/44522730
-  static_assert(is_equal_comparable_v<std::remove_reference_t<decltype(*begin)>, T> &&
-                is_less_comparable_v<std::remove_reference_t<decltype(*begin)>, T>,
+  // https://stackoverflow.com/a/44522730
+  static_assert(is_equal_comparable_v<
+                  std::remove_reference_t<decltype(*begin)>, T> &&
+                is_less_comparable_v<
+                  std::remove_reference_t<decltype(*begin)>, T>,
                 "Type must be '==' and '<' comparable");
 
   if (begin >= end) {

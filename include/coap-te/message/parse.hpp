@@ -17,19 +17,11 @@
 namespace coap_te {
 namespace message {
 
-template<typename ConstBuffer,
-         typename Message>
+template<typename Message>
 constexpr std::size_t
-parse_header(ConstBuffer&,
-             Message&,
-             coap_te::error_code&) noexcept;
-
-template<typename ConstBuffer,
-         typename Message>
-constexpr std::size_t
-parse(ConstBuffer&,
-      Message&,
-      coap_te::error_code&) noexcept;
+parse(const const_buffer& data,
+      Message& message,                     // NOLINT
+      coap_te::error_code& ec) noexcept;    // NOLINT
 
 }  // namespace message
 }  // namespace coap_te

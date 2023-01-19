@@ -24,7 +24,7 @@
 #include "coap-te/core/utility.hpp"
 #include "coap-te/core/byte_order.hpp"
 #include "coap-te/core/sorted_no_alloc_list.hpp"
-#include "coap-te/buffer/const_buffer.hpp"
+#include "coap-te/buffer/buffer.hpp"
 #include "coap-te/message/options/config.hpp"
 #include "coap-te/message/options/checks.hpp"
 
@@ -117,11 +117,11 @@ class option : public option_base<option> {
 
   constexpr
   option(number op, std::string_view str) noexcept
-    : option_base{op}, data_(const_buffer{str}) {}
+    : option_base{op}, data_(coap_te::buffer(str)) {}
 
   constexpr
   option(number op, const const_buffer& value) noexcept
-    : option_base{op}, data_(const_buffer{value}) {}
+    : option_base{op}, data_{value} {}
 
   constexpr
   explicit option(content value) noexcept
@@ -193,7 +193,7 @@ class option_view : public option_base<option_view> {
 
   constexpr
   option_view(number op, std::string_view str) noexcept
-    : option_base{op}, data_{str} {}
+    : option_base{op}, data_{coap_te::buffer(str)} {}
 
   constexpr
   option_view(number op, const const_buffer& value) noexcept

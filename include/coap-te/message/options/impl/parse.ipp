@@ -24,7 +24,7 @@ namespace coap_te {
 namespace message {
 namespace options {
 
-namespace {   // NOLINT
+namespace detail {
 
 struct header_parse {
   std::uint16_t data_extend = 0;
@@ -51,32 +51,34 @@ parse_option_header(std::uint8_t op,
   }
 }
 
-}  // namespace
+}  // namespace detail
 
-template<typename CheckOptions /* = check_all */,
-         typename ConstBuffer>
+template<typename CheckOptions /* = check_all */>
 constexpr std::size_t
 parse(number_type before,
-      ConstBuffer& input,                // NOLINT
-      number_type& current,              // NOLINT
-      ConstBuffer& output,               // NOLINT
-      coap_te::error_code& ec) noexcept {    // NOLINT
-  static_assert(is_const_buffer_v<ConstBuffer>, "Must be const buffer");
+      const const_buffer& data,
+      number_type& current,                 // NOLINT
+      const_buffer& output,                 // NOLINT
+      coap_te::error_code& ec) noexcept {   // NOLINT
+  static_assert(is_check_option_v<CheckOptions>,
+                "CheckOptions requirements not met");
 
+  const_buffer input(data);
   if (input.size() == 0) {
     ec = coap_te::errc::no_buffer_space;
     return 0;
   }
+  std::uint8_t byte0 = *reinterpret_cast<const uint8_t*>(input.data());
 
-  header_parse delta;
-  parse_option_header(input[0] >> 4, delta);
+  detail::header_parse delta;
+  detail::parse_option_header(byte0 >> 4, delta);
   if (delta.byte_op == extend::error) {
     ec = coap_te::errc::invalid_option_header;
     return 0;
   }
 
-  header_parse length;
-  parse_option_header(input[0] & 0x0F, length);
+  detail::header_parse length;
+  detail::parse_option_header(byte0 & 0x0F, length);
   if (length.byte_op == extend::error) {
     ec = coap_te::errc::invalid_option_header;
     return 0;
@@ -89,10 +91,10 @@ parse(number_type before,
   }
 
   input += 1;
-  for (header_parse* h : {&delta, &length}) {
+  for (detail::header_parse* h : {&delta, &length}) {
     switch (h->byte_op) {
       case extend::one_byte:
-        h->data_extend = input[0] + 13;
+        h->data_extend = *reinterpret_cast<const uint8_t*>(input.data()) + 13;
         break;
       case extend::two_bytes:
         h->data_extend = coap_te::core::from_small_big_endian<std::uint16_t>(
@@ -127,15 +129,14 @@ parse(number_type before,
 }
 
 template<typename CheckOptions /* = check_all */,
-         typename ConstBuffer,
          typename Option>
 constexpr std::size_t
 parse(number_type before,
-      ConstBuffer& input,                   // NOLINT
+      const const_buffer& input,
       Option& output,                       // NOLINT
       coap_te::error_code& ec) noexcept {   // NOLINT
   static_assert(is_option_v<Option>,
-                "Must be a option type");
+                "Option requirements not met");
 
   number_type current = invalid;
   coap_te::const_buffer buf;

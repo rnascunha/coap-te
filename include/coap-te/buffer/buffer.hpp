@@ -16,6 +16,11 @@
 #include <limits>
 #include <cstring>
 
+#include <vector>
+#include <string>
+#include <array>
+#include <string_view>
+
 #include "coap-te/core/traits.hpp"
 #include "coap-te/buffer/mutable_buffer.hpp"
 #include "coap-te/buffer/const_buffer.hpp"
@@ -88,40 +93,138 @@ buffer(const T (&data)[N], std::size_t max_size) noexcept {
  * fill this requirements are std::vector, std::basic_string, std::array,
  * std::basic_string_view, std::span...
  */
-template<typename T,
-        typename = std::enable_if_t<is_mutable_buffer_v<T>>>
+// template<typename T,
+//         std::enable_if_t<is_mutable_buffer_v<T>, int> = 0>
+// [[nodiscard]] constexpr mutable_buffer
+// buffer(T& container) noexcept {     // NOLINT
+//   return mutable_buffer{container.data(),
+//                         container.size() * sizeof(typename T::value_type)};
+// }
+
+// template<typename T,
+//          std::enable_if_t<is_const_buffer_v<T>, int> = 0>
+// [[nodiscard]] constexpr const_buffer
+// buffer(const T& container) noexcept {     // NOLINT
+//   return const_buffer{container.data(),
+//                         container.size() * sizeof(typename T::value_type)};
+// }
+
+// /// From container types and clamp
+// template<typename T,
+//          std::enable_if_t<is_mutable_buffer_v<T>, int> = 0>
+// [[nodiscard]] constexpr mutable_buffer
+// buffer(T& container, std::size_t max_size) noexcept {     // NOLINT
+//   return mutable_buffer{container.data(),
+//                         (std::min)(
+//                           container.size() * sizeof(typename T::value_type),
+//                           max_size)};
+// }
+
+// template<typename T,
+//          std::enable_if_t<is_const_buffer_v<T>, int> = 0>
+// [[nodiscard]] constexpr const_buffer
+// buffer(const T& container, std::size_t max_size) noexcept {     // NOLINT
+//   return const_buffer{container.data(),
+//                         (std::min)(
+//                           container.size() * sizeof(typename T::value_type),
+//                           max_size)};
+// }
+
+// vector
+template<typename T>
 [[nodiscard]] constexpr mutable_buffer
-buffer(T& container) noexcept {     // NOLINT
+buffer(std::vector<T>& container) noexcept {     // NOLINT
   return mutable_buffer{container.data(),
-                        container.size() * sizeof(typename T::value_type)};
+                        container.size() * sizeof(T)};
 }
 
-template<typename T,
-            typename = std::enable_if_t<is_const_buffer_v<T>>>
+template<typename T>
 [[nodiscard]] constexpr const_buffer
-buffer(const T& container) noexcept {     // NOLINT
+buffer(const std::vector<T>& container) noexcept {     // NOLINT
   return const_buffer{container.data(),
-                        container.size() * sizeof(typename T::value_type)};
+                        container.size() * sizeof(T)};
 }
 
 /// From container types and clamp
-template<typename T,
-        typename = std::enable_if_t<is_mutable_buffer_v<T>>>
+template<typename T>
 [[nodiscard]] constexpr mutable_buffer
-buffer(T& container, std::size_t max_size) noexcept {     // NOLINT
+buffer(std::vector<T>& container, std::size_t max_size) noexcept {     // NOLINT
   return mutable_buffer{container.data(),
                         (std::min)(
-                          container.size() * sizeof(typename T::value_type),
+                          container.size() * sizeof(T),
                           max_size)};
 }
 
-template<typename T,
-        typename = std::enable_if_t<is_const_buffer_v<T>>>
+template<typename T>
 [[nodiscard]] constexpr const_buffer
-buffer(const T& container, std::size_t max_size) noexcept {     // NOLINT
+buffer(const std::vector<T>& container, std::size_t max_size) noexcept {     // NOLINT
   return const_buffer{container.data(),
                         (std::min)(
-                          container.size() * sizeof(typename T::value_type),
+                          container.size() * sizeof(T),
+                          max_size)};
+}
+
+// array
+template<typename T, std::size_t N>
+[[nodiscard]] constexpr mutable_buffer
+buffer(std::array<T, N>& container) noexcept {     // NOLINT
+  return mutable_buffer{container.data(),
+                        container.size() * sizeof(T)};
+}
+
+template<typename T, std::size_t N>
+[[nodiscard]] constexpr const_buffer
+buffer(const std::array<T, N>& container) noexcept {     // NOLINT
+  return const_buffer{container.data(),
+                        container.size() * sizeof(T)};
+}
+
+/// From container types and clamp
+template<typename T, std::size_t N>
+[[nodiscard]] constexpr mutable_buffer
+buffer(std::array<T, N>& container, std::size_t max_size) noexcept {     // NOLINT
+  return mutable_buffer{container.data(),
+                        (std::min)(
+                          container.size() * sizeof(T),
+                          max_size)};
+}
+
+template<typename T, std::size_t N>
+[[nodiscard]] constexpr const_buffer
+buffer(const std::array<T, N>& container, std::size_t max_size) noexcept {     // NOLINT
+  return const_buffer{container.data(),
+                        (std::min)(
+                          container.size() * sizeof(T),
+                          max_size)};
+}
+
+// string_view
+// [[nodiscard]] constexpr mutable_buffer
+// buffer(std::string_view& container) noexcept {     // NOLINT
+//   return mutable_buffer{container.data(),
+//                         container.size() * sizeof(std::string_view::value_type)};
+// }
+
+[[nodiscard]] constexpr const_buffer
+buffer(const std::string_view& container) noexcept {     // NOLINT
+  return const_buffer{container.data(),
+                        container.size() * sizeof(std::string_view::value_type)};
+}
+
+/// From container types and clamp
+// [[nodiscard]] constexpr mutable_buffer
+// buffer(std::string_view& container, std::size_t max_size) noexcept {     // NOLINT
+//   return mutable_buffer{container.data(),
+//                         (std::min)(
+//                           container.size() * sizeof(std::string_view::value_type),
+//                           max_size)};
+// }
+
+[[nodiscard]] constexpr const_buffer
+buffer(const std::string_view& container, std::size_t max_size) noexcept {     // NOLINT
+  return const_buffer{container.data(),
+                        (std::min)(
+                          container.size() * sizeof(std::string_view::value_type),
                           max_size)};
 }
 
@@ -129,5 +232,6 @@ buffer(const T& container, std::size_t max_size) noexcept {     // NOLINT
 
 #include "coap-te/buffer/buffer_sequence.hpp"
 #include "coap-te/buffer/is_buffer_sequence.hpp"
+#include "coap-te/buffer/traits.hpp"
 
 #endif  // COAP_TE_BUFFER_BUFFER_HPP_
