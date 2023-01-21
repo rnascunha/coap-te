@@ -202,10 +202,10 @@ TEST(Buffer, BufferFunctions) {
     }
     {
       SCOPED_TRACE("Buffer array overload");
-      const char v[]{1, 2, 3, 4, 5, '\0'};
+      const char v[]{1, 2, 3, 4, 5};
       auto buf = coap_te::buffer(v);
-      // EXPECT_EQ(buf.size(), sizeof(v) / sizeof(v[0]));
-      EXPECT_EQ(buf.size(), 5);
+      EXPECT_EQ(buf.size(), sizeof(v) / sizeof(v[0]));
+      // EXPECT_EQ(buf.size(), 5);
       EXPECT_TRUE(coap_te::is_const_buffer_v<decltype(buf)>);
     }
     {
@@ -784,21 +784,21 @@ TEST(Buffer, BufferRange) {
     {
       auto buff1 = coap_te::buffer(data1);
       buff1 += 2;
-      std::vector<coap_te::mutable_buffer> buff{buff1,
+      std::vector<coap_te::mutable_buffer> buff2{buff1,
                                               coap_te::buffer(data2)};
-      EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buff)>);
-      coap_te::buffer_range ic(buff);
-      coap_te::buffer_range ic2(buff);
-      EXPECT_TRUE(decltype(ic)::is_multiple);
+      EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buff2)>);
+      coap_te::buffer_range ic0(buff2);
+      coap_te::buffer_range ic2(buff2);
+      EXPECT_TRUE(decltype(ic0)::is_multiple);
       EXPECT_TRUE(decltype(ic2)::is_multiple);
-      coap_te::buffer_copy(ic, ic2);
+      coap_te::buffer_copy(ic0, ic2);
     }
     {
       auto buff1 = coap_te::buffer(data1);
-      std::vector<coap_te::mutable_buffer> buff{buff1,
+      std::vector<coap_te::mutable_buffer> buff0{buff1,
                                               coap_te::buffer(data2)};
-      EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buff)>);
-      coap_te::buffer_range ic0(buff);
+      EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buff0)>);
+      coap_te::buffer_range ic0(buff0);
       coap_te::buffer_range ic2(buff1);
       EXPECT_TRUE(decltype(ic0)::is_multiple);
       EXPECT_FALSE(decltype(ic2)::is_multiple);

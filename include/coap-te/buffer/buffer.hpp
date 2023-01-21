@@ -61,10 +61,10 @@ buffer(const void* data, std::size_t size) noexcept {
   return const_buffer{data, size};
 }
 
-[[nodiscard]] constexpr const_buffer
-buffer(const char* data) noexcept {
-  return const_buffer{data, coap_te::strlen(data)};
-}
+// [[nodiscard]] constexpr const_buffer
+// buffer(const char* data) noexcept {
+//   return const_buffer{data, coap_te::strlen(data)};
+// }
 
 /// From array
 template<typename T,
