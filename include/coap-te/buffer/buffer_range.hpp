@@ -63,7 +63,7 @@ class buffer_range {
 
   [[nodiscard]] friend constexpr buffer_range
   operator+(const buffer_range& buf, std::size_t n) noexcept {
-    auto size_ = this->size();
+    auto size_ = buf.size();
     std::size_t offset = n > size_ ? size_ : n;
     return buffer_range{buf.begin_ + offset, buf.end_};
   }
