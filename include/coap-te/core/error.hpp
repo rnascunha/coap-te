@@ -182,7 +182,7 @@ namespace std {
 
 namespace coap_te {
 
-class exception : std::exception {
+class exception : public std::exception {
  public:
   exception(const error_code& ec) noexcept    // NOLINT
     : ec_(ec) {}

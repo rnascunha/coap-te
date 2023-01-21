@@ -14,14 +14,15 @@
 #include <algorithm>    // std::min
 #include <type_traits>
 #include <limits>
-#include <cstring>      // strlen
+// #include <cstring>      // strlen
 
-#include <vector>
-#include <string>
-#include <array>
-#include <string_view>
+// #include <vector>
+// #include <string>
+// #include <array>
+// #include <string_view>
 
 #include "coap-te/core/traits.hpp"
+#include "coap-te/core/constexpr_string.hpp"
 #include "coap-te/buffer/mutable_buffer.hpp"
 #include "coap-te/buffer/const_buffer.hpp"
 
@@ -62,7 +63,7 @@ buffer(const void* data, std::size_t size) noexcept {
 
 [[nodiscard]] constexpr const_buffer
 buffer(const char* data) noexcept {
-  return const_buffer{data, std::strlen(data)};
+  return const_buffer{data, coap_te::strlen(data)};
 }
 
 /// From array
