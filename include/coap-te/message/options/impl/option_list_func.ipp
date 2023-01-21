@@ -68,10 +68,11 @@ option_list_size(
          *static_cast<const uint8_t*>(cbuf.data()) !=
          coap_te::message::payload_marker) {
     option op;
-    parse(prev, cbuf, op, ec);
+    auto size = parse(prev, cbuf, op, ec);
     if (ec) {
       return {0, ec};
     }
+    cbuf += size;
     prev = static_cast<number_type>(op.option_number());
   }
   return {coap_te::core::pointer_distance(buf.data(), cbuf.data()), ec};
@@ -81,7 +82,7 @@ template<typename OptionList,
          typename Option>
 void
 insert(OptionList& list, Option&& op) noexcept {      // NOLINT
-  static_assert(coap_te::core::is_container_v<OptionList>,
+  static_assert(coap_te::core::is_container_class_v<OptionList>,
                 "Must be a container");
   static_assert(is_option_v<Option>,
                 "Must be a option");

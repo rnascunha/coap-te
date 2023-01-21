@@ -50,7 +50,8 @@ class vector_options {
     operator++() noexcept {
       value_type op;
       coap_te::error_code ec;
-      parse(prev_, buf_, op, ec);
+      auto size = parse(prev_, buf_, op, ec);
+      buf_ += size;
       prev_ = static_cast<number_type>(op.option_number());
 
       return *this;

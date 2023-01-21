@@ -58,7 +58,7 @@ is_option_v = is_option<Option>::value;
 template<typename T>
 struct is_option_list :
   std::bool_constant<
-    coap_te::core::is_container_v<T> &&
+    coap_te::core::is_container_class_v<T> &&
     is_option_v<
       coap_te::core::value_type_if_pair_t<
         typename T::value_type

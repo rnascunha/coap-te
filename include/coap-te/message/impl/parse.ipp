@@ -32,15 +32,14 @@ parse_header(const const_buffer& data,
              coap_te::error_code& ec) noexcept {             // NOLINT
   static_assert(is_message_v<Message>,
                 "CoAPMessage requirements not met");
-  const_buffer input(data);
 
-  if (input.size() < minimum_header_size) {
+  if (data.size() < minimum_header_size) {
     ec = coap_te::errc::no_buffer_space;
     return 0;
   }
 
-  std::uint8_t header[minimum_header_size];   // NOLINT
-  buffer_copy(coap_te::buffer(header), input);
+  std::uint8_t header[minimum_header_size]{};   // NOLINT
+  buffer_copy(coap_te::buffer(header), data);
 
   // byte 0
   std::uint8_t byte0 = header[0];
@@ -55,29 +54,24 @@ parse_header(const const_buffer& data,
     return 0;
   }
 
-  if (input.size() < minimum_header_size + token_len) {
+  if (data.size() < minimum_header_size + token_len) {
     ec = coap_te::errc::no_buffer_space;
     return 0;
   }
 
   message.set(static_cast<type>((byte0 >> 4) & 0b11));
-  std::size_t size = 1;
 
   // byte 1;
   message.set(static_cast<code>(header[1]));
-  size += 1;
 
   // byte 2-3
   std::uint16_t mid = static_cast<std::uint16_t>(header[2] << 8) | header[3];
   message.mid(mid);
-  size += 2;
-  input += 4;
 
   // byte 4-4+token_len
-  message.token({input.data(), token_len});
-  size += token_len;
+  message.token({reinterpret_cast<const uint8_t*>(data.data()) + 4, token_len});
 
-  return size;
+  return minimum_header_size + token_len;
 }
 
 template<typename Message>
@@ -87,13 +81,12 @@ parse(const const_buffer& data,
       coap_te::error_code& ec) noexcept {   // NOLINT
   static_assert(is_message_v<Message>,
                 "Must be of type message");
-  const_buffer input(data);
 
-  auto size = parse_header(input, message, ec);
+  auto size = parse_header(data, message, ec);
   if (ec) {
     return size;
   }
-  input += size;
+  coap_te::const_buffer input = data + size;
 
   auto size_opt = parse_options(input, message.option_list(), ec);
   if (ec) {

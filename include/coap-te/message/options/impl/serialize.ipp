@@ -83,7 +83,7 @@ serialize(number_type before,
     return 0;
   }
 
-  std::uint8_t header_opt[5];
+  std::uint8_t header_opt[5]{};
   std::size_t header_size = 1;
   header_opt[0] = (delta.byte_op << 4) | length.byte_op;
 

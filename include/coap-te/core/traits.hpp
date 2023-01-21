@@ -17,6 +17,7 @@
 #include <type_traits>
 #include <iterator>
 #include <utility>
+#include <string_view>
 
 #include "impl/traits.ipp"
 
@@ -109,6 +110,17 @@ struct is_random_access_iterator :
         Iter,
         std::random_access_iterator_tag>
 {};
+
+/**
+ * 
+ */
+template<typename Iter>
+struct is_contiguous_iterator : std::bool_constant<
+  std::is_pointer_v<Iter>>{};
+
+template<typename Iter>
+static constexpr bool
+is_contiguous_iterator_v = is_contiguous_iterator<Iter>::value;
 
 /**
  * @brief Helper template of @ref is_random_access_iterator
@@ -213,13 +225,13 @@ is_pair_v = is_pair<T>::value;
  * @link https://stackoverflow.com/a/31207079
  */
 template<typename, typename = void>
-struct is_container : std::false_type {};
+struct is_container_class : std::false_type {};
 
 template<typename... Ts>
 struct is_container_helper {};
 
 template<typename T>
-struct is_container<
+struct is_container_class<
         T,
         std::conditional_t<
             false,
@@ -241,7 +253,37 @@ struct is_container<
 
 template<typename T>
 static constexpr bool
-is_container_v = is_container<T>::value;
+is_container_class_v = is_container_class<T>::value;
+
+/**
+ * @brief 
+ * 
+ * @tparam T 
+ */
+template<typename T>
+struct is_const_container_class : std::bool_constant<
+    is_container_class_v<T> &&
+    (std::is_const_v<T> ||
+    std::is_const_v<typename T::value_type>)>{};
+
+template<typename T>
+static constexpr bool
+is_const_container_class_v = is_const_container_class<T>::value;
+
+/**
+ * @brief 
+ * 
+ * @tparam T 
+ */
+template<typename T>
+struct is_mutable_container_class : std::bool_constant<
+    is_container_class_v<T> &&
+    !std::is_const_v<T> &&
+    !std::is_const_v<typename T::value_type>>{};
+
+template<typename T>
+static constexpr bool
+is_mutable_container_class_v = is_mutable_container_class<T>::value;
 
 /**
  * @brief Checks if mapped_type is defined at class
@@ -275,7 +317,7 @@ has_key_type_v = has_key_type<T>::value;
  */
 template<typename C>
 struct is_map : std::bool_constant<
-    is_container_v<C> &&
+    is_container_class_v<C> &&
     has_key_type_v<C> &&
     has_mapped_type_v<C>>{};
 
@@ -288,7 +330,7 @@ is_map_v = is_map<T>::value;
  */
 template<typename C>
 struct is_set : std::bool_constant<
-    is_container_v<C> &&
+    is_container_class_v<C> &&
     has_key_type_v<C> &&
     !has_mapped_type_v<C>>{};
 
