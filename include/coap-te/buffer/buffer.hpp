@@ -101,7 +101,7 @@ template<typename CharT, typename Traits>
 [[nodiscard]] constexpr const_buffer
 buffer(std::basic_string_view<CharT, Traits>& container) noexcept {     // NOLINT
   return const_buffer{container.data(),
-                      container.size() * sizeof(std::string_view::value_type)};
+                      container.size() * sizeof(CharT)};
 }
 
 template<typename CharT, typename Traits>
@@ -110,7 +110,7 @@ buffer(std::basic_string_view<CharT, Traits>& container,      // NOLINT
        std::size_t max_size) noexcept {
   return const_buffer{container.data(),
                       (std::min)(
-                        container.size() * sizeof(std::string_view::value_type),
+                        container.size() * sizeof(CharT),
                         max_size)};
 }
 
@@ -118,7 +118,7 @@ template<typename CharT, typename Traits>
 [[nodiscard]] constexpr const_buffer
 buffer(const std::basic_string_view<CharT, Traits>& container) noexcept {     // NOLINT
   return const_buffer{container.data(),
-                      container.size() * sizeof(std::string_view::value_type)};
+                      container.size() * sizeof(CharT)};
 }
 
 template<typename CharT, typename Traits>
@@ -127,7 +127,7 @@ buffer(const std::basic_string_view<CharT, Traits>& container,
        std::size_t max_size) noexcept {     // NOLINT
   return const_buffer{container.data(),
                       (std::min)(
-                        container.size() * sizeof(std::string_view::value_type),
+                        container.size() * sizeof(CharT),
                         max_size)};
 }
 

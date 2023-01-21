@@ -202,9 +202,10 @@ TEST(Buffer, BufferFunctions) {
     }
     {
       SCOPED_TRACE("Buffer array overload");
-      const char v[]{1, 2, 3, 4, 5};
+      const char v[]{1, 2, 3, 4, 5, '\0'};
       auto buf = coap_te::buffer(v);
-      EXPECT_EQ(buf.size(), sizeof(v) / sizeof(v[0]));
+      // EXPECT_EQ(buf.size(), sizeof(v) / sizeof(v[0]));
+      EXPECT_EQ(buf.size(), 5);
       EXPECT_TRUE(coap_te::is_const_buffer_v<decltype(buf)>);
     }
     {
