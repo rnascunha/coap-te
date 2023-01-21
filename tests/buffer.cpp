@@ -764,20 +764,20 @@ TEST(Buffer, BufferRange) {
     buf1 += 2;
     std::vector<coap_te::const_buffer> buff{buf1,
                                           coap_te::buffer(data2)};
-    EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
-    coap_te::buffer_range ic(buff);
-    EXPECT_TRUE(decltype(ic)::is_multiple);
-    EXPECT_EQ(sizeof(data1) + sizeof(data2) - 2, ic.size());
-    EXPECT_EQ(sizeof(data1) + sizeof(data2) - 2, coap_te::buffer_size(ic));
+    EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buff)>);
+    coap_te::buffer_range icc(buff);
+    EXPECT_TRUE(decltype(icc)::is_multiple);
+    EXPECT_EQ(sizeof(data1) + sizeof(data2) - 2, icc.size());
+    EXPECT_EQ(sizeof(data1) + sizeof(data2) - 2, coap_te::buffer_size(icc));
     {
       int c = 2;
-      for (auto i = ic.begin(); i != ic.end(); ++i) {
+      for (auto i = icc.begin(); i != icc.end(); ++i) {
         EXPECT_EQ(*i, c++);
       }
     }
     {
-      for (std::size_t c = 2; c < ic.size(); ++c) {
-        EXPECT_EQ(c, ic[c - 2]);
+      for (std::size_t c = 2; c < icc.size(); ++c) {
+        EXPECT_EQ(c, icc[c - 2]);
       }
     }
     //////////////////////////////////////////////
@@ -786,7 +786,7 @@ TEST(Buffer, BufferRange) {
       buf1 += 2;
       std::vector<coap_te::mutable_buffer> buff{buf1,
                                               coap_te::buffer(data2)};
-      EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
+      EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buff)>);
       coap_te::buffer_range ic(buff);
       coap_te::buffer_range ic2(buff);
       EXPECT_TRUE(decltype(ic)::is_multiple);
@@ -795,14 +795,14 @@ TEST(Buffer, BufferRange) {
     }
     {
       auto buf1 = coap_te::buffer(data1);
-      std::vector<coap_te::mutable_buffer> buf{buf1,
+      std::vector<coap_te::mutable_buffer> buff{buf1,
                                               coap_te::buffer(data2)};
-      EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buf)>);
-      coap_te::buffer_range ic(buf);
+      EXPECT_TRUE(coap_te::is_const_buffer_sequence_v<decltype(buff)>);
+      coap_te::buffer_range ic0(buf);
       coap_te::buffer_range ic2(buf1);
-      EXPECT_TRUE(decltype(ic)::is_multiple);
+      EXPECT_TRUE(decltype(ic0)::is_multiple);
       EXPECT_FALSE(decltype(ic2)::is_multiple);
-      coap_te::buffer_copy(ic, ic2);
+      coap_te::buffer_copy(ic0, ic2);
     }
     {
       std::uint8_t dataa[]{0, 1, 2, 3, 4};
