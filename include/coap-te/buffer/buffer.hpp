@@ -22,7 +22,7 @@
 // #include <string_view>
 
 #include "coap-te/core/traits.hpp"
-#include "coap-te/core/constexpr_string.hpp"
+// #include "coap-te/core/constexpr_string.hpp"
 #include "coap-te/buffer/mutable_buffer.hpp"
 #include "coap-te/buffer/const_buffer.hpp"
 

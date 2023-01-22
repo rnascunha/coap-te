@@ -160,11 +160,6 @@ class buffers_iterator<BufferSequence, ByteType, false> {
     return current_;
   }
 
-  [[nodiscard]] constexpr buffer_sequence_iterator_type
-  end() noexcept {
-    return end_;
-  }
-
   [[nodiscard]] constexpr std::size_t
   current_position() noexcept {
     return current_buffer_position_;
@@ -488,11 +483,6 @@ class buffers_iterator<Buffer, ByteType, true> {
   [[nodiscard]] constexpr buffer_sequence_iterator_type
   current() noexcept {
     return buffer_sequence_begin(buffer_);
-  }
-
-  [[nodiscard]] constexpr buffer_sequence_iterator_type
-  end() noexcept {
-    return buffer_sequence_end(buffer_);
   }
 
   [[nodiscard]] constexpr std::size_t

@@ -10,27 +10,26 @@
  */
 #include <cstdint>
 #include <iostream>
-#include <system_error>       // NOLINT
 
 #include "coap-te.hpp"        // NOLINT
 #include "coap-te-debug.hpp"  // NOLINT
 
 int main() {
   using namespace coap_te;    // NOLINT
-
+  using namespace std::literals::string_view_literals;    // NOLINT
   /*
    * Making request
    */
   std::cout << "Creating a request message\n-----------------\n";
 
-  request req{type::confirmable, code::get, coap_te::buffer("token")};
+  request req{type::confirmable, code::get, coap_te::buffer("token"sv)};
   req.mid(0x1234)
     .add_option(option{accept::text_plain})
     .add_option(option{content::json})
     .add_option(option{number::if_none_match})
     .add_option(option{number::uri_path, "my"})
     .add_option(option{number::uri_path, "path"})
-    .payload(coap_te::buffer("my payload"));
+    .payload(coap_te::buffer("my payload"sv));
 
   std::cout << "Request";
   debug::print_message<true>(req);

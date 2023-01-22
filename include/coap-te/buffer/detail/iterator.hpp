@@ -59,8 +59,10 @@ buffer_iterator_end(const BufferSequence& b) noexcept
 template<typename Iterator>
 [[nodiscard]] constexpr auto
 buffer_iterator_end(const buffer_range<Iterator>& b) noexcept
-  -> decltype(b.end().end()) {
-  return b.end().end();
+  -> decltype(b.end().current()) {
+  // For buffer_range, the end is controlled by max size
+  // so it doesn't matter the iterator end
+  return (decltype(b.end().current()))nullptr;
 }
 
 // buffer_max_size
