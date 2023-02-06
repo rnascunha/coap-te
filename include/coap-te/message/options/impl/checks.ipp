@@ -28,19 +28,18 @@ namespace detail {
 template <class ...Ts>
 struct is_check_type : coap_te::core::is_instance<Ts..., check_type>{};
 
-coap_te::error_code
-check_sequence(number_type before,
-               number_type op,
-               const definition& def) noexcept {
-  if (before > op ||
-      (before == op &&
-       !def.repeatable)) {
-    return coap_te::errc::option_sequence;
+constexpr coap_te::error_code
+check_repeat(number_type before,
+             number_type op,
+             const definition& def) noexcept {
+  if (before == op &&
+      !def.repeatable) {
+    return coap_te::errc::option_repeat;
   }
   return coap_te::error_code{};
 }
 
-coap_te::error_code
+constexpr coap_te::error_code
 check_format(format type,
              const definition& def) noexcept {
   if (def.type != type) {
@@ -49,17 +48,17 @@ check_format(format type,
   return coap_te::error_code{};
 }
 
-coap_te::error_code
+constexpr coap_te::error_code
 check_format(const std::initializer_list<format>& types,
              const definition& def) noexcept {
-  if (std::find(std::begin(types), std::end(types), def.type)
-            == std::end(types)) {
-    return coap_te::errc::option_format;
+  for (const auto& t : types) {
+    if (t == def.type)
+      return coap_te::error_code{};
   }
-  return coap_te::error_code{};
+  return coap_te::errc::option_format;
 }
 
-coap_te::error_code
+constexpr coap_te::error_code
 check_length(std::size_t length,
              const definition& def) noexcept {
   if (length < def.length_min ||
@@ -72,7 +71,7 @@ check_length(std::size_t length,
 }  // namespace detail
 
 template<typename CheckOptions>
-coap_te::error_code
+constexpr coap_te::error_code
 check([[maybe_unused]] number_type before,
       [[maybe_unused]] number_type op,
       [[maybe_unused]] format type,
@@ -84,8 +83,8 @@ check([[maybe_unused]] number_type before,
     const auto& def = get_definition(static_cast<number>(op));
     if (!def)
       return coap_te::errc::invalid_option;
-    if constexpr (CheckOptions::sequence) {
-      if (auto ec = detail::check_sequence(before, op, def))
+    if constexpr (CheckOptions::repeat) {
+      if (auto ec = detail::check_repeat(before, op, def))
         return ec;
     }
     if constexpr (CheckOptions::format) {
@@ -105,7 +104,7 @@ check([[maybe_unused]] number_type before,
 }
 
 template<typename CheckOptions>
-coap_te::error_code
+constexpr coap_te::error_code
 check([[maybe_unused]] number_type before,
       [[maybe_unused]] number_type op,
       [[maybe_unused]] const std::initializer_list<format>& types,
@@ -117,8 +116,8 @@ check([[maybe_unused]] number_type before,
     const auto& def = get_definition(static_cast<number>(op));
     if (!def)
       return coap_te::errc::invalid_option;
-    if constexpr (CheckOptions::sequence) {
-      if (auto ec = detail::check_sequence(before, op, def))
+    if constexpr (CheckOptions::repeat) {
+      if (auto ec = detail::check_repeat(before, op, def))
         return ec;
     }
     if constexpr (CheckOptions::format) {

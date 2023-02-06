@@ -73,7 +73,7 @@ TEST(Options, CheckDefinitions) {
     test_options_definitions_fail<opt::check_all>(opt::number::uri_host,
                                   opt::number::uri_host,
                                   coap_te::const_buffer(nullptr, 100),
-                                  coap_te::errc::option_sequence);
+                                  coap_te::errc::option_repeat);
   }
   {
     SCOPED_TRACE("Fail options length bigger");
@@ -111,14 +111,6 @@ TEST(Options, IgnoreCheckDefinitions) {
                                   opt::number::invalid,
                                   opt::number::if_match,
                                   1u,
-                                  coap_te::errc::no_buffer_space);
-  }
-  {
-    SCOPED_TRACE("Ignore sequence options error");
-    test_options_definitions_fail<opt::check_type<false, true, true>>(
-                                  opt::number::etag,
-                                  opt::number::uri_host,
-                                  coap_te::const_buffer(nullptr, 100),
                                   coap_te::errc::no_buffer_space);
   }
   {

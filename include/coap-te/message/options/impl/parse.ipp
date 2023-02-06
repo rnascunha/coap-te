@@ -118,7 +118,7 @@ parse(number_type before,
   input += length.data_extend;
 
   // As a sequence of bytes can be any type, we cannot check it
-  using check_n = check_type<CheckOptions::sequence,
+  using check_n = check_type<CheckOptions::repeat,
                              false,
                              CheckOptions::length>;
   if constexpr (check_n::check_any()) {
