@@ -52,7 +52,7 @@ serialize(number_type before,
           const MutableBufferSequence& output,
           coap_te::error_code& ec) noexcept;    // NOLINT
 
-template<typename CheckOptions = check_sequence,
+template<typename CheckOptions = check_repeat,
          typename Option,
          typename MutableBufferSequence>
 [[nodiscard]] constexpr std::size_t
@@ -80,66 +80,6 @@ template<typename CheckOptions = check_all,
 serialize(const Container& option_list,
           const MutableBufferSequence& output,
           coap_te::error_code& ec) noexcept;      // NOLINT
-
-// template<typename CheckOptions = check_all,
-//          typename ConstBuffer,
-//          typename MutableBuffer>
-// [[nodiscard]] constexpr
-// std::enable_if_t<
-//   coap_te::is_const_buffer_v<ConstBuffer>, std::size_t>
-// serialize(number_type before,
-//           number_type op,
-//           const ConstBuffer& input,
-//           MutableBuffer& output,              // NOLINT
-//           coap_te::error_code& ec) noexcept;      // NOLINT
-
-// template<typename CheckOptions = check_all,
-//          typename MutableBuffer,
-//          typename UnsignedType>
-// [[nodiscard]] constexpr
-// std::enable_if_t<std::is_unsigned_v<UnsignedType>, std::size_t>
-// serialize(number_type before,
-//           number_type op,
-//           UnsignedType input,
-//           MutableBuffer& output,              // NOLINT
-//           coap_te::error_code& ec) noexcept;      // NOLINT
-
-// template<typename CheckOptions = check_all,
-//          typename MutableBuffer>
-// [[nodiscard]] constexpr std::size_t
-// serialize(number_type before,
-//           number_type op,
-//           MutableBuffer& output,                   // NOLINT
-//           coap_te::error_code& ec) noexcept;       // NOLINT
-
-// template<typename CheckOptions = check_sequence,
-//          typename Option,
-//          typename MutableBuffer>
-// [[nodiscard]] constexpr std::size_t
-// serialize(number before,
-//           const Option& option,
-//           MutableBuffer& output,                //NOLINT
-//           coap_te::error_code& ec) noexcept;    //NOLINT
-
-// /**
-//  * Serialize list
-//  */
-// template<typename CheckOptions = check_all,
-//          typename ForwardIt,
-//          typename MutableBuffer>
-// [[nodiscard]] constexpr std::size_t
-// serialize(ForwardIt begin,
-//           ForwardIt end,
-//           MutableBuffer& output,                  // NOLINT
-//           coap_te::error_code& ec) noexcept;      // NOLINT
-
-// template<typename CheckOptions = check_all,
-//          typename Container,
-//          typename MutableBuffer>
-// [[nodiscard]] constexpr std::size_t
-// serialize(const Container& options_list,
-//           MutableBuffer& output,              // NOLINT
-//           coap_te::error_code& ec) noexcept;      // NOLINT
 
 }  // namespace options
 }  // namespace message

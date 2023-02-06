@@ -122,6 +122,11 @@ serialize(number_type before,
           const ConstBufferSequence& input,
           const MutableBufferOrRange& output,
           coap_te::error_code& ec) noexcept {     // NOLINT
+  if (before > op) {
+    ec = coap_te::error_code{errc::option_sequence};
+    return 0;
+  }
+
   if constexpr (CheckOptions::check_any()) {
     ec = check<CheckOptions>(before, op,
                             {format::opaque, format::string},
@@ -178,7 +183,7 @@ serialize(number_type before,
                            output, ec);
 }
 
-template<typename CheckOptions /* = check_sequence */,
+template<typename CheckOptions /* = check_repeat */,
          typename Option,
          typename MutableBufferSequence>
 [[nodiscard]] constexpr std::size_t
@@ -187,7 +192,7 @@ serialize(number before,
           const MutableBufferSequence& output,
           coap_te::error_code& ec) noexcept {    //NOLINT
   static_assert(is_option_v<Option>, "Options requirements not met");
-  using n_check = check_type<CheckOptions::sequence, false, false>;
+  using n_check = check_type<CheckOptions::repeat, false, false>;
   return serialize<n_check>(coap_te::core::to_underlying(before),
                           coap_te::core::to_underlying(option.option_number()),
                           coap_te::const_buffer{option.data(),

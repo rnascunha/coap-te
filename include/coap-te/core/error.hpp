@@ -37,6 +37,7 @@ enum errc {
   // message/options
   invalid_option = 30,
   option_sequence,
+  option_repeat,
   option_format,
   option_length,
   invalid_option_header
@@ -56,6 +57,8 @@ error_message(errc ec) noexcept {
       return "invalid option";
     case errc::option_sequence:
       return "option sequence error";
+    case errc::option_repeat:
+      return "option repeated error";
     case errc::option_format:
       return "option format error";
     case errc::option_length:
