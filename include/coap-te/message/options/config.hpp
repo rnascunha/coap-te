@@ -38,7 +38,6 @@ enum class number : number_type;
 
 struct definition {
   number            op;
-  const
   std::string_view  name;
   bool              repeatable;
   format            type;
@@ -117,13 +116,15 @@ enum class suppress : std::uint8_t{
 
 /** Constants */
 
-static constexpr const number_type no_cache_key = 0b11100;
+static constexpr const
+number_type no_cache_key = 0b11100;
 
-static constexpr const unsigned
-max_age_default = 60;  // seconds
+static constexpr const
+unsigned max_age_default = 60;  // seconds
 
 #if COAP_TE_MESSAGE_OPTION_NO_RESPONSE == 1
-static constexpr const suppress suppress_default = suppress::none;
+static constexpr const
+suppress suppress_default = suppress::none;
 #endif /* COAP_TE_MESSAGE_OPTION_NO_RESPONSE == 1 */
 
 }  // namespace options

@@ -11,6 +11,7 @@
 #ifndef COAP_TE_MESSAGE_CONFIG_HPP_
 #define COAP_TE_MESSAGE_CONFIG_HPP_
 
+#include <cstddef>  // std::size_t
 #include <cstdint>
 
 namespace coap_te {
@@ -35,7 +36,8 @@ std::size_t max_token_size = 8;
 
 using message_id = std::uint16_t;
 
-static constexpr std::uint8_t payload_marker = 0xFF;
+static constexpr const
+std::uint8_t payload_marker = 0xFF;
 
 }  // namespace message
 }  // namespace coap_te

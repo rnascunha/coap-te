@@ -11,8 +11,21 @@
 #ifndef COAP_TE_MESSAGE_IMPL_CODE_IPP_
 #define COAP_TE_MESSAGE_IMPL_CODE_IPP_
 
+#include "coap-te/core/utility.hpp"
+
 namespace coap_te {
 namespace message {
+
+[[nodiscard]] constexpr std::uint8_t
+code_class(code co) noexcept {
+  return core::to_underlying(co) >> 5;
+}
+
+[[nodiscard]] constexpr std::uint8_t
+code_detail(code co) noexcept {
+  return core::to_underlying(co) & 0x1'1111;
+}
+
 
 [[nodiscard]] constexpr bool
 is_empty(code c) noexcept {
@@ -22,7 +35,7 @@ is_empty(code c) noexcept {
 [[nodiscard]] constexpr bool
 is_request(code c) noexcept {
   return !is_empty(c) &&
-         (static_cast<std::uint8_t>(c) >> 5) == cclass::request;
+         code_class(c) == cclass::request;
 }
 
 [[nodiscard]] constexpr bool
@@ -34,19 +47,19 @@ is_response(code c) noexcept {
 [[nodiscard]] constexpr bool
 is_success(code c) noexcept {
   return !is_empty(c) &&
-         (static_cast<std::uint8_t>(c) >> 5) == cclass::success;
+         code_class(c) == cclass::success;
 }
 
 [[nodiscard]] constexpr bool
 is_client_error(code c) noexcept {
   return !is_empty(c) &&
-         (static_cast<std::uint8_t>(c) >> 5) == cclass::client_error;
+         code_class(c) == cclass::client_error;
 }
 
 [[nodiscard]] constexpr bool
 is_server_error(code c) noexcept {
   return !is_empty(c) &&
-         (static_cast<std::uint8_t>(c) >> 5) == cclass::server_error;
+         code_class(c) == cclass::server_error;
 }
 
 [[nodiscard]] constexpr bool
@@ -59,7 +72,7 @@ is_error(code c) noexcept {
 [[nodiscard]] constexpr bool
 is_signaling(code c) noexcept {
   return !is_empty(c) &&
-         (static_cast<std::uint8_t>(c) >> 5) == cclass::signaling;
+         code_class(c) == cclass::signaling;
 }
 
 #endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */

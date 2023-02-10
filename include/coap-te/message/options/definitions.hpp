@@ -52,7 +52,8 @@ enum class number : number_type {
 #endif /* COAP_TE_MESSAGE_OPTION_NO_RESPONSE == 1 */
 };
 
-static constexpr const definition definitions[] = {
+static constexpr const
+definition definitions[] = {
   // number               name            repeat  format        min   max
   {number::invalid,       "Invalid",      false,  format::empty,  0,  0},
   {number::if_match,      "If-Match",     true,   format::opaque, 0,  8},

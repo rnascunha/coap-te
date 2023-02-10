@@ -11,6 +11,8 @@
 #ifndef COAP_TE_MESSAGE_CODE_HPP_
 #define COAP_TE_MESSAGE_CODE_HPP_
 
+#include <cstdint>
+
 namespace coap_te {
 namespace message {
 
@@ -27,7 +29,7 @@ enum cclass : std::uint8_t {
 };
 
 constexpr std::uint8_t
-mcode(cclass code_class, uint8_t detail) noexcept {
+mcode(cclass code_class, std::uint8_t detail) noexcept {
   return code_class << 5 | detail;
 }
 
@@ -111,6 +113,11 @@ enum class code : std::uint8_t {
   abort       = mcode(cclass::signaling, 5),  // 7.05 Abort
 #endif /* COAP_TE_ENABLE_STREAM_CONNECTION == 1 */
 };
+
+[[nodiscard]] constexpr std::uint8_t
+code_class(code) noexcept;
+[[nodiscard]] constexpr std::uint8_t
+code_detail(code) noexcept;
 
 [[nodiscard]] constexpr bool
 is_empty(code) noexcept;

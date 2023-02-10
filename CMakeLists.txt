@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.20) #cmake_path only at 3.20
 PROJECT(coap-te LANGUAGES CXX VERSION 0.1.0)
 
 #####################

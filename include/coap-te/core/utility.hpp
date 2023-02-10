@@ -37,7 +37,7 @@ namespace core {
  * @param end pointer at the end of the interval
  * @return std::size_t distance of the pointers
  */
-std::size_t
+[[nodiscard]] inline std::size_t
 pointer_distance(const void* begin,
                  const void* end) noexcept {
   return static_cast<std::size_t>(
