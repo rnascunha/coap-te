@@ -1,5 +1,7 @@
 # TODO
 
+* Esta linha foi adicionada para teste
+
 * Simplify;
 * Type traits: all template parameters must be checked
 * Change std::size_t to unsigned?
