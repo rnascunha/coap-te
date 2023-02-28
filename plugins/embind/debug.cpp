@@ -15,7 +15,7 @@
 #include "coap-te/message/options/config.hpp"
 
 #include "coap-te/debug/message/to_string.hpp"
-#include "coap-te/debug/message/optionsto_string.hpp"
+#include "coap-te/debug/message/options/to_string.hpp"
 
 namespace coap_te {
 namespace embind {
